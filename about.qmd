@@ -1,0 +1,19 @@
+---
+title: "About Me"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/PhDemetri
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/demetripananos/
+    - icon: github
+      text: Github
+      href: https://github.com/Dpananos
+
+---
+
+I'm a senior data scientist at Zapier. I'm usually playing chess, having a coffee, and playing fetch with my dog.

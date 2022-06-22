@@ -1,0 +1,901 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>PhDemetri</title>
+<link>https://dpananos.github.io/index.html</link>
+<atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
+<description>Numbers, Letters, Sometimes Both</description>
+<generator>quarto-0.9.596</generator>
+<lastBuildDate>Wed, 22 Jun 2022 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>This Is A Quarto Blog</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is a quarto blog.</p>
+<p>That means I can write code in either R or python directly in the blog post and have it execute. So when you see something like</p>
+<div class="cell" data-fig-dpi="240">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">t <span class="op" style="color: #5E5E5E;">=</span> np.linspace(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb1-5">plt.plot(t, np.sin(<span class="dv" style="color: #AD0000;">2</span><span class="op" style="color: #5E5E5E;">*</span>np.pi<span class="op" style="color: #5E5E5E;">*</span>t), color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'k'</span>)</span>
+<span id="cb1-6">plt.plot(t, np.cos(<span class="dv" style="color: #AD0000;">2</span><span class="op" style="color: #5E5E5E;">*</span>np.pi<span class="op" style="color: #5E5E5E;">*</span>t), color<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'red'</span>)</span>
+<span id="cb1-7">plt.title(<span class="st" style="color: #20794D;">"Here is a plot"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-trig-py" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png" class="img-fluid figure-img" width="480"></p>
+<p></p><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>That is the code that is actually executed. That means the blog is more reproducible and will have fewer errors. It also means you can go directly to <a href="https://github.com/Dpananos/dpananos.github.io">the repo for my blog</a> and clone the post to start tinkering. No more linking to other gitrepos, no more copying and pasting code with errors.</p>
+<p>Did I mention I can write both R and python?</p>
+<div class="cell" data-fig-dpi="240">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">t <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;">plot</span>(t, <span class="fu" style="color: #4758AB;">sin</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>t), <span class="at" style="color: #657422;">main=</span><span class="st" style="color: #20794D;">'Here is another plot!'</span>, <span class="at" style="color: #657422;">xlab=</span><span class="st" style="color: #20794D;">''</span>, <span class="at" style="color: #657422;">ylab=</span><span class="st" style="color: #20794D;">''</span>, <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'l'</span>)</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;">lines</span>(t, <span class="fu" style="color: #4758AB;">cos</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>t), <span class="at" style="color: #657422;">col=</span><span class="st" style="color: #20794D;">'red'</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<div id="fig-trig-r" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-r-3.png" class="img-fluid figure-img" width="480"></p>
+<p></p><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p>I can also reference figures (like Figure&nbsp;2 and Figure&nbsp;1)</p>
+
+
+
+ ]]></description>
+  <category>News</category>
+  <guid>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</guid>
+  <pubDate>Wed, 22 Jun 2022 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Flippin’ Fun!</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I wrote an <a href="https://stats.stackexchange.com/a/574359/111259">answer</a> to a question about sequences of coin flips a couple days back that I was quite chuffed with. In short, the question asked for statistical ways to determine if a sequence of coin flips was from an unbiased coin or a human trying to appear random. The resulting model turned into a fun game <a href="https://twitter.com/PhDemetri/status/1523034006626856960">on twitter</a> centered around determining if people who follow me could simulate a sequence of coin flips that looked random (without using a real RNG, or some funny workaround. I have a lot of faith in my twitter followers…maybe too much).</p>
+<p>Anyway, then I thought “I should fit a hierarchical model to this data”. So that’s what I’m doing</p>
+<section id="initial-model" class="level2">
+<h2 class="anchored" data-anchor-id="initial-model">Initial Model</h2>
+<p>To understand the hierarchical model, we first need to understand the model I initially built. Let me give you a quick rundown on that.</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?S"> be a sequence of bernoulli experiments so that <img src="https://latex.codecogs.com/png.latex?S_i"> is either 1 or a 0 (a heads or a tails if you wish). The question I answered concerns detecting if a given sequence <img src="https://latex.codecogs.com/png.latex?S"> could have been created by a human (or by a non-random process posing as random). I interpreted that as a call to estimate the lag-1 autocorrelation of the flips. The hypothesis being that humans probably perceive long streaks of one outcome or the other as signs of non-randomness and will intentionally switch the outcome if they feel the run is too long. I initially chose a Bayesian approach because I’m a glutton for punishment and someone else already gave a pretty good answer.</p>
+<p>The model is quite straight forward to write down. Let <img src="https://latex.codecogs.com/png.latex?%5Crho"> be the correlation between <img src="https://latex.codecogs.com/png.latex?S_i"> and <img src="https://latex.codecogs.com/png.latex?S_%7Bi+1%7D">, and let <img src="https://latex.codecogs.com/png.latex?q"> be the expected number of heads in the sequence. We can write down the conditional probabilities that we see a 0/1 given the last element in the sequence was a 1/0. Those conditional probabilities are derived <a href="https://stats.stackexchange.com/questions/533217/interpretation-of-the-autocorrelation-of-a-binary-process">here</a> and they are…</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P(1%20%5Cvert%201)%20=%20q%20+%20%5Crho(1-q)%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P(1%20%5Cvert%200)%20=%20q(1-%5Crho)%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P(0%20%5Cvert%201)%20=%20(1-q)(1-%5Crho)%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P(0%20%5Cvert%200)%20=%201%20-%20q%20+%20%5Crho%20%5Ccdot%20q%20"></p>
+<p>The trick is to then count the subsequences of (1, 1), (1, 0), (0, 1), and (0, 0). Let <img src="https://latex.codecogs.com/png.latex?p_%7Bi%5Cvert%20j%7D%20=%20P(i%20%5Cvert%20j)">. We can then consider the count of each subsequence as multinomial</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20y%20%5Csim%20%5Cmbox%7BMultinomial%7D(%5Ctheta)%20%5C%3E.%20"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is the multinomial parameter, wherein each element is <img src="https://latex.codecogs.com/png.latex?%5Ctheta%20=%20%5Bp_%7B1%20%5Cvert%201%7D,%20p_%7B1%5Cvert%200%7D,%20p_%7B0%20%5Cvert%201%7D,%20p_%7B0%5Cvert%200%7D%5D">. Equip this with a uniform prior on both <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> and you’ve got yourself a model.</p>
+</section>
+<section id="the-stan-code" class="level2">
+<h2 class="anchored" data-anchor-id="the-stan-code">The Stan Code</h2>
+<p>The Stan code for this model is quite easy to understand. The <code>data</code> block will consist of the counts of each type of subsequence. We can then concatenate those counts into an <code>int</code> of length 4 via the <code>transformed data</code> block. The concatenated counts will be what we pass to the multinomial likelihood.</p>
+<pre><code>data{
+  int y_1_1; //number of concurrent 1s
+  int y_0_1; //number of 0,1 occurences
+  int y_1_0; //number of 1,0 occurences
+  int y_0_0; //number of concurrent 0s
+}
+transformed data{
+    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};
+}</code></pre>
+<p>The only parameters we are interested in estimating are the autocorrelation <code>rho</code> and the coin’s bias <code>q</code>.</p>
+<pre><code>parameters{
+  real&lt;lower=-1, upper=1&gt; rho;
+  real&lt;lower=0, upper=1&gt; q;
+}</code></pre>
+<p>We can derive the probabilities we need via the equations above, and that is a job for the transformed parameters block. We can then concatenate the conditional probabilities into a <code>simplex</code> data type object, <code>theta</code> to pass to the multinomial likelihood. Be careful though, we need to multiply <code>theta</code> by 0.5 since we are working with conditional probabilities. Note <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert%201%7D%20+%20p_%7B0%20%5Cvert%201%20%7D%20+%20p_%7B1%5Cvert%200%7D%20+%20p_%7B0%20%5Cvert%200%20%7D%20=%202">, hence the scaling factor.</p>
+<pre><code>transformed parameters{
+  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);
+  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);
+  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);
+  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;
+  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';
+}</code></pre>
+<p>The model call is then quite simple</p>
+<pre><code>model{
+  q ~ beta(1, 1);
+  rho ~ uniform(-1, 1);
+  y ~ multinomial(theta); 
+}</code></pre>
+<p>and we can even generate new sequences based off the estimated parameters as a sort of posterior predictive check.</p>
+<pre><code>generated quantities{
+    vector[300] yppc;
+    
+    yppc[1] = bernoulli_rng(q);
+    
+    for(i in 2:300){
+        if(yppc[i-1]==1){
+            yppc[i] = bernoulli_rng(prob_1_1);
+        }
+        else{
+        yppc[i] = bernoulli_rng(prob_1_0);
+        }
+    }
+}</code></pre>
+<p>All in all the model is</p>
+<pre><code>data{
+
+  int y_1_1; //number of concurrent 1s
+  int y_0_1; //number of 0,1 occurences
+  int y_1_0; //number of 1,0 occurences
+  int y_0_0; //number of concurrent 0s
+  
+}
+transformed data{
+    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};
+}
+parameters{
+  real&lt;lower=-1, upper=1&gt; rho;
+  real&lt;lower=0, upper=1&gt; q;
+}
+transformed parameters{
+  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);
+  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);
+  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);
+  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;
+  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';
+}
+model{
+  q ~ beta(1, 1);
+  rho ~ uniform(-1, 1);
+  y ~ multinomial(theta);
+  
+}
+generated quantities{
+    vector[300] yppc;
+    
+    yppc[1] = bernoulli_rng(q);
+    
+    for(i in 2:300){
+        if(yppc[i-1]==1){
+            yppc[i] = bernoulli_rng(prob_1_1);
+        }
+        else{
+        yppc[i] = bernoulli_rng(prob_1_0);
+        }
+    }
+}</code></pre>
+</section>
+<section id="run-from-python" class="level2">
+<h2 class="anchored" data-anchor-id="run-from-python">Run From Python</h2>
+<p>With the model written down, all we need to do is add some python code to create the counts of each subsequence and then run the stan model. Here is teh python code I used to create the response tweets for that game I ran on twitter.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;">import</span> cmdstanpy</span>
+<span id="cb7-2"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
+<span id="cb7-3"></span>
+<span id="cb7-4">y_1_1 <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span> <span class="co" style="color: #5E5E5E;"># count of (1, 1)</span></span>
+<span id="cb7-5">y_0_0 <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span> <span class="co" style="color: #5E5E5E;"># count of (0, 0)</span></span>
+<span id="cb7-6">y_0_1 <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span> <span class="co" style="color: #5E5E5E;"># count of (0, 1)</span></span>
+<span id="cb7-7">y_1_0 <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span> <span class="co" style="color: #5E5E5E;"># count of (1, 0)</span></span>
+<span id="cb7-8"></span>
+<span id="cb7-9">sequence <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">list</span>(<span class="st" style="color: #20794D;">'TTHHTHTTHTTTHTTTHTTTHTTHTHHTHHTHTHHTTTHHTHTHTTHTHHTTHTHHTHTTTHHTTHHTTHHHTHHTHTTHTHTTHHTHHHTTHTHTTTHHTTHTHTHTHTHTTHTHTHHHTTHTHTHHTHHHTHTHTTHTTHHTHTHTHTTHHTTHTHTTHHHTHTHTHTTHTTHHTTHTHHTHHHTTHHTHTTHTHTHTHTHTHTHHHTHTHTHTHHTHHTHTHTTHTTTHHTHTTTHTHHTHHHHTTTHHTHTHTHTHHHTTHHTHTTTHTHHTHTHTHHTHTTHTTHTHHTHTHTTT'</span>.upper())</span>
+<span id="cb7-10"></span>
+<span id="cb7-11"><span class="co" style="color: #5E5E5E;"># Do a rolling window trick I saw somewhere on twitter.</span></span>
+<span id="cb7-12"><span class="co" style="color: #5E5E5E;"># This implements a rollowing window of 2</span></span>
+<span id="cb7-13"><span class="co" style="color: #5E5E5E;"># In python 3.10, this would be a great use case for match</span></span>
+<span id="cb7-14"><span class="cf" style="color: #003B4F;">for</span> pairs <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">zip</span>(sequence[:<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>], sequence[<span class="dv" style="color: #AD0000;">1</span>:]):</span>
+<span id="cb7-15">    <span class="cf" style="color: #003B4F;">if</span> pairs <span class="op" style="color: #5E5E5E;">==</span> (<span class="st" style="color: #20794D;">'H'</span>,<span class="st" style="color: #20794D;">'H'</span>):</span>
+<span id="cb7-16">        y_1_1 <span class="op" style="color: #5E5E5E;">+=</span><span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb7-17">    <span class="cf" style="color: #003B4F;">elif</span> pairs <span class="op" style="color: #5E5E5E;">==</span> (<span class="st" style="color: #20794D;">'T'</span>,<span class="st" style="color: #20794D;">'H'</span>):</span>
+<span id="cb7-18">        y_0_1 <span class="op" style="color: #5E5E5E;">+=</span><span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb7-19">    <span class="cf" style="color: #003B4F;">elif</span> pairs <span class="op" style="color: #5E5E5E;">==</span> (<span class="st" style="color: #20794D;">'H'</span>, <span class="st" style="color: #20794D;">'T'</span>):</span>
+<span id="cb7-20">        y_1_0 <span class="op" style="color: #5E5E5E;">+=</span><span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb7-21">    <span class="cf" style="color: #003B4F;">else</span>:</span>
+<span id="cb7-22">        y_0_0 <span class="op" style="color: #5E5E5E;">+=</span><span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb7-23"></span>
+<span id="cb7-24"><span class="co" style="color: #5E5E5E;"># Write the stan model as a string.  We will then write it to a file</span></span>
+<span id="cb7-25">stan_code <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'''</span></span>
+<span id="cb7-26"><span class="st" style="color: #20794D;">data{</span></span>
+<span id="cb7-27"></span>
+<span id="cb7-28"><span class="st" style="color: #20794D;">  int y_1_1; //number of concurrent 1s</span></span>
+<span id="cb7-29"><span class="st" style="color: #20794D;">  int y_0_1; //number of 0,1 occurences</span></span>
+<span id="cb7-30"><span class="st" style="color: #20794D;">  int y_1_0; //number of 1,0 occurences</span></span>
+<span id="cb7-31"><span class="st" style="color: #20794D;">  int y_0_0; //number of concurrent 0s</span></span>
+<span id="cb7-32"><span class="st" style="color: #20794D;">  </span></span>
+<span id="cb7-33"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-34"><span class="st" style="color: #20794D;">transformed data{</span></span>
+<span id="cb7-35"><span class="st" style="color: #20794D;">    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};</span></span>
+<span id="cb7-36"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-37"><span class="st" style="color: #20794D;">parameters{</span></span>
+<span id="cb7-38"><span class="st" style="color: #20794D;">  real&lt;lower=-1, upper=1&gt; rho;</span></span>
+<span id="cb7-39"><span class="st" style="color: #20794D;">  real&lt;lower=0, upper=1&gt; q;</span></span>
+<span id="cb7-40"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-41"><span class="st" style="color: #20794D;">transformed parameters{</span></span>
+<span id="cb7-42"><span class="st" style="color: #20794D;">  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);</span></span>
+<span id="cb7-43"><span class="st" style="color: #20794D;">  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);</span></span>
+<span id="cb7-44"><span class="st" style="color: #20794D;">  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);</span></span>
+<span id="cb7-45"><span class="st" style="color: #20794D;">  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;</span></span>
+<span id="cb7-46"><span class="st" style="color: #20794D;">  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';</span></span>
+<span id="cb7-47"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-48"><span class="st" style="color: #20794D;">model{</span></span>
+<span id="cb7-49"><span class="st" style="color: #20794D;">  q ~ beta(1, 1);</span></span>
+<span id="cb7-50"><span class="st" style="color: #20794D;">  rho ~ uniform(-1, 1);</span></span>
+<span id="cb7-51"><span class="st" style="color: #20794D;">  y ~ multinomial(theta);</span></span>
+<span id="cb7-52"><span class="st" style="color: #20794D;">  </span></span>
+<span id="cb7-53"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-54"><span class="st" style="color: #20794D;">generated quantities{</span></span>
+<span id="cb7-55"><span class="st" style="color: #20794D;">    vector[300] yppc;</span></span>
+<span id="cb7-56"><span class="st" style="color: #20794D;">    </span></span>
+<span id="cb7-57"><span class="st" style="color: #20794D;">    yppc[1] = bernoulli_rng(q);</span></span>
+<span id="cb7-58"><span class="st" style="color: #20794D;">    </span></span>
+<span id="cb7-59"><span class="st" style="color: #20794D;">    for(i in 2:300){</span></span>
+<span id="cb7-60"><span class="st" style="color: #20794D;">        if(yppc[i-1]==1){</span></span>
+<span id="cb7-61"><span class="st" style="color: #20794D;">            yppc[i] = bernoulli_rng(prob_1_1);</span></span>
+<span id="cb7-62"><span class="st" style="color: #20794D;">        }</span></span>
+<span id="cb7-63"><span class="st" style="color: #20794D;">        else{</span></span>
+<span id="cb7-64"><span class="st" style="color: #20794D;">        yppc[i] = bernoulli_rng(prob_1_0);</span></span>
+<span id="cb7-65"><span class="st" style="color: #20794D;">        }</span></span>
+<span id="cb7-66"><span class="st" style="color: #20794D;">    }</span></span>
+<span id="cb7-67"><span class="st" style="color: #20794D;">}</span></span>
+<span id="cb7-68"><span class="st" style="color: #20794D;">'''</span></span>
+<span id="cb7-69"></span>
+<span id="cb7-70"></span>
+<span id="cb7-71"></span>
+<span id="cb7-72"><span class="co" style="color: #5E5E5E;"># Write the model to a temp file</span></span>
+<span id="cb7-73"><span class="cf" style="color: #003B4F;">with</span> <span class="bu" style="color: null;">open</span>(<span class="st" style="color: #20794D;">'model_file.stan'</span>, <span class="st" style="color: #20794D;">'w'</span>) <span class="im" style="color: #00769E;">as</span> model_file:</span>
+<span id="cb7-74">    model_file.write(stan_code)</span>
+<span id="cb7-75">    </span>
+<span id="cb7-76"><span class="co" style="color: #5E5E5E;"># Compile the model</span></span>
+<span id="cb7-77">model <span class="op" style="color: #5E5E5E;">=</span> cmdstanpy.CmdStanModel(stan_file<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'model_file.stan'</span>)</span>
+<span id="cb7-78"></span>
+<span id="cb7-79"><span class="co" style="color: #5E5E5E;"># data to pass to Stan</span></span>
+<span id="cb7-80">data <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">dict</span>(y_1_1 <span class="op" style="color: #5E5E5E;">=</span> y_1_1, y_0_0 <span class="op" style="color: #5E5E5E;">=</span> y_0_0, y_0_1 <span class="op" style="color: #5E5E5E;">=</span> y_0_1, y_1_0 <span class="op" style="color: #5E5E5E;">=</span> y_1_0)</span>
+<span id="cb7-81"></span>
+<span id="cb7-82"><span class="co" style="color: #5E5E5E;"># Plotting stuff.</span></span>
+<span id="cb7-83">fig, ax <span class="op" style="color: #5E5E5E;">=</span> plt.subplots(dpi <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">120</span>, ncols<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">2</span>, figsize <span class="op" style="color: #5E5E5E;">=</span> (<span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">5</span>))</span>
+<span id="cb7-84"></span>
+<span id="cb7-85">ax[<span class="dv" style="color: #AD0000;">0</span>].set_title(<span class="st" style="color: #20794D;">'Auto-correlation'</span>)</span>
+<span id="cb7-86">ax[<span class="dv" style="color: #AD0000;">1</span>].set_title(<span class="st" style="color: #20794D;">'Bias'</span>)</span>
+<span id="cb7-87"></span>
+<span id="cb7-88">ax[<span class="dv" style="color: #AD0000;">0</span>].set_xlim(<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb7-89">ax[<span class="dv" style="color: #AD0000;">1</span>].set_xlim(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb7-90"></span>
+<span id="cb7-91">ax[<span class="dv" style="color: #AD0000;">0</span>].axvline(<span class="dv" style="color: #AD0000;">0</span>, color <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'red'</span>)</span>
+<span id="cb7-92">ax[<span class="dv" style="color: #AD0000;">1</span>].axvline(<span class="fl" style="color: #AD0000;">0.5</span>, color <span class="op" style="color: #5E5E5E;">=</span> <span class="st" style="color: #20794D;">'red'</span>)</span>
+<span id="cb7-93"></span>
+<span id="cb7-94">ax[<span class="dv" style="color: #AD0000;">0</span>].annotate(<span class="st" style="color: #20794D;">'Uncorrelated Flips'</span>, xy<span class="op" style="color: #5E5E5E;">=</span>(<span class="fl" style="color: #AD0000;">0.475</span>, <span class="fl" style="color: #AD0000;">0.5</span>), xycoords<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'axes fraction'</span>, rotation <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">90</span>)</span>
+<span id="cb7-95">ax[<span class="dv" style="color: #AD0000;">1</span>].annotate(<span class="st" style="color: #20794D;">'Unbiased Flips'</span>, xy<span class="op" style="color: #5E5E5E;">=</span>(<span class="fl" style="color: #AD0000;">0.475</span>, <span class="fl" style="color: #AD0000;">0.5</span>), xycoords<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'axes fraction'</span>, rotation <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">90</span>)</span>
+<span id="cb7-96"></span>
+<span id="cb7-97"><span class="co" style="color: #5E5E5E;"># MCMC go brrrr</span></span>
+<span id="cb7-98">fit <span class="op" style="color: #5E5E5E;">=</span> model.sample(data)</span>
+<span id="cb7-99"></span>
+<span id="cb7-100">ax[<span class="dv" style="color: #AD0000;">0</span>].hist(fit.stan_variable(<span class="st" style="color: #20794D;">'rho'</span>), edgecolor<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'k'</span>, alpha <span class="op" style="color: #5E5E5E;">=</span> <span class="fl" style="color: #AD0000;">0.5</span>)</span>
+<span id="cb7-101">ax[<span class="dv" style="color: #AD0000;">1</span>].hist(fit.stan_variable(<span class="st" style="color: #20794D;">'q'</span>), edgecolor<span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">'k'</span>, alpha <span class="op" style="color: #5E5E5E;">=</span> <span class="fl" style="color: #AD0000;">0.5</span>)</span>
+<span id="cb7-102"></span>
+<span id="cb7-103">autocorr <span class="op" style="color: #5E5E5E;">=</span> fit.stan_variable(<span class="st" style="color: #20794D;">'rho'</span>).mean()</span>
+<span id="cb7-104">bias <span class="op" style="color: #5E5E5E;">=</span> fit.stan_variable(<span class="st" style="color: #20794D;">'q'</span>).mean()</span>
+<span id="cb7-105"></span>
+<span id="cb7-106">tweet <span class="op" style="color: #5E5E5E;">=</span> <span class="ss" style="color: #20794D;">f"Your flips have an expected correlation of </span><span class="sc" style="color: #5E5E5E;">{</span>autocorr<span class="sc" style="color: #5E5E5E;">:.2f}</span><span class="ss" style="color: #20794D;"> and your coin's bias is about </span><span class="sc" style="color: #5E5E5E;">{</span>bias<span class="sc" style="color: #5E5E5E;">:.2f}</span><span class="ss" style="color: #20794D;">"</span></span>
+<span id="cb7-107"></span>
+<span id="cb7-108"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f"Your sequence was </span><span class="sc" style="color: #5E5E5E;">{</span><span class="st" style="color: #20794D;">''</span><span class="sc" style="color: #5E5E5E;">.</span>join(sequence)<span class="sc" style="color: #5E5E5E;">}</span><span class="ss" style="color: #20794D;">"</span>)</span>
+<span id="cb7-109"><span class="bu" style="color: null;">print</span>(tweet)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:cmdstanpy:compiling stan file /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan to exe file /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:cmdstanpy:compiled model executable: /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>WARNING:cmdstanpy:Stan compiler has produced 1 warnings:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>WARNING:cmdstanpy:
+--- Translating Stan model to C++ code ---
+bin/stanc  --o=/Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.hpp /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan
+Warning in '/Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan', line 11, column 4: Declaration
+    of arrays by placing brackets after a variable name is deprecated and
+    will be removed in Stan 2.32.0. Instead use the array keyword before the
+    type. This can be changed automatically using the auto-format flag to
+    stanc
+
+--- Compiling, linking C++ code ---
+clang++ -std=c++1y -Wno-unknown-warning-option -Wno-tautological-compare -Wno-sign-compare -D_REENTRANT -Wno-ignored-attributes      -I stan/lib/stan_math/lib/tbb_2020.3/include    -O3 -I src -I stan/src -I lib/rapidjson_1.1.0/ -I lib/CLI11-1.9.1/ -I stan/lib/stan_math/ -I stan/lib/stan_math/lib/eigen_3.3.9 -I stan/lib/stan_math/lib/boost_1.75.0 -I stan/lib/stan_math/lib/sundials_6.0.0/include -I stan/lib/stan_math/lib/sundials_6.0.0/src/sundials    -DBOOST_DISABLE_ASSERTS          -c -include-pch stan/src/stan/model/model_header.hpp.gch -x c++ -o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.hpp
+clang++ -std=c++1y -Wno-unknown-warning-option -Wno-tautological-compare -Wno-sign-compare -D_REENTRANT -Wno-ignored-attributes      -I stan/lib/stan_math/lib/tbb_2020.3/include    -O3 -I src -I stan/src -I lib/rapidjson_1.1.0/ -I lib/CLI11-1.9.1/ -I stan/lib/stan_math/ -I stan/lib/stan_math/lib/eigen_3.3.9 -I stan/lib/stan_math/lib/boost_1.75.0 -I stan/lib/stan_math/lib/sundials_6.0.0/include -I stan/lib/stan_math/lib/sundials_6.0.0/src/sundials    -DBOOST_DISABLE_ASSERTS                -Wl,-L,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb" -Wl,-rpath,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb"      /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o src/cmdstan/main.o        -Wl,-L,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb" -Wl,-rpath,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb"   stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_nvecserial.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_cvodes.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_idas.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_kinsol.a  stan/lib/stan_math/lib/tbb/libtbb.dylib stan/lib/stan_math/lib/tbb/libtbbmalloc.dylib stan/lib/stan_math/lib/tbb/libtbbmalloc_proxy.dylib -o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file
+rm -f /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o
+</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:cmdstanpy:CmdStan start processing</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"8b4197ff587543abbeaee330aeba92ed","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"97e61edfebdc429eb36afe8ac0f512b1","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"e78cdbeb72ba4ac2a7d8ddc90e504085","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"53c4fd9502654c479be23e9d7e0663e8","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                                                </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                                                </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                                                </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                                                </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:cmdstanpy:CmdStan done processing.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code></code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Your sequence was TTHHTHTTHTTTHTTTHTTTHTTHTHHTHHTHTHHTTTHHTHTHTTHTHHTTHTHHTHTTTHHTTHHTTHHHTHHTHTTHTHTTHHTHHHTTHTHTTTHHTTHTHTHTHTHTTHTHTHHHTTHTHTHHTHHHTHTHTTHTTHHTHTHTHTTHHTTHTHTTHHHTHTHTHTTHTTHHTTHTHHTHHHTTHHTHTTHTHTHTHTHTHTHHHTHTHTHTHHTHHTHTHTTHTTTHHTHTTTHTHHTHHHHTTTHHTHTHTHTHHHTTHHTHTTTHTHHTHTHTHHTHTTHTTHTHHTHTHTTT
+Your flips have an expected correlation of -0.36 and your coin's bias is about 0.49</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/index_files/figure-html/cell-2-output-17.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="stack-layerswait-thats-a-deep-learning-thing" class="level2">
+<h2 class="anchored" data-anchor-id="stack-layerswait-thats-a-deep-learning-thing">Stack Layers…Wait, That’s a Deep Learning Thing</h2>
+<p>Now it’s time to write a hierarchical model, and for that we need to be a little more careful. I initially thought I could just put priors on the population level autocorrelation and bias, but I quickly ran into a problem there, which I will illustrate below.</p>
+<p>Suppose the coin’s bias is 0 (we always get tails). Could the autocorrelation be -1? No, it couldn’t be, because that would mean our next flip would have to be a 1, but the coin’s bias is 0! This illustrates some nuance to the problem I had failed to consider but luckily did not suffer from. The autocorrelation for two binary random variables, <img src="https://latex.codecogs.com/png.latex?X,%20Y">, is defined as</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho%20=%20%5Cdfrac%7B%5Calpha%20-%20q%7D%7Bq(1-q)%7D%20"></p>
+<p>Where <img src="https://latex.codecogs.com/png.latex?E(XY)%20=%20%5Calpha">. You see, <img src="https://latex.codecogs.com/png.latex?%5Calpha"> can only be so big depending on the value of <img src="https://latex.codecogs.com/png.latex?q">, and if you place uniform priors on both <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> you can quickly get conditional probabilities outside the unit interval. That’s exactly what happened, and I was banging my head against the wall for a night trying to figure out the bounds on <img src="https://latex.codecogs.com/png.latex?%5Crho"> given <img src="https://latex.codecogs.com/png.latex?q"> and it quickly became a mess.</p>
+<p>There is another way. Rather than place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q">, we could place priors on the multinomial parameter and then do algebra (two equations, two unknowns) to find out expressions for <img src="https://latex.codecogs.com/png.latex?q"> and <img src="https://latex.codecogs.com/png.latex?%5Crho"> in terms of <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert1%7D"> and <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert0%7D">. This isn’t ideal, because I have very good prior information on what <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> should be, not on what <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> should be. Whatever, let’s proceed and see how our priors look like with a prior predictive check.</p>
+<p>The model is actually simpler to write in Stan than the previous model. We will place a Dirichlet prior on the multinomial parameters (one for each person who responded with a sequence), and then each sequence is multinomial with that multinomial parameter.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta_j%20%5Csim%20%5Cmbox%7BDirichlet%7D(%5Calpha)%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20y_j%20%5Csim%20%5Cmbox%7BMultinomial%7D(%5Ctheta_j)%20%20"></p>
+<p>The quantities we care about can be expressed in terms of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho%20=%20p_%7B1%5Cvert%201%7D%20-%20p_%7B1%5Cvert%200%7D%20%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20q%20=%20%5Cdfrac%7B2p_%7B1%5Cvert%200%7D%7D%7B1%20-%20p_%7B1%5Cvert%201%7D%20+%20p_%7B1%5Cvert%200%7D%7D"></p>
+<p>Here is the model in Stan</p>
+<pre><code>data{
+
+    int N; //How many sequences do we have
+    int y[N, 4]; // matrix of counts of co-occurences of (1,1), (1,0), (0, 1), (0,0)
+    int do_sample; // Flag to do a prior predictive check
+
+}
+parameters{
+    vector&lt;lower=0&gt;[4] a;
+    simplex[4] theta[N];
+}
+model{
+  
+  a ~ cauchy(0, 2.5);
+  
+  if(do_sample&gt;0){
+      for(i in 1:N){
+          theta[i] ~ dirichlet(a);
+          y[i] ~ multinomial(theta[i]);
+      }
+    }
+  
+}
+generated quantities{
+
+    vector[4] theta_ppc = dirichlet_rng(a);
+    real rho = theta_ppc[1] - theta_ppc[2];
+    real q = 2* theta_ppc[2]/(1 - theta_ppc[1] + theta_ppc[2]); 
+    
+    real yppc[N, 4];
+    
+    for(i in 1:N){
+        yppc[i] = multinomial_rng(theta[i], sum(y[i]));
+    }
+}</code></pre>
+<p>Shown below are the priors for the autocorrelation and bias based on the priors I’ve used. They are a little too uncertain for my liking. Humans are pretty smart, and I don’t expect for the population average bias to be very far from 0.5. I would prefer that the prior for <img src="https://latex.codecogs.com/png.latex?q"> be very tightly centered around 0.5, and that the prior for <img src="https://latex.codecogs.com/png.latex?%5Crho"> be tightly centered on 0, but that’s life. The model runs the 76 sequences in about 12 seconds (4 chains, 1000 warmups, 1000 samples) and diagnostics don’t indicate any pathological behavior. Let’s look at the joint posterior.</p>
+<div id="fig-distributions" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-prior" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/priors.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
+<p></p><p></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-hanno" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/posterior.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
+<p></p><p></p>
+</figure>
+</div>
+</div>
+</div>
+<p></p><p></p>
+</figure>
+</div>
+<p>The take home here is that the sequences are largely consistent with an unbiased and uncorrelated coin. The expected correlation is negative (-0.05) meaning humans are more likely to switch from heads to tails, or tails to heads, and the expected bias is 0.53 meaning people seem to favor heads for some reason. The results are largely unsurprising, and I really wish I could place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> directly so that my model really does reflect the state of my knowledge, but this is good enough for now.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>I’ve been thinking about this problem for a while after I watched a talk by Gelman where he mentioned estimating the autocorrelation between bernoulli experiments in passing (he was talking about model criticism and offering examples of other things to check our model with). I’m moderately happy with the hierarchical model, and the results make a lot of sense. Humans are pretty smart, and we have an intuitive sense for what random looks like. I’m willing to bet that if people submitted longer sequences, we would have a more precise estimate of the bias/correlation.</p>
+<p>One thing I’ve shirked is really detailed model criticism, though I have an idea of how I would do that. In that answer on cross validated, COOLSerdash posts a REALLY COOL way to visualize the sequence data. They plot the number of runs (sequences of consecutive heads or tails) against the longest run in the sequence. I think this would make for an excellent way to check that our model has learned the correct autocorrelation for each individual who participated in the game (though I think the sequences were too short to have a precise estimate).</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Bayes</category>
+  <category>Stan</category>
+  <category>Python</category>
+  <guid>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</guid>
+  <pubDate>Sat, 07 May 2022 04:00:00 GMT</pubDate>
+  <media:content url="https://dpananos.github.io/posts/2022-05-07-flippin/priors.png" medium="image" type="image/png" height="48" width="144"/>
+</item>
+<item>
+  <title>Hacking Sklearn To Do The Optimism Corrected Bootstrap</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.</p>
+<p>In case you don’t know, epidemiology/biostatistics people working on prediction models like to validate their models in a slightly different way than your run-in-the-mill data scientist. Now, it should be unsurprising that <a href="https://twitter.com/GaelVaroquaux/status/1293818409197731840">this has generated some discussion</a> between ML people and epi/biostats people, but I’m going to ignore this for now. I’m going to assume you have good reason for wanting to do the optimism corrected bootstrap in python, especially with sklearn, and if you don’t and want to discuss the pros and cons fo the method instead then lalalalalala I can’t hear you.</p>
+<section id="the-optimism-corrected-bootstrap-in-7-steps" class="level2">
+<h2 class="anchored" data-anchor-id="the-optimism-corrected-bootstrap-in-7-steps">The Optimism Corrected Bootstrap in 7 Steps</h2>
+<p>As a primer, you might want to tread Alex Hayes’ <a href="https://www.alexpghayes.com/blog/predictive-performance-via-bootstrap-variants/">pretty good blog post about variants of the bootstrap</a> for predictive performance. It is more mathy than I care to be right now and in R should that be your thing.</p>
+<p>To do the optimism corrected bootstrap, follow these 7 steps as found in <a href="https://link.springer.com/book/10.1007/978-0-387-77244-8">Ewout W. Steyerberg’s <em>Clinical Prediction Models</em></a>.</p>
+<ol type="1">
+<li><p>Construct a model in the original sample; determine the apparent performance on the data from the sample used to construct the model.</p></li>
+<li><p>Draw a bootstrap sample (Sample*) with replacement from the original sample.</p></li>
+<li><p>Construct a model (Model<em>) in Sample</em>, replaying every step that was done in the original sample, especially model specification steps such as selection of predictors. Determine the bootstrap performance as the apparent performance of Model* in Sample.</p></li>
+<li><p>Apply Model* to the original sample without any modification to determine the test performance.</p></li>
+<li><p>Calculate the optimism as the difference between bootstrap performance and test performance.</p></li>
+<li><p>Repeat steps 1–4 many times, at least 200, to obtain a stable mean estimate of the optimism.</p></li>
+<li><p>Subtract the mean optimism estimate (step 6) from the apparent performance (step 1) to obtain the optimism-corrected performance estimate.</p></li>
+</ol>
+<p>This procedure is very straight forward, and could easily be coded up from scratch, but I want to use as much existing code as I can and put sklearn on my resume, so let’s talk about what tools exist in sklearn to do cross validation and how we could use them to perform these steps.</p>
+</section>
+<section id="cross-validation-in-sklearn" class="level2">
+<h2 class="anchored" data-anchor-id="cross-validation-in-sklearn">Cross Validation in Sklearn</h2>
+<p>When you pass arguments like <code>cv=5</code> in sklearn’s many functions, what you’re really doing is passing <code>5</code> to <code>sklearn.model_selection.KFold</code>. See <a href="https://github.com/scikit-learn/scikit-learn/blob/0d378913b/sklearn/model_selection/_validation.py#L48"><code>sklearn.model_selection.cross_validate</code></a> which calls a function called <a href="https://github.com/scikit-learn/scikit-learn/blob/0d378913be6d7e485b792ea36e9268be31ed52d0/sklearn/model_selection/_split.py#L2262">‘check_cv’</a> to verify this. <code>KFold.split</code> returns a generator, which when passed to <code>next</code> yields a pair of train and test indicides. The inner workings of <code>KFold</code> might look something like</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="cf" style="color: #003B4F;">for</span> _ <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(number_folds):</span>
+<span id="cb1-2">    train_ix <span class="op" style="color: #5E5E5E;">=</span> make_train_ix()</span>
+<span id="cb1-3">    test_ix <span class="op" style="color: #5E5E5E;">=</span> make_test_ix()</span>
+<span id="cb1-4">    <span class="cf" style="color: #003B4F;">yield</span> (trian_ix, test_ix)</span></code></pre></div>
+<p>Those incidies are used to slice <code>X</code> and <code>y</code> to do the cross validation. So, if we are going to hack sklearn to do the optimisim corrected bootstrap for us, we really just need to write a generator to give me a bunch of indicies. According to step 2 and 3 above, the train indicies need to be resamples of <code>np.arange(len(X))</code> (ask yourself “why?”). According to step 4, the test indicies need to be <code>np.arnge(len(X))</code> (again….”why?“).</p>
+<p>Once we have a generator to do give us our indicies, we can use <code>sklearn.model_selection.cross_validate</code> to fit models on the resampled data and predict on the original sample (step 4). If we pass <code>return_train_score=True</code> to <code>cross_validate</code> we can get the bootstrap performances as well as the test performances (step 5). All we need to do then is calculate the average difference between the two (step 6) and then add this quantity to the apparent performance we got from step 1.</p>
+<p>That all sounds very complex, but the code is decieptively simple.</p>
+</section>
+<section id="the-code-i-know-you-skipped-here-dont-lie" class="level2">
+<h2 class="anchored" data-anchor-id="the-code-i-know-you-skipped-here-dont-lie">The Code (I Know You Skipped Here, Don’t Lie)</h2>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;">from</span> numpy.core.fromnumeric <span class="im" style="color: #00769E;">import</span> mean</span>
+<span id="cb2-3"><span class="im" style="color: #00769E;">from</span> sklearn.model_selection <span class="im" style="color: #00769E;">import</span> cross_validate, RepeatedKFold</span>
+<span id="cb2-4"><span class="im" style="color: #00769E;">from</span> sklearn.metrics <span class="im" style="color: #00769E;">import</span> mean_squared_error, make_scorer</span>
+<span id="cb2-5"><span class="im" style="color: #00769E;">from</span> sklearn.linear_model <span class="im" style="color: #00769E;">import</span> LinearRegression</span>
+<span id="cb2-6"><span class="im" style="color: #00769E;">from</span> sklearn.datasets <span class="im" style="color: #00769E;">import</span> load_diabetes</span>
+<span id="cb2-7"><span class="im" style="color: #00769E;">from</span> sklearn.utils <span class="im" style="color: #00769E;">import</span> resample</span>
+<span id="cb2-8"></span>
+<span id="cb2-9"><span class="co" style="color: #5E5E5E;"># Need some data to predict with</span></span>
+<span id="cb2-10">data <span class="op" style="color: #5E5E5E;">=</span> load_diabetes()</span>
+<span id="cb2-11">X, y <span class="op" style="color: #5E5E5E;">=</span> data[<span class="st" style="color: #20794D;">'data'</span>], data[<span class="st" style="color: #20794D;">'target'</span>]</span>
+<span id="cb2-12"></span>
+<span id="cb2-13"><span class="kw" style="color: #003B4F;">class</span> OptimisimBootstrap():</span>
+<span id="cb2-14"></span>
+<span id="cb2-15">    <span class="kw" style="color: #003B4F;">def</span> <span class="fu" style="color: #4758AB;">__init__</span>(<span class="va" style="color: #111111;">self</span>, n_bootstraps):</span>
+<span id="cb2-16"></span>
+<span id="cb2-17">        <span class="va" style="color: #111111;">self</span>.n_bootstraps <span class="op" style="color: #5E5E5E;">=</span> n_bootstraps</span>
+<span id="cb2-18"></span>
+<span id="cb2-19">    <span class="kw" style="color: #003B4F;">def</span> split(<span class="va" style="color: #111111;">self</span>, X, y,<span class="op" style="color: #5E5E5E;">*</span>_):</span>
+<span id="cb2-20"></span>
+<span id="cb2-21">        n <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">len</span>(X)</span>
+<span id="cb2-22">        test_ix <span class="op" style="color: #5E5E5E;">=</span> np.arange(n)</span>
+<span id="cb2-23"></span>
+<span id="cb2-24">        <span class="cf" style="color: #003B4F;">for</span> _ <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="va" style="color: #111111;">self</span>.n_bootstraps):</span>
+<span id="cb2-25">            train_ix <span class="op" style="color: #5E5E5E;">=</span> resample(test_ix)</span>
+<span id="cb2-26">            <span class="cf" style="color: #003B4F;">yield</span> (train_ix, test_ix)</span>
+<span id="cb2-27"></span>
+<span id="cb2-28"><span class="co" style="color: #5E5E5E;"># Optimism Corrected</span></span>
+<span id="cb2-29">model <span class="op" style="color: #5E5E5E;">=</span> LinearRegression()</span>
+<span id="cb2-30">model.fit(X, y)</span>
+<span id="cb2-31">apparent_performance <span class="op" style="color: #5E5E5E;">=</span> mean_squared_error(y, model.predict(X))</span>
+<span id="cb2-32"></span>
+<span id="cb2-33">opt_cv <span class="op" style="color: #5E5E5E;">=</span> OptimisimBootstrap(n_bootstraps<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">250</span>)</span>
+<span id="cb2-34">mse <span class="op" style="color: #5E5E5E;">=</span> make_scorer(mean_squared_error)</span>
+<span id="cb2-35">cv <span class="op" style="color: #5E5E5E;">=</span> cross_validate(model, X, y, cv<span class="op" style="color: #5E5E5E;">=</span>opt_cv, scoring<span class="op" style="color: #5E5E5E;">=</span>mse, return_train_score<span class="op" style="color: #5E5E5E;">=</span><span class="va" style="color: #111111;">True</span>)</span>
+<span id="cb2-36">optimism <span class="op" style="color: #5E5E5E;">=</span> cv[<span class="st" style="color: #20794D;">'test_score'</span>] <span class="op" style="color: #5E5E5E;">-</span> cv[<span class="st" style="color: #20794D;">'train_score'</span>]</span>
+<span id="cb2-37">optimism_corrected <span class="op" style="color: #5E5E5E;">=</span> apparent_performance <span class="op" style="color: #5E5E5E;">+</span> optimism.mean()</span>
+<span id="cb2-38"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'Optimism Corrected: </span><span class="sc" style="color: #5E5E5E;">{</span>optimism_corrected<span class="sc" style="color: #5E5E5E;">:.2f}</span><span class="ss" style="color: #20794D;">'</span>)</span>
+<span id="cb2-39"></span>
+<span id="cb2-40"><span class="co" style="color: #5E5E5E;"># Compare against regular cv</span></span>
+<span id="cb2-41">cv <span class="op" style="color: #5E5E5E;">=</span> cross_validate(model, X, y, cv <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">10</span>, scoring<span class="op" style="color: #5E5E5E;">=</span>mse)[<span class="st" style="color: #20794D;">'test_score'</span>].mean()</span>
+<span id="cb2-42"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'regular cv: </span><span class="sc" style="color: #5E5E5E;">{</span>cv<span class="sc" style="color: #5E5E5E;">:.2f}</span><span class="ss" style="color: #20794D;">'</span>)</span>
+<span id="cb2-43"></span>
+<span id="cb2-44"><span class="co" style="color: #5E5E5E;"># Compare against repeated cv</span></span>
+<span id="cb2-45">cv <span class="op" style="color: #5E5E5E;">=</span> cross_validate(model, X, y, cv <span class="op" style="color: #5E5E5E;">=</span> RepeatedKFold(n_splits<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">10</span>, n_repeats<span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">100</span>), scoring<span class="op" style="color: #5E5E5E;">=</span>mse)[<span class="st" style="color: #20794D;">'test_score'</span>].mean()</span>
+<span id="cb2-46"><span class="bu" style="color: null;">print</span>(<span class="ss" style="color: #20794D;">f'repeated cv: </span><span class="sc" style="color: #5E5E5E;">{</span>cv<span class="sc" style="color: #5E5E5E;">:.2f}</span><span class="ss" style="color: #20794D;">'</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Optimism Corrected: 2999.04
+regular cv: 3000.38</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>repeated cv: 3009.02</code></pre>
+</div>
+</div>
+<p>The three estimates (optimism corrected, 10 fold, and repeated 10 fold) should be reasonably close together, but uh don’t run this code multiple times. You might see that the optimism corrected estimate is quite noisy meaning I’m either wrong or that twitter thread I linked to might have some merit.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Statistics</category>
+  <category>Machine Learning</category>
+  <category>Python</category>
+  <category>Scikit-Learn</category>
+  <guid>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</guid>
+  <pubDate>Tue, 23 Nov 2021 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>On Interpretations of Confidence Intervals</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>The 95% in 95% confidence interval refers not to the probability that any one interval contains the estimand, but rather to the long term relative frequency of the estimator containing the estimand in an infinite sequence of replicated experiments under ideal conditions.</p>
+<p>Now, if this were twitter I would get ratioed so hard I might have to take a break and walk it off. Luckily, this is my blog and not yours so I can say whatever I want with impunity. But, rather than shout my opinions and demand people listen, I thought it might be a good exercise to explain to you why I think this and perhaps why people might disagree. Let’s for a moment ignore the fact that the interpretation I use above is the <em>de jure</em> definition of a confidence interval and instead start where a good proportion of statistical learning starts; with a deck of shuffled cards.</p>
+<p>I present to you a shuffled deck. Its a regular deck of cards, no funny business with the cards or the shuffling. What is the probability the top card of <em>this</em> deck an ace? I’d wager a good portion of people would say 4/52. If you, dear reader, said 4/52 then I believe you have made a benign mistake, but a mistake all the same. And I suspect the reason you’ve made this mistake is because you’ve swapped a hard question (the question about <em>this</em> deck) for an easier question (a question about the long term relative frequencies of coming to shuffled decks with no funny business and finding aces).</p>
+<p>Swapping hard questions for easy questions is not a new observation. Daniel Khaneman writes about it in <em>Thinking Fast and Slow</em> and provides numerous examples. I’ll repeat some examples from the book here. We might swap the question:</p>
+<ul>
+<li>“How much would you contribute to save dolphins?” for “how much emotion do I feel when I think of dying dolphins?”</li>
+<li>“How happy are you with your life?” for “What is my mood right now?”, and poignantly</li>
+<li>“This woman is running for the primary. How far will she go in politics?” for “Does this woman look like a political winner”.</li>
+</ul>
+<p>The book <em>Thinking Fast and Slow</em> explains why we do this, or better yet why we have no control over this. I won’t explain it here. But it is important to know that this is something we do, mostly unconsciously.</p>
+<p>So back to the deck of cards. Questions about the deck in front of you are hard. Its either an ace or not, but you can’t tell! The card is face down and there is no other information you could use to make the decision. So, you answer an easier one using information that you do know, namely the number of aces in the deck, the number of cards in the deck, the information that each card is equally likely to be on top given the fact there is no funny business with the cards or the shuffling, and the basic rules of probability you might have learned in high school if not elsewhere. But the answer you give is for a fundamentally different question, namely “If I were to observe a long sequence of well shuffled decks with no funny business, what fraction of them have an ace on top?”. Your answer is about that long sequence of shuffled decks. It isn’t about any one particular deck, and certainly not the one in front of you.</p>
+<p>I think the same thing happens with confidence intervals. The estimator has the property that 95% of the time it is constructed (under ideal circumstances) it will contain the estimand. But any one interval does or does not contain the estimand. And unlike the deck of cards which can easily be examined, we can’t ever know for certain if the interval successfully captured the estimand. There is no moment where we get to verify the estimand is in the confidence interval, and so we are sort of left guessing thus prompting us to offer a probability that we are right.</p>
+<p>The mistake is benign. It hurts no one to think about confidence intervals as having a 95% probability of containing the estimand. Your company will not lose money, your paper will (hopefully) not be rejected, and the world will not end. That being said, it is unfortunately incorrect if not by appealing to the definition, then perhaps for other reasons.</p>
+<p>I’ll start with an appeal to authority. Sander Greenland and coauthors (who include notable epidemiologist Ken Rothman and motherfucking Doug Altman) include interpretation of a confidence interval as having 95% probability of containing the true effect as misconception 19 in <a href="https://link.springer.com/content/pdf/10.1007/s10654-016-0149-3.pdf">this amazing paper</a>. They note ” It is possible to compute an interval that can be interpreted as having 95% probability of containing the true value” but go on to say that this results in us doing a Bayesian analysis and computing a credible interval. If these guys are wrong, I don’t want to be right.</p>
+<p>Additionally, when I say “The probability of a coin being flipped heads is 0.5” that references a long term frequency. I could, in principle, demonstrate that frequency by flipping a coin a lot and computing the empirical frequency of heads, which assuming the coin is fair and the number of flips large enough, will be within an acceptable range 0.5. To those people who say “This interval contains the estimand with 95% probability” I say “prove it”. Demonstrate to me via simulation or otherwise this long term relative frequency. I can’t imagine how this could be demonstrated because any fixed dataset will yield same answer over and over. Perhaps what supporters of this perspective mean is something closer to the Bayesian interpretation of probability (where probability is akin to strength in a belief). If so, the debate is decidedly answered because probability in frequentism is not about belief strength but about frequencies. Additionally, what is the random component in this probability? The data from the experiment are fixed, to allow these to vary is to appeal to my interpretation of the interval. If the estimand is random, then we are in another realm all together as frequentism assumes fixed parameters and random data. Maybe they mean something else which I just can’t think of. If there is something else, please let me know.</p>
+<p>I’ve gotten flack about confidence intervals on twitter.</p>
+<section id="flack-1-framing-it-as-a-bet" class="level2">
+<h2 class="anchored" data-anchor-id="flack-1-framing-it-as-a-bet">Flack 1: Framing It As A Bet</h2>
+<p>You present to me a shuffled deck with no funny business and offer me a bet in which I win X0,000 dollars if the card is an ace and lose X0 dollars if the card is not. “Aha Demetri! If you think the probability of the card on top being an ace is 0 or 1 you are either a fool for not taking the bet or are a fool for being so over confident! Your position is indefensible!” one person on twitter said to me (ok, they didn’t say it verbatim like this, but that was the intent).</p>
+<p>Well, not so fast. Nothing about my interpretation precludes me from using the answer to a simpler question to make decisions (I would argue statistics is the practice of doing jus that, but I digress). The top card is still an ace or not, but I can still think about an infinite sequence of shuffled decks anyway. In most of those scenarios, the card on top is an ace. Thus, I take the bet and hope the top card is an ace (much like I hope the confidence interval captures the true estimand, even though I know it either does or does not).</p>
+</section>
+<section id="flack-2-my-next-interval-has-95-probability" class="level2">
+<h2 class="anchored" data-anchor-id="flack-2-my-next-interval-has-95-probability">Flack 2: My Next Interval Has 95% Probability</h2>
+<p>“But Demetri, if 95% refers to the frequency of intervals containing the estimand, then surely my next interval has 95% probability of capturing the estimand prior to seeing data. Hence, individual intervals <em>do</em> have 95% probability of containing the estimand”.</p>
+<p>I get this sometimes, but don’t fully understand how it is supposed to be convincing. I see no problem with saying “the next interval has 95% probability” just like I have no problem with saying “If you shuffle those cards, the probability an ace is on top is 4/52” or “My next <a href="https://en.wikipedia.org/wiki/Tim_Hortons#Roll_Up_the_Rim_to_Win_campaign">Roll Up The Rim</a> cup has a 1 in 6 chance of winning”. This is starting to get more philosophical than I care it to, but those all reference non-existent things. Once they are brought into existence, it would be silly to think that they retain these properties. My cup is either winner or loser, even if I don’t roll it.</p>
+</section>
+<section id="flack-3-but-schrödingers-cat" class="level2">
+<h2 class="anchored" data-anchor-id="flack-3-but-schrödingers-cat">Flack 3: But Schrödinger’s Cat…</h2>
+<p>No.&nbsp;Stop. This is not relevant in the least. I’m talking about cards and coins, not quarks or electrons. The Wikipedia article even says “Schrödinger did not wish to promote the idea of dead-and-live cats as a serious possibility; on the contrary, he intended the example to illustrate the absurdity of the existing view of quantum mechanics”. Cards can’t be and not-be aces until flipped. Get out of here.</p>
+</section>
+<section id="wrapping-up-dont-me" class="level2">
+<h2 class="anchored" data-anchor-id="wrapping-up-dont-me">Wrapping Up, Don’t @ Me</h2>
+<p>To be completely fair, I think the question about the cards I’ve presented to you is unfair. The question asks for a probability, and while 0 and 1 are valid probabilities, the question is phrased in a way so that you are prompted for a number between 0 and 1. Likewise, the name “95% confidence interval” begs for the wrong interpretation. That is the problem we face when we use language, which is naturally imprecise and full of shortcuts and ambiguity, to talk about things as precise as mathematics. It is a seminal case study in what I like to call the precision-usefulness trade off; precise statements are not useful. It is by, interpreting them and communicating them in common language that they become useful and that usefulness comes at the cost of precision (note, this explanation of the trade off is <em>itself</em> susceptible to the trade off). The important part is that we use confidence intervals to convey uncertainty in the estimate for which they are derived from. It isn’t important what you or I think about it, as the confidence interval is merely a means to an end.</p>
+<p>AS I noted, the mistake is benign, and these arguments are mostly a mental exercise than a fight against a method which may induce harm. Were it not for COVID19, I would encourage us all to go out for a beer and have these conversations rather than do it over twitter. Anyway, if you promise not to @ me anymore about this and I promise not to tweet about it anymore.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Statistics</category>
+  <guid>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</guid>
+  <pubDate>Sat, 03 Apr 2021 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Log Link vs. Log(y)</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2020-10-06-links/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>You wanna see a little gotcha in statistics? Take the following data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">set.seed</span>(<span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb1-2">N <span class="ot" style="color: #003B4F;">=</span> <span class="dv" style="color: #AD0000;">1000</span></span>
+<span id="cb1-3">y <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">rlnorm</span>(N, <span class="fl" style="color: #AD0000;">0.5</span>, <span class="fl" style="color: #AD0000;">0.5</span>)</span></code></pre></div>
+</div>
+<p>and explain why <code>glm(y ~ 1, family = gaussian(link=log)</code> and <code>lm(log(y)~1)</code> produce different estimates of the coefficients. In case you don’t have an R terminal, here are the outputs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">log_lm <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">lm</span>(<span class="fu" style="color: #4758AB;">log</span>(y) <span class="sc" style="color: #5E5E5E;">~</span> <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;">summary</span>(log_lm)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = log(y) ~ 1)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-1.61028 -0.34631 -0.02152  0.35173  1.64112 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.49209    0.01578   31.18   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.499 on 999 degrees of freedom</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">glm_mod <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">glm</span>(y <span class="sc" style="color: #5E5E5E;">~</span> <span class="dv" style="color: #AD0000;">1</span> , <span class="at" style="color: #657422;">family =</span> <span class="fu" style="color: #4758AB;">gaussian</span>(<span class="at" style="color: #657422;">link=</span>log))</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;">summary</span>(glm_mod)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = y ~ 1, family = gaussian(link = log))
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.5282  -0.6981  -0.2541   0.4702   6.5869  
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.61791    0.01698    36.4   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for gaussian family taken to be 0.9918425)
+
+    Null deviance: 990.85  on 999  degrees of freedom
+Residual deviance: 990.85  on 999  degrees of freedom
+AIC: 2832.7
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
+</div>
+<p>Answer is the same as the difference between <img src="https://latex.codecogs.com/png.latex?E(g(X))"> and <img src="https://latex.codecogs.com/png.latex?g(E(X))"> which are not always the same. Let me explain.</p>
+<p>First, let’s start with the lognormal random variable. <img src="https://latex.codecogs.com/png.latex?y%20%5Csim%20%5Coperatorname%7BLognormal%7D(%5Cmu,%20%5Csigma)"> means <img src="https://latex.codecogs.com/png.latex?%5Clog(y)%20%5Csim%20%5Coperatorname%7BNormal%7D(%5Cmu,%20%5Csigma)">. So <img src="https://latex.codecogs.com/png.latex?%5Cmu,%20%5Csigma"> are the parameters of the underlying normal distribution. When we do <code>lm(log(y) ~ 1)</code>, we are modelling <img src="https://latex.codecogs.com/png.latex?E(%5Clog(y))%20=%20%5Cbeta_0">. So <img src="https://latex.codecogs.com/png.latex?%5Cbeta_0"> is an estimate of <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cmu)"> is an estimate of the median of the lognormal. That is an easy check</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">median</span>(y)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.600898</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="co" style="color: #5E5E5E;">#Meh, close enough</span></span>
+<span id="cb8-2"><span class="fu" style="color: #4758AB;">exp</span>(<span class="fu" style="color: #4758AB;">coef</span>(log_lm))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+   1.635723 </code></pre>
+</div>
+</div>
+<p>If I wanted an estimate of the mean of the lognormal, I would need to add <img src="https://latex.codecogs.com/png.latex?%5Csigma%5E2/2"> to my estimate of <img src="https://latex.codecogs.com/png.latex?%5Cmu">.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;">mean</span>(y)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.855038</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><span class="co" style="color: #5E5E5E;">#Meh, close enough</span></span>
+<span id="cb12-2">sigma <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">var</span>(log_lm<span class="sc" style="color: #5E5E5E;">$</span>residuals)</span>
+<span id="cb12-3"><span class="fu" style="color: #4758AB;">exp</span>(<span class="fu" style="color: #4758AB;">coef</span>(log_lm) <span class="sc" style="color: #5E5E5E;">+</span> sigma<span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+   1.852594 </code></pre>
+</div>
+</div>
+<p>Ok, onto the glm now. When we use the glm, we model <img src="https://latex.codecogs.com/png.latex?%5Clog(E(y))%20=%20%5Cbeta_0">, so we model the mean of the lognormal directly. Case in point</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;">mean</span>(y)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.855038</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;">exp</span>(<span class="fu" style="color: #4758AB;">coef</span>(glm_mod))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+   1.855038 </code></pre>
+</div>
+</div>
+<p>and if I wanted the median, I would need to consider the extra factor of <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Csigma%5E2/2)"></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><span class="fu" style="color: #4758AB;">median</span>(y)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.600898</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;">exp</span>(<span class="fu" style="color: #4758AB;">coef</span>(glm_mod) <span class="sc" style="color: #5E5E5E;">-</span> sigma<span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+   1.637881 </code></pre>
+</div>
+</div>
+<p>Log link vs.&nbsp;log outcome can be tricky. Just be sure to know what you’re modelling when you use either.</p>
+
+
+
+ ]]></description>
+  <category>R</category>
+  <category>Statistics</category>
+  <guid>https://dpananos.github.io/posts/2020-10-06-links/index.html</guid>
+  <pubDate>Tue, 06 Oct 2020 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Neat Litle Combinatorics Problem</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I’ll cut right to it. Consider the set <img src="https://latex.codecogs.com/png.latex?S%20=%20(49,%208,%2048,%2015,%2047,%204,%2016,%2023,%2043,%2044,%2042,%2045,%2046%20)">. What is the expected value for the minimum of 6 samples from this set?</p>
+<p>We could always just sample form the set to estimate the expected value. Here is a python script to do just that.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb1-2">x <span class="op" style="color: #5E5E5E;">=</span> np.array([<span class="dv" style="color: #AD0000;">49</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>])</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">mins <span class="op" style="color: #5E5E5E;">=</span> []</span>
+<span id="cb1-5"><span class="cf" style="color: #003B4F;">for</span> _ <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1000</span>):</span>
+<span id="cb1-6">    mins.append(np.random.choice(x,size <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">6</span>, replace <span class="op" style="color: #5E5E5E;">=</span> <span class="va" style="color: #111111;">False</span>).<span class="bu" style="color: null;">min</span>())</span>
+<span id="cb1-7"></span>
+<span id="cb1-8"><span class="bu" style="color: null;">print</span>(np.mean(mins))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9.098</code></pre>
+</div>
+</div>
+<p>But that is estimating the mean. We can do better and directly compute it. Here is some python code to create all subsets from <img src="https://latex.codecogs.com/png.latex?S"> of size 6. Then, we simply take out the minimum from each subset and compute the mean.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb3-2"><span class="im" style="color: #00769E;">from</span> itertools <span class="im" style="color: #00769E;">import</span> combinations, groupby</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">x <span class="op" style="color: #5E5E5E;">=</span> np.array([<span class="dv" style="color: #AD0000;">49</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>])</span>
+<span id="cb3-5">x <span class="op" style="color: #5E5E5E;">=</span> np.sort(x)</span>
+<span id="cb3-6"></span>
+<span id="cb3-7">c <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">list</span>(combinations(x,<span class="dv" style="color: #AD0000;">6</span>))</span>
+<span id="cb3-8"></span>
+<span id="cb3-9">mins <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">list</span>(<span class="bu" style="color: null;">map</span>(<span class="kw" style="color: #003B4F;">lambda</span> x: x[<span class="dv" style="color: #AD0000;">0</span>], c))</span>
+<span id="cb3-10"></span>
+<span id="cb3-11">s <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span></span>
+<span id="cb3-12"><span class="cf" style="color: #003B4F;">for</span> k, g <span class="kw" style="color: #003B4F;">in</span> groupby(<span class="bu" style="color: null;">sorted</span>(mins)):</span>
+<span id="cb3-13">    s<span class="op" style="color: #5E5E5E;">+=</span>k<span class="op" style="color: #5E5E5E;">*</span>(<span class="bu" style="color: null;">len</span>(<span class="bu" style="color: null;">list</span>(g))<span class="op" style="color: #5E5E5E;">/</span><span class="bu" style="color: null;">len</span>(mins))</span>
+<span id="cb3-14"></span>
+<span id="cb3-15"><span class="bu" style="color: null;">print</span>( s )</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>8.818181818181818</code></pre>
+</div>
+</div>
+<p>The script returns 8.18 repeating. Great, but we can do even better! If we can compute the probability density function, we can compute the mean analytically. Let’s consider a smaller problem to outline the solution.</p>
+<p>Let our set in question be <img src="https://latex.codecogs.com/png.latex?(1,2,3,4,5)">. Let the minimum of a sample of 3 numbers from this set be the random variable <img src="https://latex.codecogs.com/png.latex?z">. Now, note there are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B5%7D%7B3%7D%20=%2010"> ways to choose 3 elements from a set of 5.</p>
+<p>How many subsets exist where the minimum is 1? Well, if I sampled 1, then I would still have to pick 2 numbers from a possible 4 numbers larger than 1. There are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B4%7D%7B2%7D"> ways to do this. So <img src="https://latex.codecogs.com/png.latex?p(z=1)%20=%20%5Cbinom%7B4%7D%7B2%7D%20/%20%5Cbinom%7B5%7D%7B3%7D">.</p>
+<p>In a similar fashion, there are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B3%7D%7B2%7D"> subsets where 2 is the minimum, and <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B2%7D%7B2%7D"> subsets where 3 is the minimum. There are no subsets where 4 or 5 are the minimum (why?). So that means the expected minimum value for this set would be</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7BE%7D(z)%20=%20%5Cdfrac%7B%20%5Csum_%7Bk%20=%201%7D%5E%7B3%7D%20k%5Cbinom%7B5-k%7D%7B2%7D%20%7D%7B%5Cbinom%7B5%7D%7B3%7D%7D%20%20"></p>
+<p>Whatever that sum happens to be. Here is how you could code up the analytic solution to our problem.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb5-2"><span class="im" style="color: #00769E;">from</span> scipy.special <span class="im" style="color: #00769E;">import</span> binom</span>
+<span id="cb5-3"></span>
+<span id="cb5-4">x <span class="op" style="color: #5E5E5E;">=</span> np.array([ <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">49</span>])</span>
+<span id="cb5-5">x <span class="op" style="color: #5E5E5E;">=</span> np.sort(x)</span>
+<span id="cb5-6"></span>
+<span id="cb5-7">sample_size <span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">6</span></span>
+<span id="cb5-8">sample_space <span class="op" style="color: #5E5E5E;">=</span> x[:<span class="op" style="color: #5E5E5E;">-</span>(sample_size<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>)]</span>
+<span id="cb5-9">E <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span></span>
+<span id="cb5-10"><span class="cf" style="color: #003B4F;">for</span> i,s <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">enumerate</span>(sample_space,start <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">1</span>):</span>
+<span id="cb5-11"></span>
+<span id="cb5-12">    E<span class="op" style="color: #5E5E5E;">+=</span> s<span class="op" style="color: #5E5E5E;">*</span>binom(x.size<span class="op" style="color: #5E5E5E;">-</span>i,sample_size<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb5-13"></span>
+<span id="cb5-14"><span class="bu" style="color: null;">print</span>(E<span class="op" style="color: #5E5E5E;">/</span>binom(x.size, sample_size))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>8.818181818181818</code></pre>
+</div>
+</div>
+<p>Full disclosure, this was on a job application (literally, on the job application), so sorry KiK for putting the answer out there, but the question was too fun not to write up!</p>
+
+
+
+ ]]></description>
+  <category>Python</category>
+  <category>Probability</category>
+  <guid>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</guid>
+  <pubDate>Fri, 31 Aug 2018 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Coins and Factors</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2017-12-29-coins/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I love Fivethirtyeight’s Riddler column. Usually, I can solve the problem with computation, but on some rare occasions I can do some interesting math to get the solution without having to code. <a href="https://fivethirtyeight.com/features/can-you-survive-this-deadly-board-game/">Here</a> is the first puzzle I ever solved. It is a simple puzzle, yet it has an elegant computational and analytic solution. Let’s take a look.</p>
+<p>The puzzle says:</p>
+<blockquote class="blockquote">
+<p>You place 100 coins heads up in a row and number them by position, with the coin all the way on the left No.&nbsp;1 and the one on the rightmost edge No.&nbsp;100. Next, for every number N, from 1 to 100, you flip over every coin whose position is a multiple of N. For example, first you’ll flip over all the coins, because every number is a multiple of 1. Then you’ll flip over all the even-numbered coins, because they’re multiples of 2. Then you flip coins No.&nbsp;3, 6, 9, 12 , And so on.</p>
+<p>What do the coins look like when you’re done? Specifically, which coins are heads down?</p>
+</blockquote>
+<section id="computing-the-solution" class="level2">
+<h2 class="anchored" data-anchor-id="computing-the-solution">Computing the Solution</h2>
+<p>This is really easy to program. Here is a little python script to compute the solution:</p>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;">from</span> itertools <span class="im" style="color: #00769E;">import</span> product</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"></span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;"># Array of 100 True.  True is Heads up</span></span>
+<span id="cb1-7">Ncoins <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">100</span></span>
+<span id="cb1-8">coins <span class="op" style="color: #5E5E5E;">=</span> np.ones(Ncoins,dtype <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">bool</span>)</span>
+<span id="cb1-9">index <span class="op" style="color: #5E5E5E;">=</span> np.arange(<span class="dv" style="color: #AD0000;">1</span>,Ncoins<span class="op" style="color: #5E5E5E;">+</span><span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="co" style="color: #5E5E5E;">#Go through the coins</span></span>
+<span id="cb1-12"><span class="cf" style="color: #003B4F;">for</span> N <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1</span>,Ncoins<span class="op" style="color: #5E5E5E;">+</span><span class="dv" style="color: #AD0000;">1</span>):</span>
+<span id="cb1-13">    </span>
+<span id="cb1-14">    coins[index<span class="op" style="color: #5E5E5E;">%</span>N<span class="op" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">~</span>coins[index<span class="op" style="color: #5E5E5E;">%</span>N<span class="op" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">0</span>]  <span class="co" style="color: #5E5E5E;">#Flip the coin.  </span></span></code></pre></div>
+<p>Shown below is the solution. In dark blue are the coins face down (I’ve arranged them in a 10 by 10 grid and annotated them with their position for clarity). When we take a look at the <code>coins</code> variable, we see that those coins in positions which are perfect squares pop out. That is an interesting result, but what is more interesting is reasoning out the solution without doing any computation at all!</p>
+<div class="cell" data-fig-dpi="240" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div id="fig-grid" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2017-12-29-coins/index_files/figure-html/fig-grid-output-1.png" class="img-fluid figure-img"></p>
+<p></p><p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="reasoning-out-the-solution." class="level2">
+<h2 class="anchored" data-anchor-id="reasoning-out-the-solution.">Reasoning Out the Solution.</h2>
+<p>First, let’s think why a coin would end up face down. If all coins start heads up, then it would take an odd number of flips for the coin to end up face down. Since coins are only flipped when we pass a factor of a coin’s position, then those coins in positions with an odd number of factors will be heads down at the end.</p>
+<p>So 9 would end up heads down because it has factors 1 (flip face down), 3 (flip face up), and 9 (flip face down), while 6 would be heads up because it has factors 1, 2, 3, and 6.</p>
+<p>So which numbers have an odd number of factors? Here is where we get to do some interesting math. The Fundamental Theorem of Arithmetic says that every integer <img src="https://latex.codecogs.com/png.latex?N%3E1"> is either prime or can be uniquely factored as a product of primes</p>
+<p><img src="https://latex.codecogs.com/png.latex?N%20=%20%5Cprod_%7Bj%7D%20p_j%5E%7Ba_j%7D%20%5C%3E."></p>
+<p>If <img src="https://latex.codecogs.com/png.latex?N"> can be factored like this, that means it has</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cprod_%7Bj%7D%20(a_j%20+1)"></p>
+<p>unique factors.</p>
+<p>It is straight forward to argue that a composite odd number must be the product of odd numbers, so we know that the <img src="https://latex.codecogs.com/png.latex?a_j+1"> must be odd <img src="https://latex.codecogs.com/png.latex?%5Cforall%20j">, and so that means the <img src="https://latex.codecogs.com/png.latex?a_j"> are even and can be written as <img src="https://latex.codecogs.com/png.latex?a_j%20=%202n_j">. Thus, our factorization becomes</p>
+<p><img src="https://latex.codecogs.com/png.latex?N%20=%20%5Cprod_j%20p_j%5E%7B2n_j%7D%20=%20%5Cprod_j%20(p_j%5E%7Bn_j%7D)%5E2%20=%20%5Cleft(%5Cprod_j%20p_j%5E%7Bn_j%7D%20%5Cright)%5E2%20%5C%3E,"></p>
+<p>which means that if <img src="https://latex.codecogs.com/png.latex?N"> has an odd number of factors, it must be a perfect square! All done.</p>
+<p>I love trying to solve the Riddler’s puzzle without coding. It makes me draw upon knowledge I haven’t used in a while, and may force me to learn something new.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>Python</category>
+  <category>Riddler</category>
+  <guid>https://dpananos.github.io/posts/2017-12-29-coins/index.html</guid>
+  <pubDate>Fri, 29 Dec 2017 05:00:00 GMT</pubDate>
+  <media:content url="https://dpananos.github.io/posts/2017-12-29-coins/coins.png" medium="image" type="image/png" height="144" width="144"/>
+</item>
+</channel>
+</rss>

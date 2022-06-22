@@ -1,0 +1,48 @@
+---
+title: "This Is A Quarto Blog"
+author: "Demetri Pananos"
+date: "2022-06-22"
+categories: [News]
+---
+
+This is a quarto blog.
+
+That means I can write code in either R or python directly in the blog post and have it execute.  So when you see something like
+
+```{python}
+#| fig-height: 3
+#| fig-width: 5
+#| fig-dpi: 240
+#| label: fig-trig-py
+#| fig-cap: "Whoa, check it out!"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+t = np.linspace(0, 1)
+plt.plot(t, np.sin(2*np.pi*t), color='k')
+plt.plot(t, np.cos(2*np.pi*t), color='red')
+plt.title("Here is a plot")
+```
+
+That is the code that is actually executed.  That means the blog is more reproducible and will have fewer errors.  It also means you can go directly to [the repo for my blog](https://github.com/Dpananos/dpananos.github.io) and clone the post to start tinkering.  No more linking to other gitrepos, no more copying and pasting code with errors.
+
+
+Did I mention I can write both R and python?
+
+```{r}
+#| fig-height: 3
+#| fig-width: 5
+#| fig-dpi: 240
+#| label: fig-trig-r
+#| fig-cap: "Whoa, check it out again!"
+t = seq(0, 1, 0.01)
+plot(t, sin(2*pi*t), main='Here is another plot!', xlab='', ylab='', type='l')
+lines(t, cos(2*pi*t), col='red')
+```
+
+I can also reference figures (like @fig-trig-py and @fig-trig-1).
+
+## Sharp Points
+
+There are a few, but maybe I'm just bad at navigating documentation. I set this up in maybe 2 hours (and a lot of that was screwing wiht github). Anyway, I like this approach much better because it is less work and cuts down on stupid errors.

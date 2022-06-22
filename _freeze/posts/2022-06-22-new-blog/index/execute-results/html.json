@@ -1,0 +1,16 @@
+{
+  "hash": "087483f398549278ad58b264d34b036c",
+  "result": {
+    "markdown": "---\ntitle: \"This Is A Quarto Blog\"\nauthor: \"Demetri Pananos\"\ndate: \"2022-06-22\"\ncategories: [News]\n---\n\n\nThis is a quarto blog.\n\nThat means I can write code in either R or python directly in the blog post and have it execute.  So when you see something like\n\n\n::: {.cell fig-dpi='240'}\n\n```{.python .cell-code}\nimport matplotlib.pyplot as plt\nimport numpy as np\n\nt = np.linspace(0, 1)\nplt.plot(t, np.sin(2*np.pi*t), color='k')\nplt.plot(t, np.cos(2*np.pi*t), color='red')\nplt.title(\"Here is a plot\")\n```\n\n::: {.cell-output-display}\n![Whoa, check it out!](index_files/figure-html/fig-trig-py-1.png){#fig-trig-py width=480}\n:::\n:::\n\n\nThat is the code that is actually executed.  That means the blog is more reproducible and will have fewer errors.  It also means you can go directly to [the repo for my blog](https://github.com/Dpananos/dpananos.github.io) and clone the post to start tinkering.  No more linking to other gitrepos, no more copying and pasting code with errors.\n\n\nDid I mention I can write both R and python?\n\n\n::: {.cell fig-dpi='240'}\n\n```{.r .cell-code}\nt = seq(0, 1, 0.01)\nplot(t, sin(2*pi*t), main='Here is another plot!', xlab='', ylab='', type='l')\nlines(t, cos(2*pi*t), col='red')\n```\n\n::: {.cell-output-display}\n![Whoa, check it out again!](index_files/figure-html/fig-trig-r-3.png){#fig-trig-r width=480}\n:::\n:::\n\n\nI can also reference figures (like @fig-trig-r and @fig-trig-py)",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
