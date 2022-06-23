@@ -1,32 +1,27 @@
 project:
   type: website
   output-dir: docs
-  twitter-card:
-    creator: "@phdemetri"
 
 website:
   title: "PhDemetri"
-  site-url: https://dpananos.github.io/
-  description: Numbers, Letters, Sometimes Both
+  site-url: https://dpananos.github.io
+  repo-url: https://github.com/Dpananos/dpananos.github.io
+  repo-actions: [edit, issue]
+  open-graph: true
+  twitter-card:
+    creator: "@PhDemetri"
+    card-style: summary_large_image
   navbar:
     right:
-      - about.qmd
-      - consulting.qmd
+      - text: About
+        file: about.qmd
+      - text: Consulting
+        file: consulting/index.qmd
       - icon: github
         href: https://github.com/Dpananos
       - icon: twitter
         href: https://twitter.com/PhDemetri
-      - icon: linkedin
-        href: https://www.linkedin.com/in/demetripananos/
-      - icon: rss
-        href: index.xml
-  search:
-    location: navbar
-    type: overlay
 format:
   html:
     theme: flatly
     css: styles.css
-
-
-

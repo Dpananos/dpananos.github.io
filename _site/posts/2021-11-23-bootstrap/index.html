@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2022-11-23">
+<meta name="dcterms.date" content="2021-11-23">
 
 <title>PhDemetri - Hacking Sklearn To Do The Optimism Corrected Bootstrap</title>
 <style>
@@ -121,9 +121,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="PhDemetri - Hacking Sklearn To Do The Optimism Corrected Bootstrap">
+<meta property="og:description" content="Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.">
+<meta property="og:site-name" content="PhDemetri">
+<meta name="twitter:title" content="PhDemetri - Hacking Sklearn To Do The Optimism Corrected Bootstrap">
+<meta name="twitter:description" content="Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -138,7 +145,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">PhDemetri</a>
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">Consulting</a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
@@ -147,11 +157,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
-</i> 
- </a>
-  </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/demetripananos/"><i class="bi bi-linkedin" role="img">
 </i> 
  </a>
   </li>  
@@ -188,7 +193,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 23, 2022</p>
+        <p class="date">November 23, 2021</p>
       </div>
     </div>
       
@@ -198,7 +203,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#the-optimism-corrected-bootstrap-in-7-steps" id="toc-the-optimism-corrected-bootstrap-in-7-steps" class="nav-link active" data-scroll-target="#the-optimism-corrected-bootstrap-in-7-steps">The Optimism Corrected Bootstrap in 7 Steps</a></li>
+  <li><a href="#cross-validation-in-sklearn" id="toc-cross-validation-in-sklearn" class="nav-link" data-scroll-target="#cross-validation-in-sklearn">Cross Validation in Sklearn</a></li>
+  <li><a href="#the-code-i-know-you-skipped-here-dont-lie" id="toc-the-code-i-know-you-skipped-here-dont-lie" class="nav-link" data-scroll-target="#the-code-i-know-you-skipped-here-dont-lie">The Code (I Know You Skipped Here, Don’t Lie)</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2021-11-23-bootstrap/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
@@ -281,16 +296,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare against repeated cv</span></span>
 <span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>cv <span class="op">=</span> cross_validate(model, X, y, cv <span class="op">=</span> RepeatedKFold(n_splits<span class="op">=</span><span class="dv">10</span>, n_repeats<span class="op">=</span><span class="dv">100</span>), scoring<span class="op">=</span>mse)[<span class="st">'test_score'</span>].mean()</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'regular cv: </span><span class="sc">{</span>cv<span class="sc">:.2f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'repeated cv: </span><span class="sc">{</span>cv<span class="sc">:.2f}</span><span class="ss">'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Optimism Corrected: 2998.79
+<pre><code>Optimism Corrected: 2999.04
 regular cv: 3000.38</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>regular cv: 3012.67</code></pre>
+<pre><code>repeated cv: 3009.02</code></pre>
 </div>
 </div>
-<p>The two estimates (optimism corrected and 10 fold) should be reasonably close together, but uh don’t run this code multiple times. You might see that the optimism corrected estimate is quite noisy meaning I’m either wrong or that twitter thread I linked to might have some merit.</p>
+<p>The three estimates (optimism corrected, 10 fold, and repeated 10 fold) should be reasonably close together, but uh don’t run this code multiple times. You might see that the optimism corrected estimate is quite noisy meaning I’m either wrong or that twitter thread I linked to might have some merit.</p>
 
 
 </section>

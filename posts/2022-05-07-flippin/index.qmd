@@ -1,6 +1,5 @@
 ---
 title: "Flippin' Fun!"
-author: "Demetri Pananos"
 date: "2022-05-07"
 categories: [Bayes, Stan, Python]
 ---

@@ -1,19 +1,5 @@
 [
   {
-    "objectID": "consulting.html",
-    "href": "consulting.html",
-    "title": "Consulting",
-    "section": "",
-    "text": "I am available for private statistical consulting. Throughout my PhD, I’ve had the good fortune to work as a statistical analyst for The Department of Medicine at Western University. In that role I provided statistical services to researching physicians, including: but not limited to:\n\nProviding statistical expertise in grant writing\nHelping design analysis plans for funded studies\nHelping clean data to prepare for modelling\nStatistical modelling\nReporting and interpreting results of modelling\nCommunication of results to non-expert audiences (including writing manuscripts for publication), and\nResponding to reviewer requests.\n\nIf you need help with statistics of any kind, I’m always open to lend a hand. Please feel free to reach out at dpananos [at] gmail [dot] com."
-  },
-  {
-    "objectID": "consulting.html#pricing",
-    "href": "consulting.html#pricing",
-    "title": "Consulting",
-    "section": "Pricing",
-    "text": "Pricing\nI have variable pricing depending on requirements and timeline to complete work. I offer a 30 minute consult free of charge to scope out project needs and will send you an estimated cost for the work."
-  },
-  {
     "objectID": "posts/2017-12-29-coins/index.html",
     "href": "posts/2017-12-29-coins/index.html",
     "title": "Coins and Factors",
@@ -173,5 +159,19 @@
     "title": "About Me",
     "section": "",
     "text": "I’m a senior data scientist at Zapier. I’m usually playing chess, having a coffee, and playing fetch with my dog."
+  },
+  {
+    "objectID": "consulting/index.html",
+    "href": "consulting/index.html",
+    "title": "Demetri Pananos",
+    "section": "",
+    "text": "I am available for private statistical consulting. Throughout my PhD, I’ve had the good fortune to work as a statistical analyst for The Department of Medicine at Western University. In that role I provided statistical services to researching physicians, including: but not limited to:\n\nProviding statistical expertise in grant writing\nHelping design analysis plans for funded studies\nHelping clean data to prepare for modelling\nStatistical modelling\nReporting and interpreting results of modelling\nCommunication of results to non-expert audiences (including writing manuscripts for publication), and\nResponding to reviewer requests.\n\nIf you need help with statistics of any kind, I’m always open to lend a hand. Please feel free to reach out at dpananos [at] gmail [dot] com."
+  },
+  {
+    "objectID": "consulting/index.html#pricing",
+    "href": "consulting/index.html#pricing",
+    "title": "Demetri Pananos",
+    "section": "Pricing",
+    "text": "Pricing\nI have variable pricing depending on requirements and timeline to complete work. I offer a 30 minute consult free of charge to scope out project needs and will send you an estimated cost for the work."
   }
 ]

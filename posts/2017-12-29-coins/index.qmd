@@ -1,6 +1,5 @@
 ---
 title: "Coins and Factors"
-author: "Demetri Pananos"
 date: "2017-12-29"
 image: coins.png
 categories: [Python, Riddler]

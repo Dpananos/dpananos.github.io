@@ -1,6 +1,5 @@
 ---
 title: "Hacking Sklearn To Do The Optimism Corrected Bootstrap"
-author: "Demetri Pananos"
 date: "2021-11-23"
 categories: [Statistics, Machine Learning, Python, Scikit-Learn]
 ---

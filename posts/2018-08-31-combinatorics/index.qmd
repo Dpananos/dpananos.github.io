@@ -1,6 +1,5 @@
 ---
 title: "Neat Litle Combinatorics Problem"
-author: "Demetri Pananos"
 date: "2018-08-31"
 categories: [Python, Probability]
 ---

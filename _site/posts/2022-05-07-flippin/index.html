@@ -126,9 +126,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="PhDemetri - Flippin’ Fun!">
+<meta property="og:description" content="I wrote an answer to a question about sequences of coin flips a couple days back that I was quite chuffed with.">
+<meta property="og:site-name" content="PhDemetri">
+<meta name="twitter:title" content="PhDemetri - Flippin’ Fun!">
+<meta name="twitter:description" content="I wrote an answer to a question about sequences of coin flips a couple days back that I was quite chuffed with.">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -143,7 +150,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">PhDemetri</a>
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">Consulting</a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
@@ -152,11 +162,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
-</i> 
- </a>
-  </li>  
-  <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/demetripananos/"><i class="bi bi-linkedin" role="img">
 </i> 
  </a>
   </li>  
@@ -202,7 +207,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#initial-model" id="toc-initial-model" class="nav-link active" data-scroll-target="#initial-model">Initial Model</a></li>
+  <li><a href="#the-stan-code" id="toc-the-stan-code" class="nav-link" data-scroll-target="#the-stan-code">The Stan Code</a></li>
+  <li><a href="#run-from-python" id="toc-run-from-python" class="nav-link" data-scroll-target="#run-from-python">Run From Python</a></li>
+  <li><a href="#stack-layerswait-thats-a-deep-learning-thing" id="toc-stack-layerswait-thats-a-deep-learning-thing" class="nav-link" data-scroll-target="#stack-layerswait-thats-a-deep-learning-thing">Stack Layers…Wait, That’s a Deep Learning Thing</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-05-07-flippin/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 

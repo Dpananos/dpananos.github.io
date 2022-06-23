@@ -1,6 +1,5 @@
 ---
 title: "On Interpretations of Confidence Intervals"
-author: "Demetri Pananos"
 date: "2021-04-03"
 categories: [Statistics]
 ---

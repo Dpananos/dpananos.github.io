@@ -1,6 +1,5 @@
 ---
 title: "This Is A Quarto Blog"
-author: "Demetri Pananos"
 date: "2022-06-22"
 categories: [News]
 ---

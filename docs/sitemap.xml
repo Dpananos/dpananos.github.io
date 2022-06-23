@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://dpananos.github.io/consulting.html</loc>
-    <lastmod>2022-06-22T22:55:23.020Z</lastmod>
-  </url>
-  <url>
     <loc>https://dpananos.github.io/posts/2017-12-29-coins/index.html</loc>
-    <lastmod>2022-06-22T22:54:56.445Z</lastmod>
+    <lastmod>2022-06-23T00:00:50.825Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</loc>
-    <lastmod>2022-06-22T22:54:57.898Z</lastmod>
+    <lastmod>2022-06-23T00:00:51.794Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</loc>
-    <lastmod>2022-06-22T22:54:58.815Z</lastmod>
+    <lastmod>2022-06-23T00:00:52.617Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</loc>
-    <lastmod>2022-06-22T22:55:00.072Z</lastmod>
+    <lastmod>2022-06-23T00:00:53.781Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</loc>
-    <lastmod>2022-06-22T22:55:01.103Z</lastmod>
+    <lastmod>2022-06-23T00:00:54.668Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2020-10-06-links/index.html</loc>
-    <lastmod>2022-06-22T22:55:01.824Z</lastmod>
+    <lastmod>2022-06-23T00:00:55.528Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</loc>
-    <lastmod>2022-06-22T22:55:02.469Z</lastmod>
+    <lastmod>2022-06-23T00:00:56.126Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2022-06-22T22:55:17.266Z</lastmod>
+    <lastmod>2022-06-23T00:00:56.760Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
-    <lastmod>2022-06-22T22:55:03.462Z</lastmod>
+    <lastmod>2022-06-23T00:00:57.088Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/consulting/index.html</loc>
+    <lastmod>2022-06-23T00:00:57.428Z</lastmod>
   </url>
 </urlset>

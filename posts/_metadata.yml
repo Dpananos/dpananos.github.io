@@ -6,3 +6,19 @@ freeze: true
 
 # Enable banner style title blocks
 title-block-banner: true
+
+
+# Default for table of contents
+toc: true
+toc-title: Sections
+toc-location: right
+
+# Default knitr options
+execute:
+  echo: true
+  message: false
+  warning: false
+  
+# Default author
+author:
+  - name: Demetri Pananos

@@ -1,6 +1,6 @@
 ---
-title: "Consulting"
-image: profile.jpg
+title: "Demetri Pananos"
+image: ../profile.jpg
 about:
   template: trestles
   links:
