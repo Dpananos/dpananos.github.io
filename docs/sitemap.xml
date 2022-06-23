@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://dpananos.github.io/posts/2019-05-21-odes/index.html</loc>
+    <lastmod>2022-06-23T03:15:16.800Z</lastmod>
+  </url>
+  <url>
     <loc>https://dpananos.github.io/posts/2017-12-29-coins/index.html</loc>
-    <lastmod>2022-06-23T02:06:45.415Z</lastmod>
+    <lastmod>2022-06-23T03:15:17.680Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</loc>
-    <lastmod>2022-06-23T02:06:48.120Z</lastmod>
+    <lastmod>2022-06-23T03:15:18.759Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</loc>
-    <lastmod>2022-06-23T02:06:54.816Z</lastmod>
+    <lastmod>2022-06-23T03:15:19.528Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</loc>
-    <lastmod>2022-06-23T02:07:04.468Z</lastmod>
+    <lastmod>2022-06-23T03:15:20.493Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</loc>
-    <lastmod>2022-06-23T02:07:11.492Z</lastmod>
+    <lastmod>2022-06-23T03:15:21.428Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2020-10-06-links/index.html</loc>
-    <lastmod>2022-06-23T02:07:15.025Z</lastmod>
+    <lastmod>2022-06-23T03:15:22.056Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</loc>
-    <lastmod>2022-06-23T02:07:16.527Z</lastmod>
+    <lastmod>2022-06-23T03:15:22.581Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2022-06-23T02:07:17.396Z</lastmod>
+    <lastmod>2022-06-23T03:15:23.138Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
-    <lastmod>2022-06-23T02:07:17.972Z</lastmod>
+    <lastmod>2022-06-23T03:15:23.460Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/consulting/index.html</loc>
-    <lastmod>2022-06-23T02:07:19.588Z</lastmod>
+    <lastmod>2022-06-23T03:15:23.802Z</lastmod>
   </url>
 </urlset>

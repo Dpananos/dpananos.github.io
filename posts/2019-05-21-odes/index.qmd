@@ -2,6 +2,7 @@
 title: "Gradient Descent with ODEs"
 date: "2019-05-21"
 categories: [Python, Machine Learning, Statistics]
+image: sir_curves.png
 ---
 
 Gradient descent usually isn't used to fit Ordinary Differential Equations (ODEs) to data (at least, that isn't how the Applied Mathematics departments to which I have been a part have done it).  Nevertheless, that doesn't mean that it can't be done.  For some of my recent GSoC work, I've been investigating how to compute gradients of solutions to ODEs without access to the solution's analytical form.  In this blog post, I describe how these gradients can be computed and how they can be used to fit ODEs to synchronous data with gradient descent.
@@ -186,7 +187,10 @@ plt.scatter(t,y_obs[:,1], marker = '.', alpha = 0.5)
 plt.plot(t,true_sol[:,0], label = 'Estimated ', color = 'k')
 plt.plot(t,true_sol[:,1], color = 'k')
 
-plt.legend();
+plt.legend()
+
+plt.tight_layout()
+plt.savefig('sir_curves.png');
 ```
 
 
