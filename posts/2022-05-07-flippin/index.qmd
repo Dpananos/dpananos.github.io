@@ -2,6 +2,7 @@
 title: "Flippin' Fun!"
 date: "2022-05-07"
 categories: [Bayes, Stan, Python]
+image: posterior.png
 ---
 
 I wrote an [answer](https://stats.stackexchange.com/a/574359/111259) to a question about sequences of coin flips a couple days back that I was quite chuffed with.  In short, the question asked for statistical ways to determine if a sequence of coin flips was from an unbiased coin or a human trying to appear random.  The resulting model turned into a fun game [on twitter](https://twitter.com/PhDemetri/status/1523034006626856960) centered around determining if people who follow me could simulate a sequence of coin flips that looked random (without using a real RNG, or some funny workaround.  I have a lot of faith in my twitter followers...maybe too much).
