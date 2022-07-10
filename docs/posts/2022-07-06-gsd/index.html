@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.646">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2022-07-06">
+
+<title>PhDemetri - Interim Analysis &amp; Group Sequential Designs Pt 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="PhDemetri - Interim Analysis &amp; Group Sequential Designs Pt 1">
+<meta property="og:description" content="At Zapier, AB testing kind of has a bad rap. AB testing is perceived as slow – sometimes taking up to a month to complete a single test– with the chance that we don’t get a definitive result (i.e.">
+<meta property="og:image" content="https://dpananos.github.io/posts/2022-07-06-gsd/joint_dist.png">
+<meta property="og:site-name" content="PhDemetri">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:width" content="1200">
+<meta name="twitter:title" content="PhDemetri - Interim Analysis &amp; Group Sequential Designs Pt 1">
+<meta name="twitter:description" content="At Zapier, AB testing kind of has a bad rap. AB testing is perceived as slow – sometimes taking up to a month to complete a single test– with the chance that we don’t get a definitive result (i.e.">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2022-07-06-gsd/joint_dist.png">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="1200">
+<meta name="twitter:image-width" content="1200">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">PhDemetri</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">Consulting</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Interim Analysis &amp; Group Sequential Designs Pt 1</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">Statistics</div>
+                <div class="quarto-category">AB Testing</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 6, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#goal-for-this-post" id="toc-goal-for-this-post" class="nav-link active" data-scroll-target="#goal-for-this-post">Goal For This Post</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a></li>
+  <li><a href="#some-math-on-means" id="toc-some-math-on-means" class="nav-link" data-scroll-target="#some-math-on-means">Some Math on Means</a></li>
+  <li><a href="#a-simple-example" id="toc-a-simple-example" class="nav-link" data-scroll-target="#a-simple-example">A Simple Example</a>
+  <ul class="collapse">
+  <li><a href="#how-much-does-the-type-one-inflate" id="toc-how-much-does-the-type-one-inflate" class="nav-link" data-scroll-target="#how-much-does-the-type-one-inflate"><em>How Much</em> Does The Type One Inflate?</a></li>
+  <li><a href="#why-the-type-one-inflates" id="toc-why-the-type-one-inflates" class="nav-link" data-scroll-target="#why-the-type-one-inflates"><em>Why</em> The Type One Inflates</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#appendix" id="toc-appendix" class="nav-link" data-scroll-target="#appendix">Appendix</a>
+  <ul class="collapse">
+  <li><a href="#sec-cov" id="toc-sec-cov" class="nav-link" data-scroll-target="#sec-cov">Covariance Calculation</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-07-06-gsd/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<blockquote class="blockquote">
+<p>Special thanks to <a href="https://twitter.com/jfiksel1">Jacob Fiksel</a> for writing a great <a href="file:///Users/demetripananos/Zotero/storage/HQG5JJ4N/2021-02-03-alpha_spending_explained.html">blog post</a> which inspired me to write my own.</p>
+</blockquote>
+<p>At Zapier, AB testing kind of has a bad rap. AB testing is perceived as slow – sometimes taking up to a month to complete a single test– with the chance that we don’t get a definitive result (i.e.&nbsp;we fail to reject the null). One of our priorities (and hence my priority) is to find a way to speed up AB testing so we can learn faster.</p>
+<p>Peeking is one way to do that. Peeking involves testing the experimental data before the end of the experiment (“peeking” at the results to see if they indicate a change). As you may know from other <a href="https://www.evanmiller.org/how-not-to-run-an-ab-test.html">popular posts</a> on the matter, or from sophomore stats, this can inflate the type one error. That’s a real shame, because peeking is a really attractive way to end an experiment early and save some time. Additionally, people are curious! They want to know how things are going. Fortunately, there are ways to satisfy the urge to peek while preserving the type one error rate.</p>
+<p>One way to peek while preserving the type one error rate is through Group Sequential Designs (GSDs). This series of blog posts is intended to delve into some of the theory of GSDs. To me, theoretical understanding – knowing why something works, or at least being able to understand how in principle I could do this myself – is the key to learning. I’m happy to just do this in isolation, but I bet someone else may benefit too.</p>
+<p>I’m working mainly from <a href="https://link.springer.com/book/10.1007/978-3-319-32562-0">this</a> book, but I don’t anticipate I will discuss the entirety of the book. I really want to know a few key things:</p>
+<ul>
+<li>What is the foundational problem for peeking?</li>
+<li>How can we address that problem (i.e.&nbsp;How can we preserve the type one error when we peek)?</li>
+<li>How else can we speed up experiments (e.g.&nbsp;by declaring an experiment futile)?</li>
+<li>What is the theory underlying each of the above?</li>
+</ul>
+<section id="goal-for-this-post" class="level2">
+<h2 class="anchored" data-anchor-id="goal-for-this-post">Goal For This Post</h2>
+<p>We know that under “peeking conditions” – just testing the data as they roll in – inflates the type one error rate. In this post, I want to understand <em>why</em> that happens. Like…where is the problem <em>exactly</em>? Where will be our theoretical basis for attacking the problem of controlling the type one error rate?</p>
+<p>But first, a little background on GSDs.</p>
+</section>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>The “<em>G</em>” in GSD means that the hypothesis test is performed on groups of observations. Given a maximum number of groups <span class="math inline">\(K\)</span>, the sample size of <span class="math inline">\(k^{th}\)</span> each group is <span class="math inline">\(n_k\)</span>.</p>
+<p>The “<em>S</em>” in GSD means the test is performed sequentially. If after observing the <span class="math inline">\(k^{th}\)</span> group the test statistic (computed using all the data observed up to that point) is beyond some threshold, then the null is rejected and the experiment is finished. If not, the next group of observations is made and added to the existing data, wherein the process continues until the final group has been observed. If after observing the final group the test statistic does not exceed the threshold, then we fail to reject the null. The process for <span class="math inline">\(K=2\)</span> is illustrated in <a href="#fig-gsd">Figure&nbsp;1</a>.</p>
+<div class="cell fig-cap-location-top">
+<div class="cell-output-display">
+<div id="fig-gsd" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p></p><figcaption aria-hidden="true" class="figure-caption">Figure 1: A GSD for <span class="math inline">\(K=2\)</span></figcaption><p></p>
+<p>
+</p><pre class="mermaid" data-tooltip-selector="#mermaid-tooltip-1">flowchart TD
+  A[Observe Group k=1] --&gt; B[Perform Test]
+  B --&gt; C{Data From k=1 \n Significant?}
+  C -- Yes --&gt; D[Reject Null]
+  C -- No --&gt; E[Observe Group k=2]
+  E --&gt; G{Data From k=1 and \n k=2 Significant?}
+  G -- Yes --&gt; D
+  G -- No --&gt; H[Fail To Reject Null]
+</pre>
+<div id="mermaid-tooltip-1" class="mermaidTooltip">
+
+</div>
+<p></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="some-math-on-means" class="level2">
+<h2 class="anchored" data-anchor-id="some-math-on-means">Some Math on Means</h2>
+<p>Means are a fairly standard place to start for a statsitical test, so we will start there too. Let <span class="math inline">\(X_{k, i}\)</span> be the <span class="math inline">\(i^{th}\)</span> observation in the <span class="math inline">\(k^{th}\)</span> group. Then the mean of group <span class="math inline">\(k\)</span> is</p>
+<p><span class="math display">\[ \bar{X}_k = \dfrac{1}{n_k} \sum_{i=1}^{n_{k}} X_{k, i} \]</span></p>
+<p>Since we are accumulating data, let’s write the cumulative mean up to and including group <span class="math inline">\(k\)</span> as <span class="math inline">\(\bar{X}^{(k)}\)</span>, and let the cumulative standard deviation up to and including group <span class="math inline">\(k\)</span> be <span class="math inline">\(\sigma^{(k)}\)</span>. We can actually write <span class="math inline">\(\bar{X}^{(k)}\)</span> in terms of the group means <span class="math inline">\(\bar{X}_{k}\)</span> using some algebra. Its just a weighted mean of the previous <span class="math inline">\(\bar{X}_{k}\)</span> weighted by the sample size.</p>
+<p><span id="eq-eq-1"><span class="math display">\[
+\bar{X}^{(k)} =  \dfrac{\sum_{\tilde{k} = 1}^{k^\prime} n_{\tilde{k}} \bar{X}_{\tilde{k}}}{\sum_{\tilde{k} = 1}^{k^\prime} n_{\tilde{k}}}
+\tag{1}\]</span></span></p>
+</section>
+<section id="a-simple-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-example">A Simple Example</h2>
+<p>Remember that our goal is to understand <em>why</em> the type one error rate increases when we peek as data accumulates, as we might do in an AB test. Answering <em>how much</em> is a little easier, so let’s do that first. Let’s do so by analyzing a <span class="math inline">\(K=2\)</span> GSD where we assume:</p>
+<ul>
+<li>That each group has the same sample size <span class="math inline">\(n_1 = n_2 = n\)</span>.</li>
+<li>That the data we observe are IID bernoulli trials <span class="math inline">\(X_{k, i} \sim \operatorname{Bernoulli}(p=0.5)\)</span> for <span class="math inline">\(k=1, 2\)</span> and <span class="math inline">\(j=1, \dots, n\)</span>.</li>
+<li>That our false postie rate <span class="math inline">\(\alpha = 0.05\)</span></li>
+</ul>
+<section id="how-much-does-the-type-one-inflate" class="level3">
+<h3 class="anchored" data-anchor-id="how-much-does-the-type-one-inflate"><em>How Much</em> Does The Type One Inflate?</h3>
+<p>Let’s just simulate data under the assumptions above. At each stage, let’s test the null that <span class="math inline">\(H_0: p=0.5\)</span> against <span class="math inline">\(H_A: p \neq 0.5\)</span> and see how frequently we reject the null. In our simulation, we will assume “peeking” conditions, meaning we’re just going to do a test of proportions at each stage.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulation Parameters</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p<span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>n<span class="ot">&lt;-</span> <span class="dv">250</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>nsims <span class="ot">&lt;-</span> <span class="fu">as.integer</span>((<span class="dv">1</span><span class="sc">/</span><span class="fl">0.01</span>)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the simulation</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sims<span class="ot">&lt;-</span><span class="fu">rerun</span>(nsims, {</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># K=1</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  x1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">1</span>, n, p)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># K=2, accumulating data from each state</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  x2 <span class="ot">&lt;-</span> x1 <span class="sc">+</span> <span class="fu">rbinom</span>(<span class="dv">1</span>, n, p)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Compute some various quntities we will need, like the Z score</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  K <span class="ot">&lt;-</span> <span class="fu">str_c</span>(<span class="st">'K='</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  X <span class="ot">&lt;-</span> <span class="fu">c</span>(x1, x2) <span class="sc">/</span> ((<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)<span class="sc">*</span>n)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> p</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  sds <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p)<span class="sc">/</span>(n<span class="sc">*</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> (X<span class="sc">-</span>p)<span class="sc">/</span>sds</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  reject <span class="ot">&lt;-</span> <span class="fu">abs</span>(Z)<span class="sc">&gt;</span><span class="fl">1.96</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(K, X, mu, sds, Z, reject)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(<span class="at">.id=</span><span class="st">'sim'</span>)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>fpr<span class="ot">&lt;-</span>sims <span class="sc">%&gt;%</span> </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sim) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">result=</span><span class="fu">any</span>(reject)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">fpr =</span> <span class="fu">mean</span>(result)) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(fpr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>From our simulation, we reject the null around 8.6% of the time. That is certainly higher than the nominal 5%, but if we recall our sophomore stats classes, isn’t there a 9.8% (<span class="math inline">\(1-0.95^2\)</span>) chance we reject the null?</p>
+<p>The 8.6% isn’t simulation error. Because of the accumulation of data, <span class="math inline">\(\bar{X}^{(1)}\)</span> and <span class="math inline">\(\bar{X}^{(2)}\)</span> are <em>correlated</em>. The correlation between <span class="math inline">\(\bar{X}^{(1)}\)</span> and <span class="math inline">\(\bar{X}^{(2)}\)</span> makes intuitive sense. If the sample mean for the first group is small, then the accumulated mean is also likely to be small than if we were to just take a new sample. Let’s take a more detailed look at <a href="#eq-eq-1">Equation&nbsp;1</a>. Note that</p>
+<p><span class="math display">\[ \bar{X}^{(2)} = \dfrac{n_1 \bar{X}_1 + n_2\bar{X}_2}{n_1 + n_2} \&gt;.\]</span></p>
+<p><span class="math inline">\(\bar{X}^{(1)}\)</span> (which is just <span class="math inline">\(\bar{X}_1\)</span> ) appears in the expression for <span class="math inline">\(\bar{X}^{(2)}\)</span>. In the extreme case where <span class="math inline">\(n_2=1\)</span>, the stage 2 mean is going to be <span class="math inline">\(n_1 \bar{X}_1/(n_1+1) + X_{2, 1}/(n_1+1)\)</span>. How much could a single observation change the sample mean? It depends on the observation, but also on how big that sample is. The stuff you learned in sophmore stats about type one error inflating like <span class="math inline">\(1 - (1-\alpha)^k\)</span> assumes the test statistics are independent. So where does the 8.6% come from? To answer that, we need to understand the joint distribution of the <span class="math inline">\(\bar{X}^{(k)}\)</span>.</p>
+</section>
+<section id="why-the-type-one-inflates" class="level3">
+<h3 class="anchored" data-anchor-id="why-the-type-one-inflates"><em>Why</em> The Type One Inflates</h3>
+<p>The assumptions we made above allow us to get a little analytic traction. We know that the sampling distribution of <span class="math inline">\(\bar{X}^{(1)}\)</span> and <span class="math inline">\(\bar{X}^{(2)}\)</span> are asymptotic normal thanks to the CLT</p>
+<p><span class="math display">\[ \bar{X}^{(1)} \sim \operatorname{Normal}\left(p, \dfrac{p(1-p)}{n}\right)  \]</span></p>
+<p><span class="math display">\[ \bar{X}^{(2)}\sim \operatorname{Normal}\left( p, \dfrac{p(1-p)}{2 n} \right)  \]</span></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>my_blue <span class="ot">&lt;-</span> <span class="fu">rgb</span>(<span class="dv">45</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">62</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">80</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">1</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>())</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>sims <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(X))<span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y=</span>..density..), <span class="at">fill =</span> <span class="st">'light gray'</span>, <span class="at">color =</span> <span class="st">'black'</span>)<span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>K) <span class="sc">+</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="fu">dnorm</span>(X,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">mean =</span> mu,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                          <span class="at">sd =</span> sds[PANEL])),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> my_blue, </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y=</span><span class="st">'Density'</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="fu">expression</span>(<span class="fu">bar</span>(X)<span class="sc">^</span>(k)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p></p><figcaption aria-hidden="true" class="figure-caption">10,000 simulations of a <span class="math inline">\(K=2\)</span> GSD. Each group has 250 observations. Note that <span class="math inline">\(\bar{X}^{(2)}\)</span> has smaller standard error due to the fact that 500 (250 + 250) observations are used in the computation. Sampling distributions show in blue.</figcaption><p></p>
+<p><img src="index_files/figure-html/marginal-density-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Consider the random vector <span class="math inline">\(\theta = \left(\bar{X}^{(1)}, \bar{X}^{(2)}\right)\)</span>. Since each components has a normal marginal then the joint must be multivariate normal</p>
+<p><span class="math display">\[ \theta \sim \mathcal{N}(\mathbf{p}, \Sigma) \]</span></p>
+<p>with mean <span class="math inline">\(\mathbf{p} = (p,p)\)</span> and covariance<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p><span class="math display">\[ \Sigma= p(1-p)\begin{bmatrix}
+\dfrac{1}{n_1} &amp;  \dfrac{1}{n_1 + n_2} \\
+\dfrac{1}{n_1 + n_2} &amp; \dfrac{1}{n_1 + n_2}
+\end{bmatrix}
+\]</span></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sigma_1 <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">qchisq</span>(<span class="fl">0.95</span>, <span class="dv">2</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sigma_2 <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">qchisq</span>(<span class="fl">0.99</span>, <span class="dv">2</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>sig<span class="ot">&lt;-</span> p<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>p) <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span><span class="sc">/</span>n, <span class="dv">1</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>n), <span class="dv">1</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>n), <span class="dv">1</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>n) ), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.01</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>tt)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>tt)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">cbind</span>(x,y)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>e <span class="ot">=</span> <span class="fu">eigen</span>(sig)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>V <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(e<span class="sc">$</span>values))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>level_curve_1 <span class="ot">&lt;-</span> sigma_1<span class="sc">*</span>R <span class="sc">%*%</span> (e<span class="sc">$</span>vectors <span class="sc">%*%</span> V <span class="sc">%*%</span> <span class="fu">t</span>(e<span class="sc">$</span>vectors)) <span class="sc">+</span> p</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(level_curve_1) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"X1"</span>, <span class="st">"X2"</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>level_curve_1 <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(level_curve_1)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>level_curve_2 <span class="ot">&lt;-</span> sigma_2<span class="sc">*</span>R <span class="sc">%*%</span> (e<span class="sc">$</span>vectors <span class="sc">%*%</span> V <span class="sc">%*%</span> <span class="fu">t</span>(e<span class="sc">$</span>vectors)) <span class="sc">+</span> p</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(level_curve_2) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"X1"</span>, <span class="st">"X2"</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>level_curve_2 <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(level_curve_2)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>joint <span class="ot">&lt;-</span>sims <span class="sc">%&gt;%</span> </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sim, K, X) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from=</span><span class="st">'K'</span>, <span class="at">values_from=</span><span class="st">'X'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">X1 =</span> <span class="st">`</span><span class="at">K=1</span><span class="st">`</span>, <span class="at">X2=</span><span class="st">`</span><span class="at">K=2</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sim) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(<span class="dv">1000</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>joint <span class="sc">%&gt;%</span> </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(X1, X2))<span class="sc">+</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">'dark gray'</span>, <span class="at">fill=</span><span class="st">'gray'</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">shape=</span><span class="dv">21</span>)<span class="sc">+</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">data=</span>level_curve_1, <span class="fu">aes</span>(X1, X2), <span class="at">color =</span> my_blue, <span class="at">linetype=</span><span class="st">'dashed'</span>)<span class="sc">+</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_path</span>(<span class="at">data=</span>level_curve_2, <span class="fu">aes</span>(X1, X2), <span class="at">color =</span> my_blue)<span class="sc">+</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lims</span>(<span class="at">x=</span><span class="fu">c</span>(.<span class="dv">4</span>, .<span class="dv">6</span>), <span class="at">y=</span><span class="fu">c</span>(.<span class="dv">4</span>, .<span class="dv">6</span>))<span class="sc">+</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(),</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">aspect.ratio =</span> <span class="dv">1</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">+</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">expression</span>(<span class="fu">bar</span>(X)<span class="sc">^</span>(<span class="dv">1</span>)),</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">expression</span>(<span class="fu">bar</span>(X)<span class="sc">^</span>(<span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-level-curves" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p></p><figcaption aria-hidden="true" class="figure-caption">Figure 2: 1000 samples from the density of <span class="math inline">\(\theta\)</span>. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.</figcaption><p></p>
+<p><img src="index_files/figure-html/fig-level-curves-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now that we know the joint sampling distribution for our statistics of interest (namely <span class="math inline">\(\bar{X}^{(1)}\)</span> and <span class="math inline">\(\bar{X}^{(2)}\)</span>), let’s examine when we would reject the null under “peeking” conditions. For brevity, let’s call <span class="math inline">\(Z^{(k)}\)</span> the standardized cumulative means. Then we would reject the null under “peeking” conditions if <span class="math inline">\(\Big\vert Z^{(k)} \Big\vert &gt; 1.96\)</span> for at least one <span class="math inline">\(k=1, 2\)</span>. As a probabilistic statement, we want to know</p>
+<p><span class="math display">\[ Pr\left( \Big\vert Z^{(1)} \Big\vert &gt; 1.96 \cup 1.96 &lt; \Big\vert Z^{(2)} \Big\vert \right) \&gt;. \]</span></p>
+<p>Because the joint is multivariate normal, we can compute this probability directly. However, I’m just going to simulate it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Z<span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>((<span class="dv">1</span><span class="sc">/</span><span class="fl">0.001</span>)<span class="sc">^</span><span class="dv">2</span>, <span class="fu">rep</span>(p, <span class="dv">2</span>), sig)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Something something inverse of the cholesky, I forget</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Z[, <span class="dv">1</span>] <span class="ot">&lt;-</span> (Z[, <span class="dv">1</span>] <span class="sc">-</span> p)<span class="sc">/</span><span class="fu">sqrt</span>(Z[, <span class="dv">1</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z[, <span class="dv">1</span>])<span class="sc">/</span>n)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>Z[, <span class="dv">2</span>] <span class="ot">&lt;-</span> (Z[, <span class="dv">2</span>] <span class="sc">-</span> p)<span class="sc">/</span><span class="fu">sqrt</span>(Z[, <span class="dv">2</span>]<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z[, <span class="dv">2</span>])<span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>n))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>z1 <span class="ot">=</span> <span class="fu">abs</span>(Z[, <span class="dv">1</span>])<span class="sc">&gt;</span><span class="fl">1.96</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>z2 <span class="ot">=</span> <span class="fu">abs</span>(Z[, <span class="dv">2</span>])<span class="sc">&gt;</span><span class="fl">1.96</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>fpr <span class="ot">&lt;-</span> <span class="fu">mean</span>(z1<span class="sc">|</span>z2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and we get something like 8.5%. But that doesn’t answer <em>why</em>, that just means I did my algebra correctly. As always, a visualization might help. take a look at <a href="#fig-regions">Figure&nbsp;3</a>. The shaded regions show the areas where the null would be rejected. These are the areas we would make a false positive. The dots indicate the standardized draws from the density of <span class="math inline">\(\theta\)</span>. Remember, this distribution <em>is</em> the null distribution for our GSD – these are draws from <span class="math inline">\(\theta\)</span> when <span class="math inline">\(H_0\)</span> is true. And now here is the important part…</p>
+<blockquote class="blockquote">
+<p>The shaded region depends on critical values we use for each test in the sequence. If we naively use <span class="math inline">\(Z_{1-\alpha/2}\)</span> as the critical value for each group as in “peeking” conditions, then the shaded region is too big!</p>
+</blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sims <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sim, K, Z) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from=</span><span class="st">'K'</span>, <span class="at">values_from=</span><span class="st">'Z'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Z1 =</span> <span class="st">`</span><span class="at">K=1</span><span class="st">`</span>, <span class="at">Z2=</span><span class="st">`</span><span class="at">K=2</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>sim) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_n</span>(<span class="dv">1000</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(Z1, Z2))<span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">'dark gray'</span>, <span class="at">fill=</span><span class="st">'gray'</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">shape=</span><span class="dv">21</span>)<span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))<span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">expand=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>))<span class="sc">+</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">xmax =</span> <span class="sc">-</span><span class="fl">1.96</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">ymax =</span> <span class="dv">5</span>, <span class="at">alpha =</span> .<span class="dv">5</span>, <span class="at">fill=</span>my_blue)<span class="sc">+</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> <span class="fl">1.96</span>, <span class="at">xmax =</span> <span class="dv">5</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">ymax =</span> <span class="dv">5</span>, <span class="at">alpha =</span> .<span class="dv">5</span>, <span class="at">fill=</span>my_blue)<span class="sc">+</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> <span class="sc">-</span><span class="fl">1.96</span>, <span class="at">xmax =</span> <span class="fl">1.96</span>, <span class="at">ymin =</span> <span class="fl">1.96</span>, <span class="at">ymax =</span> <span class="dv">5</span>, <span class="at">alpha =</span> .<span class="dv">5</span>, <span class="at">fill=</span>my_blue)<span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"rect"</span>, <span class="at">xmin =</span> <span class="sc">-</span><span class="fl">1.96</span>, <span class="at">xmax =</span> <span class="fl">1.96</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="fl">1.96</span>, <span class="at">ymax =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">alpha =</span> .<span class="dv">5</span>, <span class="at">fill=</span>my_blue)<span class="sc">+</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept=</span><span class="sc">-</span><span class="fl">1.96</span>), <span class="at">linetype=</span><span class="st">'dashed'</span>)<span class="sc">+</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="fu">aes</span>(<span class="at">yintercept=</span><span class="fl">1.96</span>), <span class="at">linetype=</span><span class="st">'dashed'</span>)<span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept=</span><span class="sc">-</span><span class="fl">1.96</span>), <span class="at">linetype=</span><span class="st">'dashed'</span>)<span class="sc">+</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept=</span><span class="fl">1.96</span>), <span class="at">linetype=</span><span class="st">'dashed'</span>)<span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(),</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">aspect.ratio =</span> <span class="dv">1</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="fu">expression</span>(Z<span class="sc">^</span>(<span class="dv">1</span>)),</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>       <span class="at">y=</span><span class="fu">expression</span>(Z<span class="sc">^</span>(<span class="dv">2</span>)))</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>find_region <span class="ot">&lt;-</span> <span class="cf">function</span>(za){</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  z1 <span class="ot">=</span> <span class="fu">abs</span>(Z[, <span class="dv">1</span>])<span class="sc">&gt;</span>za</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  z2 <span class="ot">=</span> <span class="fu">abs</span>(Z[, <span class="dv">2</span>])<span class="sc">&gt;</span>za</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  fpr <span class="ot">&lt;-</span> <span class="fu">mean</span>(z1<span class="sc">|</span>z2)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  (fpr <span class="sc">-</span> <span class="fl">0.05</span>)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>result<span class="ot">&lt;-</span><span class="fu">optimize</span>(find_region, <span class="at">interval=</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-regions" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p></p><figcaption aria-hidden="true" class="figure-caption">Figure 3: Standardized draws from the density of <span class="math inline">\(\theta\)</span>. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.</figcaption><p></p>
+<p><img src="index_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+
+</div>
+<p>That is the <em>why</em>! When we naively just run our test each time we peek, we are defining a region in <span class="math inline">\(\theta\)</span> space which has too much probability. Peeking is fine, you just have to be careful in defining your rejection region in <span class="math inline">\(\theta\)</span> space. Defining a better rejection region isn’t too hard, and we can do it using a numerical search. When we do so, we find that using a critical value of 2.19 results in a type one error closer to the desired 5%. However, we’re implicitly restricted ourselves to having the threshold be the same for each group. That doesn’t have to be the case as we will see eventually.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>We’ve done algebra, and it wasn’t for nothing. It have us insight into exactly what is going on and <em>why</em> the type one error increases under peeking. We also know that there is a way to fix it, we just need to define the shaded region a little more carefully. This will lead us to talk about alpha spending and various alpha spending functions.</p>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="sec-cov" class="level3">
+<h3 class="anchored" data-anchor-id="sec-cov">Covariance Calculation</h3>
+<p>The diagonals of the covariance matrix <span class="math inline">\(\Sigma\)</span> are simply the variances of the marginal distributions.</p>
+<p><span class="math display">\[ \Sigma_{1, 1} = \dfrac{p(1-p)}{n_1} \]</span></p>
+<p><span class="math display">\[ \Sigma_{2, 2} = \dfrac{p(1-p)}{n_1 + n_2} \]</span></p>
+<p>What remains is the covariance, which can be obtained with some covariance rules</p>
+<p><span class="math display">\[ \begin{align} \operatorname{Cov}\left(\bar{X}^{(1)}, \bar{X}^{(2)}\right) &amp;= \operatorname{Cov}\left(\bar{X}_1, \dfrac{n_1\bar{X}_1 + n_2\bar{X}_2}{n_1 + n_2}\right)\\
+&amp;=\dfrac{n_1}{n_1 + n_2}\operatorname{Var}(\bar{X_1}) + \dfrac{n_2}{n_1+n_2}\operatorname{Cov}(\bar{X}_1, \bar{X}_2)
+\end{align}\]</span></p>
+<p>Since the groups are independent, the sample means are also independent (but the cumlative means are not). Meaning <span class="math inline">\(\operatorname{Cov}(\bar{X}_1, \bar{X}_2)=0\)</span> so</p>
+<p><span class="math display">\[ \operatorname{Cov}\left(\bar{X}^{(1)}, \bar{X}^{(2)}\right) = \dfrac{p(1-p)}{n_1 + n_2} \]</span></p>
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1" role="doc-endnote"><p>See the <a href="#sec-cov">Section&nbsp;6.1</a> for a calculation<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
