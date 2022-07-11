@@ -221,11 +221,12 @@ Because the joint is multivariate normal, we can compute this probability direct
 #| include: true
 #| code-fold: false
 #| echo: true
-Z<- MASS::mvrnorm((1/0.001)^2, rep(p, 2), sig)
 
-# Something something inverse of the cholesky, I forget
-Z[, 1] <- (Z[, 1] - p)/sqrt(Z[, 1]*(1-Z[, 1])/n)
-Z[, 2] <- (Z[, 2] - p)/sqrt(Z[, 2]*(1-Z[, 2])/(2*n))
+# Standardize the MVN by converting covariance matrix into a correlation matrix
+D <- solve(diag(sqrt(diag(sig))))
+cormat <- D %*% sig %*% D
+Z<- MASS::mvrnorm((1/0.001)^2, rep(0, 2), cormat)
+
 
 z1 = abs(Z[, 1])>1.96
 z2 = abs(Z[, 2])>1.96
