@@ -38,7 +38,7 @@
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2022-07-11T23:08:20.446Z</lastmod>
+    <lastmod>2022-07-21T22:17:58.207Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
@@ -47,5 +47,9 @@
   <url>
     <loc>https://dpananos.github.io/consulting/index.html</loc>
     <lastmod>2022-07-11T23:06:55.312Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</loc>
+    <lastmod>2022-07-21T22:17:57.709Z</lastmod>
   </url>
 </urlset>
