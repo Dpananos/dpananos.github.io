@@ -37,7 +37,7 @@ generated quantities{
   for(i in 1:n_experiments_per_year){
     rr_over_year[i] =  exp(normal_rng(mu_metric, sig_ex));
     es = 2*asin(sqrt(rr_over_year[i] * 0.01)) - 2*asin(sqrt(0.01));
-    power[i] = 1 - normal_cdf(0.9674216 - es * sqrt(n_group/2), 0, 1);    
+    power[i] = 1 - normal_cdf( 1.644854 - es * sqrt(n_group/2), 0, 1);    
     detected_lift[i] = power[i] * log(rr_over_year[i]);
   }
   forecasted_lift = exp(cumulative_sum(detected_lift));

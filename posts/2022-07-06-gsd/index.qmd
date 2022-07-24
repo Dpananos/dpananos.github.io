@@ -8,7 +8,7 @@ number-sections: false
 image: joint_dist.png
 ---
 
-> Special thanks to [Jacob Fiksel](https://twitter.com/jfiksel1) for writing a great [blog post](file:///Users/demetripananos/Zotero/storage/HQG5JJ4N/2021-02-03-alpha_spending_explained.html) which inspired me to write my own.
+> Special thanks to [Jacob Fiksel](https://twitter.com/jfiksel1) for writing a great [blog post](https://jfiksel.github.io/2021-02-03-alpha_spending_explained/) which inspired me to write my own.
 
 
 

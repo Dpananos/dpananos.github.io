@@ -6,6 +6,7 @@ echo: false
 fig-cap-location: top
 categories: [Statistics, AB Testing, Bayes]
 number-sections: false
+image: forecast.png
 ---
   
   
@@ -15,7 +16,7 @@ You're part of a team at a company who is tasked with improving conversion on so
 
 Maybe your approach for your end of year targets would look like
 
-$$ \Big( \mbox{Baseline Conversions / Year} \Big)\Big( \mbox{Average Lift}\Big)^{\mbox{Number of Planned Experiments}} $$
+$$ \Big( \mbox{Average Lift}\Big)^{\mbox{Number of Planned Experiments}} $$
 
 Its a good back-of-the-napkin approach to the problem.  But if you come up short is that *neccesarily* a failure?  Or, could it be well within expectation?
 
@@ -38,9 +39,9 @@ Let's make some additional assumptions about experiments:
 
 ## Scenario
 
-Shown in the table below are your results over the last year.  Nice job, lots of wins, a few failures to reject the null, but overall very good.  Using the estimated relative lifts, you managed to increase conversion by 80\%.  Now, you're PM is asking you to shoot for 2.5x conversion this year.
+Shown in the table below are your results over the last year.  Nice job, lots of wins, a few failures to reject the null, but overall very good.  Using the estimated relative lifts where you did , you managed to increase conversion by 80\%.  Now, you're PM is asking you to shoot for 2x conversion this year.
 
-Is...is that reasonable[^1]. How probable are you to generate at least 2.5x lift over 12 months given your past performance".  Luckily, you're a good data scientist.  Even though your team uses frequentism to evaluate their A/B tests, you are not beholden to one ideology over another.  So, you decide to use a hierarchical Bayesian model to estimate what kinds of lifts your team is likely to generate in the future.
+Is that reasonable[^1]? How probable are you to generate at least 2x lift over 12 months given your past performance?  I mean, it's only a little better than you did this past year, right?  Luckily, you're a good data scientist.  Even though your team uses frequentism to evaluate their A/B tests, you are not beholden to one ideology over another.  So, you decide to use a hierarchical Bayesian model to estimate what kinds of lifts your team is likely to generate in the future.
 
 [^1]:  Just go with it, its a work of fiction, who knows if it is reasonable.  Let's pull out the forecasted lifts after the final experiment.
 
@@ -89,11 +90,13 @@ experiments %>%
 
 ## Hierarchical Model
 
-Let $\widehat{\theta}_i$ be the estimated relative lift from experiment $i$.  The sampling distribution of relative lift is asymptotically normally distributed on the log scale.  Assuming we know the standard error exactly (using the delta rule), this means
+Let $\widehat{RR}_i$ be the estimated relative lift[^2] from experiment $i$.  The sampling distribution of relative lift is asymptotically normally distributed on the log scale.  Assuming we know the standard error exactly (using the delta rule), this means
 
-$$ \log(\widehat{\theta}_i) \sim \mathcal{N}(\theta_i, \sigma)$$
+[^2]: $RR$ for relative risk, sorry my epidemiology is showing
 
-Here, $\theta_i$ is the relative lift on the log scale for experiment $i$ (whereas $\widehat{\theta}_i$ is just the estimated relative lift).  We can model the $\theta$ hierarchically as
+$$ \widehat{RR}_i \sim \mathcal{N}(\theta_i, \sigma)$$
+
+Here, $\theta_i$ is the relative lift on the log scale for experiment $i$ (whereas $\widehat{RR}_i$ is just the estimated relative lift).  We can model the $\theta$ hierarchically as
 
 $$ \theta_i \sim \mathcal{N}(\mu, \tau) $$
 
@@ -103,14 +106,14 @@ Now, you just need to place priors on $\mu$ and $\tau$ (assume you used good pri
 
 Once you fit your model, you can generate hypothetical relative lifts by sampling from the model.  Let $\psi$ be a relative lift, so that
 
-$$ \psi \sim \mathcal{N}(\mu, \sigma) \>. $$
+$$ \log(\psi) \sim \mathcal{N}(\mu, \sigma) \>. $$
 
-If your team were to implement an experiment for which had a relative lift of $\psi$, you would get an estimated relative lift $\widehat{\psi}$.  Depending on the size of $\widehat{\psi}$, you may or may not reject the null hypothesis.  The probability you reject the null hypothesis is when it is false (and it is always false by assumption) is known as the statistical power.  Since you have a fixed sample size in each experiment,  and every experiment is a 50/50 split, you can calculate the statistical power that you detect a relative lift of $\psi$.  Call that $p_{\psi}$.
+If your team were to implement an experiment for which had a relative lift of $\psi$, you would get an estimated relative lift.  Depending on the size of that estimate, you may or may not reject the null hypothesis.  The probability you reject the null hypothesis is when it is false (and it is always false by assumption) is known as the statistical power.  Since you have a fixed sample size in each experiment,  and every experiment is a 50/50 split, you can calculate the statistical power that you detect a relative lift of $\psi$.  Call that $p_{\psi}$.
 
 Now for the fun part.  Say you run $K$ experiments over the year.  The forecasted lift, $FL$, you would have after experiment $1 \leq k \leq K$ might be
 
-$$ FL = \exp\Bigg( \sum_{j=1}^k \log(\psi_j) p_{\psi, j} \Bigg) $$
-Think this through.  If you were to implement every intervention, your lift would simply be $\prod_{j=1}^k \psi_j$, or on the log scale $\sum_j \log(\psi_j)$.  But you don't detect every effect.  The probability you detect the effect of the $j^{th}$ intervention is $p_{\psi, j}$.  So $\sum_j \log(\psi_j)$ is the expected lift you would accrue over the $k$ experiments.  Take the exponential to convert this sum back to a product and you've got a forecasted lift after $k$ experiments. Now, because there is uncertainty in the $\psi$, there is uncertainty in the forecasted lift.  However, your hierarchical model will make it more or less easy to integrate over that uncertainty.  Just sample from the model and average over the samples.
+$$ FL_k = \exp\Bigg( \sum_{j=1}^k \log(\psi_j) p_{\psi, j} \Bigg) $$
+Think this through.  If you were to implement every intervention, your lift would simply be $\prod_{j=1}^k \psi_j$, or on the log scale $\sum_j \log(\psi_j)$.  But you don't detect every effect.  The probability you detect the effect of the $j^{th}$ intervention is $p_{\psi, j}$.  So $\sum_j \log(\psi_j) p_{\psi, j}$ is the expected lift you would accrue over the $k$ experiments.  Take the exponential to convert this sum back to a product and you've got a forecasted lift after $k$ experiments. Now, because there is uncertainty in the $\psi$, there is uncertainty in the forecasted lift.  However, your hierarchical model will make it more or less easy to integrate over that uncertainty.  Just sample from the model and average over the samples.
 
 
 ## Modelling
@@ -147,12 +150,12 @@ model <- cmdstan_model('model.stan')
 fit<-model$sample(model_data, parallel_chains = parallel::detectCores(), refresh = 0,seed = 0)
 ```
 
-Luckily, all of the computation above -- even the power calculation -- can be done inside Stan (and you're pretty good at writing stan code[^2]). 
+Luckily, all of the computation above -- even the power calculation -- can be done inside Stan (and you're pretty good at writing Stan code[^3]). 
 
 
-[^2:] Speaking of Stan code, the Stan file in the github repo for this post (see the "Edit this page on github" on the right hand side).  
+[^3]: Speaking of Stan code, the Stan file in the github repo for this post (see the "Edit this page on github" on the right hand side).  
 
-Shown in @fig-forecast is the forecasted lift as compared to baseline after the $k^{th}$ experiment.  Good job, if you keep doing things as you're doing, you're going to probably double the conversion rate (you deserve a raise and then some).  The shaded blue regions indicate the uncertainty in that estimate.  Note that although your forecasted lift seems to always be increasing, that isn't necessarily the case.  You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.
+Shown in @fig-forecast is the forecasted lift as compared to baseline after the $k^{th}$ experiment.  Good job, if you keep doing things as you're doing, you're going to probably increase conversion rate by a little more than 50\% (a little less than the 80\% but still nothing to sneeze at).  The shaded blue regions indicate the uncertainty in that estimate.  Note that although your forecasted lift seems to always be increasing, that isn't necessarily the case.  You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.
 
 
 
@@ -161,6 +164,8 @@ Shown in @fig-forecast is the forecasted lift as compared to baseline after the 
 #| label: fig-forecast
 #| fig-cap: 
 #|   - "Forecasted lift after the 2 experiments.  Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale."
+
+
 cred_lev <- c(0.95, 0.8, 0.5)
 fl<-fit %>% 
     spread_draws(forecasted_lift[i]) 
@@ -176,7 +181,7 @@ fl %>%
   stat_lineribbon(point_interval = 'mean_qi', .width = cred_lev)
   
 
-
+ggsave('forecast.png', dpi = 120)
 
 
 ```
@@ -186,23 +191,27 @@ fl %>%
 <details><summary>Click to see individual trajectories </summary>
 <p>
 ```{r}
-#| fig-cap: See how that top line decreases after the tenth experiment?  In that simulation, you've mistakenly implemented a change that hurts conversion.  Such is life, can't win em all!
+#| fig-cap: The red lines are draws where you would have implemented a change to hurt the conversion rate. See how sometimes those lines actually decrease?  Such is life, can't win em all!
 #| code-fold: false
 #| echo: false
 cred_lev <- c(0.95, 0.8, 0.5)
 fl<-fit %>% 
-    spread_draws(forecasted_lift[i]) 
+    spread_draws(forecasted_lift[i], rr_over_year[i]) 
 
 fl %>% 
-  filter(.draw<=10) %>% 
-  ggplot(aes(i, forecasted_lift, group = .draw))+
+  filter(.draw<=20, .draw>10) %>% 
+  group_by(.draw) %>% 
+  mutate(decrease = any(rr_over_year<1)) %>%  
+  ggplot(aes(i, forecasted_lift, group = .draw, color=decrease))+
   scale_fill_brewer(palette = "Blues", labels=scales::percent(cred_lev))+
   scale_x_continuous(breaks = seq(0, 12, 4))+
   scale_y_continuous(labels = function(x) str_c(x, 'x'))+
   labs(x='Experiment No',
        y='Lift',
        fill='Credible Level') +
-  geom_line()
+  geom_line() + 
+  scale_color_manual(values=c('black', 'red')) + 
+  guides(color=F)
   
 
 lift_at_12 <- fl %>% ungroup %>% filter(i==max(i)) %>% pull(forecasted_lift)
@@ -213,20 +222,20 @@ lift_at_12 <- fl %>% ungroup %>% filter(i==max(i)) %>% pull(forecasted_lift)
 </p>
 </details>
 
-Now, what about that goal of increasing conversion by 2.5x?  Well, it isn't looking good.  Looks like there is only a `r scales::percent(mean(lift_at_12>2.5))` chance you meet or exceed the 2.5x goal.  Sounds like a good time to push back on your boss and come prepared with data. 
+Now, what about that goal of increasing conversion by 2x?  Well, it isn't looking good.  Looks like there is only a `r scales::percent(mean(lift_at_12>2))` chance you meet or exceed the 2x goal.  Could it be your performance last year was just extreme?  The distribution of forecasted lifts *is* long tailed.  Maybe you're just going to regress to the mean.  Sounds like a good time to push back on your boss and come prepared with data. 
 ```{r}
 #| label: fig-conditional
-#| fig-cap: "Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year."
+#| fig-cap: "Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year.  Indicated point/interval is mean and 95% credible interval."
 #| code-fold: false
 #| echo: false
 fl %>% 
   filter(i == max(i)) %>%
-  ggplot(aes(x=forecasted_lift, fill = stat(x>2.5)))+
-  geom_histogram()+
-  xlim(NA, 5) + 
+  ggplot(aes(x=forecasted_lift, fill = stat(x>=2)))+
+  stat_histinterval(point_interval = 'mean_qi',outline_bars = T, slab_color='black', interval_size=10)+
   labs(x = 'Lift', fill = 'Goal Achieved?', y='') + 
   scale_fill_brewer(palette = 'Set1', direction=-1) +
-  scale_x_continuous(labels = function(x) str_c(x, 'x')) 
+  scale_y_continuous(breaks = c())+
+  scale_x_continuous(labels = function(x) str_c(x, 'x'), breaks = 1:4, limits = c(NA, 4)) 
   
 
   
@@ -235,6 +244,46 @@ fl %>%
 
 ## Conclusion
 
-You're clever and realized you could use a hierarchical model to simulate future experiment results and use those to forecast your team's performance.  Your boss' goal of a 2.5x increase is nice in so far as it shows they have confidence in you and your team, but the model says it isn't super achievable.
+You're clever and realized you could use a hierarchical model to simulate future experiment results and use those to forecast your team's performance.  Your boss' goal of a 2x increase is nice in so far as it shows they have confidence in you and your team, but the model says it isn't super achievable.
 
-If 2.5x isn't achieveable, what is a better target?  Or maybe, what is a better range of targets.  I'm not sure, that isn't the point of the post.  The post was to equip you with a means of answering that question yourself, and I know you're capable of answering it.  I mean...look at all this cool modelling you did.
+If 2x isn't achievable, what is a better target?  Or maybe, what is a better range of targets.  I'm not sure, that isn't the point of the post.  The post was to equip you with a means of answering that question yourself, and I know you're capable of answering it.  I mean...look at all this cool modelling you did.
+
+
+## Post Script
+
+Ok, breaking away from the narrative for a moment...this is a continuous approximation to a discrete process.  We should simulate this to see how real experiments would stack up against my forecast.  I've gone ahead and actually simulated running the 12 tests and computed the lift after the 12 tests.  Shown below is the forecasted lift versus relative error as compared to simulation.  I'll let you come to your own conclusion about the quality of the approximation. 
+```{r}
+#| code-fold: true
+do_test <- function(rr){
+  theta <- c(rr, 1) * p_baseline
+  N <- rep(n_per_group, 2)
+  y <- rbinom(2, N, theta)
+  p<- as.numeric(prop.test(y, N, alternative = 'greater')$p.value<0.05)
+  
+  p*rr + (1-p)
+}
+
+rrs <- spread_draws(fit, possible_rr)$possible_rr
+
+sims <- map_dfr(1:1000, ~{
+  
+  rr <- sample(rrs, size = n_experiments_last_year)  
+  detected_rr <- cumprod(map_dbl(rr, do_test))
+  
+  tibble(experiment = 1:n_experiments_last_year,
+         simulated_test_rr = detected_rr)
+})
+
+sims %>% 
+  group_by(experiment) %>%
+  mean_qi() %>% 
+  inner_join(mean_qi(fl), by=c('experiment'='i')) %>% 
+  ggplot(aes(forecasted_lift, (simulated_test_rr - forecasted_lift)/ simulated_test_rr))+ 
+  geom_point()+
+  geom_abline(linetype='dashed', color='gray45')+
+  labs(x='Forecasted Lift', y='Relative Error')+
+  theme(aspect.ratio = 1) + 
+  scale_x_continuous(labels = function(x) str_c(x, 'x'))+
+  scale_y_continuous(labels = scales::percent)
+```
+

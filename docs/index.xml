@@ -25,7 +25,7 @@
 <p>Based on your team’s performance to date, how do you set realistic goals for incremental conversion?</p>
 </blockquote>
 <p>Maybe your approach for your end of year targets would look like</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5CBig(%20%5Cmbox%7BBaseline%20Conversions%20/%20Year%7D%20%5CBig)%5CBig(%20%5Cmbox%7BAverage%20Lift%7D%5CBig)%5E%7B%5Cmbox%7BNumber%20of%20Planned%20Experiments%7D%7D%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5CBig(%20%5Cmbox%7BAverage%20Lift%7D%5CBig)%5E%7B%5Cmbox%7BNumber%20of%20Planned%20Experiments%7D%7D%20"></p>
 <p>Its a good back-of-the-napkin approach to the problem. But if you come up short is that <em>neccesarily</em> a failure? Or, could it be well within expectation?</p>
 <p>This post is forecasting how much a given team can move a metric within some time frame. You’re going to forecast the lift the team can generate given some of their past performance. The forecasting is Bayesian, but assumes the team works within a frequentist framework.</p>
 <section id="assumptions" class="level2">
@@ -46,8 +46,8 @@
 </section>
 <section id="scenario" class="level2">
 <h2 class="anchored" data-anchor-id="scenario">Scenario</h2>
-<p>Shown in the table below are your results over the last year. Nice job, lots of wins, a few failures to reject the null, but overall very good. Using the estimated relative lifts, you managed to increase conversion by 80%. Now, you’re PM is asking you to shoot for 2.5x conversion this year.</p>
-<p>Is…is that reasonable<sup>1</sup>. How probable are you to generate at least 2.5x lift over 12 months given your past performance”. Luckily, you’re a good data scientist. Even though your team uses frequentism to evaluate their A/B tests, you are not beholden to one ideology over another. So, you decide to use a hierarchical Bayesian model to estimate what kinds of lifts your team is likely to generate in the future.</p>
+<p>Shown in the table below are your results over the last year. Nice job, lots of wins, a few failures to reject the null, but overall very good. Using the estimated relative lifts where you did , you managed to increase conversion by 80%. Now, you’re PM is asking you to shoot for 2x conversion this year.</p>
+<p>Is that reasonable<sup>1</sup>? How probable are you to generate at least 2x lift over 12 months given your past performance? I mean, it’s only a little better than you did this past year, right? Luckily, you’re a good data scientist. Even though your team uses frequentism to evaluate their A/B tests, you are not beholden to one ideology over another. So, you decide to use a hierarchical Bayesian model to estimate what kinds of lifts your team is likely to generate in the future.</p>
 <div class="cell">
 <div class="cell-output-display">
 
@@ -154,29 +154,28 @@
 </section>
 <section id="hierarchical-model" class="level2">
 <h2 class="anchored" data-anchor-id="hierarchical-model">Hierarchical Model</h2>
-<p>Let <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7B%5Ctheta%7D_i"> be the estimated relative lift from experiment <img src="https://latex.codecogs.com/png.latex?i">. The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Clog(%5Cwidehat%7B%5Ctheta%7D_i)%20%5Csim%20%5Cmathcal%7BN%7D(%5Ctheta_i,%20%5Csigma)"></p>
-<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Ctheta_i"> is the relative lift on the log scale for experiment <img src="https://latex.codecogs.com/png.latex?i"> (whereas <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7B%5Ctheta%7D_i"> is just the estimated relative lift). We can model the <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> hierarchically as</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BRR%7D_i"> be the estimated relative lift<sup>2</sup> from experiment <img src="https://latex.codecogs.com/png.latex?i">. The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cwidehat%7BRR%7D_i%20%5Csim%20%5Cmathcal%7BN%7D(%5Ctheta_i,%20%5Csigma)"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Ctheta_i"> is the relative lift on the log scale for experiment <img src="https://latex.codecogs.com/png.latex?i"> (whereas <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BRR%7D_i"> is just the estimated relative lift). We can model the <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> hierarchically as</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta_i%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmu,%20%5Ctau)%20"></p>
 <p>Now, you just need to place priors on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Ctau"> (assume you used good priors).</p>
 </section>
 <section id="forcasting-lift" class="level2">
 <h2 class="anchored" data-anchor-id="forcasting-lift">Forcasting Lift</h2>
 <p>Once you fit your model, you can generate hypothetical relative lifts by sampling from the model. Let <img src="https://latex.codecogs.com/png.latex?%5Cpsi"> be a relative lift, so that</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cpsi%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmu,%20%5Csigma)%20%5C%3E.%20"></p>
-<p>If your team were to implement an experiment for which had a relative lift of <img src="https://latex.codecogs.com/png.latex?%5Cpsi">, you would get an estimated relative lift <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7B%5Cpsi%7D">. Depending on the size of <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7B%5Cpsi%7D">, you may or may not reject the null hypothesis. The probability you reject the null hypothesis is when it is false (and it is always false by assumption) is known as the statistical power. Since you have a fixed sample size in each experiment, and every experiment is a 50/50 split, you can calculate the statistical power that you detect a relative lift of <img src="https://latex.codecogs.com/png.latex?%5Cpsi">. Call that <img src="https://latex.codecogs.com/png.latex?p_%7B%5Cpsi%7D">.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Clog(%5Cpsi)%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmu,%20%5Csigma)%20%5C%3E.%20"></p>
+<p>If your team were to implement an experiment for which had a relative lift of <img src="https://latex.codecogs.com/png.latex?%5Cpsi">, you would get an estimated relative lift. Depending on the size of that estimate, you may or may not reject the null hypothesis. The probability you reject the null hypothesis is when it is false (and it is always false by assumption) is known as the statistical power. Since you have a fixed sample size in each experiment, and every experiment is a 50/50 split, you can calculate the statistical power that you detect a relative lift of <img src="https://latex.codecogs.com/png.latex?%5Cpsi">. Call that <img src="https://latex.codecogs.com/png.latex?p_%7B%5Cpsi%7D">.</p>
 <p>Now for the fun part. Say you run <img src="https://latex.codecogs.com/png.latex?K"> experiments over the year. The forecasted lift, <img src="https://latex.codecogs.com/png.latex?FL">, you would have after experiment <img src="https://latex.codecogs.com/png.latex?1%20%5Cleq%20k%20%5Cleq%20K"> might be</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20FL%20=%20%5Cexp%5CBigg(%20%5Csum_%7Bj=1%7D%5Ek%20%5Clog(%5Cpsi_j)%20p_%7B%5Cpsi,%20j%7D%20%5CBigg)%20"></p>
-<p>Think this through. If you were to implement every intervention, your lift would simply be <img src="https://latex.codecogs.com/png.latex?%5Cprod_%7Bj=1%7D%5Ek%20%5Cpsi_j">, or on the log scale <img src="https://latex.codecogs.com/png.latex?%5Csum_j%20%5Clog(%5Cpsi_j)">. But you don’t detect every effect. The probability you detect the effect of the <img src="https://latex.codecogs.com/png.latex?j%5E%7Bth%7D"> intervention is <img src="https://latex.codecogs.com/png.latex?p_%7B%5Cpsi,%20j%7D">. So <img src="https://latex.codecogs.com/png.latex?%5Csum_j%20%5Clog(%5Cpsi_j)"> is the expected lift you would accrue over the <img src="https://latex.codecogs.com/png.latex?k"> experiments. Take the exponential to convert this sum back to a product and you’ve got a forecasted lift after <img src="https://latex.codecogs.com/png.latex?k"> experiments. Now, because there is uncertainty in the <img src="https://latex.codecogs.com/png.latex?%5Cpsi">, there is uncertainty in the forecasted lift. However, your hierarchical model will make it more or less easy to integrate over that uncertainty. Just sample from the model and average over the samples.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20FL_k%20=%20%5Cexp%5CBigg(%20%5Csum_%7Bj=1%7D%5Ek%20%5Clog(%5Cpsi_j)%20p_%7B%5Cpsi,%20j%7D%20%5CBigg)%20"></p>
+<p>Think this through. If you were to implement every intervention, your lift would simply be <img src="https://latex.codecogs.com/png.latex?%5Cprod_%7Bj=1%7D%5Ek%20%5Cpsi_j">, or on the log scale <img src="https://latex.codecogs.com/png.latex?%5Csum_j%20%5Clog(%5Cpsi_j)">. But you don’t detect every effect. The probability you detect the effect of the <img src="https://latex.codecogs.com/png.latex?j%5E%7Bth%7D"> intervention is <img src="https://latex.codecogs.com/png.latex?p_%7B%5Cpsi,%20j%7D">. So <img src="https://latex.codecogs.com/png.latex?%5Csum_j%20%5Clog(%5Cpsi_j)%20p_%7B%5Cpsi,%20j%7D"> is the expected lift you would accrue over the <img src="https://latex.codecogs.com/png.latex?k"> experiments. Take the exponential to convert this sum back to a product and you’ve got a forecasted lift after <img src="https://latex.codecogs.com/png.latex?k"> experiments. Now, because there is uncertainty in the <img src="https://latex.codecogs.com/png.latex?%5Cpsi">, there is uncertainty in the forecasted lift. However, your hierarchical model will make it more or less easy to integrate over that uncertainty. Just sample from the model and average over the samples.</p>
 </section>
 <section id="modelling" class="level2">
 <h2 class="anchored" data-anchor-id="modelling">Modelling</h2>
 <div class="cell">
 
 </div>
-<p>Luckily, all of the computation above – even the power calculation – can be done inside Stan (and you’re pretty good at writing stan code[^2]).</p>
-<p>[^2:] Speaking of Stan code, the Stan file in the github repo for this post (see the “Edit this page on github” on the right hand side).</p>
-<p>Shown in Figure&nbsp;1 is the forecasted lift as compared to baseline after the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> experiment. Good job, if you keep doing things as you’re doing, you’re going to probably double the conversion rate (you deserve a raise and then some). The shaded blue regions indicate the uncertainty in that estimate. Note that although your forecasted lift seems to always be increasing, that isn’t necessarily the case. You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.</p>
+<p>Luckily, all of the computation above – even the power calculation – can be done inside Stan (and you’re pretty good at writing Stan code<sup>3</sup>).</p>
+<p>Shown in Figure&nbsp;1 is the forecasted lift as compared to baseline after the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> experiment. Good job, if you keep doing things as you’re doing, you’re going to probably increase conversion rate by a little more than 50% (a little less than the 80% but still nothing to sneeze at). The shaded blue regions indicate the uncertainty in that estimate. Note that although your forecasted lift seems to always be increasing, that isn’t necessarily the case. You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-forecast" class="quarto-figure quarto-figure-center anchored">
@@ -204,7 +203,7 @@ Click to see individual trajectories
 </div>
 <p></p>
 </details>
-<p>Now, what about that goal of increasing conversion by 2.5x? Well, it isn’t looking good. Looks like there is only a 16% chance you meet or exceed the 2.5x goal. Sounds like a good time to push back on your boss and come prepared with data.</p>
+<p>Now, what about that goal of increasing conversion by 2x? Well, it isn’t looking good. Looks like there is only a 12% chance you meet or exceed the 2x goal. Could it be your performance last year was just extreme? The distribution of forecasted lifts <em>is</em> long tailed. Maybe you’re just going to regress to the mean. Sounds like a good time to push back on your boss and come prepared with data.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-conditional" class="quarto-figure quarto-figure-center anchored">
@@ -218,8 +217,17 @@ Click to see individual trajectories
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>You’re clever and realized you could use a hierarchical model to simulate future experiment results and use those to forecast your team’s performance. Your boss’ goal of a 2.5x increase is nice in so far as it shows they have confidence in you and your team, but the model says it isn’t super achievable.</p>
-<p>If 2.5x isn’t achieveable, what is a better target? Or maybe, what is a better range of targets. I’m not sure, that isn’t the point of the post. The post was to equip you with a means of answering that question yourself, and I know you’re capable of answering it. I mean…look at all this cool modelling you did.</p>
+<p>You’re clever and realized you could use a hierarchical model to simulate future experiment results and use those to forecast your team’s performance. Your boss’ goal of a 2x increase is nice in so far as it shows they have confidence in you and your team, but the model says it isn’t super achievable.</p>
+<p>If 2x isn’t achievable, what is a better target? Or maybe, what is a better range of targets. I’m not sure, that isn’t the point of the post. The post was to equip you with a means of answering that question yourself, and I know you’re capable of answering it. I mean…look at all this cool modelling you did.</p>
+</section>
+<section id="post-script" class="level2">
+<h2 class="anchored" data-anchor-id="post-script">Post Script</h2>
+<p>Ok, breaking away from the narrative for a moment…this is a continuous approximation to a discrete process. We should simulate this to see how real experiments would stack up against my forecast. I’ve gone ahead and actually simulated running the 12 tests and computed the lift after the 12 tests. Shown below is the forecasted lift versus relative error as compared to simulation. I’ll let you come to your own conclusion about the quality of the approximation.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
 </section>
@@ -229,6 +237,8 @@ Click to see individual trajectories
 
 <ol>
 <li id="fn1"><p>Just go with it, its a work of fiction, who knows if it is reasonable. Let’s pull out the forecasted lifts after the final experiment.↩︎</p></li>
+<li id="fn2"><p><img src="https://latex.codecogs.com/png.latex?RR"> for relative risk, sorry my epidemiology is showing↩︎</p></li>
+<li id="fn3"><p>Speaking of Stan code, the Stan file in the github repo for this post (see the “Edit this page on github” on the right hand side).↩︎</p></li>
 </ol>
 </section></div> ]]></description>
   <category>Statistics</category>
@@ -236,6 +246,7 @@ Click to see individual trajectories
   <category>Bayes</category>
   <guid>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</guid>
   <pubDate>Wed, 20 Jul 2022 04:00:00 GMT</pubDate>
+  <media:content url="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/forecast.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Interim Analysis & Group Sequential Designs Pt 1</title>
