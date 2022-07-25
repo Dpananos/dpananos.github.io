@@ -305,9 +305,9 @@ ul.task-list{list-style: none;}
 <section id="hierarchical-model" class="level2">
 <h2 class="anchored" data-anchor-id="hierarchical-model">Hierarchical Model</h2>
 <p>Let <span class="math inline">\(\widehat{RR}_i\)</span> be the estimated relative lift<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> from experiment <span class="math inline">\(i\)</span>. The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means</p>
-<p><span class="math display">\[ \log \Big(\widehat{RR}_i \Big) \sim \mathcal{N}(\theta_i, \sigma)\]</span></p>
-<p>Here, <span class="math inline">\(\theta_i\)</span> is the relative lift on the log scale for experiment <span class="math inline">\(i\)</span> (whereas <span class="math inline">\(\widehat{RR}_i\)</span> is just the estimated relative lift). We can model the <span class="math inline">\(\theta\)</span> hierarchically as</p>
-<p><span class="math display">\[ \theta_i \sim \mathcal{N}(\mu, \tau) \]</span></p>
+<p><span class="math display">\[ \log \Big(\widehat{RR}_i \Big) \sim \mathcal{N}(\log(\theta_i), \sigma)\]</span></p>
+<p>Here, <span class="math inline">\(\log(\theta_i)\)</span> is the relative lift on the log scale for experiment <span class="math inline">\(i\)</span> (whereas <span class="math inline">\(\widehat{RR}_i\)</span> is just the estimated relative lift). We can model the <span class="math inline">\(\theta\)</span> hierarchically as</p>
+<p><span class="math display">\[ \log(\theta_i) \sim \mathcal{N}(\mu, \tau) \]</span></p>
 <p>Now, you just need to place priors on <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau\)</span> (assume you used good priors).</p>
 </section>
 <section id="forcasting-lift" class="level2">
