@@ -155,7 +155,7 @@
 <section id="hierarchical-model" class="level2">
 <h2 class="anchored" data-anchor-id="hierarchical-model">Hierarchical Model</h2>
 <p>Let <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BRR%7D_i"> be the estimated relative lift<sup>2</sup> from experiment <img src="https://latex.codecogs.com/png.latex?i">. The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cwidehat%7BRR%7D_i%20%5Csim%20%5Cmathcal%7BN%7D(%5Ctheta_i,%20%5Csigma)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Clog%20%5CBig(%5Cwidehat%7BRR%7D_i%20%5CBig)%20%5Csim%20%5Cmathcal%7BN%7D(%5Ctheta_i,%20%5Csigma)"></p>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?%5Ctheta_i"> is the relative lift on the log scale for experiment <img src="https://latex.codecogs.com/png.latex?i"> (whereas <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BRR%7D_i"> is just the estimated relative lift). We can model the <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> hierarchically as</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta_i%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmu,%20%5Ctau)%20"></p>
 <p>Now, you just need to place priors on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Ctau"> (assume you used good priors).</p>

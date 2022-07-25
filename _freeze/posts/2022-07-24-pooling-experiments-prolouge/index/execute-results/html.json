@@ -1,0 +1,16 @@
+{
+  "hash": "ec7246272b68c1bfa0ed40e416564817",
+  "result": {
+    "markdown": "---\ntitle: \"Prolouge to Forecasting Experimental Lift Using Hierarchical Bayesian Modelling\"\ndate: \"2022-07-24\"\ncode-fold: false\necho: false\nfig-cap-location: top\ncategories: [Statistics, AB Testing, Bayes]\nnumber-sections: false\n---\n\n\nIn a [previous blog post](https://dpananos.github.io/posts/2022-07-20-pooling-experiments/) I demonstrated how to use Bayesian hierarchical models to forecast the lift a team would generate over a number of experiments.\n\nThat was fun, but I realized I could make some analytical traction on the generated lift with some mild assumptions and use of `jax` for autodifferentiation.\n\nIn the last post, we assumed\n\n\n$$ \\log(\\psi) \\sim \\mathcal(N)(\\mu, \\sigma^2) \\>.$$\n\n\nOf course, there is uncertainty in both $\\mu$ and $\\sigma$, but assuming we summarized the posterior predictive distribution for $\\log(\\psi)$ using maximum likelihood, we could actually get the distribution of the random variable $\\log(\\psi) \\p_{\\psi}$, or at least we could write a python function which represents the density.\n\nRunning the model on the data I included in that last post yields a maximum likelihood estimate of $\\mu = 0.08$ and $\\sigma = 0.035$.  Now, let's use the change of variables technique to get the distribution of $\\log(\\psi)p_\\psi$.  This is going to require taking derivatives of some messy expressions.  It is possible, but requires a patient hand or a computer algebra system, neither of which are essential to this prologue.Instead, I'll use `jax` to do some of the differentiation.  I'll explain the steps below, and then demonstrate how this can be done in python with `jax`.\n\n## The Math\n\n## The Code\n\n\n::: {.cell}\n\n:::\n\n::: {.cell}\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

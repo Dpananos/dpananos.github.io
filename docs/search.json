@@ -81,7 +81,7 @@
     "href": "posts/2022-07-20-pooling-experiments/index.html#hierarchical-model",
     "title": "Forecasting Experimental Lift Using Hierarchical Bayesian Modelling",
     "section": "Hierarchical Model",
-    "text": "Hierarchical Model\nLet \\(\\widehat{RR}_i\\) be the estimated relative lift2 from experiment \\(i\\). The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means\n\\[ \\widehat{RR}_i \\sim \\mathcal{N}(\\theta_i, \\sigma)\\]\nHere, \\(\\theta_i\\) is the relative lift on the log scale for experiment \\(i\\) (whereas \\(\\widehat{RR}_i\\) is just the estimated relative lift). We can model the \\(\\theta\\) hierarchically as\n\\[ \\theta_i \\sim \\mathcal{N}(\\mu, \\tau) \\]\nNow, you just need to place priors on \\(\\mu\\) and \\(\\tau\\) (assume you used good priors)."
+    "text": "Hierarchical Model\nLet \\(\\widehat{RR}_i\\) be the estimated relative lift2 from experiment \\(i\\). The sampling distribution of relative lift is asymptotically normally distributed on the log scale. Assuming we know the standard error exactly (using the delta rule), this means\n\\[ \\log \\Big(\\widehat{RR}_i \\Big) \\sim \\mathcal{N}(\\theta_i, \\sigma)\\]\nHere, \\(\\theta_i\\) is the relative lift on the log scale for experiment \\(i\\) (whereas \\(\\widehat{RR}_i\\) is just the estimated relative lift). We can model the \\(\\theta\\) hierarchically as\n\\[ \\theta_i \\sim \\mathcal{N}(\\mu, \\tau) \\]\nNow, you just need to place priors on \\(\\mu\\) and \\(\\tau\\) (assume you used good priors)."
   },
   {
     "objectID": "posts/2022-07-20-pooling-experiments/index.html#forcasting-lift",

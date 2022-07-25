@@ -94,7 +94,7 @@ Let $\widehat{RR}_i$ be the estimated relative lift[^2] from experiment $i$.  Th
 
 [^2]: $RR$ for relative risk, sorry my epidemiology is showing
 
-$$ \widehat{RR}_i \sim \mathcal{N}(\theta_i, \sigma)$$
+$$ \log \Big(\widehat{RR}_i \Big) \sim \mathcal{N}(\theta_i, \sigma)$$
 
 Here, $\theta_i$ is the relative lift on the log scale for experiment $i$ (whereas $\widehat{RR}_i$ is just the estimated relative lift).  We can model the $\theta$ hierarchically as
 
