@@ -184,6 +184,14 @@ One of the spending functions results in the same $u_k$, regardless of informati
 
 The solid line is very clearly the O'Brien Flemming spending function.  When $t_k$ is small, then the O'Brien Flemming spending function has a small amount of spend (because $\alpha^\star(t_k) - \alpha^\star(t_{k-1})$ is very small when $t_k$ is small).  But, when $t_k$ is large, then $\alpha^\star(t_k) - \alpha^\star(t_{k-1})$ is large, leading to more spend and hence smaller $u_k$.  The Pocock function is the dashed line, but I have no good rationale why constant lines should come from a spending function which is not on the diagonal.  I'd love an explanation if you have one.
 
+So what is the difference?  Why might you choose one spending function over another?  Note that the O'Brien Flemming function results in critical values which are really big in the beginning and really small at the end.  This means we have the best chance to reject the null near the end of the experiment. I mean...that's nice and all, but for AB testing we want to save as much time as possible, and the large critical values in the beginning work against us in that regard.  On the other hand Pocock spending has constant critical values, meaning we are more likely to save time and detect an effect early.  However, we run the risk of not detecting an effect over the experimental period, so there is risk of commiting a type II error.  If it were me, I would choose Pocock boundaries.  Move faster, try more things, and you can likely make up for type II erros by doing so.
+
+What would be kind of cool is to specify our own alpha spending function, perhaps one which makes it realy easy to reject the null early but later punishes us for spending so much early on. Maybe that would be a good idea for another post.
+
+## Conclusion
+
+I feel like we are more or less ready to start doing GSD in AB testing.  We know why peeking is bad, and more or less how to fix it now.  We also have a better understanding of some of the tradeoffs between the two most prevalent spending functions.  There is still a lot to talk about, including confidence intervals for these sorts of tests (which are NOT intuitive in the least) as well as stopping for futility as well as binding/non-binding boundaries. Honestly, I don't have a good idea for what the next part will be about, but I promise it will make sense.
+
 ## Visualising Alpha Spending in Action
 
 Its one thing to talk about alpha spending (@eq-rejections and the probability statements that follow it), but it is another thing completely to see it in action.
