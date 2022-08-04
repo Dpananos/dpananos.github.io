@@ -10,7 +10,203 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-0.9.646</generator>
-<lastBuildDate>Wed, 20 Jul 2022 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 30 Jul 2022 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Interim Analysis & Group Sequential Designs Pt 2</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>This is part 2 of an ongoing series on group sequential designs for AB testing. Previous parts are shown below</p>
+<blockquote class="blockquote">
+<p><a href="https://dpananos.github.io/posts/2022-07-06-gsd/">Part 1</a></p>
+</blockquote>
+<p>Last time, we noted that we want our AB tests to be shorter so we could learn quicker. Peeking – testing the data before the end of the experiment – inflates the probability we make a false positive unless we choose the critical values of the tests a little more carefully. The reason this happens is because requiring that any of the cumulative test statistics be larger than 1.96 in magnitude defines a region in the space of cumulative means which has a probability density larger than 5%. One way to fix that is just to redefine the space to be smaller by requiring the cumulative test statistics to be larger in magnitude than some other value. I noted this puts the unnecessary requirement on us that the thresholds all be the same. In this blog post, we will discuss other approaches to that problem and their pros and cons.</p>
+<p>In order to have that discussion, we need to understand what “alpha” (<img src="https://latex.codecogs.com/png.latex?%5Calpha">) is and how it can be “spent”. That will allow us to talk about “alpha spending functions”.</p>
+<section id="preliminaries" class="level2">
+<h2 class="anchored" data-anchor-id="preliminaries">Preliminaries</h2>
+<p>In the last post, we looked at a <img src="https://latex.codecogs.com/png.latex?K=2"> GSD with equal sized groups. Of course, we don’t need to have equal sized groups and we can have more than two stages. Let <img src="https://latex.codecogs.com/png.latex?n_k"> be the sample size of the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> group. Then <img src="https://latex.codecogs.com/png.latex?N%20=%20%5Csum_k%20n_k"> is the total sample size. It is sometimes more convenient to refer to the <em>information rates</em> <img src="https://latex.codecogs.com/png.latex?t_k%20=%20n_k/N">. We will do the same for consistency with other sources on GSDs.</p>
+</section>
+<section id="what-is-alpha-and-how-do-we-spend-it" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-alpha-and-how-do-we-spend-it">What is <img src="https://latex.codecogs.com/png.latex?%5Calpha">, and How Do We Spend It?</h2>
+<p>The probability we reject the null, <img src="https://latex.codecogs.com/png.latex?H_0">, when it is true is called <img src="https://latex.codecogs.com/png.latex?%5Calpha">. In a classical test, we would reject <img src="https://latex.codecogs.com/png.latex?H_0"> when <img src="https://latex.codecogs.com/png.latex?%5Cvert%20Z%20%5Cvert%20%3E%20z_%7B1-%5Calpha/2%7D">, and so <img src="https://latex.codecogs.com/png.latex?P(%5Cvert%20Z%20%5Cvert%20%3E%20z_%7B1-%5Calpha/2%7D%20%5Cvert%20H_0)%20=%20%5Calpha">. Now consider a <img src="https://latex.codecogs.com/png.latex?K=4"> GSD so we can work with a concrete example. Let <img src="https://latex.codecogs.com/png.latex?Z%5E%7B(k)%7D"> be the test statistic after seeing the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> group, and let <img src="https://latex.codecogs.com/png.latex?u_k"> be the threshold so that if <img src="https://latex.codecogs.com/png.latex?%5Cvert%20Z%5E%7B(k)%7D%20%5Cvert%20%3E%20u_k"> then we would reject the null. Then a type one error could happen when <sup>1</sup> …</p>
+<p><span id="eq-rejections"><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A&amp;%5Cleft(%20u_1%20%5Clt%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cright)%20%20%5Cquad%20%5Cmbox%7Bor%7D%20%5C%5C%0A&amp;%20%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Clt%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5Cright)%20%5Cquad%20%5Cmbox%7Bor%7D%20%5C%5C%0A&amp;%20%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Cgeq%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_3%20%5Clt%20%5Cvert%20Z%5E%7B(3)%7D%20%5Cvert%20%5Cright)%20%5Cquad%20%5Cmbox%7Bor%7D%20%5C%5C%0A&amp;%20%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Cgeq%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_3%20%5Cgeq%20%5Cvert%20Z%5E%7B(3)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_4%20%5Clt%20%5Cvert%20Z%5E%7B(4)%7D%20%5Cvert%20%5Cright)%0A%5Cend%7Balign%7D%0A%5Ctag%7B1%7D"></span></p>
+<p>So a type one error can occur in multiple ways, but we still want the probability we make a type one error to be <img src="https://latex.codecogs.com/png.latex?%5Calpha">, which means we’re going to need to evaluate the probability of the expression above. Note that each line in (Equation&nbsp;1) are mutually exclusive, so the probability of the expression above is just the sum of the probabilities of each expression. This gives us</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Calpha%20=%20&amp;P%5Cleft(%20u_1%20%5Clt%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%20%20+%20%20%5C%5C%0A&amp;%20P%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Clt%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%20+%20%5C%5C%0A&amp;%20P%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Cgeq%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_3%20%5Clt%20%5Cvert%20Z%5E%7B(3)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%20+%20%5C%5C%0A&amp;%20P%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Cgeq%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_3%20%5Cgeq%20%5Cvert%20Z%5E%7B(3)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_4%20%5Clt%20%5Cvert%20Z%5E%7B(4)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%0A%5Cend%7Balign%7D%0A"></p>
+<p>The test at each stage contributes towards the probability we make a type one error <img src="https://latex.codecogs.com/png.latex?%5Calpha">. You can think of <img src="https://latex.codecogs.com/png.latex?%5Calpha"> as a “budget”, and at each stage we have to “spend” (see where I’m going?) some of that alpha, with the added condition that we can never buy it back (meaning our <img src="https://latex.codecogs.com/png.latex?%5Calpha"> spending must be increasing). How much we decide to spend dictates what the <img src="https://latex.codecogs.com/png.latex?u_k"> are going to be.</p>
+<p>But how do we decide how to spend our <img src="https://latex.codecogs.com/png.latex?%5Calpha">? If <img src="https://latex.codecogs.com/png.latex?%5Calpha"> is our budget for type one error, we need some sort of spending plan. Or perhaps a spending…function.</p>
+</section>
+<section id="alpha-spending-functions" class="level2">
+<h2 class="anchored" data-anchor-id="alpha-spending-functions"><img src="https://latex.codecogs.com/png.latex?%5Calpha">-Spending Functions</h2>
+<p>An <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending function <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(t_k)"> can be any non-decreasing function of the information rate <img src="https://latex.codecogs.com/png.latex?t_k"> such that <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(0)=0"> and <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(1)%20=%20%5Calpha">. Using this approach, we don’t need to specify the number of looks (though we may plan for <img src="https://latex.codecogs.com/png.latex?K"> of them), nor the number of observations at those looks. Only the maximum sample size needed, <img src="https://latex.codecogs.com/png.latex?N">.</p>
+<p>Each time we make an analysis, we spend some of our budgeted <img src="https://latex.codecogs.com/png.latex?%5Calpha">. In our first analysis (at <img src="https://latex.codecogs.com/png.latex?t_1%20=%20n_1/N">), we spend</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P%5Cleft(%20u_1%20%5Clt%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%20=%20%5Calpha%5E%5Cstar(t_1)%20%5C%3E.%20"></p>
+<p>At the second analysis, we spend</p>
+<p><img src="https://latex.codecogs.com/png.latex?P%5Cleft(u_1%20%5Cgeq%20%5Cvert%20Z%5E%7B(1)%7D%20%5Cvert%20%5Cmbox%7B%20and%20%7D%20u_2%20%5Clt%20%5Cvert%20Z%5E%7B(2)%7D%20%5Cvert%20%5CBig%5Cvert%20H_0%5Cright)%20=%20%5Calpha%5E%5Cstar(t_2)%20-%20%5Calpha%5E%5Cstar(t_1)%20%5C%3E,"></p>
+<p>and so on, with the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> analysis being the difference in the alpha spending functions at the successive information rates. The spend is defined in this way so that the sum of the spend totals <img src="https://latex.codecogs.com/png.latex?%5Calpha"> since <img src="https://latex.codecogs.com/png.latex?%5Calpha%20=%20%5Csum_%7Bk=2%7D%5EK%20%5Calpha%5E%5Cstar(t_k)%20-%20%5Calpha%5E%5Cstar(t_%7Bk-1%7D)">. The quantities <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(t_k)%20-%20%5Calpha%5E%5Cstar(t_%7Bk-1%7D)"> determine what the <img src="https://latex.codecogs.com/png.latex?u_k"> should be through something called the <em>recursive integration formula</em>, which I will not be covering because wow is it every mathy and I need some time.</p>
+<p>Two popular <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions are the Pockock Spending function and the O’Brien Flemming spending function, shown in Figure&nbsp;1. The equations don’t matter, what matters is the qualitative behavior.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-spending-function" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p></p><p></p>
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/fig-spending-function-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In gray is the line <img src="https://latex.codecogs.com/png.latex?y%20=%200.05x">, which would correspond to an alpha spending function in which our spend is proportional to the difference in information rates. Note how the Pocock function is kind of close to the diagonal (but not exactly on it), while the O’Brien Flemmming is constant up until <img src="https://latex.codecogs.com/png.latex?t_k%20%5Capprox%200.3"> and then starts to increase. The result of this qualitative behavioiur is evident when we plot our rejection regions (the <img src="https://latex.codecogs.com/png.latex?u_k">, which remember depend on the spending function).</p>
+</section>
+<section id="plotting-the-rejection-regions" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-the-rejection-regions">Plotting the Rejection Regions</h2>
+<p>In my <a href="https://dpananos.github.io/posts/2022-07-06-gsd/">last post</a>, the rejection region was plotted on the joint distribution of the <img src="https://latex.codecogs.com/png.latex?Z%5E%7B(1)%7D"> and <img src="https://latex.codecogs.com/png.latex?Z%5E%7B(2)%7D">. That is easy for two dimensions, doable for 3, and impossible for us to comprehend beyond that. Luckily, there is a simpler way of visualizing these rejection regions. We can simply plot the rejection regions <img src="https://latex.codecogs.com/png.latex?u_k"> as a function of the information rate <img src="https://latex.codecogs.com/png.latex?t_k">. Let’s plot the rejection regions for the Pocock and O’Brien Flemming spending functions now. But, I’m not going to label them just yet. I want you to think about which one might be which and why (knowing what we know about spending functions and the qualitative behaviour we saw above).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">extract_lims <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="cf" style="color: #003B4F;">function</span>(sfu){</span>
+<span id="cb1-2">  </span>
+<span id="cb1-3">  gs <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">gsDesign</span>(</span>
+<span id="cb1-4">  <span class="at" style="color: #657422;">k=</span><span class="dv" style="color: #AD0000;">11</span>, </span>
+<span id="cb1-5">  <span class="at" style="color: #657422;">timing =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="fl" style="color: #AD0000;">0.1</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">length.out =</span> <span class="dv" style="color: #AD0000;">11</span>),</span>
+<span id="cb1-6">  <span class="at" style="color: #657422;">test.type=</span><span class="dv" style="color: #AD0000;">2</span>,</span>
+<span id="cb1-7">  <span class="at" style="color: #657422;">alpha=</span><span class="fl" style="color: #AD0000;">0.025</span>, </span>
+<span id="cb1-8">  <span class="at" style="color: #657422;">beta =</span> <span class="fl" style="color: #AD0000;">0.2</span>,</span>
+<span id="cb1-9">  <span class="at" style="color: #657422;">sfu=</span>sfu</span>
+<span id="cb1-10">)</span>
+<span id="cb1-11">  </span>
+<span id="cb1-12"><span class="fu" style="color: #4758AB;">tibble</span>(<span class="at" style="color: #657422;">tk =</span> gs<span class="sc" style="color: #5E5E5E;">$</span>timing,</span>
+<span id="cb1-13">       <span class="at" style="color: #657422;">lower =</span> gs<span class="sc" style="color: #5E5E5E;">$</span>lower<span class="sc" style="color: #5E5E5E;">$</span>bound,</span>
+<span id="cb1-14">       <span class="at" style="color: #657422;">upper =</span> gs<span class="sc" style="color: #5E5E5E;">$</span>upper<span class="sc" style="color: #5E5E5E;">$</span>bound,</span>
+<span id="cb1-15">       <span class="at" style="color: #657422;">spending =</span> <span class="fu" style="color: #4758AB;">if_else</span>(sfu<span class="sc" style="color: #5E5E5E;">==</span><span class="st" style="color: #20794D;">'OF'</span>, <span class="st" style="color: #20794D;">"O'Brien Flemming"</span>, <span class="st" style="color: #20794D;">"Pocock"</span>)</span>
+<span id="cb1-16">       )</span>
+<span id="cb1-17"></span>
+<span id="cb1-18">}</span>
+<span id="cb1-19"></span>
+<span id="cb1-20"></span>
+<span id="cb1-21">sfus<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">'Pocock'</span>, <span class="st" style="color: #20794D;">'OF'</span>)</span>
+<span id="cb1-22"></span>
+<span id="cb1-23">lims <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(sfus, extract_lims) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-24">      <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="at" style="color: #657422;">cols =</span> lower<span class="sc" style="color: #5E5E5E;">:</span>upper, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'which'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'uk'</span> )</span>
+<span id="cb1-25"></span>
+<span id="cb1-26">lims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-27">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(tk, uk, <span class="at" style="color: #657422;">linetype =</span> <span class="fu" style="color: #4758AB;">interaction</span>(which, spending))) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-28">  <span class="fu" style="color: #4758AB;">geom_line</span>(<span class="at" style="color: #657422;">color=</span>my_blue, <span class="at" style="color: #657422;">size=</span><span class="dv" style="color: #AD0000;">1</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-29">  <span class="fu" style="color: #4758AB;">scale_linetype_manual</span>(<span class="at" style="color: #657422;">values =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">1</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="dv" style="color: #AD0000;">2</span>, <span class="dv" style="color: #AD0000;">2</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-30">  <span class="fu" style="color: #4758AB;">guides</span>(<span class="at" style="color: #657422;">linetype=</span>F) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-31">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>, </span>
+<span id="cb1-32">        <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>()</span>
+<span id="cb1-33">        )<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-34">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">expression</span>(t[k]), </span>
+<span id="cb1-35">       <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">expression</span>(u[k]))</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;">ggsave</span>(<span class="st" style="color: #20794D;">'spending.png'</span>, <span class="at" style="color: #657422;">dpi =</span> <span class="dv" style="color: #AD0000;">240</span>)</span></code></pre></div>
+</details>
+</div>
+<details>
+<summary>
+Click to see which is which
+</summary>
+<p>
+</p><div class="cell">
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p></p>
+</details>
+<p>One of the spending functions results in the same <img src="https://latex.codecogs.com/png.latex?u_k">, regardless of information rate, while the other seems to put a relatively low chance of rejecting the null (low alpha spend) in the beginning but then allows for a larger chance to reject the null later (larger alpha spend). Now, knowing what we know about the spending function qualitative behaviour, which function corresponds to which spending function?</p>
+<p>The solid line is very clearly the O’Brien Flemming spending function. When <img src="https://latex.codecogs.com/png.latex?t_k"> is small, then the O’Brien Flemming spending function has a small amount of spend (because <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(t_k)%20-%20%5Calpha%5E%5Cstar(t_%7Bk-1%7D)"> is very small when <img src="https://latex.codecogs.com/png.latex?t_k"> is small). But, when <img src="https://latex.codecogs.com/png.latex?t_k"> is large, then <img src="https://latex.codecogs.com/png.latex?%5Calpha%5E%5Cstar(t_k)%20-%20%5Calpha%5E%5Cstar(t_%7Bk-1%7D)"> is large, leading to more spend and hence smaller <img src="https://latex.codecogs.com/png.latex?u_k">. The Pocock function is the dashed line, but I have no good rationale why constant lines should come from a spending function which is not on the diagonal. I’d love an explanation if you have one.</p>
+</section>
+<section id="visualising-alpha-spending-in-action" class="level2">
+<h2 class="anchored" data-anchor-id="visualising-alpha-spending-in-action">Visualising Alpha Spending in Action</h2>
+<p>Its one thing to talk about alpha spending (Equation&nbsp;1 and the probability statements that follow it), but it is another thing completely to see it in action.</p>
+<p>I’m going to use <code>{rpact}</code> to obtain the <img src="https://latex.codecogs.com/png.latex?u_k"> for a <img src="https://latex.codecogs.com/png.latex?K=4"> stage GSD using the O’Brien Flemming spending function. Then, I’m going to simulate some data from a GSD and compute the spend to show you how it works. I really hope you take the time to do the same, it can really clear up how the spending works.</p>
+<p>First, we need data, and a lot of it. Some of the spend can be on the order of 1e-5, so I’m going to cheat a little. The book I’m working from writes down the joint distribution of the <img src="https://latex.codecogs.com/png.latex?Z"> under some assumptions (namely that the standard deviation is known and the data are normal). Let’s use that joint distirbution to simulate 10, 000, 000 samples. This should give me about 3 decimal places of accuracy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;">set.seed</span>(<span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb3-2">n <span class="ot" style="color: #003B4F;">=</span> <span class="dv" style="color: #AD0000;">250</span></span>
+<span id="cb3-3">K <span class="ot" style="color: #003B4F;">=</span> <span class="dv" style="color: #AD0000;">4</span></span>
+<span id="cb3-4"></span>
+<span id="cb3-5"><span class="co" style="color: #5E5E5E;"># Construct the Cholesky Factor, row-wise</span></span>
+<span id="cb3-6">A <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">matrix</span>(<span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>, K<span class="sc" style="color: #5E5E5E;">*</span>K), <span class="at" style="color: #657422;">nrow =</span> K)</span>
+<span id="cb3-7">A[<span class="dv" style="color: #AD0000;">1</span>, <span class="dv" style="color: #AD0000;">1</span>] <span class="ot" style="color: #003B4F;">=</span> <span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb3-8"><span class="cf" style="color: #003B4F;">for</span>(i <span class="cf" style="color: #003B4F;">in</span> <span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">:</span>K){</span>
+<span id="cb3-9">  A[i, <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span>i] <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">sqrt</span>(n)<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sqrt</span>(i<span class="sc" style="color: #5E5E5E;">*</span>n)</span>
+<span id="cb3-10">}</span>
+<span id="cb3-11"></span>
+<span id="cb3-12"><span class="co" style="color: #5E5E5E;"># Construct the covariance </span></span>
+<span id="cb3-13">S <span class="ot" style="color: #003B4F;">=</span> A <span class="sc" style="color: #5E5E5E;">%*%</span> <span class="fu" style="color: #4758AB;">t</span>(A)</span>
+<span id="cb3-14"><span class="co" style="color: #5E5E5E;"># Draw from a multivariate normal</span></span>
+<span id="cb3-15"><span class="co" style="color: #5E5E5E;"># Lots of draws because the alpha spend will be small</span></span>
+<span id="cb3-16">X <span class="ot" style="color: #003B4F;">=</span> MASS<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mvrnorm</span>(<span class="fl" style="color: #AD0000;">10e6</span>, <span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>, K), S)</span></code></pre></div>
+</div>
+<p>Now, let’s use <code>{rpart}</code> to get those critical values as well as how much alpha should be spent at each stage.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">r <span class="ot" style="color: #003B4F;">=</span> rpact<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">getDesignGroupSequential</span>(</span>
+<span id="cb4-2">  <span class="at" style="color: #657422;">kMax =</span> K, </span>
+<span id="cb4-3">  <span class="at" style="color: #657422;">sided=</span><span class="dv" style="color: #AD0000;">2</span>, </span>
+<span id="cb4-4">  <span class="at" style="color: #657422;">alpha=</span><span class="fl" style="color: #AD0000;">0.05</span>, </span>
+<span id="cb4-5">  <span class="at" style="color: #657422;">beta=</span><span class="fl" style="color: #AD0000;">0.2</span>,</span>
+<span id="cb4-6">  <span class="at" style="color: #657422;">informationRates =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="fl" style="color: #AD0000;">0.25</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">length.out=</span>K),</span>
+<span id="cb4-7">  <span class="at" style="color: #657422;">typeOfDesign =</span> <span class="st" style="color: #20794D;">'OF'</span></span>
+<span id="cb4-8">  )</span>
+<span id="cb4-9"></span>
+<span id="cb4-10">z_vals <span class="ot" style="color: #003B4F;">=</span> r<span class="sc" style="color: #5E5E5E;">$</span>criticalValues</span>
+<span id="cb4-11">aspend <span class="ot" style="color: #003B4F;">=</span> r<span class="sc" style="color: #5E5E5E;">$</span>alphaSpent</span></code></pre></div>
+</div>
+<p>Now, its just a matter of taking means. The <code>ith</code> column of <code>X</code> represents a mean I might see in a group sequential design at the <code>ith</code> stage. We know what the critical value is for each stage, so we just have to estimate the proportion of observations in each column which are beyond the associated critical value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">X1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(X[, <span class="dv" style="color: #AD0000;">1</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>z_vals[<span class="dv" style="color: #AD0000;">1</span>]</span>
+<span id="cb5-2">X2 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(X[, <span class="dv" style="color: #AD0000;">2</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>z_vals[<span class="dv" style="color: #AD0000;">2</span>]</span>
+<span id="cb5-3">X3 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(X[, <span class="dv" style="color: #AD0000;">3</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>z_vals[<span class="dv" style="color: #AD0000;">3</span>]</span>
+<span id="cb5-4">X4 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(X[, <span class="dv" style="color: #AD0000;">4</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>z_vals[<span class="dv" style="color: #AD0000;">4</span>]</span></code></pre></div>
+</div>
+<p>To compute the alpha spend, we just compute the probability statement above</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">my_spend <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">c</span>(</span>
+<span id="cb6-2">  <span class="fu" style="color: #4758AB;">mean</span>(X1),</span>
+<span id="cb6-3">  <span class="fu" style="color: #4758AB;">mean</span>((<span class="sc" style="color: #5E5E5E;">!</span>X1)<span class="sc" style="color: #5E5E5E;">&amp;</span>X2),</span>
+<span id="cb6-4">  <span class="fu" style="color: #4758AB;">mean</span>((<span class="sc" style="color: #5E5E5E;">!</span>X1)<span class="sc" style="color: #5E5E5E;">&amp;</span>(<span class="sc" style="color: #5E5E5E;">!</span>X2)<span class="sc" style="color: #5E5E5E;">&amp;</span>X3),</span>
+<span id="cb6-5">  <span class="fu" style="color: #4758AB;">mean</span>((<span class="sc" style="color: #5E5E5E;">!</span>X1)<span class="sc" style="color: #5E5E5E;">&amp;</span>(<span class="sc" style="color: #5E5E5E;">!</span>X2)<span class="sc" style="color: #5E5E5E;">&amp;</span>(<span class="sc" style="color: #5E5E5E;">!</span>X3)<span class="sc" style="color: #5E5E5E;">&amp;</span>X4)</span>
+<span id="cb6-6">)</span></code></pre></div>
+</div>
+<p>Now, we just take the cumulative sum of <code>my_spend</code> to determine how much alpha we spend up to the <code>ith</code> stage</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;">plot</span>(<span class="fu" style="color: #4758AB;">cumsum</span>(my_spend), aspend, <span class="at" style="color: #657422;">xlab =</span> <span class="st" style="color: #20794D;">'Simulated Spend'</span>, <span class="at" style="color: #657422;">ylab=</span><span class="st" style="color: #20794D;">'Spend From rpact'</span>)</span>
+<span id="cb7-2"><span class="fu" style="color: #4758AB;">abline</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Oh MAN does that feel good! We spend very nearly the projected alpha at each stage. THAT is alpha spending in action!</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Or if you like set theory, we could write each line as <img src="https://latex.codecogs.com/png.latex?%5Cleft(%20%5Cbigcap_%7Bk=1%7D%5E%7Bj-1%7D%20%5Cvert%7BZ%5E%7B(k)%7D%7D%20%5Cvert%20%5Clt%20u_k%20%5Cright)%20%5Ccap%20%5Cleft(%20%5Cvert%7BZ%5E%7B(j)%7D%7D%20%5Cvert%20%5Cgeq%20u_j%20%5Cright)">.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>Statistics</category>
+  <category>AB Testing</category>
+  <guid>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</guid>
+  <pubDate>Sat, 30 Jul 2022 04:00:00 GMT</pubDate>
+  <media:content url="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/spending.png" medium="image" type="image/png" height="103" width="144"/>
+</item>
 <item>
   <title>Forecasting Experimental Lift Using Hierarchical Bayesian Modelling</title>
   <dc:creator>Demetri Pananos</dc:creator>
