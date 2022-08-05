@@ -7,38 +7,61 @@ data{
   int experiment[n]; //experiment numericlal identifier
   
   //For generated quantities
-  int n_experiments_per_year;
+  int n_months;
+  int n_experiments_per_month;
   real n_group; //Sample size in each group
+  real z_alpha;
+  real baseline_rate;
+  real page_views;
 }
 parameters{
-  real mu_metric; 
-  real<lower=0> sig_ex;
-  vector[n_experiment] z_ex;
+  real mu; 
+  real<lower=0> sigma;
+  vector[n_experiment] z;
 }
 transformed parameters{
-  vector[n] true_log_rr = mu_metric + z_ex[experiment] * sig_ex;
+  vector[n] true_log_rr = mu + z[experiment] * sigma;
 }
 model{
-  mu_metric ~ student_t(3, 0, 2.5);
-  sig_ex ~ cauchy(0, 1);
-  z_ex ~ std_normal();
+  mu ~ student_t(3, 0, 2.5);
+  sigma ~ cauchy(0, 1);
+  z ~ std_normal();
   estimated_log_relative_lift ~ normal(true_log_rr, estimated_sd_relative_lift);
 }
 generated quantities{
   
-  real possible_rr = exp(normal_rng(mu_metric, sig_ex));
-  real rr_over_year[n_experiments_per_year];
-  real es;
-  real power[n_experiments_per_year];
-  real detected_lift[n_experiments_per_year];
-  real forecasted_lift[n_experiments_per_year];
+  real possible_rl = exp(normal_rng(mu, sigma)); // Possiblle future lifts
+  real lifts[n_months, n_experiments_per_month]; // Lifts we generate in each month
+  real power[n_months, n_experiments_per_month]; // Power for the n experiments per month
+  real es; // Effect size for the relative lift
+  vector[n_months] lift_generated;
+  vector[n_months] forecasted_lift;
+  vector[n_months] incremental_activations;
   
-  
-  for(i in 1:n_experiments_per_year){
-    rr_over_year[i] =  exp(normal_rng(mu_metric, sig_ex));
-    es = 2*asin(sqrt(rr_over_year[i] * 0.01)) - 2*asin(sqrt(0.01));
-    power[i] = 1 - normal_cdf( 1.644854 - es * sqrt(n_group/2), 0, 1);    
-    detected_lift[i] = power[i] * log(rr_over_year[i]);
+  // For each month
+  for(i in 1:n_months){
+    // for each experiment in each month
+    for(j in 1:n_experiments_per_month){
+      // Draw a lift from the future lift distribution
+      lifts[i, j] = exp(normal_rng(mu, sigma));
+      // Compute the effect size for the drawn lift against the baseline rate
+      es = 2*asin(sqrt(lifts[i, j] * baseline_rate)) - 2*asin(sqrt(baseline_rate)); 
+      // Determine the power to detect that lift
+      power[i, j] = 1 - normal_cdf( z_alpha - es * sqrt(n_group/2)| 0, 1); 
+    }
+    // Compute the weighted harmonic means of the lifts generated in the month
+    // This is the lift generated in the month
+    lift_generated[i] = exp(sum(to_vector(power[i, ]) .* log(to_vector(lifts[i, ]))));
+    
   }
-  forecasted_lift = exp(cumulative_sum(detected_lift));
+  // Compute the rolling lift.  This is a cumulative product written as a sum on the log scale.
+  forecasted_lift = to_vector(exp(cumulative_sum(log(lift_generated))));
+
+  // Compute the incremental activations based on the lfit above.
+  // Again, this is the incremental activations generated up to and including month i
+  incremental_activations = cumulative_sum(forecasted_lift .* rep_vector(baseline_rate * page_views, n_months)) - cumulative_sum(rep_vector(baseline_rate * page_views, n_months) );
+
+  
+  
 }
+

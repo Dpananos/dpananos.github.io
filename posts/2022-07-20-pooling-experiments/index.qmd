@@ -24,7 +24,7 @@ This post is forecasting how much a given team can move a metric within some tim
 
 ## Assumptions
 
-Your team can run approximately 1 experiment per month or 12 in a calendar year.  Let's say you start experimenting on January 1 and will evaluate your performance December 31.  In addition to this, assume:
+Your team can run approximately 1 experiment per month or 12 in a calendar year (but the method we develop can be extended to an arbitrary number of experiments per month).  Let's say you start experimenting on January 1 and will evaluate your performance December 31.  In addition to this, assume:
 
 * All your experiments are A/B tests with two and only two groups: test and control.
 * Your main metric is a conversion rate and the baseline value is 1\%.
@@ -56,14 +56,17 @@ cmdstanr::register_knitr_engine()
 
 set.seed(0)
 
-p_baseline <- 0.01
+baseline_rate <- 0.01
+alpha <- 0.05
 n_experiments_last_year <- 12
 n_per_group <- 50000
+n_months<-12
+n_experiments_per_month <- 1
 
 log_rr <- rnorm(n_experiments_last_year, 0.07, .01)
-p_txts <- exp(log_rr) * p_baseline
+p_txts <- exp(log_rr) * baseline_rate
 
-y_control <- rbinom(n_experiments_last_year, n_per_group, p_baseline)
+y_control <- rbinom(n_experiments_last_year, n_per_group, baseline_rate)
 y_txt <- rbinom(n_experiments_last_year, n_per_group, p_txts)
 
 pvals <- map2_dbl(y_txt, y_control, ~prop.test(c(.x, .y), c(n_per_group, n_per_group), alternative = 'greater')$p.value)
@@ -110,10 +113,14 @@ $$ \log(\psi) \sim \mathcal{N}(\mu, \sigma) \>. $$
 
 If your team were to implement an experiment for which had a relative lift of $\psi$, you would get an estimated relative lift.  Depending on the size of that estimate, you may or may not reject the null hypothesis.  The probability you reject the null hypothesis is when it is false (and it is always false by assumption) is known as the statistical power.  Since you have a fixed sample size in each experiment,  and every experiment is a 50/50 split, you can calculate the statistical power that you detect a relative lift of $\psi$.  Call that $p_{\psi}$.
 
-Now for the fun part.  Say you run $K$ experiments over the year.  The forecasted lift, $FL$, you would have after experiment $1 \leq k \leq K$ might be
+Now for the fun part.  Say you run $n$ experiments per month for $K$ months.  The lift you generate in month $k$, $LG_k$, would be
 
-$$ FL_k = \exp\Bigg( \sum_{j=1}^k \log(\psi_j) p_{\psi, j} \Bigg) $$
-Think this through.  If you were to implement every intervention, your lift would simply be $\prod_{j=1}^k \psi_j$, or on the log scale $\sum_j \log(\psi_j)$.  But you don't detect every effect.  The probability you detect the effect of the $j^{th}$ intervention is $p_{\psi, j}$.  So $\sum_j \log(\psi_j) p_{\psi, j}$ is the expected lift you would accrue over the $k$ experiments.  Take the exponential to convert this sum back to a product and you've got a forecasted lift after $k$ experiments. Now, because there is uncertainty in the $\psi$, there is uncertainty in the forecasted lift.  However, your hierarchical model will make it more or less easy to integrate over that uncertainty.  Just sample from the model and average over the samples.
+$$ LG_k = \exp\Bigg( \sum_{j=1}^n \log(\psi_j) p_{\psi, j} \Bigg) $$
+
+and the forecasted lift, $FL$, up to and including month $k$ is
+
+$$ FL_k = \prod_{i=1}^{k} LG_i $$
+Think this through.  If you were to implement every intervention, your lift would simply be $\prod_{j=1}^k \psi_j$, or on the log scale $\sum_j \log(\psi_j)$.  But you don't detect every effect.  The probability you detect the effect of the $j^{th}$ intervention is $p_{\psi, j}$.  So $\sum_j \log(\psi_j) p_{\psi, j}$ is the expected lift you would accrue over the $k$ experiments.  Take the exponential to convert this sum back to a product and you've got a generated lift after $n$ experiments in a given month.  Multiply the lift month over month to get a forecasted lift. Now, because there is uncertainty in the $\psi$, there is uncertainty in the forecasted lift.  However, your hierarchical model will make it more or less easy to integrate over that uncertainty.  Just sample from the model and average over the samples.
 
 
 ## Modelling
@@ -142,8 +149,13 @@ model_data <- experiments %>%
               ) %>% 
   compose_data()
 
-model_data$n_experiments_per_year <- 12
+model_data$n_months <- n_months
+model_data$n_experiments_per_month <- n_experiments_per_month
+alpha = 0.05
+model_data$z_alpha <- qnorm(1-alpha)
 model_data$n_group <- n_per_group
+model_data$page_views<- 2 * n_per_group
+model_data$baseline_rate <-baseline_rate
 
 model <- cmdstan_model('model.stan')
 
@@ -155,7 +167,7 @@ Luckily, all of the computation above -- even the power calculation -- can be do
 
 [^3]: Speaking of Stan code, the Stan file in the github repo for this post (see the "Edit this page on github" on the right hand side).  
 
-Shown in @fig-forecast is the forecasted lift as compared to baseline after the $k^{th}$ experiment.  Good job, if you keep doing things as you're doing, you're going to probably increase conversion rate by a little more than 50\% (a little less than the 80\% but still nothing to sneeze at).  The shaded blue regions indicate the uncertainty in that estimate.  Note that although your forecasted lift seems to always be increasing, that isn't necessarily the case.  You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.
+Shown in @fig-forecast is the forecasted lift as compared to baseline after the $k^{th}$ month  Good job, if you keep doing things as you're doing, you're going to probably increase conversion rate by a little more than 50\% (a little less than the 80\% but still nothing to sneeze at).  The shaded blue regions indicate the uncertainty in that estimate.  Note that although your forecasted lift seems to always be increasing, that isn't necessarily the case.  You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.
 
 
 
@@ -163,7 +175,7 @@ Shown in @fig-forecast is the forecasted lift as compared to baseline after the 
 ```{r}
 #| label: fig-forecast
 #| fig-cap: 
-#|   - "Forecasted lift after the 2 experiments.  Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale."
+#|   - "Forecasted lift after the 12 months.  Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale."
 
 
 cred_lev <- c(0.95, 0.8, 0.5)
@@ -175,7 +187,7 @@ fl %>%
   scale_fill_brewer(palette = "Blues", labels=scales::percent(cred_lev))+
   scale_x_continuous(breaks = seq(0, 12, 4))+
   scale_y_continuous(labels = function(x) str_c(x, 'x'))+
-  labs(x='Experiment No',
+  labs(x='Month',
        y='Lift',
        fill='Credible Level') +
   stat_lineribbon(point_interval = 'mean_qi', .width = cred_lev)
@@ -196,12 +208,12 @@ ggsave('forecast.png', dpi = 120)
 #| echo: false
 cred_lev <- c(0.95, 0.8, 0.5)
 fl<-fit %>% 
-    spread_draws(forecasted_lift[i], rr_over_year[i]) 
+    spread_draws(forecasted_lift[i], lift_generated[i]) 
 
 fl %>% 
   filter(.draw<=20, .draw>10) %>% 
   group_by(.draw) %>% 
-  mutate(decrease = any(rr_over_year<1)) %>%  
+  mutate(decrease = any(lift_generated<1)) %>%  
   ggplot(aes(i, forecasted_lift, group = .draw, color=decrease))+
   scale_fill_brewer(palette = "Blues", labels=scales::percent(cred_lev))+
   scale_x_continuous(breaks = seq(0, 12, 4))+
@@ -255,7 +267,7 @@ Ok, breaking away from the narrative for a moment...this is a continuous approxi
 ```{r}
 #| code-fold: true
 do_test <- function(rr){
-  theta <- c(rr, 1) * p_baseline
+  theta <- c(rr, 1) * baseline_rate
   N <- rep(n_per_group, 2)
   y <- rbinom(2, N, theta)
   p<- as.numeric(prop.test(y, N, alternative = 'greater')$p.value<0.05)
@@ -263,7 +275,7 @@ do_test <- function(rr){
   p*rr + (1-p)
 }
 
-rrs <- spread_draws(fit, possible_rr)$possible_rr
+rrs <- spread_draws(fit, possible_rl)$possible_rl
 
 sims <- map_dfr(1:1000, ~{
   
