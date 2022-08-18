@@ -35,6 +35,7 @@ B.Id as AnswerId,
 B.OwnerUserId,
 B.Body as AnswerBody,
 
+C.iD as UserId,
 C.DisplayName,
 dense_rank() over (order by C.Reputation desc) as rnk,
 
@@ -56,12 +57,13 @@ on D.TagId = E.Id)
 
 select
 rnk,
+UserId, 
 DisplayName, 
 TagName,
 count(distinct QuestionId) as N
 from QA_tags
 where rnk<=250
-group by rnk, DisplayName, TagName
+group by rnk, UserId, DisplayName, TagName
 order by rnk
 ```
 
@@ -80,13 +82,13 @@ library(here)
 
 raw_d <- read_csv('QueryResults.csv') %>% 
      na.omit() %>% 
-     group_by(rnk, DisplayName) %>% 
+     group_by(rnk, UserId, DisplayName) %>% 
      mutate(p = N/sum(N),
             TagName = str_to_title(TagName)) %>% 
      ungroup
      
 d <- raw_d %>% 
-     pivot_wider(id_cols = c('rnk', 'DisplayName'), values_from = p, names_from = TagName, values_fill = 0)
+     pivot_wider(id_cols = c('rnk', 'UserId', 'DisplayName'), values_from = p, names_from = TagName, values_fill = 0)
 
 
 raw_d %>% 
@@ -103,7 +105,7 @@ Checkout how dummy easy the analysis is with tidymodels.  I think I spent more t
 
 ```{r}
 #| echo: true
-rec <- recipe(rnk + DisplayName ~ ., data = d) %>% 
+rec <- recipe(rnk + UserId + DisplayName ~ ., data = d) %>% 
        step_normalize(all_numeric_predictors()) %>% 
        step_pca(all_numeric_predictors(), num_comp = 3) %>% 
        prep()
@@ -179,7 +181,8 @@ Plotting PC2 vs PC3 shows a very predictable pattern.  Users near the bottom are
 interesting_accounts <- prin_comps %>% 
   filter(
     DisplayName %in% c('whuber', 'Tim', 'Stephan Kolassa', 'Rob Hyndman', 'Frank Harrell', 'EdM', "Nick Cox", "Demetri Pananos", "Dimitris Rizopoulos", "BruceET", 'topepo')
-  )
+  ) %>% 
+  distinct(DisplayName, .keep_all = T)
 
 prin_comps %>% 
   ggplot(aes(PC1, PC2)) + 

@@ -41,6 +41,7 @@ B.Id as AnswerId,
 B.OwnerUserId,
 B.Body as AnswerBody,
 
+C.iD as UserId,
 C.DisplayName,
 dense_rank() over (order by C.Reputation desc) as rnk,
 
@@ -62,12 +63,13 @@ on D.TagId = E.Id)
 
 select
 rnk,
+UserId, 
 DisplayName, 
 TagName,
 count(distinct QuestionId) as N
 from QA_tags
 where rnk&lt;=250
-group by rnk, DisplayName, TagName
+group by rnk, UserId, DisplayName, TagName
 order by rnk</code></pre>
 <p></p>
 </details>
@@ -89,7 +91,7 @@ order by rnk</code></pre>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> Regression </td>
-   <td style="text-align:left;"> 11.42% </td>
+   <td style="text-align:left;"> 11.40% </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
@@ -104,7 +106,7 @@ order by rnk</code></pre>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> Machine-Learning </td>
-   <td style="text-align:left;"> 5.46% </td>
+   <td style="text-align:left;"> 5.45% </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
@@ -114,7 +116,7 @@ order by rnk</code></pre>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> Bayesian </td>
-   <td style="text-align:left;"> 3.59% </td>
+   <td style="text-align:left;"> 3.58% </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
@@ -124,22 +126,22 @@ order by rnk</code></pre>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> Confidence-Interval </td>
-   <td style="text-align:left;"> 2.76% </td>
+   <td style="text-align:left;"> 2.75% </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> T-Test </td>
-   <td style="text-align:left;"> 2.65% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Generalized-Linear-Model </td>
-   <td style="text-align:left;"> 2.32% </td>
+   <td style="text-align:left;"> 2.64% </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Demetri Pananos </td>
    <td style="text-align:left;"> Probability </td>
-   <td style="text-align:left;"> 2.32% </td>
+   <td style="text-align:left;"> 2.31% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Generalized-Linear-Model </td>
+   <td style="text-align:left;"> 2.31% </td>
   </tr>
 </tbody>
 </table>
@@ -148,7 +150,7 @@ order by rnk</code></pre>
 </div>
 <p>Checkout how dummy easy the analysis is with tidymodels. I think I spent more time cleaning the data than I did modelling it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">rec <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">recipe</span>(rnk <span class="sc" style="color: #5E5E5E;">+</span> DisplayName <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">data =</span> d) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">rec <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">recipe</span>(rnk <span class="sc" style="color: #5E5E5E;">+</span> UserId <span class="sc" style="color: #5E5E5E;">+</span> DisplayName <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">data =</span> d) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
 <span id="cb2-2">       <span class="fu" style="color: #4758AB;">step_normalize</span>(<span class="fu" style="color: #4758AB;">all_numeric_predictors</span>()) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
 <span id="cb2-3">       <span class="fu" style="color: #4758AB;">step_pca</span>(<span class="fu" style="color: #4758AB;">all_numeric_predictors</span>(), <span class="at" style="color: #657422;">num_comp =</span> <span class="dv" style="color: #AD0000;">3</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
 <span id="cb2-4">       <span class="fu" style="color: #4758AB;">prep</span>()</span>
