@@ -9,8 +9,204 @@
 <link>https://dpananos.github.io/index.html</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-0.9.646</generator>
-<lastBuildDate>Sat, 30 Jul 2022 04:00:00 GMT</lastBuildDate>
+<generator>quarto-1.0.38</generator>
+<lastBuildDate>Tue, 16 Aug 2022 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>PCA on The Tags for Cross Validated</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2022-08-16-pca/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>So I’m moving at the end of the month. What better time than now to brush up on some SQL and machine learning.</p>
+<p>Julia Silge gave a <a href="https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/">really good talk</a> in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc). These principal components were able to shed some light on what drove the variation in questions asked.</p>
+<p>I love this talk, and I crib it all the time. As of late, I’ve not been doing much SQL, so I figured I would recreate Julia’s analysis using data from <a href="https://stats.stackexchange.com/">cross validated</a>. But this time, with a twist!</p>
+<p>What if instead of understanding the drivers of variance in questions asked, we analyze the kinds of questions users answer. This could give us insight into the type of analysts we have on cross validated. The site is intended to be for statistical analysis, but it has a mix of prediction questions, machine learning questions, econometrics questions, and much more. Hang around there long enough and you will see some familiar faces (mine included) and you get a pretty good sense of who answers what kinds of questions.</p>
+<p>I’m going to use data available from the stack exchange data explorer available <a href="https://data.stackexchange.com/">here</a>. I’ve included a code box in this post with the query I’ve used. I’ve sliced out the top 250 users as ranked by reputation and the top 100 tags as calculated by prevalence. We can use <code>{tidymodels}</code> to do a lot of the heay lifting. Let’s get to it.</p>
+<details>
+<summary>
+Click to see SQL Query
+</summary>
+<p>
+</p><pre><code>with QA_Tags as (
+select
+
+A.Id as QuestionId,
+A.Title as QuestionTitle,
+A.Body as QuestionBody,
+
+B.Id as AnswerId,
+B.OwnerUserId,
+B.Body as AnswerBody,
+
+C.DisplayName,
+dense_rank() over (order by C.Reputation desc) as rnk,
+
+D.TagId,
+E.TagName
+
+from
+--Extract Answers from Posts Table
+(select * from Posts where PostTypeId = 2)  as B
+--Extract Questions from Posts Table
+left join (select * from Posts where PostTypeId = 1)  as A
+on  A.Id = B.ParentId
+left join Users as C
+on B.OwnerUserId = C.Id
+left join PostTags as D
+on A.Id = D.PostId
+left join (select top 100 * from Tags where TagName is not NULL order by Count desc) as E
+on D.TagId = E.Id)
+
+select
+rnk,
+DisplayName, 
+TagName,
+count(distinct QuestionId) as N
+from QA_tags
+where rnk&lt;=250
+group by rnk, DisplayName, TagName
+order by rnk</code></pre>
+<p></p>
+</details>
+<section id="data-modelling" class="level2">
+<h2 class="anchored" data-anchor-id="data-modelling">Data &amp; Modelling</h2>
+<p>Let’s Take a peek at the data, using me as an example. Below are my top 10 tags as a percent of my total answers. Looks like I like to answer questions about regression, hypothesis testing, and R most frequently. Each of the top 250 users has data similar to this in my dataset. I need to pivot it so that tags become features. Then, I can normalize the data and perform PCA.</p>
+<div class="cell">
+<div class="cell-output-display">
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Name </th>
+   <th style="text-align:left;"> Tag </th>
+   <th style="text-align:left;"> Percent </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Regression </td>
+   <td style="text-align:left;"> 11.42% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Hypothesis-Testing </td>
+   <td style="text-align:left;"> 6.01% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> R </td>
+   <td style="text-align:left;"> 5.90% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Machine-Learning </td>
+   <td style="text-align:left;"> 5.46% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Logistic </td>
+   <td style="text-align:left;"> 4.85% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Bayesian </td>
+   <td style="text-align:left;"> 3.59% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Statistical-Significance </td>
+   <td style="text-align:left;"> 3.42% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Confidence-Interval </td>
+   <td style="text-align:left;"> 2.76% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> T-Test </td>
+   <td style="text-align:left;"> 2.65% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Generalized-Linear-Model </td>
+   <td style="text-align:left;"> 2.32% </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Demetri Pananos </td>
+   <td style="text-align:left;"> Probability </td>
+   <td style="text-align:left;"> 2.32% </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<p>Checkout how dummy easy the analysis is with tidymodels. I think I spent more time cleaning the data than I did modelling it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">rec <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">recipe</span>(rnk <span class="sc" style="color: #5E5E5E;">+</span> DisplayName <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">data =</span> d) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-2">       <span class="fu" style="color: #4758AB;">step_normalize</span>(<span class="fu" style="color: #4758AB;">all_numeric_predictors</span>()) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-3">       <span class="fu" style="color: #4758AB;">step_pca</span>(<span class="fu" style="color: #4758AB;">all_numeric_predictors</span>(), <span class="at" style="color: #657422;">num_comp =</span> <span class="dv" style="color: #AD0000;">3</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-4">       <span class="fu" style="color: #4758AB;">prep</span>()</span>
+<span id="cb2-5"></span>
+<span id="cb2-6">prin_comps <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">bake</span>(rec, <span class="at" style="color: #657422;">new_data =</span> d) </span>
+<span id="cb2-7">weights <span class="ot" style="color: #003B4F;">&lt;-</span> rec <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-8">           <span class="fu" style="color: #4758AB;">tidy</span>(<span class="at" style="color: #657422;">number =</span> <span class="dv" style="color: #AD0000;">2</span>, <span class="at" style="color: #657422;">type =</span> <span class="st" style="color: #20794D;">"coef"</span>)</span></code></pre></div>
+</div>
+<p>The last two lines extract both the principal components and the weights for each tag on each component. Now. we’re ready to make some plots.</p>
+</section>
+<section id="principal-components" class="level2">
+<h2 class="anchored" data-anchor-id="principal-components">Principal Components</h2>
+<p>The results for the first 3 principal componensts are shown below. I’ve shown the 20 most extreme components for clarity.</p>
+<p>The first principal compnent has tags like “Anova”, “T-Test” and “SPSS” as heavily weighted positive, while “Machine Learning”, “Mathematical Statistics” and “Probability” are all weighted heavily negative (the direction of the weights doesn’t matter, it isn’t like one direction is better or worse). To me, I read this as “Beginner” vs “Advanced” answers. Questions with the former tags are usually from users who are maybe taking a stats class for the first time and are learning about the t test or Anova. The dead give away for this is the “SPSS” tag being weighted so heavily<sup>1</sup>. Looking at more weights verifies this, with the negative weights being associated with topics like “Neural Nets”, and “Maximum Likelihod” while the positive weights have tags like “Statistical Significance” and “Interpretation”.</p>
+<p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
+<div class="cell">
+
+</div>
+<div class="cell" data-layout-row="3" data-fig.dpi="240">
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means classical stats vs machine learning. I’m not surprised to see Frank Harrell closer to the bottom, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the bottom of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
+<p>Plotting PC2 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
+<div class="cell quarto-layout-panel" data-fig.dpi="240">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Because once you’ve taken a few stats courses, you know bette than to use SPSS.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>Machine Learning</category>
+  <guid>https://dpananos.github.io/posts/2022-08-16-pca/index.html</guid>
+  <pubDate>Tue, 16 Aug 2022 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Interim Analysis & Group Sequential Designs Pt 2</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -52,7 +248,7 @@
 <div class="cell-output-display">
 <div id="fig-spending-function" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Pocock and O’Brien <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/fig-spending-function-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -384,7 +580,7 @@ Click to see which is which
 <div class="cell-output-display">
 <div id="fig-forecast" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Forecasted lift after the 12 months. Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-forecast-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -399,7 +595,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">The red lines are draws where you would have implemented a change to hurt the conversion rate. See how sometimes those lines actually decrease? Such is life, can’t win em all!</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -412,7 +608,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div id="fig-conditional" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year. Indicated point/interval is mean and 95% credible interval.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-conditional-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -487,7 +683,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div id="fig-gsd" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: A GSD for <img src="https://latex.codecogs.com/png.latex?K=2"></figcaption><p></p>
 <p>
 </p><pre class="mermaid" data-tooltip-selector="#mermaid-tooltip-1">flowchart TD
   A[Observe Group k=1] --&gt; B[Perform Test]
@@ -595,7 +791,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">10,000 simulations of a <img src="https://latex.codecogs.com/png.latex?K=2"> GSD. Each group has 250 observations. Note that <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(2)%7D"> has smaller standard error due to the fact that 500 (250 + 250) observations are used in the computation. Sampling distributions show in blue.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/marginal-density-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -648,7 +844,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div id="fig-level-curves" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: 1000 samples from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-level-curves-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -715,7 +911,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div id="fig-regions" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 3: Standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -783,7 +979,7 @@ Click to see individual trajectories
 <div id="fig-trig-py" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Whoa, check it out!</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -798,7 +994,7 @@ Click to see individual trajectories
 <div id="fig-trig-r" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-r-3.png" class="img-fluid figure-img" width="480"></p>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: Whoa, check it out again!</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1171,7 +1367,7 @@ generated quantities{
 <div id="fig-prior" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/priors.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">(a) Priors</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1179,12 +1375,12 @@ generated quantities{
 <div id="fig-hanno" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/posterior.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">(b) Posteriors</figcaption><p></p>
 </figure>
 </div>
 </div>
 </div>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Prior and Posterior distributions for the model.</figcaption><p></p>
 </figure>
 </div>
 <p>The take home here is that the sequences are largely consistent with an unbiased and uncorrelated coin. The expected correlation is negative (-0.05) meaning humans are more likely to switch from heads to tails, or tails to heads, and the expected bias is 0.53 meaning people seem to favor heads for some reason. The results are largely unsurprising, and I really wish I could place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> directly so that my model really does reflect the state of my knowledge, but this is good enough for now.</p>
@@ -1817,7 +2013,7 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <div id="fig-grid" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2017-12-29-coins/index_files/figure-html/fig-grid-output-1.png" class="img-fluid figure-img"></p>
-<p></p><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Coins after flipping. Dark squares are face down coins.</figcaption><p></p>
 </figure>
 </div>
 </div>
