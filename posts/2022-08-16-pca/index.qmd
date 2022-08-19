@@ -8,8 +8,6 @@ categories: [Machine Learning]
 number-sections: false
 ---
 
-So I'm moving at the end of the month.  What better time than now to brush up on some SQL and machine learning.
-
 
 Julia Silge gave a [really good talk](https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/) in 2018 about PCA ond tags on stack overflow.  She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc).  These principal components were able to shed some light on what drove the variation in questions asked.
 
@@ -169,9 +167,9 @@ weights %>%
 
 ```
 
-I think what is more interesting is that we can plot some of the more popular users on the site using the principal components.  In the first plot, I've scattered PC1 vs PC2.  Left to right means advanced vs simple questions.  It is no surpriuse to see whuber farther left and BruceET farther right.  Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions.  Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means classical stats vs machine learning.  I'm not surprised to see Frank Harrell closer to the bottom, as he has appeared in many questions if not only to scold people for using accuracy as a metric.  No surprise Topepo is on the bottom of this PC.  Interestingly, I'm kind of near the origin, if not a bit right of it.  Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.
+I think what is more interesting is that we can plot some of the more popular users on the site using the principal components.  In the first plot, I've scattered PC1 vs PC2.  Left to right means advanced vs simple questions.  It is no surpriuse to see whuber farther left and BruceET farther right.  Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions.  Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats.  I'm not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric.  No surprise Topepo is on the top of this PC.  Interestingly, I'm kind of near the origin, if not a bit right of it.  Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.
 
-Plotting PC2 vs PC3 shows a very predictable pattern.  Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom.  I'm near the top, I have no clue about any of that stuff to be honest.
+Plotting PC1 vs PC3 shows a very predictable pattern.  Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom.  I'm near the top, I have no clue about any of that stuff to be honest.
 ```{r}
 #| label: prin-comp-3
 #| layout-nrow: 2
@@ -180,7 +178,7 @@ Plotting PC2 vs PC3 shows a very predictable pattern.  Users near the bottom are
 #| echo: false
 interesting_accounts <- prin_comps %>% 
   filter(
-    DisplayName %in% c('whuber', 'Tim', 'Stephan Kolassa', 'Rob Hyndman', 'Frank Harrell', 'EdM', "Nick Cox", "Demetri Pananos", "Dimitris Rizopoulos", "BruceET", 'topepo')
+    DisplayName %in% c('whuber', 'Tim', 'Stephan Kolassa', 'Rob Hyndman', 'Frank Harrell', 'EdM', "Nick Cox", "Demetri Pananos", "Dimitris Rizopoulos", "BruceET", 'topepo', 'IrishStat')
   ) %>% 
   distinct(DisplayName, .keep_all = T)
 
@@ -190,11 +188,11 @@ prin_comps %>%
   geom_point(data = interesting_accounts, color='red')+
   ggrepel::geom_text_repel(data=interesting_accounts, aes(label=DisplayName))+
   theme_classic() + 
-  theme(aspect.ratio = 1)
+  theme(aspect.ratio = 1) 
 
 
 prin_comps %>% 
-  ggplot(aes(PC2, PC3)) + 
+  ggplot(aes(PC1, PC3)) + 
   geom_point(alpha = 0.1) + 
   geom_point(data = interesting_accounts, color='red')+
   ggrepel::geom_text_repel(data=interesting_accounts, aes(label=DisplayName))+
@@ -202,3 +200,9 @@ prin_comps %>%
   theme(aspect.ratio = 1)
 
 ```
+## Conclusion
+ 
+There appear to be at least three dimensions about which analysts on cross validated can be placed.  Analysts can either opt to answer easy or difficult questions, which lean classical statistics or machine learning, with additional focus on forecasting on non-forecasting problems.  That's a fairly useful interpretation of the first three principal components!
+
+It could be fun to think about how best to use this information.  Now that we know these three kinds of subgroups, could we use it to recommend users questions to answer?  Its been the case that [there is a large gap between questions and answers](https://stats.meta.stackexchange.com/questions/5325/we-have-a-very-large-widening-gap-between-questions-and-answers-how-do-we-fix), so maybe this could be useful but also maybe not.
+ 

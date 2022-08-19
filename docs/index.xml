@@ -20,7 +20,6 @@
 
 
 
-<p>So I’m moving at the end of the month. What better time than now to brush up on some SQL and machine learning.</p>
 <p>Julia Silge gave a <a href="https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/">really good talk</a> in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc). These principal components were able to shed some light on what drove the variation in questions asked.</p>
 <p>I love this talk, and I crib it all the time. As of late, I’ve not been doing much SQL, so I figured I would recreate Julia’s analysis using data from <a href="https://stats.stackexchange.com/">cross validated</a>. But this time, with a twist!</p>
 <p>What if instead of understanding the drivers of variance in questions asked, we analyze the kinds of questions users answer. This could give us insight into the type of analysts we have on cross validated. The site is intended to be for statistical analysis, but it has a mix of prediction questions, machine learning questions, econometrics questions, and much more. Hang around there long enough and you will see some familiar faces (mine included) and you get a pretty good sense of who answers what kinds of questions.</p>
@@ -180,8 +179,8 @@ order by rnk</code></pre>
 <p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means classical stats vs machine learning. I’m not surprised to see Frank Harrell closer to the bottom, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the bottom of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
-<p>Plotting PC2 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
+<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats. I’m not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the top of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
+<p>Plotting PC1 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
 <div class="cell quarto-layout-panel" data-fig.dpi="240">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
@@ -194,6 +193,11 @@ order by rnk</code></pre>
 </div>
 </div>
 </div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>There appear to be at least three dimensions about which analysts on cross validated can be placed. Analysts can either opt to answer easy or difficult questions, which lean classical statistics or machine learning, with additional focus on forecasting on non-forecasting problems. That’s a fairly useful interpretation of the first three principal components!</p>
+<p>It could be fun to think about how best to use this information. Now that we know these three kinds of subgroups, could we use it to recommend users questions to answer? Its been the case that <a href="https://stats.meta.stackexchange.com/questions/5325/we-have-a-very-large-widening-gap-between-questions-and-answers-how-do-we-fix">there is a large gap between questions and answers</a>, so maybe this could be useful but also maybe not.</p>
 
 
 </section>
