@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2022-10-30">
+
+<title>PhDemetri - How to Make a Clinical Prediction Model, Step 1: Sample Size</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="PhDemetri - How to Make a Clinical Prediction Model, Step 1: Sample Size">
+<meta property="og:description" content="I still moonlight as a biostatistician, and lately I’ve seen a lot of clinical prediction models. I won’t beat around the bush; they aren’t amazing models.">
+<meta property="og:site-name" content="PhDemetri">
+<meta name="twitter:title" content="PhDemetri - How to Make a Clinical Prediction Model, Step 1: Sample Size">
+<meta name="twitter:description" content="I still moonlight as a biostatistician, and lately I’ve seen a lot of clinical prediction models. I won’t beat around the bush; they aren’t amazing models.">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">PhDemetri</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">Consulting</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">How to Make a Clinical Prediction Model, Step 1: Sample Size</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 30, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#who-should-read-this" id="toc-who-should-read-this" class="nav-link" data-scroll-target="#who-should-read-this">Who Should Read This</a></li>
+  <li><a href="#why-should-you-read-this" id="toc-why-should-you-read-this" class="nav-link" data-scroll-target="#why-should-you-read-this">Why Should You Read This</a></li>
+  </ul></li>
+  <li><a href="#sample-sizes-for-prediction-models" id="toc-sample-sizes-for-prediction-models" class="nav-link" data-scroll-target="#sample-sizes-for-prediction-models">Sample Sizes for Prediction Models</a>
+  <ul class="collapse">
+  <li><a href="#how-not-to-compute-a-sample-size-epv-is-misused-and-misunderstood" id="toc-how-not-to-compute-a-sample-size-epv-is-misused-and-misunderstood" class="nav-link" data-scroll-target="#how-not-to-compute-a-sample-size-epv-is-misused-and-misunderstood">How Not To Compute a Sample Size: EPV is Misused and Misunderstood</a></li>
+  </ul></li>
+  <li><a href="#steps-for-predictive-model-sample-size" id="toc-steps-for-predictive-model-sample-size" class="nav-link" data-scroll-target="#steps-for-predictive-model-sample-size">4 Steps For Predictive Model Sample Size:</a>
+  <ul class="collapse">
+  <li><a href="#step-1-what-sample-size-will-produice-a-precice-estimate-of-the-overall-outcome-risk-or-mean-outcome-value" id="toc-step-1-what-sample-size-will-produice-a-precice-estimate-of-the-overall-outcome-risk-or-mean-outcome-value" class="nav-link" data-scroll-target="#step-1-what-sample-size-will-produice-a-precice-estimate-of-the-overall-outcome-risk-or-mean-outcome-value">Step 1: What Sample Size Will Produice a Precice Estimate of the Overall outcome Risk or Mean outcome Value?</a></li>
+  <li><a href="#step-2-what-sample-size-will-produce-predicted-values-that-have-a-small-mean-error-across-all-individuals" id="toc-step-2-what-sample-size-will-produce-predicted-values-that-have-a-small-mean-error-across-all-individuals" class="nav-link" data-scroll-target="#step-2-what-sample-size-will-produce-predicted-values-that-have-a-small-mean-error-across-all-individuals">Step 2: What Sample Size Will Produce Predicted Values That Have a Small Mean Error Across All Individuals?</a></li>
+  <li><a href="#step-3-what-sample-size-will-produce-a-small-required-shrinkage-of-predictor-effects" id="toc-step-3-what-sample-size-will-produce-a-small-required-shrinkage-of-predictor-effects" class="nav-link" data-scroll-target="#step-3-what-sample-size-will-produce-a-small-required-shrinkage-of-predictor-effects">Step 3: What Sample Size Will Produce a Small Required Shrinkage of Predictor Effects?</a></li>
+  <li><a href="#step-4-what-sample-size-will-produce-a-small-optimism-in-apparent-model-fit" id="toc-step-4-what-sample-size-will-produce-a-small-optimism-in-apparent-model-fit" class="nav-link" data-scroll-target="#step-4-what-sample-size-will-produce-a-small-optimism-in-apparent-model-fit">Step 4: What Sample SIze Will Produce a Small Optimism in Apparent Model Fit?</a></li>
+  </ul></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-10-30-pred-models/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>I still moonlight as a biostatistician, and lately I’ve seen a lot of clinical prediction models. I won’t beat around the bush; they aren’t amazing models. Now, in fairness, it seems like a lot of clinical prediction models are.</p>
+<p>There is a ton of ink spilled on how to go about making a model, like Frank Harrell’s <a href="https://hbiostat.org/rmsc/">RMS Notes</a> (now in Quarto so you can copy + paste code), but often times people are looking for a shortcut. So I’m creating a sequence of blog posts on prediction models for clinical use. They are going to be short, sweet, and tell you the following things:</p>
+<ul>
+<li>What steps are involved in creating a model</li>
+<li>What are some possible resources you need to read/and or cite in your protocol or study.</li>
+<li>Why this is important, and why you should not skimp on the step in question.</li>
+</ul>
+<p>I’m going to skip over questions of <em>if</em> a model should be built. We will just assume that there is a genuine need for a model and that you have data to answer that effectively.</p>
+<section id="who-should-read-this" class="level3">
+<h3 class="anchored" data-anchor-id="who-should-read-this">Who Should Read This</h3>
+<p>These posts are intended for medical students and clinician researchers who are interested in making clinical prediction models. Ideally, you have some training in statistics (e.g.&nbsp;you should be able to tell me what the standard error for a binomial random variable is, or at least be able to look it up) and be familiar with R or Stata (SAS may also be fine, but SPSS is probably a “no”).</p>
+<p>Please note however that these posts are not a full scale replacement for a statistician. They are intended to help you come to the table prepared to speak with a statistician.</p>
+</section>
+<section id="why-should-you-read-this" class="level3">
+<h3 class="anchored" data-anchor-id="why-should-you-read-this">Why Should You Read This</h3>
+<p>I can’t remember who tweeted this, but someone once tweeted that clinical prediction models are essentially little medical devices. They have the opportunity to guide patient treatment, and if you do not consider that a real possibility when creating a model then I would encourage you to consider why you’re building it in the first place. Consequently, we want to make sure that these models are well planned, well fit, well validated, and well communicated in preparation for their eventual use. Else, we are putting patients at risk.</p>
+<p>At risk of beating a dead horse and coming off as flippant, the “Do No Harm” extends to products you create and research you promulgate.</p>
+</section>
+</section>
+<section id="sample-sizes-for-prediction-models" class="level2">
+<h2 class="anchored" data-anchor-id="sample-sizes-for-prediction-models">Sample Sizes for Prediction Models</h2>
+<p>Sample sizes are usually the first thing you do for a study and it is worthwhile to sit back and consider the reason we do sample size computations. For statistical inference, we want to power our study to detect an effect of some variable. The rationale here being that if we do not have enough data, we might make a type II error (a false negative). The reason we would make this is because the test statistic can have a very large variance, meaning there is a reasonable chance we observe a test statistic below our critical value (or that our confidence interval might be too wide, same thing really). Variance is an obstacle, and we compute the sample size to know how much data we need to have a reasonable chance of overcoming that obstacle.</p>
+<p>Variance is an obstacle in prediction too. Rather than talk about the variance of a test statistic, we are more interested in the variance of the prediction itself. Let’s see what I mean with a little example. Take a look at <a href="#fig-variance">Figure&nbsp;1</a>. Each panel shows 10 predicted risk curves estimated from 10 different datasets, each having the number of observations indicated by the banner at the top of the plot. Notice how the lines in the <span class="math inline">\(N=50\)</span> plot are really spread out? This is “variance” in the prediction case. Now, why is this an obstacle? Obviously, we want our predictions to be close to the true risk. With more data (and assuming the model is correctly specified), the predictions get closer and closer to the true risk curve (the red line). When we don’t have enough data, our predictions can be very far from the truth, and even show the opposite behaviour. See how there is 1 line in the <span class="math inline">\(N=50\)</span> panel which actually predicts the risk decreases as the predictor increases? That’s what we are trying to avoid.</p>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-variance" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p></p><figcaption class="figure-caption">Figure 1: Each subplot shows 10 estimated risk curves from 10 different datasets, each measuring the same data generating process. The only difference between the 4 subplots (aside from sampling varibility) is the number of observations used to fit the model. The size of the dataset used to create the model is indicated on top of the plot. The models which were fit with more data are less varible as evidenced by their clustering around the truth.</figcaption><p></p>
+<p><img src="index_files/figure-html/fig-variance-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In 2020 Riley <em>et. al</em> (the <em>et. al</em> includes such names as Frank Harrell, Maarten Van Smeden, and Gary Collins) published <a href="https://www.bmj.com/content/368/bmj.m441">Calculating the sample size required for developing a clinical prediction model</a> <span class="citation" data-cites="riley_calculating_2020">(<a href="#ref-riley_calculating_2020" role="doc-biblioref">Richard D. Riley et al. 2020</a>)</span>. This paper is essentially a guide on what to think about with respect to sample size before creating a model. You should really read it, but I will summarize a few points for you here. But first, a quick work on a popular rule-of-thumb.</p>
+<section id="how-not-to-compute-a-sample-size-epv-is-misused-and-misunderstood" class="level3">
+<h3 class="anchored" data-anchor-id="how-not-to-compute-a-sample-size-epv-is-misused-and-misunderstood">How Not To Compute a Sample Size: EPV is Misused and Misunderstood</h3>
+<p>A popular rule-of-thumb is that you can adjust for one variable for every 10 events or non-events (whichever is fewer). This rule apparently came out of the 90s, the studies which produced it focused on the bias and precision of the estimated effect. Those are fairly important if you’re doing statistical inference, but we don’t care about p values and confidence intervals as much when we are creating a prediction model. Additionally, a bit of bias can actually be a good thing. See the James-Stein phenomenon for more on this.</p>
+<p>Even if 10 EPV were a good rule of thumb it is often misunderstood. The rule actually states that for every 10 event/non-event (again, whichever is the fewer) you can <em>estimate one additional parameter</em>. A single variable can be associated with multiple different parameters. For instance, a categorical variable with <span class="math inline">\(K\)</span> categories will require <span class="math inline">\(K-1\)</span> parameters (1 is lumped into the intercept). A continuous variable requires 1 parameter if you assume the effect is linear on the appropriate scale, but if you were to relax that assumption and use a restricted cubic spline (sometimes called a natural spline) then you need <span class="math inline">\(df-1\)</span> parameters, where <span class="math inline">\(df\)</span> is the number of knots. Additionally, under this rule, the first 10 events are used to estimate the intercept, so really you need 20 events to even begin to think about modelling.</p>
+<p>There has been some research into the rule of thumb, and a few papers say if any such rule were to exist then the required events per parameter might be as high as 50. In short, the 10 EPV rule of thumb is not a justifiable means of selecting a sample size. Luckily, Riley <em>et. al</em> are going to provide us with 4 steps to determine the sample size for our model. Let’s discuss that next.</p>
+</section>
+</section>
+<section id="steps-for-predictive-model-sample-size" class="level2">
+<h2 class="anchored" data-anchor-id="steps-for-predictive-model-sample-size">4 Steps For Predictive Model Sample Size:</h2>
+<p>In what follows, I’m going to explain to you the four steps to creating a predictive model sample size. Each step estimates a sample size to meet some criterion. At the end of the 4 steps, we choose the largest sample size as our final sample size for our model. Much like a chain, a model is only as good as its weakest part. So if we choose the largest sample size among the 4, we automatically ensure all 4 criteria will be met. That’s going to lead to a good model (or at least a good plan to make a model).</p>
+<section id="step-1-what-sample-size-will-produice-a-precice-estimate-of-the-overall-outcome-risk-or-mean-outcome-value" class="level3">
+<h3 class="anchored" data-anchor-id="step-1-what-sample-size-will-produice-a-precice-estimate-of-the-overall-outcome-risk-or-mean-outcome-value">Step 1: What Sample Size Will Produice a Precice Estimate of the Overall outcome Risk or Mean outcome Value?</h3>
+<p>Consider the simplest model you could possibly make: 1 parameter. This model is going to estimate the mean outcome. If this estimate can not be made precisely then in what sense would the model you want to build – with potentially many more parameters – be considered a good model?</p>
+<p>The way to do this is to consider the margin of error in the estimate of the intercept. The authors recommend a margin of error no larger than 0.05. For a binary outcome, the margin of error, <span class="math inline">\(\delta\)</span> <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, is</p>
+<p><span class="math display">\[ \delta =2 \sqrt{\dfrac{p (1-p) }{n}} \&gt;. \]</span></p>
+<p>Here, <span class="math inline">\(p\)</span> is simply the anticipated mean outcome (number of outcomes divided by number of samples). The margin of error is maximized when <span class="math inline">\(p=0.5\)</span>, so if you don’t have a good estimate of <span class="math inline">\(p\)</span> just assume the worst and you’ll be prepared for most anything. Inverting this for <span class="math inline">\(n\)</span> yields <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<p><span class="math display">\[ n = \left(\dfrac{2 \times 0.5}{0.05}\right)^2 = 400 \]</span></p>
+<p>So at this point, the absolute smallest sample size you would need for a binary outcome would be 400 samples. If you had fewer than 400 samples and no predictors, then your estimate of the intercept in the worst case when <span class="math inline">\(p=0.5\)</span> would have a margin of error larger than 0.05.</p>
+<p>If you’re already sweating about the math here, don’t worry. We’re going to wrap this blog post up with an R function to do all this math for you.</p>
+</section>
+<section id="step-2-what-sample-size-will-produce-predicted-values-that-have-a-small-mean-error-across-all-individuals" class="level3">
+<h3 class="anchored" data-anchor-id="step-2-what-sample-size-will-produce-predicted-values-that-have-a-small-mean-error-across-all-individuals">Step 2: What Sample Size Will Produce Predicted Values That Have a Small Mean Error Across All Individuals?</h3>
+<p>Hopefully, our data have a wide variety of individuals from which to learn. We want the predicted outcome to have a small error across all those individuals, else we’re going to do really well for some individuals and really bad for others.</p>
+<p>Its hard to collapse “small error” onto a single quantity like we did in the last step. There are a few things which can affect the performance of the model, including the sample size, the number of candidate predictors, and the anticipated average outcome. Lucky for you, all you need from this step is the number of candidate predictors as well as an estimate of the average outcome. The library we’re going to be using will do the computation for this step for you.</p>
+<p>Though, if you are interested, <span class="citation" data-cites="riley_calculating_2020">Richard D. Riley et al. (<a href="#ref-riley_calculating_2020" role="doc-biblioref">2020</a>)</span> has an appendix on how this is done.</p>
+</section>
+<section id="step-3-what-sample-size-will-produce-a-small-required-shrinkage-of-predictor-effects" class="level3">
+<h3 class="anchored" data-anchor-id="step-3-what-sample-size-will-produce-a-small-required-shrinkage-of-predictor-effects">Step 3: What Sample Size Will Produce a Small Required Shrinkage of Predictor Effects?</h3>
+<p>Overfitting is a problem we need to avoid. The authors of <span class="citation" data-cites="riley_calculating_2020">Richard D. Riley et al. (<a href="#ref-riley_calculating_2020" role="doc-biblioref">2020</a>)</span> describe overfitting as:</p>
+<blockquote class="blockquote">
+<p>[…] when a devloped model;s predictions are more extreme than they ought to be for individuals in a new dataset from the same target population.</p>
+</blockquote>
+<p>The authors use the example of a model fit to a binary outcome to demonstrate this. In an overfit model for a binary outcome, the predicted risks will be too close to 1 for individuals with a higher than average risk, and will be too close to 0 for individuals with a lower than average risk. Overfit models’ look really good on the data used to fit the model, but fail to cary that performance over to new observations.</p>
+<p>One way to combat overfitting is to bias the parameter estimates a little bit <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. This isn’t a silver bullet, but it is a good tactic to try. For this step, we need to find a sample size such that the desired level of bias (what the authors reffer to as shrinkage) is <span class="math inline">\(\leq 10\%\)</span>. For this step, you need to know the number of predictor parameters as well as the outcome proportion/rate for binary/time-to-event models.</p>
+<p>You’re also going to need to have an estimate of the Cox-Snell R squared for the model. Typically, you can get this from a previously published model (if it is reported), or you can estimate it using a number of techniques described in <span class="citation" data-cites="riley2019minimum">(<a href="#ref-riley2019minimum" role="doc-biblioref">Richard D. Riley et al. 2019</a>)</span>. For a continuous outcome, the Cox-Snell R squared is simply the coefficient of determination.</p>
+</section>
+<section id="step-4-what-sample-size-will-produce-a-small-optimism-in-apparent-model-fit" class="level3">
+<h3 class="anchored" data-anchor-id="step-4-what-sample-size-will-produce-a-small-optimism-in-apparent-model-fit">Step 4: What Sample SIze Will Produce a Small Optimism in Apparent Model Fit?</h3>
+<p>Optimism is the difference between the performance of your model on the data used to fit it, and the performance of your model on new data. Every model is going to have some optimism, that is just a fact of life. We just want that optimism to be small.</p>
+<p>For this step, all you need is an estimate of the Cox-Snell R squared.</p>
+</section>
+</section>
+<section id="examples" class="level2">
+<h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<p>Many applied examples are provided in <span class="citation" data-cites="riley_calculating_2020">(<a href="#ref-riley_calculating_2020" role="doc-biblioref">Richard D. Riley et al. 2020</a>)</span>, but I thought we could find some real life examples and try to do the calculation ourselves.</p>
+
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-riley_calculating_2020" class="csl-entry" role="doc-biblioentry">
+Riley, Richard D., Joie Ensor, Kym I. E. Snell, Frank E. Harrell, Glen P. Martin, Johannes B. Reitsma, Karel G. M. Moons, Gary Collins, and Maarten van Smeden. 2020. <span>“Calculating the Sample Size Required for Developing a Clinical Prediction Model.”</span> <em>BMJ</em> 368 (March): m441. <a href="https://doi.org/10.1136/bmj.m441">https://doi.org/10.1136/bmj.m441</a>.
+</div>
+<div id="ref-riley2019minimum" class="csl-entry" role="doc-biblioentry">
+Riley, Richard D, Kym IE Snell, Joie Ensor, Danielle L Burke, Frank E Harrell Jr, Karel GM Moons, and Gary S Collins. 2019. <span>“Minimum Sample Size for Developing a Multivariable Prediction Model: PART II-Binary and Time-to-Event Outcomes.”</span> <em>Statistics in Medicine</em> 38 (7): 1276–96.
+</div>
+</div></section><section class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1" role="doc-endnote"><p>Continuous and survival data have their own computations for margin of error. See <span class="citation" data-cites="riley_calculating_2020">(<a href="#ref-riley_calculating_2020" role="doc-biblioref">Richard D. Riley et al. 2020</a>)</span> for more.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p>Note, the authors use the proper <span class="math inline">\(z\)</span>-quantile of 1.96, which yields a 385 samples. Often in medicine, 15 samples is a lot so if you need to be precise and use 385 as the sample size for this step, then do it.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3" role="doc-endnote"><p>Told you bias was a good thing sometimes.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
