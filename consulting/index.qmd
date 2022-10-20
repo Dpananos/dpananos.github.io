@@ -1,5 +1,5 @@
 ---
-title: "Demetri Pananos"
+title: "Demetri Pananos Ph.D"
 image: ../profile.jpg
 about:
   template: trestles
@@ -18,7 +18,7 @@ about:
 
 ## Statistical Consulting
 
-I am available for private statistical consulting. Throughout my PhD, I've had the good fortune to work as a statistical analyst for The Department of Medicine at Western University.  In that role I provided statistical services to researching physicians, including: but not limited to:
+I am available for private statistical consulting. I've had the good fortune to work as a statistical analyst for The Department of Medicine at Western University.  In that role I provided statistical services to researching physicians, including: but not limited to:
 
 * Providing statistical expertise in grant writing
 * Helping design analysis plans for funded studies

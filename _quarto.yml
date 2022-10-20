@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "PhDemetri"
+  title: "Demetri Pananos Ph.D"
   site-url: https://dpananos.github.io
   repo-url: https://github.com/Dpananos/dpananos.github.io
   repo-actions: [edit, issue]
