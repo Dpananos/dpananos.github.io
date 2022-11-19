@@ -2,62 +2,66 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dpananos.github.io/posts/2019-05-21-odes/index.html</loc>
-    <lastmod>2022-10-20T17:00:02.675Z</lastmod>
+    <lastmod>2022-11-19T23:36:54.937Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2017-12-29-coins/index.html</loc>
-    <lastmod>2022-10-20T17:00:03.382Z</lastmod>
+    <lastmod>2022-11-19T23:36:55.424Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</loc>
-    <lastmod>2022-10-20T17:00:03.896Z</lastmod>
+    <lastmod>2022-11-19T23:36:55.883Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</loc>
-    <lastmod>2022-10-20T17:00:04.586Z</lastmod>
+    <lastmod>2022-11-19T23:36:56.495Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</loc>
-    <lastmod>2022-10-20T17:00:05.113Z</lastmod>
+    <lastmod>2022-11-19T23:36:56.988Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</loc>
-    <lastmod>2022-10-20T17:00:05.970Z</lastmod>
+    <lastmod>2022-11-19T23:36:57.837Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</loc>
-    <lastmod>2022-10-20T17:00:06.656Z</lastmod>
+    <lastmod>2022-11-19T23:36:58.491Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</loc>
-    <lastmod>2022-10-20T17:00:07.236Z</lastmod>
+    <lastmod>2022-11-19T23:36:59.018Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index.html</loc>
+    <lastmod>2022-11-19T23:36:59.586Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-08-16-pca/index.html</loc>
-    <lastmod>2022-10-20T17:00:08.056Z</lastmod>
+    <lastmod>2022-11-19T23:37:00.129Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2020-10-06-links/index.html</loc>
-    <lastmod>2022-10-20T17:00:08.514Z</lastmod>
+    <lastmod>2022-11-19T23:37:00.658Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</loc>
-    <lastmod>2022-10-20T17:00:09.227Z</lastmod>
+    <lastmod>2022-11-19T23:37:01.310Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</loc>
-    <lastmod>2022-10-20T17:00:09.632Z</lastmod>
+    <lastmod>2022-11-19T23:37:01.729Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2022-10-20T17:00:18.584Z</lastmod>
+    <lastmod>2022-11-19T23:37:02.181Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
-    <lastmod>2022-10-20T17:00:24.005Z</lastmod>
+    <lastmod>2022-11-19T23:37:02.476Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/consulting/index.html</loc>
-    <lastmod>2022-10-20T17:00:28.351Z</lastmod>
+    <lastmod>2022-11-19T23:37:02.769Z</lastmod>
   </url>
 </urlset>

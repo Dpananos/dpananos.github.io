@@ -1,0 +1,284 @@
+---
+title: Bootstrapping in SQL
+date: "2022-11-16"
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: [Statistics]
+number-sections: false
+---
+
+## Introduction
+
+Remember the ["Double Down"](https://en.wikipedia.org/wiki/Double_Down_(sandwich)) from KFC?  It was bacon and cheese sandwiched between two deep fried pieces of chicken. I'm willing to bet we all conceived of it independently (as in "LOL wouldn't it be crazy if..."), realistically could have made it ourselves, but were smart enough not to because "sure we could but... why?".  
+
+This blog post is the Double Down of statistics.
+
+## Bootstrapping in SQL.  No, Really.
+
+Two things which have made my stats like easier:
+
+* Bootstrapping, and 
+* Tidy data
+
+R's `rsample::bootstraps` seems to do one in terms of the other.  Take a look at the output of that function.  We have, in essence, one bootstrapped dataset per row.
+
+```{r}
+#| echo: true
+library(tidyverse)
+library(rsample )
+
+rsample::bootstraps(cars)
+```
+
+In theory, I could unnest this and have one observation from each bootstrap per row, with `id` serving as an indicator to tell me to which resample the observation belongs to.  Which means...I could theoretically bootstrap in SQL.
+
+So, let's do that.  I'm going to use duckdb because its SQL-like and has some stats functions (whereas SQLite does not).
+
+
+Let's sample some pairs $(x_i, y_i)$ from the relationship $y_i = 2x_i + 1 + \varepsilon_i$, where the  $\varepsilon$ are iid draws from a standard Gaussian  Let's stick that in a dataframe along with a row number column into our database.  The data are shown in @tbl-original-data.
+
+```{r}
+#| echo: false
+library(DBI)
+library(duckdb)
+
+set.seed(0)
+N <- 2500
+x <- rgamma(N, 4, 3)
+y <- 2*x + 1 + rnorm(N)
+original_data <- tibble(original_rownum = 1:length(x),
+                        x = x,
+                        y = y)
+
+con = dbConnect(duckdb::duckdb(), dbdir=":memory:")
+DBI::dbWriteTable(con, 'original_data', original_data)
+```
+
+
+```{r}
+#| tbl-cap: My Data
+#| label: tbl-original-data
+kableExtra::kbl(head(original_data), 
+                digits = 2, 
+                booktabs = T,
+                align = 'c') %>% 
+  kableExtra::kable_styling(bootstrap_options = 'striped')
+```
+
+
+
+To bootstrap in SQL, we need to emulate what the unnested results of `rsample::bootstraps` would look like.  We need rows of (`strap_id`, `original_data_rownum`, and `bootstrap_rownum`).  Let's discuss the interpretation and purpose of each column.
+
+* `strap_id` plays the part of `id` in `rsample::bootstraps`. We're just going to group by this column and aggregate the resampled data later.
+
+* `original_data_rownum` doesn't really serve a purpose.  It contains integers 1 through $N$ (where $N$ is our original sample size).  We can do a cross join to get pairs (`strap_id`, `original_data_rownum`).  This means there will be $N$ copies of `strap_id`, meaning we can get $N$ resamples of our data for each `strap_id`.
+
+* `bootstrap_rownum` is a random integer between 1 and $N$.  This column DOES serve a purpose, its basically the sampling with replacement bit for the bootstrap.  Now, duckdb doesn't have a function to sample random integers.  To do this, I basically sample random numbers on the unit interval do some arithmetic to turn those into integers.  
+
+Let's set that up now.  The hardest part really is creating a sequence of numbers, but duckdb makes that pretty easy.
+
+### Query To Make `strap_id`
+
+```{sql, connection=con, echo=TRUE}
+-- Set up strap_ids in a table
+CREATE OR REPLACE TABLE strap_ids(strap_id INTEGER);
+-- Do 1000 bootstraps
+INSERT INTO strap_ids(strap_id) select * from range(1, 1001, 1);
+
+```
+
+```{sql, connection=con, output.var = 'tbl1'}
+SELECT * FROM STRAP_IDS LIMIT 5
+```
+
+
+```{r}
+#| tbl-cap: Contents of `strap_ids`.  These play the role of `id` in the rsample output.
+#| label: tbl-strap-ids
+kableExtra::kbl(tbl1, 
+                digits = 2, 
+                booktabs = T,
+                align = 'c') %>% 
+kableExtra::kable_styling(bootstrap_options = 'striped')
+```
+
+### Query To Make `original_data_rownum`
+
+```{sql, connection=con, echo=T}
+-- Set up original_data_rownum in a table
+CREATE OR REPLACE TABLE original_data_rownum(original_rownum INTEGER);
+-- I have 2500 observations in my data
+INSERT INTO original_data_rownum(original_rownum) select * from range(1, 2500+1, 1);
+```
+
+
+```{sql, connection=con, output.var = 'tbl2'}
+select * from original_data_rownum limit 5
+```
+
+
+
+```{r}
+#| tbl-cap: Contents of `original_data_rownum`.  These play the role of `id` in the rsample output.
+#| label: tbl-original-data-rownum
+kableExtra::kbl(tbl2, 
+                digits = 2, 
+                booktabs = T,
+                align = 'c') %>% 
+kableExtra::kable_styling(bootstrap_options = 'striped')
+```
+
+
+Ok, now we have the two tables `strap_ids` and `original_data_rownum`.  All we need to do now is cross join then, and do the random number magic.  That's shown below in table @tbl-resample-template.
+
+### Query To Make `bootstrap_rownum`
+
+```{sql, connection=con, echo=T}
+create or replace table resample_template as 
+select
+  strap_ids.strap_id,
+  original_data_rownum.original_rownum,
+  -- I have 2500 observations in my data
+  round( -0.5 + 2501*random()) as bootstrap_rownum,
+from
+  strap_ids
+cross join 
+  original_data_rownum;
+```
+
+
+```{sql, connection=con, output.var = 'tbl3', echo=F}
+select * from resample_template using sample 5;
+```
+
+
+
+```{r}
+#| tbl-cap: A sample from the table `resampel_template`.
+#| label: tbl-resample-template
+kableExtra::kbl(tbl3, 
+                booktabs = T,
+                align = 'c') %>% 
+kableExtra::kable_styling(bootstrap_options = 'striped')
+```
+
+## Actually Doing The Bootstrapping:  Its Just A Left Join!
+
+Now all we have to do is join the original data onto `resample_template`.  The join is going to happen `on original_data.original_rownum = resample_template.bootstrap_rownum`.
+
+```{sql, connection=con, echo=T}
+create or replace table resampled_data as
+select
+  resample_template.strap_id,
+  resample_template.bootstrap_rownum,
+  original_data.x,
+  original_data.y
+from 
+  resample_template
+left join 
+  original_data on original_data.original_rownum = resample_template.bootstrap_rownum;
+```
+
+And congratulations, you have what is in essence an unnested `rsample::bootstraps` output.  This happens shockingly fast in duckdb (actually, a bit faster than `rsample` does it, but that is anecdote I didn't actually time them).  The hard part now is the aggregation function.  Obviously, you can't do very complex statsitical aggregations in duckdb (or any other SQL dialect), but there are a few you can do.  For example, let's bootstrap the mean of $x$ and $y$, as well as the estimated regression coefficient.
+
+```{sql, connection=con, echo=T, output.var = 'bsr'}
+select
+  'Bootstrap' || lpad(strap_id,4,0) as id,
+  'SQL' as method,
+  avg(x) as mean_x,
+  avg(y) as mean_y,
+  corr(y, x) * stddev(y) / stddev(x) as beta
+from resampled_data
+group by 1
+order by 1;
+```
+
+We can easily compare the distributions obtained via the SQL bootstrap with distributions obtained from `rsample::bootstrap`
+
+```{r}
+dbDisconnect(con)
+get_stats <- function(dat){
+  
+
+  d <- analysis(dat) %>% 
+       summarise(
+         mean_x = mean(x),
+         mean_y = mean(y)
+                 )
+  
+  lm(y~x, data=analysis(dat)) %>% 
+  broom::tidy() %>% 
+  filter(term=='x') %>% 
+    bind_cols(d) %>% 
+    mutate(method = 'rsample') %>% 
+    rename(beta=estimate)
+  
+}
+
+r <- original_data %>% 
+  bootstraps(times=1000) %>% 
+  mutate(
+    stats = map_dfr(splits, get_stats)
+  ) %>% 
+  unnest(stats)
+
+z <- r %>% 
+  select(id, method, mean_x, mean_y, beta) %>% 
+  bind_rows(bsr) %>% 
+  pivot_longer(cols = mean_x:beta, names_to = 'statistic', values_to = 'estimate') %>% 
+  pivot_wider(names_from = method, values_from = estimate)
+```
+
+## But Does It Work
+
+Yes...I think.  The averages for $x$ and $y$ look really good, but the SQL bootstrap tails for the regression coefficient are a little thin.
+
+```{r}
+#| fig-height: 10
+#| fig-width: 10
+par(mfrow=c(2, 2))
+
+qqplot(
+  filter(z, statistic=='mean_x')$SQL, 
+  filter(z, statistic=='mean_x')$rsample ,
+  main = 'Bootstrapped Average of x',
+  xlab = 'SQL Percentiles',
+  ylab = 'rsample Percentiles',
+  pch=19, 
+  col='black'
+  )
+
+abline(0, 1, col = 'red')
+
+qqplot(
+  filter(z, statistic=='mean_y')$SQL, 
+  filter(z, statistic=='mean_y')$rsample ,
+  main = 'Bootstrapped Average of y',
+  xlab = 'SQL Percentiles',
+  ylab = 'rsample Percentiles',
+  pch=19, 
+  col='black'
+  )
+
+abline(0, 1, col = 'red')
+
+qqplot(
+  filter(z, statistic=='beta')$SQL, 
+  filter(z, statistic=='beta')$rsample ,
+  main = 'Bootstrapped Regression Coefficient',
+  xlab = 'SQL Percentiles',
+  ylab = 'rsample Percentiles',
+  pch=19, 
+  col='black'
+  )
+
+abline(0, 1, col = 'red')
+  
+
+  
+```
+
+## Conclusion
+
+This is pretty silly, and probably inefficient.  I'm no data engineer, I'm just a guy with a Ph.D in stats and a lot of time on the weekend.  I should get a hobby or something.
