@@ -135,12 +135,13 @@ Ok, now we have the two tables `strap_ids` and `original_data_rownum`.  All we n
 ### Query To Make `bootstrap_rownum`
 
 ```{sql, connection=con, echo=T}
+
 create or replace table resample_template as 
 select
   strap_ids.strap_id,
   original_data_rownum.original_rownum,
   -- I have 2500 observations in my data
-  round( -0.5 + 2501*random()) as bootstrap_rownum,
+  1 + round( -0.5 + 2501*random()) as bootstrap_rownum,
 from
   strap_ids
 cross join 
@@ -197,7 +198,7 @@ order by 1;
 We can easily compare the distributions obtained via the SQL bootstrap with distributions obtained from `rsample::bootstrap`
 
 ```{r}
-dbDisconnect(con)
+
 get_stats <- function(dat){
   
 
@@ -232,7 +233,7 @@ z <- r %>%
 
 ## But Does It Work
 
-Yes...I think.  The averages for $x$ and $y$ look really good, but the SQL bootstrap tails for the regression coefficient are a little thin.
+Yes...I think.  
 
 ```{r}
 #| fig-height: 10
@@ -282,3 +283,6 @@ abline(0, 1, col = 'red')
 ## Conclusion
 
 This is pretty silly, and probably inefficient.  I'm no data engineer, I'm just a guy with a Ph.D in stats and a lot of time on the weekend.  I should get a hobby or something.
+
+
+
