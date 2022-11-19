@@ -141,7 +141,7 @@ select
   strap_ids.strap_id,
   original_data_rownum.original_rownum,
   -- I have 2500 observations in my data
-  1 + round( -0.5 + 2501*random()) as bootstrap_rownum,
+  1 + round( -0.5 + 2499*random()) as bootstrap_rownum,
 from
   strap_ids
 cross join 
