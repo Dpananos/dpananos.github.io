@@ -9,8 +9,66 @@
 <link>https://dpananos.github.io/index.html</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.2.269</generator>
-<lastBuildDate>Wed, 16 Nov 2022 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.0.28</generator>
+<lastBuildDate>Fri, 25 Nov 2022 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Way Too Many Taylor Series</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>Listen, I’ve made some useful blog posts. I’ve made some silly blog posts. This blog post is absolutely not useful and is perhaps so silly as to be stupid. I’m going to give you the conclusion now: <em>You can do a t-test on the log scale and interpret that as a relative change in means</em>. That is the conclusion of this blog post. There, saved you 10 mins.</p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Little back story to set the stage. I was tasked with writing down some guidance on how to evaluate A/B tests in which our OEC (overall evaluation criterion) is revenue. Revenue is long tailed, so typical justifications for using the t-test (CLT + Berry-Esseen) probably won’t work as well as we want.</p>
+<p>What about doing some sort of transform (e.g.&nbsp;<img src="https://latex.codecogs.com/png.latex?log">, which for some reason is used to represent <img src="https://latex.codecogs.com/png.latex?%5Cln"> in most statistical texts I’ve read, so I will continute that pattern here). Ok, that can reign in the tail, but there is a small problem: How do I interpret a difference in means on the log scale? Some say to interpret it as a relative change in means on the log scale (essentially just take the exponential of the diference in means to get the relative change), but that is not a mathematical equivalence. Let me demonstrate.</p>
+<p>let <img src="https://latex.codecogs.com/png.latex?Y_a%20=%20Y(A=a)"> be a potential outcome under treatment status <img src="https://latex.codecogs.com/png.latex?A=a">. Because exposure is randomly assigned in an A/B test, then <img src="https://latex.codecogs.com/png.latex?E%5BY%20%5Cvert%20A%5D"> consistently estimates <img src="https://latex.codecogs.com/png.latex?E%5BY_a%5D">. A difference in means on the log scale corresponds to the causal contrast</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%5E%5Cstar%20=%20E%5B%5Clog(Y_1)%5D%20-%20E%5B%5Clog(Y_0)%5D%20=%20E%5Cleft%5B%20%5Clog%20%5Cleft(%20%5Cdfrac%7BY_1%7D%7BY_0%7D%20%5Cright)%20%5Cright%5D%20%5C%3E."></p>
+<p>The relative change in means corresponds to the causal contrast</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%20=%20%20%20%5Cdfrac%7BE%5BY_1%5D%7D%7BE%5BY_0%5D%7D%20"></p>
+<p>and generally <img src="https://latex.codecogs.com/png.latex?%5Cdelta%20%5Cneq%20%5Cexp(%5Cdelta%5E%5Cstar)">. This is because a) Jensen’s inequality says <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(E%5BX%5D)%20%5Cleq%20E%5B%5Cvarphi(X)%5D">, and b) because <img src="https://latex.codecogs.com/png.latex?E%5BY/X%5D%20%5Cneq%20E%5BY%5D/E%5BX%5D"> (remember, <img src="https://latex.codecogs.com/png.latex?E"> is a linear operator).</p>
+<p>So this blog post is going to waste both our time by answering some very precise questions:</p>
+<ul>
+<li>What approximations, if any, are neccesarily made to interpret <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cdelta%5E%5Cstar)"> as <img src="https://latex.codecogs.com/png.latex?%5Cdelta">, and</li>
+<li>Under what conditions are those approximations valid? When might they break?</li>
+</ul>
+<p>This is going to be a long one but a good one. This post is going to combine Applied Math + Statistics by way if lots and lots of Taylor Series. Speaking of which, it might be useful to review Taylor Series and their application to functions of random variables.</p>
+<p>I can not stress how unimportant this blog post is. Its really just because I find the question compelling. I’d turn back if I were you…</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-11-25-taylor-series/https:/bookdown.org/adam_aiken/advinv/images/03-compels.jpg" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Ok, I warned you.</p>
+</section>
+<section id="taylor-series-or-the-reason-i-kept-my-calculus-text-book" class="level2">
+<h2 class="anchored" data-anchor-id="taylor-series-or-the-reason-i-kept-my-calculus-text-book">Taylor Series (or The Reason I Kept My Calculus Text Book)</h2>
+<p>The Taylor Series of a continuously differentiable function, <img src="https://latex.codecogs.com/png.latex?f">, centered at <img src="https://latex.codecogs.com/png.latex?t"> is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20f(x)%20=%20%5Csum_%7Bk=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bf%5E%7B(k)%7D(t)%7D%7Bk!%7D%20(x-t)%5Ek%20%5Cquad%20%5Cmid%20x%20-%20t%20%5Cmid%20%5Clt%20d%20%5C%3E.%20"></p>
+<p>The first <img src="https://latex.codecogs.com/png.latex?n+1"> terms form the Taylor polynomial of degree <img src="https://latex.codecogs.com/png.latex?n">, <img src="https://latex.codecogs.com/png.latex?T_n(x)">. The difference between the Taylor Polynomial and the function it approximates is known as the remainder <img src="https://latex.codecogs.com/png.latex?R_n(x)">. We can bound <img src="https://latex.codecogs.com/png.latex?R_n(x)">, meaning we can bound the error in using <img src="https://latex.codecogs.com/png.latex?T_n(x)"> to estimate <img src="https://latex.codecogs.com/png.latex?f(x)">. If <img src="https://latex.codecogs.com/png.latex?%5Cmid%20f%5E%7B(n+1)%7D(x)%20%5Cmid%20%5Cleq%20M"> on <img src="https://latex.codecogs.com/png.latex?%5Cmid%20x-t%5Cmid%20%5Cleq%20d"> then</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cmid%20R_n(x)%20%5Cmid%20%5Cleq%20%5Cdfrac%7BM%7D%7B(n_1)!%7D(x-t)%5E%7Bn+1%7D"></p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2022-11-25-taylor-series/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>Statistics</category>
+  <category>AB Testing</category>
+  <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</guid>
+  <pubDate>Fri, 25 Nov 2022 05:00:00 GMT</pubDate>
+  <media:content url="https://bookdown.org/adam_aiken/advinv/images/03-compels.jpg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>Bootstrapping in SQL</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -66,7 +124,7 @@
 <div class="cell-output-display">
 <div id="tbl-original-data" class="anchored">
 
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table&nbsp;1:  My Data </caption>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table 1:  My Data </caption>
  <thead>
   <tr>
    <th style="text-align:center;"> original_rownum </th>
@@ -133,7 +191,7 @@
 <div class="cell-output-display">
 <div id="tbl-strap-ids" class="anchored">
 
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table&nbsp;2:  Contents of strap_ids. These play the role of id in the rsample output. </caption>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table 2:  Contents of strap_ids. These play the role of id in the rsample output. </caption>
  <thead>
   <tr>
    <th style="text-align:center;"> strap_id </th>
@@ -177,7 +235,7 @@
 <div class="cell-output-display">
 <div id="tbl-original-data-rownum" class="anchored">
 
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table&nbsp;3:  Contents of original_data_rownum. These play the role of id in the rsample output. </caption>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table 3:  Contents of original_data_rownum. These play the role of id in the rsample output. </caption>
  <thead>
   <tr>
    <th style="text-align:center;"> original_rownum </th>
@@ -228,7 +286,7 @@
 <div class="cell-output-display">
 <div id="tbl-resample-template" class="anchored">
 
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table&nbsp;4:  A sample from the table resampel_template. </caption>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;"><caption>Table 4:  A sample from the table resampel_template. </caption>
  <thead>
   <tr>
    <th style="text-align:center;"> strap_id </th>
@@ -515,7 +573,7 @@ order by rnk</code></pre>
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Because once you’ve taken a few stats courses, you know bette than to use SPSS.↩︎</p></li>
@@ -526,7 +584,7 @@ order by rnk</code></pre>
   <pubDate>Tue, 16 Aug 2022 04:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Interim Analysis &amp; Group Sequential Designs Pt 2</title>
+  <title>Interim Analysis & Group Sequential Designs Pt 2</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</link>
   <description><![CDATA[ 
@@ -566,7 +624,7 @@ order by rnk</code></pre>
 <div class="cell-output-display">
 <div id="fig-spending-function" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Pocock and O’Brien <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Pocock and O’Brien <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/fig-spending-function-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -715,7 +773,7 @@ Click to see which is which
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Or if you like set theory, we could write each line as <img src="https://latex.codecogs.com/png.latex?%5Cleft(%20%5Cbigcap_%7Bk=1%7D%5E%7Bj-1%7D%20%5Cvert%7BZ%5E%7B(k)%7D%7D%20%5Cvert%20%5Clt%20u_k%20%5Cright)%20%5Ccap%20%5Cleft(%20%5Cvert%7BZ%5E%7B(j)%7D%7D%20%5Cvert%20%5Cgeq%20u_j%20%5Cright)">.↩︎</p></li>
@@ -898,7 +956,7 @@ Click to see which is which
 <div class="cell-output-display">
 <div id="fig-forecast" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Forecasted lift after the 12 months. Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Forecasted lift after the 12 months. Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-forecast-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -926,7 +984,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div id="fig-conditional" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year. Indicated point/interval is mean and 95% credible interval.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year. Indicated point/interval is mean and 95% credible interval.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-conditional-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -951,7 +1009,7 @@ Click to see individual trajectories
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Just go with it, its a work of fiction, who knows if it is reasonable. Let’s pull out the forecasted lifts after the final experiment.↩︎</p></li>
@@ -967,7 +1025,7 @@ Click to see individual trajectories
   <media:content url="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/forecast.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
-  <title>Interim Analysis &amp; Group Sequential Designs Pt 1</title>
+  <title>Interim Analysis & Group Sequential Designs Pt 1</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</link>
   <description><![CDATA[ 
@@ -998,23 +1056,12 @@ Click to see individual trajectories
 <p>The “<em>G</em>” in GSD means that the hypothesis test is performed on groups of observations. Given a maximum number of groups <img src="https://latex.codecogs.com/png.latex?K">, the sample size of <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> each group is <img src="https://latex.codecogs.com/png.latex?n_k">.</p>
 <p>The “<em>S</em>” in GSD means the test is performed sequentially. If after observing the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> group the test statistic (computed using all the data observed up to that point) is beyond some threshold, then the null is rejected and the experiment is finished. If not, the next group of observations is made and added to the existing data, wherein the process continues until the final group has been observed. If after observing the final group the test statistic does not exceed the threshold, then we fail to reject the null. The process for <img src="https://latex.codecogs.com/png.latex?K=2"> is illustrated in Figure&nbsp;1.</p>
 <div class="cell fig-cap-location-top">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1">flowchart TD</span>
-<span id="cb1-2">  A[Observe Group k=1] --&gt; B[Perform Test]</span>
-<span id="cb1-3">  B --&gt; C{Data From k=1 \n Significant?}</span>
-<span id="cb1-4">  C -- Yes --&gt; D[Reject Null]</span>
-<span id="cb1-5">  C -- No --&gt; E[Observe Group k=2]</span>
-<span id="cb1-6">  E --&gt; G{Data From k=1 and \n k=2 Significant?}</span>
-<span id="cb1-7">  G -- Yes --&gt; D</span>
-<span id="cb1-8">  G -- No --&gt; H[Fail To Reject Null]</span></code></pre></div>
-</details>
 <div class="cell-output-display">
 <div id="fig-gsd" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: A GSD for <img src="https://latex.codecogs.com/png.latex?K=2"></figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: A GSD for <img src="https://latex.codecogs.com/png.latex?K=2"></figcaption><p></p>
 <p>
-</p><pre class="mermaid mermaid-js" data-tooltip-selector="#mermaid-tooltip-1">flowchart TD
+</p><pre class="mermaid" data-tooltip-selector="#mermaid-tooltip-1">flowchart TD
   A[Observe Group k=1] --&gt; B[Perform Test]
   B --&gt; C{Data From k=1 \n Significant?}
   C -- Yes --&gt; D[Reject Null]
@@ -1051,39 +1098,39 @@ Click to see individual trajectories
 <h3 class="anchored" data-anchor-id="how-much-does-the-type-one-inflate"><em>How Much</em> Does The Type One Inflate?</h3>
 <p>Let’s just simulate data under the assumptions above. At each stage, let’s test the null that <img src="https://latex.codecogs.com/png.latex?H_0:%20p=0.5"> against <img src="https://latex.codecogs.com/png.latex?H_A:%20p%20%5Cneq%200.5"> and see how frequently we reject the null. In our simulation, we will assume “peeking” conditions, meaning we’re just going to do a test of proportions at each stage.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
-<span id="cb2-2"></span>
-<span id="cb2-3"><span class="fu" style="color: #4758AB;">set.seed</span>(<span class="dv" style="color: #AD0000;">0</span>)</span>
-<span id="cb2-4"></span>
-<span id="cb2-5"><span class="co" style="color: #5E5E5E;"># Simulation Parameters</span></span>
-<span id="cb2-6">p<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fl" style="color: #AD0000;">0.5</span></span>
-<span id="cb2-7">n<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="dv" style="color: #AD0000;">250</span></span>
-<span id="cb2-8">nsims <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as.integer</span>((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span><span class="fl" style="color: #AD0000;">0.01</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span>)</span>
-<span id="cb2-9"></span>
-<span id="cb2-10"><span class="co" style="color: #5E5E5E;"># Run the simulation</span></span>
-<span id="cb2-11">sims<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">rerun</span>(nsims, {</span>
-<span id="cb2-12">  <span class="co" style="color: #5E5E5E;"># K=1</span></span>
-<span id="cb2-13">  x1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(<span class="dv" style="color: #AD0000;">1</span>, n, p)</span>
-<span id="cb2-14">  <span class="co" style="color: #5E5E5E;"># K=2, accumulating data from each state</span></span>
-<span id="cb2-15">  x2 <span class="ot" style="color: #003B4F;">&lt;-</span> x1 <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">rbinom</span>(<span class="dv" style="color: #AD0000;">1</span>, n, p)</span>
-<span id="cb2-16">  </span>
-<span id="cb2-17">  <span class="co" style="color: #5E5E5E;"># Compute some various quntities we will need, like the Z score</span></span>
-<span id="cb2-18">  K <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">str_c</span>(<span class="st" style="color: #20794D;">'K='</span>,<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>)</span>
-<span id="cb2-19">  X <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(x1, x2) <span class="sc" style="color: #5E5E5E;">/</span> ((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>)<span class="sc" style="color: #5E5E5E;">*</span>n)</span>
-<span id="cb2-20">  mu <span class="ot" style="color: #003B4F;">&lt;-</span> p</span>
-<span id="cb2-21">  sds <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(p<span class="sc" style="color: #5E5E5E;">*</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>p)<span class="sc" style="color: #5E5E5E;">/</span>(n<span class="sc" style="color: #5E5E5E;">*</span><span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>))</span>
-<span id="cb2-22">  Z <span class="ot" style="color: #003B4F;">&lt;-</span> (X<span class="sc" style="color: #5E5E5E;">-</span>p)<span class="sc" style="color: #5E5E5E;">/</span>sds</span>
-<span id="cb2-23">  reject <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">abs</span>(Z)<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
-<span id="cb2-24">  </span>
-<span id="cb2-25">  <span class="fu" style="color: #4758AB;">tibble</span>(K, X, mu, sds, Z, reject)</span>
-<span id="cb2-26">}) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb2-27">  <span class="fu" style="color: #4758AB;">bind_rows</span>(<span class="at" style="color: #657422;">.id=</span><span class="st" style="color: #20794D;">'sim'</span>)</span>
-<span id="cb2-28"></span>
-<span id="cb2-29">fpr<span class="ot" style="color: #003B4F;">&lt;-</span>sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb2-30">  <span class="fu" style="color: #4758AB;">group_by</span>(sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb2-31">  <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">result=</span><span class="fu" style="color: #4758AB;">any</span>(reject)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb2-32">  <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">fpr =</span> <span class="fu" style="color: #4758AB;">mean</span>(result)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb2-33">  <span class="fu" style="color: #4758AB;">pull</span>(fpr)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;">set.seed</span>(<span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;"># Simulation Parameters</span></span>
+<span id="cb1-6">p<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fl" style="color: #AD0000;">0.5</span></span>
+<span id="cb1-7">n<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="dv" style="color: #AD0000;">250</span></span>
+<span id="cb1-8">nsims <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as.integer</span>((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span><span class="fl" style="color: #AD0000;">0.01</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10"><span class="co" style="color: #5E5E5E;"># Run the simulation</span></span>
+<span id="cb1-11">sims<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">rerun</span>(nsims, {</span>
+<span id="cb1-12">  <span class="co" style="color: #5E5E5E;"># K=1</span></span>
+<span id="cb1-13">  x1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(<span class="dv" style="color: #AD0000;">1</span>, n, p)</span>
+<span id="cb1-14">  <span class="co" style="color: #5E5E5E;"># K=2, accumulating data from each state</span></span>
+<span id="cb1-15">  x2 <span class="ot" style="color: #003B4F;">&lt;-</span> x1 <span class="sc" style="color: #5E5E5E;">+</span> <span class="fu" style="color: #4758AB;">rbinom</span>(<span class="dv" style="color: #AD0000;">1</span>, n, p)</span>
+<span id="cb1-16">  </span>
+<span id="cb1-17">  <span class="co" style="color: #5E5E5E;"># Compute some various quntities we will need, like the Z score</span></span>
+<span id="cb1-18">  K <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">str_c</span>(<span class="st" style="color: #20794D;">'K='</span>,<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb1-19">  X <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(x1, x2) <span class="sc" style="color: #5E5E5E;">/</span> ((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>)<span class="sc" style="color: #5E5E5E;">*</span>n)</span>
+<span id="cb1-20">  mu <span class="ot" style="color: #003B4F;">&lt;-</span> p</span>
+<span id="cb1-21">  sds <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(p<span class="sc" style="color: #5E5E5E;">*</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>p)<span class="sc" style="color: #5E5E5E;">/</span>(n<span class="sc" style="color: #5E5E5E;">*</span><span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">2</span>))</span>
+<span id="cb1-22">  Z <span class="ot" style="color: #003B4F;">&lt;-</span> (X<span class="sc" style="color: #5E5E5E;">-</span>p)<span class="sc" style="color: #5E5E5E;">/</span>sds</span>
+<span id="cb1-23">  reject <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">abs</span>(Z)<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
+<span id="cb1-24">  </span>
+<span id="cb1-25">  <span class="fu" style="color: #4758AB;">tibble</span>(K, X, mu, sds, Z, reject)</span>
+<span id="cb1-26">}) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-27">  <span class="fu" style="color: #4758AB;">bind_rows</span>(<span class="at" style="color: #657422;">.id=</span><span class="st" style="color: #20794D;">'sim'</span>)</span>
+<span id="cb1-28"></span>
+<span id="cb1-29">fpr<span class="ot" style="color: #003B4F;">&lt;-</span>sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-30">  <span class="fu" style="color: #4758AB;">group_by</span>(sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-31">  <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">result=</span><span class="fu" style="color: #4758AB;">any</span>(reject)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-32">  <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">fpr =</span> <span class="fu" style="color: #4758AB;">mean</span>(result)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-33">  <span class="fu" style="color: #4758AB;">pull</span>(fpr)</span></code></pre></div>
 </div>
 <p>From our simulation, we reject the null around 8.6% of the time. That is certainly higher than the nominal 5%, but if we recall our sophomore stats classes, isn’t there a 9.8% (<img src="https://latex.codecogs.com/png.latex?1-0.95%5E2">) chance we reject the null?</p>
 <p>The 8.6% isn’t simulation error. We forgot that <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(1)%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(2)%7D"> are <em>correlated</em>. The correlation between <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(1)%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(2)%7D"> makes intuitive sense. If the sample mean for the first group is small, then the accumulated mean is also likely to be small than if we were to just take a new sample. Let’s take a more detailed look at Equation&nbsp;1. Note that</p>
@@ -1098,24 +1145,24 @@ Click to see individual trajectories
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">my_blue <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rgb</span>(<span class="dv" style="color: #AD0000;">45</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">62</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">80</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb3-2"><span class="fu" style="color: #4758AB;">theme_set</span>(<span class="fu" style="color: #4758AB;">theme_classic</span>())</span>
-<span id="cb3-3"></span>
-<span id="cb3-4"></span>
-<span id="cb3-5">sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb3-6">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(X))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb3-7">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y=</span>..density..), <span class="at" style="color: #657422;">fill =</span> <span class="st" style="color: #20794D;">'light gray'</span>, <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'black'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb3-8">  <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>K) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb3-9">  <span class="fu" style="color: #4758AB;">geom_line</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> <span class="fu" style="color: #4758AB;">dnorm</span>(X,</span>
-<span id="cb3-10">                          <span class="at" style="color: #657422;">mean =</span> mu,</span>
-<span id="cb3-11">                          <span class="at" style="color: #657422;">sd =</span> sds[PANEL])),</span>
-<span id="cb3-12">            <span class="at" style="color: #657422;">color =</span> my_blue, </span>
-<span id="cb3-13">            <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">1</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb3-14">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
-<span id="cb3-15">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>()</span>
-<span id="cb3-16">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb3-17">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Density'</span>,</span>
-<span id="cb3-18">       <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(k)))</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">my_blue <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rgb</span>(<span class="dv" style="color: #AD0000;">45</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">62</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">80</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">250</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;">theme_set</span>(<span class="fu" style="color: #4758AB;">theme_classic</span>())</span>
+<span id="cb2-3"></span>
+<span id="cb2-4"></span>
+<span id="cb2-5">sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-6">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(X))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-7">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y=</span>..density..), <span class="at" style="color: #657422;">fill =</span> <span class="st" style="color: #20794D;">'light gray'</span>, <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'black'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-8">  <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>K) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb2-9">  <span class="fu" style="color: #4758AB;">geom_line</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> <span class="fu" style="color: #4758AB;">dnorm</span>(X,</span>
+<span id="cb2-10">                          <span class="at" style="color: #657422;">mean =</span> mu,</span>
+<span id="cb2-11">                          <span class="at" style="color: #657422;">sd =</span> sds[PANEL])),</span>
+<span id="cb2-12">            <span class="at" style="color: #657422;">color =</span> my_blue, </span>
+<span id="cb2-13">            <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">1</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-14">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
+<span id="cb2-15">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>()</span>
+<span id="cb2-16">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-17">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Density'</span>,</span>
+<span id="cb2-18">       <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(k)))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -1133,47 +1180,47 @@ Click to see individual trajectories
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">sigma_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">qchisq</span>(<span class="fl" style="color: #AD0000;">0.95</span>, <span class="dv" style="color: #AD0000;">2</span>))</span>
-<span id="cb4-2">sigma_2 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">qchisq</span>(<span class="fl" style="color: #AD0000;">0.99</span>, <span class="dv" style="color: #AD0000;">2</span>))</span>
-<span id="cb4-3">sig<span class="ot" style="color: #003B4F;">&lt;-</span> p<span class="sc" style="color: #5E5E5E;">*</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>p) <span class="sc" style="color: #5E5E5E;">*</span> <span class="fu" style="color: #4758AB;">matrix</span>(<span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>n, <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n), <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n), <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n) ), <span class="at" style="color: #657422;">nrow =</span> <span class="dv" style="color: #AD0000;">2</span>)</span>
-<span id="cb4-4">tt <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)</span>
-<span id="cb4-5">x <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cos</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>tt)</span>
-<span id="cb4-6">y <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sin</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>tt)</span>
-<span id="cb4-7">R <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cbind</span>(x,y)</span>
-<span id="cb4-8">e <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">eigen</span>(sig)</span>
-<span id="cb4-9">V <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">diag</span>(e<span class="sc" style="color: #5E5E5E;">$</span>values))</span>
-<span id="cb4-10"></span>
-<span id="cb4-11">level_curve_1 <span class="ot" style="color: #003B4F;">&lt;-</span> sigma_1<span class="sc" style="color: #5E5E5E;">*</span>R <span class="sc" style="color: #5E5E5E;">%*%</span> (e<span class="sc" style="color: #5E5E5E;">$</span>vectors <span class="sc" style="color: #5E5E5E;">%*%</span> V <span class="sc" style="color: #5E5E5E;">%*%</span> <span class="fu" style="color: #4758AB;">t</span>(e<span class="sc" style="color: #5E5E5E;">$</span>vectors)) <span class="sc" style="color: #5E5E5E;">+</span> p</span>
-<span id="cb4-12"><span class="fu" style="color: #4758AB;">colnames</span>(level_curve_1) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"X1"</span>, <span class="st" style="color: #20794D;">"X2"</span>)</span>
-<span id="cb4-13">level_curve_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as_tibble</span>(level_curve_1)</span>
-<span id="cb4-14">level_curve_2 <span class="ot" style="color: #003B4F;">&lt;-</span> sigma_2<span class="sc" style="color: #5E5E5E;">*</span>R <span class="sc" style="color: #5E5E5E;">%*%</span> (e<span class="sc" style="color: #5E5E5E;">$</span>vectors <span class="sc" style="color: #5E5E5E;">%*%</span> V <span class="sc" style="color: #5E5E5E;">%*%</span> <span class="fu" style="color: #4758AB;">t</span>(e<span class="sc" style="color: #5E5E5E;">$</span>vectors)) <span class="sc" style="color: #5E5E5E;">+</span> p</span>
-<span id="cb4-15"><span class="fu" style="color: #4758AB;">colnames</span>(level_curve_2) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"X1"</span>, <span class="st" style="color: #20794D;">"X2"</span>)</span>
-<span id="cb4-16">level_curve_2 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as_tibble</span>(level_curve_2)</span>
-<span id="cb4-17"></span>
-<span id="cb4-18">joint <span class="ot" style="color: #003B4F;">&lt;-</span>sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-19">  <span class="fu" style="color: #4758AB;">select</span>(sim, K, X) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-20">  <span class="fu" style="color: #4758AB;">pivot_wider</span>(<span class="at" style="color: #657422;">names_from=</span><span class="st" style="color: #20794D;">'K'</span>, <span class="at" style="color: #657422;">values_from=</span><span class="st" style="color: #20794D;">'X'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-21">  <span class="fu" style="color: #4758AB;">rename</span>(<span class="at" style="color: #657422;">X1 =</span> <span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=1</span><span class="st" style="color: #20794D;">`</span>, <span class="at" style="color: #657422;">X2=</span><span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=2</span><span class="st" style="color: #20794D;">`</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-22">  <span class="fu" style="color: #4758AB;">select</span>(<span class="sc" style="color: #5E5E5E;">-</span>sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-23">  <span class="fu" style="color: #4758AB;">sample_n</span>(<span class="dv" style="color: #AD0000;">1000</span>)</span>
-<span id="cb4-24"></span>
-<span id="cb4-25">joint <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-26">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(X1, X2))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-27">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'dark gray'</span>, <span class="at" style="color: #657422;">fill=</span><span class="st" style="color: #20794D;">'gray'</span>, <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">shape=</span><span class="dv" style="color: #AD0000;">21</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-28">  <span class="fu" style="color: #4758AB;">geom_path</span>(<span class="at" style="color: #657422;">data=</span>level_curve_1, <span class="fu" style="color: #4758AB;">aes</span>(X1, X2), <span class="at" style="color: #657422;">color =</span> my_blue, <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-29">  <span class="fu" style="color: #4758AB;">geom_path</span>(<span class="at" style="color: #657422;">data=</span>level_curve_2, <span class="fu" style="color: #4758AB;">aes</span>(X1, X2), <span class="at" style="color: #657422;">color =</span> my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-30">  <span class="fu" style="color: #4758AB;">lims</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">4</span>, .<span class="dv" style="color: #AD0000;">6</span>), <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">4</span>, .<span class="dv" style="color: #AD0000;">6</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-31">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
-<span id="cb4-32">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>(),</span>
-<span id="cb4-33">    <span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span></span>
-<span id="cb4-34">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb4-35">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">1</span>)),</span>
-<span id="cb4-36">       <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">2</span>)))</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">sigma_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">qchisq</span>(<span class="fl" style="color: #AD0000;">0.95</span>, <span class="dv" style="color: #AD0000;">2</span>))</span>
+<span id="cb3-2">sigma_2 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">qchisq</span>(<span class="fl" style="color: #AD0000;">0.99</span>, <span class="dv" style="color: #AD0000;">2</span>))</span>
+<span id="cb3-3">sig<span class="ot" style="color: #003B4F;">&lt;-</span> p<span class="sc" style="color: #5E5E5E;">*</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>p) <span class="sc" style="color: #5E5E5E;">*</span> <span class="fu" style="color: #4758AB;">matrix</span>(<span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>n, <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n), <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n), <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n) ), <span class="at" style="color: #657422;">nrow =</span> <span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb3-4">tt <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)</span>
+<span id="cb3-5">x <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cos</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>tt)</span>
+<span id="cb3-6">y <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sin</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>pi<span class="sc" style="color: #5E5E5E;">*</span>tt)</span>
+<span id="cb3-7">R <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cbind</span>(x,y)</span>
+<span id="cb3-8">e <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">eigen</span>(sig)</span>
+<span id="cb3-9">V <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">diag</span>(e<span class="sc" style="color: #5E5E5E;">$</span>values))</span>
+<span id="cb3-10"></span>
+<span id="cb3-11">level_curve_1 <span class="ot" style="color: #003B4F;">&lt;-</span> sigma_1<span class="sc" style="color: #5E5E5E;">*</span>R <span class="sc" style="color: #5E5E5E;">%*%</span> (e<span class="sc" style="color: #5E5E5E;">$</span>vectors <span class="sc" style="color: #5E5E5E;">%*%</span> V <span class="sc" style="color: #5E5E5E;">%*%</span> <span class="fu" style="color: #4758AB;">t</span>(e<span class="sc" style="color: #5E5E5E;">$</span>vectors)) <span class="sc" style="color: #5E5E5E;">+</span> p</span>
+<span id="cb3-12"><span class="fu" style="color: #4758AB;">colnames</span>(level_curve_1) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"X1"</span>, <span class="st" style="color: #20794D;">"X2"</span>)</span>
+<span id="cb3-13">level_curve_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as_tibble</span>(level_curve_1)</span>
+<span id="cb3-14">level_curve_2 <span class="ot" style="color: #003B4F;">&lt;-</span> sigma_2<span class="sc" style="color: #5E5E5E;">*</span>R <span class="sc" style="color: #5E5E5E;">%*%</span> (e<span class="sc" style="color: #5E5E5E;">$</span>vectors <span class="sc" style="color: #5E5E5E;">%*%</span> V <span class="sc" style="color: #5E5E5E;">%*%</span> <span class="fu" style="color: #4758AB;">t</span>(e<span class="sc" style="color: #5E5E5E;">$</span>vectors)) <span class="sc" style="color: #5E5E5E;">+</span> p</span>
+<span id="cb3-15"><span class="fu" style="color: #4758AB;">colnames</span>(level_curve_2) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"X1"</span>, <span class="st" style="color: #20794D;">"X2"</span>)</span>
+<span id="cb3-16">level_curve_2 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as_tibble</span>(level_curve_2)</span>
+<span id="cb3-17"></span>
+<span id="cb3-18">joint <span class="ot" style="color: #003B4F;">&lt;-</span>sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-19">  <span class="fu" style="color: #4758AB;">select</span>(sim, K, X) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-20">  <span class="fu" style="color: #4758AB;">pivot_wider</span>(<span class="at" style="color: #657422;">names_from=</span><span class="st" style="color: #20794D;">'K'</span>, <span class="at" style="color: #657422;">values_from=</span><span class="st" style="color: #20794D;">'X'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-21">  <span class="fu" style="color: #4758AB;">rename</span>(<span class="at" style="color: #657422;">X1 =</span> <span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=1</span><span class="st" style="color: #20794D;">`</span>, <span class="at" style="color: #657422;">X2=</span><span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=2</span><span class="st" style="color: #20794D;">`</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-22">  <span class="fu" style="color: #4758AB;">select</span>(<span class="sc" style="color: #5E5E5E;">-</span>sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-23">  <span class="fu" style="color: #4758AB;">sample_n</span>(<span class="dv" style="color: #AD0000;">1000</span>)</span>
+<span id="cb3-24"></span>
+<span id="cb3-25">joint <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-26">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(X1, X2))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-27">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'dark gray'</span>, <span class="at" style="color: #657422;">fill=</span><span class="st" style="color: #20794D;">'gray'</span>, <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">shape=</span><span class="dv" style="color: #AD0000;">21</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-28">  <span class="fu" style="color: #4758AB;">geom_path</span>(<span class="at" style="color: #657422;">data=</span>level_curve_1, <span class="fu" style="color: #4758AB;">aes</span>(X1, X2), <span class="at" style="color: #657422;">color =</span> my_blue, <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-29">  <span class="fu" style="color: #4758AB;">geom_path</span>(<span class="at" style="color: #657422;">data=</span>level_curve_2, <span class="fu" style="color: #4758AB;">aes</span>(X1, X2), <span class="at" style="color: #657422;">color =</span> my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-30">  <span class="fu" style="color: #4758AB;">lims</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">4</span>, .<span class="dv" style="color: #AD0000;">6</span>), <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">c</span>(.<span class="dv" style="color: #AD0000;">4</span>, .<span class="dv" style="color: #AD0000;">6</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-31">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
+<span id="cb3-32">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>(),</span>
+<span id="cb3-33">    <span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb3-34">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-35">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">1</span>)),</span>
+<span id="cb3-36">       <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">expression</span>(<span class="fu" style="color: #4758AB;">bar</span>(X)<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">2</span>)))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-level-curves" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: 1000 samples from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: 1000 samples from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-level-curves-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -1183,16 +1230,16 @@ Click to see individual trajectories
 <p><img src="https://latex.codecogs.com/png.latex?%20Pr%5Cleft(%20%5CBig%5Cvert%20Z%5E%7B(1)%7D%20%5CBig%5Cvert%20%3E%201.96%20%5Ccup%201.96%20%3C%20%5CBig%5Cvert%20Z%5E%7B(2)%7D%20%5CBig%5Cvert%20%5Cright)%20%5C%3E.%20"></p>
 <p>Because the joint is multivariate normal, we can compute this probability directly. However, I’m just going to simulate it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="co" style="color: #5E5E5E;"># Standardize the MVN by converting covariance matrix into a correlation matrix</span></span>
-<span id="cb5-2">D <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">solve</span>(<span class="fu" style="color: #4758AB;">diag</span>(<span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">diag</span>(sig))))</span>
-<span id="cb5-3">cormat <span class="ot" style="color: #003B4F;">&lt;-</span> D <span class="sc" style="color: #5E5E5E;">%*%</span> sig <span class="sc" style="color: #5E5E5E;">%*%</span> D</span>
-<span id="cb5-4">Z<span class="ot" style="color: #003B4F;">&lt;-</span> MASS<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mvrnorm</span>((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span><span class="fl" style="color: #AD0000;">0.001</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span>, <span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">2</span>), cormat)</span>
-<span id="cb5-5"></span>
-<span id="cb5-6"></span>
-<span id="cb5-7">z1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">1</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
-<span id="cb5-8">z2 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">2</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
-<span id="cb5-9"></span>
-<span id="cb5-10">fpr <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(z1<span class="sc" style="color: #5E5E5E;">|</span>z2)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="co" style="color: #5E5E5E;"># Standardize the MVN by converting covariance matrix into a correlation matrix</span></span>
+<span id="cb4-2">D <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">solve</span>(<span class="fu" style="color: #4758AB;">diag</span>(<span class="fu" style="color: #4758AB;">sqrt</span>(<span class="fu" style="color: #4758AB;">diag</span>(sig))))</span>
+<span id="cb4-3">cormat <span class="ot" style="color: #003B4F;">&lt;-</span> D <span class="sc" style="color: #5E5E5E;">%*%</span> sig <span class="sc" style="color: #5E5E5E;">%*%</span> D</span>
+<span id="cb4-4">Z<span class="ot" style="color: #003B4F;">&lt;-</span> MASS<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mvrnorm</span>((<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span><span class="fl" style="color: #AD0000;">0.001</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span>, <span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">2</span>), cormat)</span>
+<span id="cb4-5"></span>
+<span id="cb4-6"></span>
+<span id="cb4-7">z1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">1</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
+<span id="cb4-8">z2 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">2</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span><span class="fl" style="color: #AD0000;">1.96</span></span>
+<span id="cb4-9"></span>
+<span id="cb4-10">fpr <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(z1<span class="sc" style="color: #5E5E5E;">|</span>z2)</span></code></pre></div>
 </div>
 <p>and we get something like 8.3%. But that doesn’t answer <em>why</em>, that just means I did my algebra correctly. As always, a visualization might help. take a look at Figure&nbsp;3. The shaded regions show the areas where the null would be rejected. These are the areas we would make a false positive. The dots indicate the standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Remember, this distribution <em>is</em> the null distribution for our GSD – these are draws from <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> when <img src="https://latex.codecogs.com/png.latex?H_0"> is true. And now here is the important part…</p>
 <blockquote class="blockquote">
@@ -1201,46 +1248,46 @@ Click to see individual trajectories
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-2">  <span class="fu" style="color: #4758AB;">select</span>(sim, K, Z) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-3">  <span class="fu" style="color: #4758AB;">pivot_wider</span>(<span class="at" style="color: #657422;">names_from=</span><span class="st" style="color: #20794D;">'K'</span>, <span class="at" style="color: #657422;">values_from=</span><span class="st" style="color: #20794D;">'Z'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-4">  <span class="fu" style="color: #4758AB;">rename</span>(<span class="at" style="color: #657422;">Z1 =</span> <span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=1</span><span class="st" style="color: #20794D;">`</span>, <span class="at" style="color: #657422;">Z2=</span><span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=2</span><span class="st" style="color: #20794D;">`</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-5">  <span class="fu" style="color: #4758AB;">select</span>(<span class="sc" style="color: #5E5E5E;">-</span>sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-6">  <span class="fu" style="color: #4758AB;">sample_n</span>(<span class="dv" style="color: #AD0000;">1000</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-7">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(Z1, Z2))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-8">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'dark gray'</span>, <span class="at" style="color: #657422;">fill=</span><span class="st" style="color: #20794D;">'gray'</span>, <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">shape=</span><span class="dv" style="color: #AD0000;">21</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-9">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="dv" style="color: #AD0000;">5</span>), <span class="at" style="color: #657422;">expand=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-10">  <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="dv" style="color: #AD0000;">5</span>), <span class="at" style="color: #657422;">expand=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-11">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-12">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-13">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-14">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-15">  <span class="fu" style="color: #4758AB;">geom_hline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">yintercept=</span><span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-16">  <span class="fu" style="color: #4758AB;">geom_hline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">yintercept=</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-17">  <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept=</span><span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-18">  <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept=</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-19">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
-<span id="cb6-20">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>(),</span>
-<span id="cb6-21">    <span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span></span>
-<span id="cb6-22">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb6-23">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">expression</span>(Z<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">1</span>)),</span>
-<span id="cb6-24">       <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">expression</span>(Z<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">2</span>)))</span>
-<span id="cb6-25"></span>
-<span id="cb6-26">find_region <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="cf" style="color: #003B4F;">function</span>(za){</span>
-<span id="cb6-27">  z1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">1</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>za</span>
-<span id="cb6-28">  z2 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">2</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>za</span>
-<span id="cb6-29"></span>
-<span id="cb6-30">  fpr <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(z1<span class="sc" style="color: #5E5E5E;">|</span>z2)</span>
-<span id="cb6-31">  </span>
-<span id="cb6-32">  (fpr <span class="sc" style="color: #5E5E5E;">-</span> <span class="fl" style="color: #AD0000;">0.05</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span></span>
-<span id="cb6-33">}</span>
-<span id="cb6-34"></span>
-<span id="cb6-35">result<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">optimize</span>(find_region, <span class="at" style="color: #657422;">interval=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">3</span>))</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">sims <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-2">  <span class="fu" style="color: #4758AB;">select</span>(sim, K, Z) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-3">  <span class="fu" style="color: #4758AB;">pivot_wider</span>(<span class="at" style="color: #657422;">names_from=</span><span class="st" style="color: #20794D;">'K'</span>, <span class="at" style="color: #657422;">values_from=</span><span class="st" style="color: #20794D;">'Z'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-4">  <span class="fu" style="color: #4758AB;">rename</span>(<span class="at" style="color: #657422;">Z1 =</span> <span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=1</span><span class="st" style="color: #20794D;">`</span>, <span class="at" style="color: #657422;">Z2=</span><span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">K=2</span><span class="st" style="color: #20794D;">`</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-5">  <span class="fu" style="color: #4758AB;">select</span>(<span class="sc" style="color: #5E5E5E;">-</span>sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-6">  <span class="fu" style="color: #4758AB;">sample_n</span>(<span class="dv" style="color: #AD0000;">1000</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-7">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(Z1, Z2))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-8">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'dark gray'</span>, <span class="at" style="color: #657422;">fill=</span><span class="st" style="color: #20794D;">'gray'</span>, <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">shape=</span><span class="dv" style="color: #AD0000;">21</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-9">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="dv" style="color: #AD0000;">5</span>), <span class="at" style="color: #657422;">expand=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-10">  <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="dv" style="color: #AD0000;">5</span>), <span class="at" style="color: #657422;">expand=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">0</span>))<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-11">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-12">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-13">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-14">  <span class="fu" style="color: #4758AB;">annotate</span>(<span class="st" style="color: #20794D;">"rect"</span>, <span class="at" style="color: #657422;">xmin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">xmax =</span> <span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymin =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>, <span class="at" style="color: #657422;">ymax =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">alpha =</span> .<span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">fill=</span>my_blue)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-15">  <span class="fu" style="color: #4758AB;">geom_hline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">yintercept=</span><span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-16">  <span class="fu" style="color: #4758AB;">geom_hline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">yintercept=</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-17">  <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept=</span><span class="sc" style="color: #5E5E5E;">-</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-18">  <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept=</span><span class="fl" style="color: #AD0000;">1.96</span>), <span class="at" style="color: #657422;">linetype=</span><span class="st" style="color: #20794D;">'dashed'</span>)<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-19">  <span class="fu" style="color: #4758AB;">theme</span>(</span>
+<span id="cb5-20">    <span class="at" style="color: #657422;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;">element_line</span>(),</span>
+<span id="cb5-21">    <span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span></span>
+<span id="cb5-22">  )<span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-23">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="fu" style="color: #4758AB;">expression</span>(Z<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">1</span>)),</span>
+<span id="cb5-24">       <span class="at" style="color: #657422;">y=</span><span class="fu" style="color: #4758AB;">expression</span>(Z<span class="sc" style="color: #5E5E5E;">^</span>(<span class="dv" style="color: #AD0000;">2</span>)))</span>
+<span id="cb5-25"></span>
+<span id="cb5-26">find_region <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="cf" style="color: #003B4F;">function</span>(za){</span>
+<span id="cb5-27">  z1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">1</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>za</span>
+<span id="cb5-28">  z2 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">abs</span>(Z[, <span class="dv" style="color: #AD0000;">2</span>])<span class="sc" style="color: #5E5E5E;">&gt;</span>za</span>
+<span id="cb5-29"></span>
+<span id="cb5-30">  fpr <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(z1<span class="sc" style="color: #5E5E5E;">|</span>z2)</span>
+<span id="cb5-31">  </span>
+<span id="cb5-32">  (fpr <span class="sc" style="color: #5E5E5E;">-</span> <span class="fl" style="color: #AD0000;">0.05</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span></span>
+<span id="cb5-33">}</span>
+<span id="cb5-34"></span>
+<span id="cb5-35">result<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">optimize</span>(find_region, <span class="at" style="color: #657422;">interval=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">3</span>))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <div id="fig-regions" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: Standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 3: Standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.</figcaption><p></p>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -1273,7 +1320,7 @@ Click to see individual trajectories
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>See the Section&nbsp;6.1 for a calculation↩︎</p></li>
@@ -1308,7 +1355,7 @@ Click to see individual trajectories
 <div id="fig-trig-py" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Whoa, check it out!</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Whoa, check it out!</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1323,7 +1370,7 @@ Click to see individual trajectories
 <div id="fig-trig-r" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-r-3.png" class="img-fluid figure-img" width="480"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Whoa, check it out again!</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 2: Whoa, check it out again!</figcaption><p></p>
 </figure>
 </div>
 </div>
@@ -1709,7 +1756,7 @@ generated quantities{
 </div>
 </div>
 </div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Prior and Posterior distributions for the model.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Prior and Posterior distributions for the model.</figcaption><p></p>
 </figure>
 </div>
 <p>The take home here is that the sequences are largely consistent with an unbiased and uncorrelated coin. The expected correlation is negative (-0.05) meaning humans are more likely to switch from heads to tails, or tails to heads, and the expected bias is 0.53 meaning people seem to favor heads for some reason. The results are largely unsurprising, and I really wish I could place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> directly so that my model really does reflect the state of my knowledge, but this is good enough for now.</p>
@@ -2342,7 +2389,7 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <div id="fig-grid" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="https://dpananos.github.io/posts/2017-12-29-coins/index_files/figure-html/fig-grid-output-1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Coins after flipping. Dark squares are face down coins.</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure 1: Coins after flipping. Dark squares are face down coins.</figcaption><p></p>
 </figure>
 </div>
 </div>
