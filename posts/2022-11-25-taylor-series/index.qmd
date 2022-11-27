@@ -8,7 +8,6 @@ categories: [Statistics, AB Testing]
 number-sections: false
 header-includes:
   - \usepackage{xcolor}
-draft: true
 ---
 
 
