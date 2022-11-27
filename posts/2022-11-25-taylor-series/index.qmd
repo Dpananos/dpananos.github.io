@@ -6,8 +6,6 @@ echo: false
 fig-cap-location: top
 categories: [Statistics, AB Testing]
 number-sections: false
-header-includes:
-  - \usepackage{xcolor}
 ---
 
 
