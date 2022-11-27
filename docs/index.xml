@@ -9,66 +9,8 @@
 <link>https://dpananos.github.io/index.html</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.0.28</generator>
-<lastBuildDate>Fri, 25 Nov 2022 05:00:00 GMT</lastBuildDate>
-<item>
-  <title>Way Too Many Taylor Series</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="tldr" class="level2">
-<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
-<p>Listen, I’ve made some useful blog posts. I’ve made some silly blog posts. This blog post is absolutely not useful and is perhaps so silly as to be stupid. I’m going to give you the conclusion now: <em>You can do a t-test on the log scale and interpret that as a relative change in means</em>. That is the conclusion of this blog post. There, saved you 10 mins.</p>
-</section>
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Little back story to set the stage. I was tasked with writing down some guidance on how to evaluate A/B tests in which our OEC (overall evaluation criterion) is revenue. Revenue is long tailed, so typical justifications for using the t-test (CLT + Berry-Esseen) probably won’t work as well as we want.</p>
-<p>What about doing some sort of transform (e.g.&nbsp;<img src="https://latex.codecogs.com/png.latex?log">, which for some reason is used to represent <img src="https://latex.codecogs.com/png.latex?%5Cln"> in most statistical texts I’ve read, so I will continute that pattern here). Ok, that can reign in the tail, but there is a small problem: How do I interpret a difference in means on the log scale? Some say to interpret it as a relative change in means on the log scale (essentially just take the exponential of the diference in means to get the relative change), but that is not a mathematical equivalence. Let me demonstrate.</p>
-<p>let <img src="https://latex.codecogs.com/png.latex?Y_a%20=%20Y(A=a)"> be a potential outcome under treatment status <img src="https://latex.codecogs.com/png.latex?A=a">. Because exposure is randomly assigned in an A/B test, then <img src="https://latex.codecogs.com/png.latex?E%5BY%20%5Cvert%20A%5D"> consistently estimates <img src="https://latex.codecogs.com/png.latex?E%5BY_a%5D">. A difference in means on the log scale corresponds to the causal contrast</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%5E%5Cstar%20=%20E%5B%5Clog(Y_1)%5D%20-%20E%5B%5Clog(Y_0)%5D%20=%20E%5Cleft%5B%20%5Clog%20%5Cleft(%20%5Cdfrac%7BY_1%7D%7BY_0%7D%20%5Cright)%20%5Cright%5D%20%5C%3E."></p>
-<p>The relative change in means corresponds to the causal contrast</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%20=%20%20%20%5Cdfrac%7BE%5BY_1%5D%7D%7BE%5BY_0%5D%7D%20"></p>
-<p>and generally <img src="https://latex.codecogs.com/png.latex?%5Cdelta%20%5Cneq%20%5Cexp(%5Cdelta%5E%5Cstar)">. This is because a) Jensen’s inequality says <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(E%5BX%5D)%20%5Cleq%20E%5B%5Cvarphi(X)%5D">, and b) because <img src="https://latex.codecogs.com/png.latex?E%5BY/X%5D%20%5Cneq%20E%5BY%5D/E%5BX%5D"> (remember, <img src="https://latex.codecogs.com/png.latex?E"> is a linear operator).</p>
-<p>So this blog post is going to waste both our time by answering some very precise questions:</p>
-<ul>
-<li>What approximations, if any, are neccesarily made to interpret <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cdelta%5E%5Cstar)"> as <img src="https://latex.codecogs.com/png.latex?%5Cdelta">, and</li>
-<li>Under what conditions are those approximations valid? When might they break?</li>
-</ul>
-<p>This is going to be a long one but a good one. This post is going to combine Applied Math + Statistics by way if lots and lots of Taylor Series. Speaking of which, it might be useful to review Taylor Series and their application to functions of random variables.</p>
-<p>I can not stress how unimportant this blog post is. Its really just because I find the question compelling. I’d turn back if I were you…</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-11-25-taylor-series/https:/bookdown.org/adam_aiken/advinv/images/03-compels.jpg" class="img-fluid figure-img"></p>
-</figure>
-</div>
-<p>Ok, I warned you.</p>
-</section>
-<section id="taylor-series-or-the-reason-i-kept-my-calculus-text-book" class="level2">
-<h2 class="anchored" data-anchor-id="taylor-series-or-the-reason-i-kept-my-calculus-text-book">Taylor Series (or The Reason I Kept My Calculus Text Book)</h2>
-<p>The Taylor Series of a continuously differentiable function, <img src="https://latex.codecogs.com/png.latex?f">, centered at <img src="https://latex.codecogs.com/png.latex?t"> is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20f(x)%20=%20%5Csum_%7Bk=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bf%5E%7B(k)%7D(t)%7D%7Bk!%7D%20(x-t)%5Ek%20%5Cquad%20%5Cmid%20x%20-%20t%20%5Cmid%20%5Clt%20d%20%5C%3E.%20"></p>
-<p>The first <img src="https://latex.codecogs.com/png.latex?n+1"> terms form the Taylor polynomial of degree <img src="https://latex.codecogs.com/png.latex?n">, <img src="https://latex.codecogs.com/png.latex?T_n(x)">. The difference between the Taylor Polynomial and the function it approximates is known as the remainder <img src="https://latex.codecogs.com/png.latex?R_n(x)">. We can bound <img src="https://latex.codecogs.com/png.latex?R_n(x)">, meaning we can bound the error in using <img src="https://latex.codecogs.com/png.latex?T_n(x)"> to estimate <img src="https://latex.codecogs.com/png.latex?f(x)">. If <img src="https://latex.codecogs.com/png.latex?%5Cmid%20f%5E%7B(n+1)%7D(x)%20%5Cmid%20%5Cleq%20M"> on <img src="https://latex.codecogs.com/png.latex?%5Cmid%20x-t%5Cmid%20%5Cleq%20d"> then</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cmid%20R_n(x)%20%5Cmid%20%5Cleq%20%5Cdfrac%7BM%7D%7B(n_1)!%7D(x-t)%5E%7Bn+1%7D"></p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-11-25-taylor-series/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <category>AB Testing</category>
-  <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</guid>
-  <pubDate>Fri, 25 Nov 2022 05:00:00 GMT</pubDate>
-  <media:content url="https://bookdown.org/adam_aiken/advinv/images/03-compels.jpg" medium="image" type="image/jpeg"/>
-</item>
+<generator>quarto-1.2.269</generator>
+<lastBuildDate>Wed, 16 Nov 2022 05:00:00 GMT</lastBuildDate>
 <item>
   <title>Bootstrapping in SQL</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -584,7 +526,7 @@ order by rnk</code></pre>
   <pubDate>Tue, 16 Aug 2022 04:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>Interim Analysis & Group Sequential Designs Pt 2</title>
+  <title>Interim Analysis &amp; Group Sequential Designs Pt 2</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</link>
   <description><![CDATA[ 
@@ -1025,7 +967,7 @@ Click to see individual trajectories
   <media:content url="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/forecast.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
-  <title>Interim Analysis & Group Sequential Designs Pt 1</title>
+  <title>Interim Analysis &amp; Group Sequential Designs Pt 1</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</link>
   <description><![CDATA[ 
