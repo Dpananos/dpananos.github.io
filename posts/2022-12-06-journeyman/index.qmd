@@ -49,7 +49,7 @@ Again, this is a model rather than a law.  As an example, consider the definitio
 
 > A 95% confidence interval is an interval estimate which, upon repeated construction under identical and ideal conditions, contains the estimand 95% of the time.
 
-I can make this statement more useful by writing it down mathematically
+I can make this statement more precise by writing it down mathematically
 
 $$ P \left( \bar{x} - z_{0.975} \sigma/\sqrt{n} \leq \mu \leq \bar{x} + z_{0.975} \sigma/\sqrt{n} \right) = 0.95 $$
 

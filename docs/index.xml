@@ -52,7 +52,7 @@
 <blockquote class="blockquote">
 <p>A 95% confidence interval is an interval estimate which, upon repeated construction under identical and ideal conditions, contains the estimand 95% of the time.</p>
 </blockquote>
-<p>I can make this statement more useful by writing it down mathematically</p>
+<p>I can make this statement more precise by writing it down mathematically</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20P%20%5Cleft(%20%5Cbar%7Bx%7D%20-%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cleq%20%5Cmu%20%5Cleq%20%5Cbar%7Bx%7D%20+%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cright)%20=%200.95%20"></p>
 <p>but it loses usefulness. This doesn’t really tell me what a confidence interval is, when to use one, or how to interpret one. However, the definition I initially presented perhaps permits some pathological cases. We can make the definition more useful by removing precision further</p>
 <blockquote class="blockquote">
