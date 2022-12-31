@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2022-12-31">
+
+<title>Demetri Pananos Ph.D - Journeyman Statistics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - Journeyman Statistics">
+<meta property="og:description" content="A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not theoretical enough.">
+<meta property="og:site-name" content="Demetri Pananos Ph.D">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Journeyman Statistics">
+<meta name="twitter:description" content="A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not theoretical enough.">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">
+ <span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Journeyman Statistics</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 31, 2022</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#what-is-journeyman-statistics" id="toc-what-is-journeyman-statistics" class="nav-link active" data-scroll-target="#what-is-journeyman-statistics">What is Journeyman Statistics?</a></li>
+  <li><a href="#why-do-we-need-a-book-on-journeyman-statistics" id="toc-why-do-we-need-a-book-on-journeyman-statistics" class="nav-link" data-scroll-target="#why-do-we-need-a-book-on-journeyman-statistics">Why Do We Need a Book on Journeyman Statistics?</a></li>
+  <li><a href="#what-will-this-book-contain" id="toc-what-will-this-book-contain" class="nav-link" data-scroll-target="#what-will-this-book-contain">What Will This Book Contain?</a></li>
+  <li><a href="#what-benefit-is-there-to-reading-this-book" id="toc-what-benefit-is-there-to-reading-this-book" class="nav-link" data-scroll-target="#what-benefit-is-there-to-reading-this-book">What Benefit is There to Reading This Book?</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-12-06-phd/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not theoretical enough. Some too focused on pen and paper calculation, others provide code that was very likely written decades ago and do not use modern packages or tidy principles (e.g they begin their analysis with <code>rm(list=ls()</code> or use <code>attach</code> and <code>detatch</code>). I can’t recommend my own path to learning statistics either, mostly because I did a Ph.D in statistics and had the benefit of a Masters in Applied Mathematics.</p>
+<p>I want to write a book for people who are not statisticians but need to make use of statistics anyway. The medical residents who need to do logistic regression for a research project, the social science grad student (save econometricians, I’d say we could learn something from them but we probably know all the same things by different names) who is more interested in their research than their statistical models, the business intelligence analyst who has to to analyze a (poorly planned) A/B test and would love nothing than to improve the experiment the next time around.</p>
+<p>This sequence of blog posts is going to be a sort of first go at that book. Not even an alpha or a rough draft, but rather somewhere to put some thoughts that might eventually make it into the book. This first post is about the motivation for the book, which I am tentatively calling “Journeyman Statistics”.</p>
+<section id="what-is-journeyman-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-journeyman-statistics">What is Journeyman Statistics?</h2>
+<p>A journeyperson/woman/man is</p>
+<blockquote class="blockquote">
+<p>“a worker, skilled in a given building trade or craft, who has successfully completed an official apprenticeship qualification. Journeymen are considered competent and authorized to work in that field as a fully qualified employee. They earn their license by education, supervised experience and examination. Although journeymen have completed a trade certificate and are allowed to work as employees, they may not yet work as self-employed master craftsmen.</p>
+</blockquote>
+<p>What do I mean then by “journeyman statistics” and who are “journeyman statisticians”? Borrowing heavily from the definition above, journeyman statisticians are people who are trained in some field and are currently doing statistics in service of someone or something else. Journeyman statistics are then the statistical analyses performed by these people. I don’t think its tough to pick our journeyman statisticians; they are to a first approximation those who perform statistical analysis but are not statisticians first and foremost. They are biologists, medical residents, sociologists, analysts of several varietys, etc. To them, statistics is <em>the means</em> whereas statistics are “the end” to research (perhaps “pure”) statisticians.</p>
+<p>Its important to further distinguish journeyman statisticians from applied statisticians. Applied statisticians can, as Tukey once said, “play in everyone’s backyard”. They possess the necessary mathematical maturity and statistical expertise to move from field to field. A journeyman statistician, though they may be well versed in statistics, would likely stay in their own backyard (to continue the metaphor) in order to tackle problems there.</p>
+<p>Of course, I don’t mean to place people in boxes. You don’t need to subscribe to my taxonomy of statisticians (in fact, outside of this book I don’t think its a particularly useful taxonomy), and I think there are edge cases which threaten the taxonomy as a whole. The taxonomy is simply a model, and this model is useful for one thing: understanding motivations for learning statistics, and designing a path through statistical literature so as to serve those motivations.</p>
+</section>
+<section id="why-do-we-need-a-book-on-journeyman-statistics" class="level2">
+<h2 class="anchored" data-anchor-id="why-do-we-need-a-book-on-journeyman-statistics">Why Do We Need a Book on Journeyman Statistics?</h2>
+<p>The taxonomy allows us to understand who journeyman statisticians are, what their intentions are, what they may lack in terms of statistical understanding, what is enough to satiate their desire to learn statistics, and what details contribute “noise” rather than “signal”. As an example, I don’t think biology grad students need to know what <span class="math inline">\(\operatorname{plim}\)</span> means, or any of the other topics adjacent to mathematical analysis in Casella and Berger’s <em>Statistical Inference</em>. They do need to go slightly beyond their sophmore classes which tell them they can use the t-test when <span class="math inline">\(N&gt;30\)</span>. Likewise, medical residents need to go beyond Martin Bland’s <em>An Introduction to Medical Statistics</em> and need to be able to confidently say “we shouldn’t do that” when their supervisors or superiors insist on a clearly flawed mode of analysis. However, they may get bogged down by the integrals in Frank Harrell’s <em>Regression Modelling Strategies</em> (as well as the sea of references to methodological papers). There are few books for people like that. I find that books are typically for sophmore students learning statistics for the first time, or applied statisticians. Journeyman statisticians need something in the middle. I hope this book is that something.</p>
+</section>
+<section id="what-will-this-book-contain" class="level2">
+<h2 class="anchored" data-anchor-id="what-will-this-book-contain">What Will This Book Contain?</h2>
+<p>Statisticians like to joke “its all regression”. There is truth in that phrase, and so this book will take the perspective that regression is the primary means of estimation. We’ll cover all the typical analyses as regression methods. This includes estimation of the mean, its just a one parameter regression. I want to get to GLM’s as quickly as possible while not getting bogged down by mathematical details, like whatever “mild regularity conditions” means. GLMs are the workhorse of applied statistics, and I see no point in leaving GLMs to later chapters. One thing that will be absent from the book is p values. The book will take an estimation approach and report only confidence intervals.</p>
+<p>The book will also contain code in both python and R, though I encourage readers to use R rather than python. Python’s statistical tools have a distinct econometrics flavor.</p>
+</section>
+<section id="what-benefit-is-there-to-reading-this-book" class="level2">
+<h2 class="anchored" data-anchor-id="what-benefit-is-there-to-reading-this-book">What Benefit is There to Reading This Book?</h2>
+<p>Before discussing why you should read this book, I want to discuss what I call “The Precision-Usefulness Tradeoff”, as I anticipate I will refer to this many times. In short, the tradeoff states</p>
+<blockquote class="blockquote">
+<p>Perfectly precise statements are completely useless. In order to become useful, the statement must be made less precise. The less precise, the more useful.</p>
+</blockquote>
+<p>Again, this is a model rather than a law. As an example, consider the definition for a 95% confidence interval.</p>
+<blockquote class="blockquote">
+<p>A 95% confidence interval is an interval estimate which, upon repeated construction under identical and ideal conditions, contains the estimand 95% of the time.</p>
+</blockquote>
+<p>I can make this statement more useful by writing it down mathematically</p>
+<p><span class="math display">\[ P \left( \bar{x} - z_{0.975} \sigma/\sqrt{n} \leq \mu \leq \bar{x} + z_{0.975} \sigma/\sqrt{n} \right) = 0.95 \]</span></p>
+<p>but it loses usefulness. This doesn’t really tell me what a confidence interval is, when to use one, or how to interpret one. However, the definition I initially presented perhaps permits some pathological cases. We can make the definition more useful by removing precision further</p>
+<blockquote class="blockquote">
+<p>A 95% confidence interval contains parameters consistent with the data.</p>
+</blockquote>
+<p>Now, we have a better idea how to interpret the interval, but the 95% is opaque to us.</p>
+<p>The reason I bring up this trade off is because the book is intended to give journeyman statisticians the tools required to move in Precision-Usefulness space. My hope is that when the time comes, you will be able to artfully trade precision for usefulness (e.g.&nbsp;to be pedantic when it is necessary, or to break the rules precisely because you know how and when they can be broken safely). This is the primary benefit of the book. Obviously, I can’t tell people <em>when</em> or <em>where</em> to move within that space. I will have to leave that to their best judgement.</p>
+<p>The second benefit is to solve the problem we began with; to answer “how to I go about learning statistics” in a satisfactory way.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
