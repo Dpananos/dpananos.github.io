@@ -1,8 +1,8 @@
 ---
 title: On Marginal Effects
 date: "2022-01-31"
-code-fold: false
-echo: false
+code-fold: true
+echo: true
 fig-cap-location: top
 categories: []
 number-sections: false
