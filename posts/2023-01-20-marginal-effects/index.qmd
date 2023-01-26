@@ -1,0 +1,99 @@
+---
+title: On Marginal Effects
+date: "2022-01-31"
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+---
+
+Consider a function, $f: \mathbb{R}^p \times \mathbb{R}^p \to \mathbb{R}$.  This function models the conditional expectation of some data,
+
+$$ E[y \mid X] = f(x'\beta) \>.$$
+
+You can think of this as being generalized linear model, with arbitrarily complex linear predictors (e.g. splines, interactions, whatever). For now, let's assume all the $x$ are continuous.
+
+The marginal effects function, as you may well know, is then the partial derivative of $f$ with respect to $x$, $\nabla_x f(x'\beta)$.  Here, I use the subscript $_x$ to denote that we've taken partials with respect to $x$ and not $beta$.
+
+If we average the gradient over our samples, then this is an estimate of the marginal effect of $x$.
+
+Let's see that now using `jax` and `{marginaleffects}`
+
+```{r}
+library(tidyverse)
+library(marginaleffects)
+library(reticulate)
+library(kableExtra)
+
+
+N <- 97
+x <- rnorm(N)
+y <- rbinom(N, 1,plogis(-0.8 + 0.45*x))
+df <- tibble(x, y)
+
+fit <- glm(y~x, data=df, family = binomial())
+
+marginaleffects(fit) %>% 
+  summary() %>% 
+  kbl() %>% 
+  kable_styling(bootstrap_options = c('floating', 'striped'))
+```
+
+```{python}
+import jax.numpy as jnp
+from jax import grad, vmap, jacobian
+
+from statsmodels.formula.api import logit
+import patsy
+
+# Import the data from R
+df = r.df
+
+fit = logit('y~x', data=df).fit()
+
+
+beta = jnp.asarray(fit.params.values)
+X = jnp.asarray(patsy.dmatrix(fit.model.data.design_info, data=df, return_type='matrix'))
+
+expectation_func = lambda x, b: 1.0 / (1.0 + jnp.exp(-jnp.dot(x, b)))
+marginal_fx_func = grad(expectation_func)
+
+gradients = vmap(marginal_fx_func, (0, None), 0)(X, beta)
+
+gradients.mean(0)
+
+# Compare against some pen and paper math
+p = fit.predict(df)
+
+((p*(1-p))*beta[1]).mean()
+```
+
+
+Awesome, the difference in the point estimates is negligible.  So that's the point estimate, what about the standard error?
+
+## The Standard Error of a Marginal Effect
+
+According to the delta method
+
+$$ \operatorname{Var}({\nabla_xf(x'\beta)}) = J'\> \Sigma \> J $$
+
+and if we wanted to compute the variance of the avergage of marginal effects
+
+$$ \operatorname{Var}\left(\dfrac{1}{n} \sum_i {\nabla_xf(x_i'\beta)}\right) = \dfrac{1}{n^2} \sum_i J_i'\> \Sigma \> J_i $$
+
+```{python}
+Sigma = jnp.asarray(fit.cov_params())
+J = jacobian(marginal_fx_func)
+Js = vmap(J, (0, None), 0)(X, beta)
+
+var = 0
+for j in Js:
+  var += j.T @ Sigma @ j
+  
+  
+# Standard error is too large
+jnp.sqrt(jnp.diag(var)/len(df)**2)
+```
+
