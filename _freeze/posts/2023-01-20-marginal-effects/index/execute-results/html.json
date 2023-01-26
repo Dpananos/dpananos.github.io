@@ -1,0 +1,18 @@
+{
+  "hash": "c812c212b0e1fa0b2dcc7bf45968551b",
+  "result": {
+    "markdown": "---\ntitle: On Marginal Effects\ndate: \"2022-01-31\"\ncode-fold: false\necho: false\nfig-cap-location: top\ncategories: []\nnumber-sections: false\ndraft: true\n---\n\n\nConsider a function, $f: \\mathbb{R}^p \\times \\mathbb{R}^p \\to \\mathbb{R}$.  This function models the conditional expectation of some data,\n\n$$ E[y \\mid X] = f(x'\\beta) \\>.$$\n\nYou can think of this as being generalized linear model, with arbitrarily complex linear predictors (e.g. splines, interactions, whatever). For now, let's assume all the $x$ are continuous.\n\nThe marginal effects function, as you may well know, is then the partial derivative of $f$ with respect to $x$, $\\nabla_x f(x'\\beta)$.  Here, I use the subscript $_x$ to denote that we've taken partials with respect to $x$ and not $beta$.\n\nIf we average the gradient over our samples, then this is an estimate of the marginal effect of $x$.\n\nLet's see that now using `jax` and `{marginaleffects}`\n\n\n::: {.cell}\n::: {.cell-output-display}\n`````{=html}\n<table class=\"table table-striped\" style=\"margin-left: auto; margin-right: auto;\">\n <thead>\n  <tr>\n   <th style=\"text-align:left;\"> type </th>\n   <th style=\"text-align:left;\"> term </th>\n   <th style=\"text-align:left;\"> contrast </th>\n   <th style=\"text-align:right;\"> estimate </th>\n   <th style=\"text-align:right;\"> std.error </th>\n   <th style=\"text-align:right;\"> statistic </th>\n   <th style=\"text-align:right;\"> p.value </th>\n   <th style=\"text-align:right;\"> conf.low </th>\n   <th style=\"text-align:right;\"> conf.high </th>\n  </tr>\n </thead>\n<tbody>\n  <tr>\n   <td style=\"text-align:left;\"> response </td>\n   <td style=\"text-align:left;\"> x </td>\n   <td style=\"text-align:left;\"> mean(dY/dX) </td>\n   <td style=\"text-align:right;\"> 0.1253615 </td>\n   <td style=\"text-align:right;\"> 0.0450958 </td>\n   <td style=\"text-align:right;\"> 2.779893 </td>\n   <td style=\"text-align:right;\"> 0.0054377 </td>\n   <td style=\"text-align:right;\"> 0.0369754 </td>\n   <td style=\"text-align:right;\"> 0.2137477 </td>\n  </tr>\n</tbody>\n</table>\n\n`````\n:::\n:::\n\n::: {.cell}\n::: {.cell-output .cell-output-stdout}\n```\nOptimization terminated successfully.\n         Current function value: 0.631312\n         Iterations 5\n```\n:::\n\n::: {.cell-output .cell-output-stdout}\n```\nArray([-0.12846975,  0.12535843], dtype=float32)\n```\n:::\n\n::: {.cell-output .cell-output-stdout}\n```\n0.12535843\n```\n:::\n:::\n\n\n\nAwesome, the difference in the point estimates is negligible.  So that's the point estimate, what about the standard error?\n\n## The Standard Error of a Marginal Effect\n\nAccording to the delta method\n\n$$ \\operatorname{Var}({\\nabla_xf(x'\\beta)}) = J'\\> \\Sigma \\> J $$\n\nand if we wanted to compute the variance of the avergage of marginal effects\n\n$$ \\operatorname{Var}\\left(\\dfrac{1}{n} \\sum_i {\\nabla_xf(x_i'\\beta)}\\right) = \\dfrac{1}{n^2} \\sum_i J_i'\\> \\Sigma \\> J_i $$\n\n\n::: {.cell}\n::: {.cell-output .cell-output-stdout}\n```\nArray([0.0008105 , 0.00079087], dtype=float32)\n```\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {
+      "include-in-header": [
+        "<script src=\"../../site_libs/kePrint-0.0.1/kePrint.js\"></script>\n<link href=\"../../site_libs/lightable-0.0.1/lightable.css\" rel=\"stylesheet\" />\n"
+      ]
+    },
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
