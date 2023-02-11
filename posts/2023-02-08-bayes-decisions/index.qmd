@@ -1,0 +1,62 @@
+---
+title: "Bayesian Decision Making for AB Tests on Revenue"
+editor: visual
+date: "2023-02-08"
+code-fold: false
+echo: false
+fig-cap-location: top
+draft: true
+categories: [AB Tests, Statistics, Bayes]
+number-sections: false
+---
+
+A lot of companies operate on a subscription service. Every month, you give them money and they allow you to use a service. The quality of extent of that service depends on how much money you give them. For example, Netflix allows you to pay more for higher definition content, Calendly includes some automation with their higher tiered plans, Apple provides you with more iCloud storage, and its all for a cost.
+
+These companies make more money if you choose the higher priced plan (duh), but they have to show you the value so that you *want* the higher priced plan. Sometimes, this comes in the form of a free trial for a limited time; no additional cost to the consumer, but hopefully you like it enough to shell out some cash.
+
+There is a trade off to be made here. Try a *too* premium plan and you might get hit by sticker shock and fail to convert. Not premium enough, and the trial fails to convert users who would have found value in the more premium plans.
+
+Deciding on which plan to roll out as the default trial is a question for another post. Assuming there is an existing decision I'm here to answer
+
+> How do we analyze experiments where we have to balance both conversion from the trial and revenue from users who find value in more premium plans?
+
+Seemingly easy, just do a t-test on log revenue or something. Not so fast. Consider the following:
+
+-   Not every randomized user converts, meaning there are many censored revenue observations. Filling them in with 0 prevents using the log to reign in possible long tails, and $\log(1+x)$ has been shown to yield arbitrarily small/large ATEs.
+
+-   If you're conversion rate is small enough, maybe getting enough users to power your experiment would take months and months and months. Maybe you have the stomach for that, maybe you don't. Its certainly my experience that the shorter the experiment can run, the faster we can improve.
+
+In this post, I'll present a (pretty niche, honestly) Bayesian model of the process. I'll then demonstrate how to use the model to compute expected loss in revenue. The "winner" of the AB test is then the variant which produces smallest expected loss.
+
+## Revenue In Terms of Conversions
+
+Let's say you have $j=1, \cdots, J$ plan levels. Let's assume
+
+-   The probability a user converts (chooses to pay you, $C$) is $P(C)$.
+-   Once the user converts, the probability the user chooses plan $j$ is $P(T=j\mid C)$.
+-   Finally, each plan produces some amount of expected revenue $E[R \mid T=j]$.
+
+Using the law of total expectation, the expected revenue from a given free trail plan should be
+
+$$ E[R] = \sum_j E[R \vert T=j] \cdot P(T=j \mid C) \cdot P(C) \>. $$
+
+If we could jointly estimate these quantities, then we could integrate over the uncertainty in each of them and compute $E[R]$. If we could compute $E[R]$ for two groups (say test and control), we could do Bayesain decision making.
+
+## A Possible Model
+
+Let's make some simplifying assumptions.
+
+```{r}
+conversion_rate <- 0.03
+convert_into_rate <- c(0.5, 0.25, 0.2, 0.05)
+min_revenue <- c(250, 600, 5000, 10000)
+
+N <- 5000
+converts <- rbinom(N, 1, conversion_rate)
+which_plan <- sample(1:length(convert_into_rate), replace=T, size=N, prob=convert_into_rate)
+plans <- letters[which_plan]
+rev <- rexp(N,1/20) + min_revenue[which_plan]
+
+d
+
+```

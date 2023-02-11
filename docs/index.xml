@@ -10,7 +10,169 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Sat, 31 Dec 2022 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 11 Feb 2023 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Causal Risk Ratios in AB Tests with One Sided Non-Compliance</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Sometimes we run AB tests where engaging with the treatment (and hence being treated) is optional. Since assignment to treatment is random, we can use the randomization as an instrumental variable (assuming there is a strong correlation between the instrument and the treatment, and that there are no backdoor paths between randomization and the final outcome).</p>
+<p>There are a few libraries to do estimate the LATE from an instrumental variable. However, none of them report a causal risk ratio, which is usually our choice of causal contrast for better or worse.</p>
+<p>In this post, I’m putting together some much appreciated advice from <a href="https://twitter.com/guilhermejd1/status/1624196853947416576"><span class="citation" data-cites="guilhermejd1">@guilhermejd1</span></a> and <a href="https://stats.stackexchange.com/a/605042/111259">dimitry on cross validated</a> on how to estimate a causal risk ratio in a randomized experiment with one sided non-compliance. I’ll first demonstrate how to do this with a simulation where we will actually have potential outcomes with which to compare. Then, I’ll apply this approach to a real experiment I helped run at Zapier.</p>
+<section id="simulation" class="level2">
+<h2 class="anchored" data-anchor-id="simulation">Simulation</h2>
+<p>Let <img src="https://latex.codecogs.com/png.latex?A"> be a binary indicator for assignment to treatment (1) or control. Let <img src="https://latex.codecogs.com/png.latex?d_j%5Ea"> be the potential outcome for engaging with the treatment under treatment <img src="https://latex.codecogs.com/png.latex?A=a"> for user <img src="https://latex.codecogs.com/png.latex?j">. Due to construction of the experiment, <img src="https://latex.codecogs.com/png.latex?d_j%5E0%20=%200%20%5Cforall%20j"> because users in control can not engage in the treatment by design (“[t]his is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group”, writes dimitry). This means that we have two types of users in treatment group: <img src="https://latex.codecogs.com/png.latex?d_j%5E1%20=%201"> is a “complier” and <img src="https://latex.codecogs.com/png.latex?d_j%5E0%20=%200"> is a “never taker”. If our outcome is <img src="https://latex.codecogs.com/png.latex?y">, then LATE is the ATE for compliers and is also the ATT.</p>
+<p>Let’s set up a simulation. Here are some details:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?A"> is decided by a coinflip (i.e.&nbsp;bernoulli with probability of success 0.5)</li>
+<li>There is an unmeasured confounder <img src="https://latex.codecogs.com/png.latex?w">, which is also distributed in the population via a coinflip.</li>
+<li>The confounder and the treatment effect the probability of engaging with the treatment (being a complier). <img src="https://latex.codecogs.com/png.latex?P%5Cleft(d_j%5E1%20=%201%20%5Cmid%20A=1,%20w%5Cright)%20=%200.4%20-%200.2w">. Because of the one sided compliance <img src="https://latex.codecogs.com/png.latex?P(d_j%5E0=1)%20=%200">.</li>
+<li>Probability of the outcome is <img src="https://latex.codecogs.com/png.latex?P%5Cleft(%20y%5Ea_j=1%20%5Cmid%20d%5E%7Ba%7D_j,%20w%20%5Cright)%20=%200.1%20+%200.5w%20+%200.1d_j%5E%7Ba%7D">. So the instrument only effects the outcome through compliance.</li>
+</ul>
+<p>Let’s simuilate this in R</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(kableExtra)</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;">set.seed</span>(<span class="dv" style="color: #AD0000;">0</span>)</span>
+<span id="cb1-5">N<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as.integer</span>(<span class="fl" style="color: #AD0000;">1e6</span>) <span class="co" style="color: #5E5E5E;"># Lots of precision</span></span>
+<span id="cb1-6">A <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(N, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.5</span>)</span>
+<span id="cb1-7">w <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(N, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.5</span>)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9"><span class="co" style="color: #5E5E5E;"># Potential outcomes</span></span>
+<span id="cb1-10">d_0 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="dv" style="color: #AD0000;">0</span></span>
+<span id="cb1-11">d_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(N, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.3</span> <span class="sc" style="color: #5E5E5E;">-</span> <span class="fl" style="color: #AD0000;">0.2</span><span class="sc" style="color: #5E5E5E;">*</span>w <span class="sc" style="color: #5E5E5E;">+</span> <span class="fl" style="color: #AD0000;">0.1</span><span class="sc" style="color: #5E5E5E;">*</span>A)</span>
+<span id="cb1-12">y_0 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(N, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.1</span> <span class="sc" style="color: #5E5E5E;">+</span> <span class="fl" style="color: #AD0000;">0.5</span><span class="sc" style="color: #5E5E5E;">*</span>w)</span>
+<span id="cb1-13">y_1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbinom</span>(N, <span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.1</span> <span class="sc" style="color: #5E5E5E;">+</span> <span class="fl" style="color: #AD0000;">0.5</span><span class="sc" style="color: #5E5E5E;">*</span>w <span class="sc" style="color: #5E5E5E;">+</span> <span class="fl" style="color: #AD0000;">0.1</span><span class="sc" style="color: #5E5E5E;">*</span>d_1)</span>
+<span id="cb1-14"></span>
+<span id="cb1-15"><span class="co" style="color: #5E5E5E;"># and now the observed data via switching equation</span></span>
+<span id="cb1-16">y <span class="ot" style="color: #003B4F;">&lt;-</span> A<span class="sc" style="color: #5E5E5E;">*</span>y_1 <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>A)<span class="sc" style="color: #5E5E5E;">*</span>y_0</span>
+<span id="cb1-17">d <span class="ot" style="color: #003B4F;">&lt;-</span> A<span class="sc" style="color: #5E5E5E;">*</span>d_1 <span class="sc" style="color: #5E5E5E;">+</span> (<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">-</span>A)<span class="sc" style="color: #5E5E5E;">*</span>d_0</span>
+<span id="cb1-18">complier <span class="ot" style="color: #003B4F;">&lt;-</span> d<span class="sc" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">1</span></span></code></pre></div>
+</div>
+<p>From our setup, <img src="https://latex.codecogs.com/png.latex?LATE%20=%200.1">. Let’s compute that from our potential outcomes and estimate it using <img src="https://latex.codecogs.com/png.latex?A"> as an instrument.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">sample_late <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(y_1[d_1<span class="sc" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">1</span>]) <span class="sc" style="color: #5E5E5E;">-</span> <span class="fu" style="color: #4758AB;">mean</span>(y_0[d_1<span class="sc" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">1</span>])</span>
+<span id="cb2-2">est_late <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cov</span>(y, A)<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">cov</span>(d, A)</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<caption>True LATE, sample LATE, and estimated LATE.  All 3 agree to within 3 decimal places and any differences are just sampling variability.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> True LATE </th>
+   <th style="text-align:right;"> Sample LATE </th>
+   <th style="text-align:right;"> IV Estimate of LATE </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0.1 </td>
+   <td style="text-align:right;"> 0.101 </td>
+   <td style="text-align:right;"> 0.103 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</section>
+<section id="estimating-the-causal-risk-ratio" class="level2">
+<h2 class="anchored" data-anchor-id="estimating-the-causal-risk-ratio">Estimating The Causal Risk Ratio</h2>
+<p>In order to compute the causal risk ratio we need two quantities:</p>
+<ul>
+<li>An estimate of <img src="https://latex.codecogs.com/png.latex?E%5By%5E1_j%20%5Cmid%20d%5E1%5D">, and</li>
+<li>An estimate of <img src="https://latex.codecogs.com/png.latex?E%5By%5E0_j%20%5Cmid%20d%5E1%5D">.</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?E%5By%5E1_j%20%5Cmid%20d%5E1%5D"> is easy to estimate; just compute the average outcome of those users in treatment who engaged with the treatment. Now because <img src="https://latex.codecogs.com/png.latex?LATE%20=%20E%5By%5E1_j%20%5Cmid%20d%5E1%5D%20-%20E%5By%5E0_j%20%5Cmid%20d%5E1%5D">, the second estimate we need is obtained from some algebra.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="co" style="color: #5E5E5E;"># Estimate from the data</span></span>
+<span id="cb3-2">E_y1 <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">mean</span>(y[d<span class="sc" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">1</span>])</span>
+<span id="cb3-3">E_y0 <span class="ot" style="color: #003B4F;">&lt;-</span> E_y1 <span class="sc" style="color: #5E5E5E;">-</span> est_late <span class="co" style="color: #5E5E5E;"># use the estimate, not the truth</span></span>
+<span id="cb3-4"></span>
+<span id="cb3-5">E_y1<span class="sc" style="color: #5E5E5E;">/</span>E_y0</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.389267</code></pre>
+</div>
+</div>
+<p>Let’s compare this to the true estimate of the causal risk ratio using potential outcomes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="fu" style="color: #4758AB;">mean</span>(y_1[complier])<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">mean</span>(y_0[complier])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.381259</code></pre>
+</div>
+</div>
+<p>Which is pretty damn close.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>AB Tests</category>
+  <category>Statistics</category>
+  <category>Causal Inference</category>
+  <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</guid>
+  <pubDate>Sat, 11 Feb 2023 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Bayesian Decision Making for AB Tests on Revenue</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-02-08-bayes-decisions/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>A lot of companies operate on a subscription service. Every month, you give them money and they allow you to use a service. The quality of extent of that service depends on how much money you give them. For example, Netflix allows you to pay more for higher definition content, Calendly includes some automation with their higher tiered plans, Apple provides you with more iCloud storage, and its all for a cost.</p>
+<p>These companies make more money if you choose the higher priced plan (duh), but they have to show you the value so that you <em>want</em> the higher priced plan. Sometimes, this comes in the form of a free trial for a limited time; no additional cost to the consumer, but hopefully you like it enough to shell out some cash.</p>
+<p>There is a trade off to be made here. Try a <em>too</em> premium plan and you might get hit by sticker shock and fail to convert. Not premium enough, and the trial fails to convert users who would have found value in the more premium plans.</p>
+<p>Deciding on which plan to roll out as the default trial is a question for another post. Assuming there is an existing decision I’m here to answer</p>
+<blockquote class="blockquote">
+<p>How do we analyze experiments where we have to balance both conversion from the trial and revenue from users who find value in more premium plans?</p>
+</blockquote>
+<p>Seemingly easy, just do a t-test on log revenue or something. Not so fast. Consider the following:</p>
+<ul>
+<li><p>Not every randomized user converts, meaning there are many censored revenue observations. Filling them in with 0 prevents using the log to reign in possible long tails, and <img src="https://latex.codecogs.com/png.latex?%5Clog(1+x)"> has been shown to yield arbitrarily small/large ATEs.</p></li>
+<li><p>If you’re conversion rate is small enough, maybe getting enough users to power your experiment would take months and months and months. Maybe you have the stomach for that, maybe you don’t. Its certainly my experience that the shorter the experiment can run, the faster we can improve.</p></li>
+</ul>
+<p>In this post, I’ll present a (pretty niche, honestly) Bayesian model of the process. I’ll then demonstrate how to use the model to compute expected loss in revenue. The “winner” of the AB test is then the variant which produces smallest expected loss.</p>
+<section id="revenue-in-terms-of-conversions" class="level2">
+<h2 class="anchored" data-anchor-id="revenue-in-terms-of-conversions">Revenue In Terms of Conversions</h2>
+<p>Let’s say you have <img src="https://latex.codecogs.com/png.latex?j=1,%20%5Ccdots,%20J"> plan levels. Let’s assume</p>
+<ul>
+<li>The probability a user converts (chooses to pay you, <img src="https://latex.codecogs.com/png.latex?C">) is <img src="https://latex.codecogs.com/png.latex?P(C)">.</li>
+<li>Once the user converts, the probability the user chooses plan <img src="https://latex.codecogs.com/png.latex?j"> is <img src="https://latex.codecogs.com/png.latex?P(T=j%5Cmid%20C)">.</li>
+<li>Finally, each plan produces some amount of expected revenue <img src="https://latex.codecogs.com/png.latex?E%5BR%20%5Cmid%20T=j%5D">.</li>
+</ul>
+<p>Using the law of total expectation, the expected revenue from a given free trail plan should be</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20E%5BR%5D%20=%20%5Csum_j%20E%5BR%20%5Cvert%20T=j%5D%20%5Ccdot%20P(T=j%20%5Cmid%20C)%20%5Ccdot%20P(C)%20%5C%3E.%20"></p>
+<p>If we could jointly estimate these quantities, then we could integrate over the uncertainty in each of them and compute <img src="https://latex.codecogs.com/png.latex?E%5BR%5D">. If we could compute <img src="https://latex.codecogs.com/png.latex?E%5BR%5D"> for two groups (say test and control), we could do Bayesain decision making.</p>
+</section>
+<section id="a-possible-model" class="level2">
+<h2 class="anchored" data-anchor-id="a-possible-model">A Possible Model</h2>
+<p>Let’s make some simplifying assumptions.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-02-08-bayes-decisions/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>AB Tests</category>
+  <category>Statistics</category>
+  <category>Bayes</category>
+  <guid>https://dpananos.github.io/posts/2023-02-08-bayes-decisions/index.html</guid>
+  <pubDate>Wed, 08 Feb 2023 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Journeyman Statistics</title>
   <dc:creator>Demetri Pananos</dc:creator>
