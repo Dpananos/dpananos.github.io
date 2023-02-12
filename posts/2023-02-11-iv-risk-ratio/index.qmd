@@ -152,9 +152,9 @@ We can see that 74 of the 219 compliers actually had the outcome.  This means we
 
 ## Oh Shit, I Forgot a Bound
 
-Note that there is no bound on the LATE because it is estimated via OLS (sure, there are realistic bounds on how big this can be, but OLS isn't enforcing those).  In particular, what if $LATE = E[y^1 \mid d_1]$?  Then the denominator of the causal risk ratio would be 0.  That's...bad.
+Note that there is no bound on the LATE because it is estimated via OLS (sure, there are realistic bounds on how big this can be, but OLS isn't enforcing those).  In particular, what if $LATE = E[y^1 \mid d^1]$?  Then the denominator of the causal risk ratio would be 0.  That's...bad.
 
-More over, what if $LATE \approx E[y^1 \mid d_1]$ so that the denominator was really small?  Then the causal risk ratio would basically blow up (that's a technical term for "embiggen").
+More over, what if $LATE \approx E[y^1 \mid d^1]$ so that the denominator was really small?  Then the causal risk ratio would basically blow up (that's a technical term for "embiggen").
 
 The only reason I bring this up is because it happens in this example.  Let's bootstrap the estimated causal risk ratio (what we call "lift") and look at the distribuion of bootstrap replicates.
 
