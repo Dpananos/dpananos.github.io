@@ -21,7 +21,7 @@ Let $A$ be a binary indicator for assignment to treatment (1) or control (0). Le
 
 > "This is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group".
 
-This means that we have two types of users in treatment group: $d_j^1 = 1$ is a "complier" and $d_j^0 = 0$ is a "never taker". If our outcome is $y$, then LATE is the ATE for compliers and is also the ATT. 
+This means that we have two types of users in treatment group: $d_j^1 = 1$ is a "complier" and $d_j^1 = 0$ is a "never taker". If our outcome is $y$, then LATE is the ATE for compliers and is also the ATT. 
 
 
 Let's set up a simulation.  Here are some details:
