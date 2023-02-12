@@ -178,7 +178,7 @@ d_rs %>%
 
 ```
 
-LMAO look at that tail! The long tail us due to the problems I've highlighted.  In fact, we can highlight the "Oh shit zone" on a plot of the bootstraps (below in the figure below).  The red line is where the tail behavour comes from; of you have a bootstrap replicate on that line, you should be saying "oh shit".
+LMAO look at that tail! The long tail us due to the problems I've highlighted.  In fact, we can highlight the "Oh shit zone" on a plot of the bootstraps (below in the figure below).  The red line is where the tail behavior comes from; if you have a bootstrap replicate on that line, you should be saying "oh shit".
 
 ```{r}
 
