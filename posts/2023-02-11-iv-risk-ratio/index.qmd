@@ -18,14 +18,18 @@ In this post, I'm putting together some much appreciated advice from [@guilherme
 
 ## Simulation
 
-Let $A$ be a binary indicator for assignment to treatment (1) or control. Let $d_j^a$ be the potential outcome for engaging with the treatment under treatment $A=a$ for user $j$.  Due to construction of the experiment, $d_j^0 = 0  \forall j$ because users in control can not engage in the treatment by design ("[t]his is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group", writes dimitry).  This means that we have two types of users in treatment group: $d_j^1 = 1$ is a "complier" and $d_j^0 = 0$ is a "never taker". If our outcome is $y$, then LATE is the ATE for compliers and is also the ATT. 
+Let $A$ be a binary indicator for assignment to treatment (1) or control (0). Let $d_j^a$ be the potential outcome for engaging with the treatment under treatment $A=a$ for user $j$.  Due to construction of the experiment, $d_j^0 = 0  \forall j$ because users in control can not engage in the treatment by design.  Dimitry writes
+
+> "This is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group".
+
+This means that we have two types of users in treatment group: $d_j^1 = 1$ is a "complier" and $d_j^0 = 0$ is a "never taker". If our outcome is $y$, then LATE is the ATE for compliers and is also the ATT. 
 
 
 Let's set up a simulation.  Here are some details:
 
 * $A$ is decided by a coinflip (i.e. bernoulli with probability of success 0.5)
 * There is an unmeasured confounder $w$, which is also distributed in the population via a coinflip.
-* The confounder and the treatment effect the probability of engaging with the treatment (being a complier).  $P\left(d_j^1 = 1 \mid A=1, w\right) = 0.4 - 0.2w$.  Because of the one sided compliance $P(d_j^0=1) = 0$.
+* The confounder and the treatment effect the probability of engaging with the treatment (being a complier).  $P\left(d_j^1 = 1 \mid A=1, w\right) = 0.4 - 0.2w$.  Because of the one sided compliance,  $P(d_j^0=1) = 0$.
 * Probability of the outcome is $P\left( y^a_j=1 \mid d^{a}_j, w \right) = 0.1 + 0.5w + 0.1d_j^{a}$.  So the instrument only effects the outcome through compliance.
 
 Let's simuilate this in R
@@ -33,7 +37,15 @@ Let's simuilate this in R
 ```{r, echo=T}
 library(tidyverse)
 library(kableExtra)
+my_blue <- rgb(45/250, 62/250, 80/250, 1)
+theme_set(theme_classic()) 
 
+update_geom_defaults("point",   list(fill = my_blue, shape=21, color = 'black'))
+
+```
+
+
+```{r, echo=T}
 set.seed(0)
 N<- as.integer(1e6) # Lots of precision
 A <- rbinom(N, 1, 0.5)
@@ -60,13 +72,13 @@ est_late <- cov(y, A)/cov(d, A)
 ```
 
 ```{r}
+#| fig-cap: 'True LATE, sample LATE, and estimated LATE.  All 3 agree to within 3 decimal places and any differences are just sampling variability.'
 tibble(
   `True LATE` = 0.1,
   `Sample LATE` = sample_late,
   `IV Estimate of LATE` = est_late
 ) %>% 
-  kbl(digits = 3,
-      caption = 'True LATE, sample LATE, and estimated LATE.  All 3 agree to within 3 decimal places and any differences are just sampling variability.') %>% 
+  kbl(digits = 3) %>% 
   kable_styling(bootstrap_options = c('striped','floating'))
 ```
 
@@ -97,36 +109,98 @@ mean(y_1[complier])/mean(y_0[complier])
 Which is pretty damn close.
 
 
-# Simulation Across Different Parameteriztions
+# A Real Example
+
+We ran an experiment where users could optionally watch a video.  The video was intended to drive some other metric $y$.  Here are the results from the experiment.
 
 ```{r}
-simulate_causal_rr <- function(prob_w, prob_d, fx_w_d, fx_a_d, prob_y, fx_w_y, fx_d_y){
-  N<- as.integer(1e6) # Lots of precision
-  A <- rbinom(N, 1, 0.5)
-  w <- rbinom(N, 1, prob_w)
+library(tidyverse)
+library(gtsummary)
+library(rsample)
+
+experiment <-data.frame(
+  treatment = c(0, 0, 1, 1, 1, 1),
+  complied = c(0, 0, 0, 0, 1, 1),
+  y = c(0, 1, 0, 1, 0, 1),
+  n = c(3008L, 2075L, 2779L, 2038L, 145L, 74L)
+) %>% 
+mutate(
+  Treatment = if_else(treatment==1, 'Treatment','Control'),
+  Clicked = if_else(complied==1, 'Complied','Never Taker'),
+  Y = factor(y)
+) %>% 
+  uncount(n)
+
+est_lift <- function(d, ...){
   
-  # Potential outcomes
-  d_0 <- 0
-  d_1 <- rbinom(N, 1, prob_d - fx_w_d*w + fx_a_d*A)
-  y_0 <- rbinom(N, 1, prob_d + fx_w_d*w)
-  y_1 <- rbinom(N, 1, prob_y + fx_w_y*w + fx_d_y*d_1)
+  mfit <- ivreg::ivreg(y~complied|treatment, data=analysis(d))
+  late_est <- coef(mfit)[[2]]
+  Ey1 <- mean(filter(analysis(d), treatment==1, complied==1)$y)
   
-  # and now the observed data via switching equation
-  y <- A*y_1 + (1-A)*y_0
-  d <- A*d_1 + (1-A)*d_0
-  complier <- d==1
+  lift <- Ey1/(Ey1-late_est)
   
-  # Things we want to compute
-  sample_late <- mean(y_1[d_1==1]) - mean(y_0[d_1==1])
-  est_late <- cov(y, A)/cov(d, A)
-  
-  sample_rr <- mean(y_1[complier])/mean(y_0[complier])
-  E_y1 <- mean(y[d==1])
-  E_y0 <- E_y1 - est_late # use the estimate, not the truth
-  
-  est_rr = E_y1/E_y0
-  
-  tibble(sample_late, est_late, rr, est_rr)
+  tibble(estimate=c(lift, Ey1, Ey1-late_est, late_est),
+         term = c('Lift','Ey1', 'Ey0','LATE'))
 }
+
+experiment %>% 
+  select(Y, Clicked, Treatment) %>% 
+  tbl_summary( by='Clicked', digits = list(y~1, Treatment ~ 1)) %>% 
+  add_overall()
 ```
 
+We can see that 74 of the 219 compliers actually had the outcome.  This means we can estimate $E[y^1\mid d^1] \approx 74/219 \approx 33.8\%$. Using `ivreg`, the LATE is estimated to be 0.256, so the lift is estimated to be $0.338/(0.388-0.256) \approx 2.56$. But there is still a problem.
+
+## Oh Shit, I Forgot a Bound
+
+Note that there is no bound on the LATE because it is estimated via OLS (sure, there are realistic bounds on how big this can be, but OLS isn't enforcing those).  In particular, what if $LATE = E[y^1 \mid d_1]$?  Then the denominator of the causal risk ratio would be 0.  That's...bad.
+
+More over, what if $LATE \approx E[y^1 \mid d_1]$ so that the denominator was really small?  Then the causal risk ratio would basically blow up (that's a technical term for "embiggen").
+
+The only reason I bring this up is because it happens in this example.  Let's bootstrap the estimated causal risk ratio (what we call "lift") and look at the distribuion of bootstrap replicates.
+
+```{r}
+d_rs <- experiment %>% 
+  bootstraps(times=1000, apparent = T) %>% 
+  mutate(
+    results = map(splits, est_lift)
+  )
+
+d_rs %>% 
+  unnest(results) %>% 
+  filter(term=='Lift') %>% 
+  ggplot(aes(estimate)) + 
+  geom_histogram(fill=my_blue) + 
+  theme(aspect.ratio = 1/1.61) + 
+  labs(
+    x = 'Causal Risk Ratio',
+    subtitle = "Estimates of the Causal Risk Ratio Can Be Long Tailed!"
+  )
+
+```
+
+LMAO look at that tail! The long tail us due to the problem's I've highlighted.  In fact, we can highlight the "Oh shit zone" on a plot of the bootstraps (below in the figure below).  The red line is where the tail behavour comes from; of you have a bootstrap replicate on that line, you should be saying "oh shit".
+
+```{r}
+
+d_rs %>% 
+  unnest(results) %>% 
+  filter(term %in% c('Ey1','LATE')) %>% 
+  pivot_wider(id_cols = c('splits','id'), values_from = estimate, names_from = term) %>% 
+  ggplot(aes(Ey1, LATE)) + 
+  geom_point() + 
+  geom_abline(aes(slope=1, intercept=0, color='Oh Shit Zone')) +
+  theme(aspect.ratio = 1) + 
+  labs(x='Expected Outcome For Compliers in Treatment', color = '')+
+  scale_color_manual(values = c('Oh Shit Zone'='red'))
+
+```
+
+
+In fact, there are some estimates from the bootstrap which yield $E[y^0\mid d^1]<0$ so... what was the point if this?
+
+## What Was The Point Of This Post
+
+Ok, so estimating the causal risk ratio in a randomized experiment with one sided non-compliance is technically possible, but the math can get...weird.  In particular, bootstrapping the standard errors (which is probably the most sensible way of estimating the standard errors unless you're a glutton for delta method punishment) shows that we can get non-nonsensical bootstrapped estimates of the counterfacutal average outcome for compliers.
+
+Honestly...I'm not sure where to go from here. Point estimates are possible but incomplete.  Bootstrapping is a sanest way to get standard errors, but have no way of ensuring the estimates are bounded appropriately.  All is not lost, its nice to know this sort of thing can happen.  Maybe the most sensible thing to say here is "do not ask for causal risk ratios for these types of experiments" and that is worth its weight in gold.

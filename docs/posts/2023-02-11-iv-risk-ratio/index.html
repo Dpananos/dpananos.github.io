@@ -223,7 +223,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#simulation" id="toc-simulation" class="nav-link active" data-scroll-target="#simulation">Simulation</a></li>
   <li><a href="#estimating-the-causal-risk-ratio" id="toc-estimating-the-causal-risk-ratio" class="nav-link" data-scroll-target="#estimating-the-causal-risk-ratio">Estimating The Causal Risk Ratio</a></li>
-  <li><a href="#simulation-across-different-parameteriztions" id="toc-simulation-across-different-parameteriztions" class="nav-link" data-scroll-target="#simulation-across-different-parameteriztions">Simulation Across Different Parameteriztions</a></li>
+  <li><a href="#a-real-example" id="toc-a-real-example" class="nav-link" data-scroll-target="#a-real-example">A Real Example</a>
+  <ul class="collapse">
+  <li><a href="#oh-shit-i-forgot-a-bound" id="toc-oh-shit-i-forgot-a-bound" class="nav-link" data-scroll-target="#oh-shit-i-forgot-a-bound">Oh Shit, I Forgot a Bound</a></li>
+  <li><a href="#what-was-the-point-of-this-post" id="toc-what-was-the-point-of-this-post" class="nav-link" data-scroll-target="#what-was-the-point-of-this-post">What Was The Point Of This Post</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-02-11-iv-risk-ratio/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -238,61 +242,82 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In this post, I’m putting together some much appreciated advice from <a href="https://twitter.com/guilhermejd1/status/1624196853947416576"><span class="citation" data-cites="guilhermejd1">@guilhermejd1</span></a> and <a href="https://stats.stackexchange.com/a/605042/111259">dimitry on cross validated</a> on how to estimate a causal risk ratio in a randomized experiment with one sided non-compliance. I’ll first demonstrate how to do this with a simulation where we will actually have potential outcomes with which to compare. Then, I’ll apply this approach to a real experiment I helped run at Zapier.</p>
 <section id="simulation" class="level2">
 <h2 class="anchored" data-anchor-id="simulation">Simulation</h2>
-<p>Let <span class="math inline">\(A\)</span> be a binary indicator for assignment to treatment (1) or control. Let <span class="math inline">\(d_j^a\)</span> be the potential outcome for engaging with the treatment under treatment <span class="math inline">\(A=a\)</span> for user <span class="math inline">\(j\)</span>. Due to construction of the experiment, <span class="math inline">\(d_j^0 = 0 \forall j\)</span> because users in control can not engage in the treatment by design (“[t]his is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group”, writes dimitry). This means that we have two types of users in treatment group: <span class="math inline">\(d_j^1 = 1\)</span> is a “complier” and <span class="math inline">\(d_j^0 = 0\)</span> is a “never taker”. If our outcome is <span class="math inline">\(y\)</span>, then LATE is the ATE for compliers and is also the ATT.</p>
+<p>Let <span class="math inline">\(A\)</span> be a binary indicator for assignment to treatment (1) or control (0). Let <span class="math inline">\(d_j^a\)</span> be the potential outcome for engaging with the treatment under treatment <span class="math inline">\(A=a\)</span> for user <span class="math inline">\(j\)</span>. Due to construction of the experiment, <span class="math inline">\(d_j^0 = 0 \forall j\)</span> because users in control can not engage in the treatment by design. Dimitry writes</p>
+<blockquote class="blockquote">
+<p>“This is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group”.</p>
+</blockquote>
+<p>This means that we have two types of users in treatment group: <span class="math inline">\(d_j^1 = 1\)</span> is a “complier” and <span class="math inline">\(d_j^0 = 0\)</span> is a “never taker”. If our outcome is <span class="math inline">\(y\)</span>, then LATE is the ATE for compliers and is also the ATT.</p>
 <p>Let’s set up a simulation. Here are some details:</p>
 <ul>
 <li><span class="math inline">\(A\)</span> is decided by a coinflip (i.e.&nbsp;bernoulli with probability of success 0.5)</li>
 <li>There is an unmeasured confounder <span class="math inline">\(w\)</span>, which is also distributed in the population via a coinflip.</li>
-<li>The confounder and the treatment effect the probability of engaging with the treatment (being a complier). <span class="math inline">\(P\left(d_j^1 = 1 \mid A=1, w\right) = 0.4 - 0.2w\)</span>. Because of the one sided compliance <span class="math inline">\(P(d_j^0=1) = 0\)</span>.</li>
+<li>The confounder and the treatment effect the probability of engaging with the treatment (being a complier). <span class="math inline">\(P\left(d_j^1 = 1 \mid A=1, w\right) = 0.4 - 0.2w\)</span>. Because of the one sided compliance, <span class="math inline">\(P(d_j^0=1) = 0\)</span>.</li>
 <li>Probability of the outcome is <span class="math inline">\(P\left( y^a_j=1 \mid d^{a}_j, w \right) = 0.1 + 0.5w + 0.1d_j^{a}\)</span>. So the instrument only effects the outcome through compliance.</li>
 </ul>
 <p>Let’s simuilate this in R</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>N<span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fl">1e6</span>) <span class="co"># Lots of precision</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Potential outcomes</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>d_0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>d_1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.3</span> <span class="sc">-</span> <span class="fl">0.2</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">0.1</span><span class="sc">*</span>A)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>y_0 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.5</span><span class="sc">*</span>w)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>y_1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.5</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">0.1</span><span class="sc">*</span>d_1)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># and now the observed data via switching equation</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> A<span class="sc">*</span>y_1 <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>A)<span class="sc">*</span>y_0</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> A<span class="sc">*</span>d_1 <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>A)<span class="sc">*</span>d_0</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>complier <span class="ot">&lt;-</span> d<span class="sc">==</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>my_blue <span class="ot">&lt;-</span> <span class="fu">rgb</span>(<span class="dv">45</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">62</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">80</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">1</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>()) </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">update_geom_defaults</span>(<span class="st">"point"</span>,   <span class="fu">list</span>(<span class="at">fill =</span> my_blue, <span class="at">shape=</span><span class="dv">21</span>, <span class="at">color =</span> <span class="st">'black'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">0</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>N<span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fl">1e6</span>) <span class="co"># Lots of precision</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Potential outcomes</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>d_0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>d_1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.3</span> <span class="sc">-</span> <span class="fl">0.2</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">0.1</span><span class="sc">*</span>A)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>y_0 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.5</span><span class="sc">*</span>w)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>y_1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(N, <span class="dv">1</span>, <span class="fl">0.1</span> <span class="sc">+</span> <span class="fl">0.5</span><span class="sc">*</span>w <span class="sc">+</span> <span class="fl">0.1</span><span class="sc">*</span>d_1)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># and now the observed data via switching equation</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> A<span class="sc">*</span>y_1 <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>A)<span class="sc">*</span>y_0</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> A<span class="sc">*</span>d_1 <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>A)<span class="sc">*</span>d_0</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>complier <span class="ot">&lt;-</span> d<span class="sc">==</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>From our setup, <span class="math inline">\(LATE = 0.1\)</span>. Let’s compute that from our potential outcomes and estimate it using <span class="math inline">\(A\)</span> as an instrument.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>sample_late <span class="ot">&lt;-</span> <span class="fu">mean</span>(y_1[d_1<span class="sc">==</span><span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y_0[d_1<span class="sc">==</span><span class="dv">1</span>])</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>est_late <span class="ot">&lt;-</span> <span class="fu">cov</span>(y, A)<span class="sc">/</span><span class="fu">cov</span>(d, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sample_late <span class="ot">&lt;-</span> <span class="fu">mean</span>(y_1[d_1<span class="sc">==</span><span class="dv">1</span>]) <span class="sc">-</span> <span class="fu">mean</span>(y_0[d_1<span class="sc">==</span><span class="dv">1</span>])</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>est_late <span class="ot">&lt;-</span> <span class="fu">cov</span>(y, A)<span class="sc">/</span><span class="fu">cov</span>(d, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
 
 <table class="table table-striped" style="margin-left: auto; margin-right: auto;">
-<caption>True LATE, sample LATE, and estimated LATE.  All 3 agree to within 3 decimal places and any differences are just sampling variability.</caption>
- <thead>
-  <tr>
-   <th style="text-align:right;"> True LATE </th>
-   <th style="text-align:right;"> Sample LATE </th>
-   <th style="text-align:right;"> IV Estimate of LATE </th>
-  </tr>
- </thead>
+<thead>
+<tr>
+<th style="text-align:right;">
+True LATE
+</th>
+<th style="text-align:right;">
+Sample LATE
+</th>
+<th style="text-align:right;">
+IV Estimate of LATE
+</th>
+</tr>
+</thead>
 <tbody>
-  <tr>
-   <td style="text-align:right;"> 0.1 </td>
-   <td style="text-align:right;"> 0.101 </td>
-   <td style="text-align:right;"> 0.103 </td>
-  </tr>
+<tr>
+<td style="text-align:right;">
+0.1
+</td>
+<td style="text-align:right;">
+0.101
+</td>
+<td style="text-align:right;">
+0.103
+</td>
+</tr>
 </tbody>
-</table>
 
+</table>
+<p>True LATE, sample LATE, and estimated LATE. All 3 agree to within 3 decimal places and any differences are just sampling variability.</p>
 </div>
 </div>
 </section>
@@ -305,31 +330,513 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul>
 <p><span class="math inline">\(E[y^1_j \mid d^1]\)</span> is easy to estimate; just compute the average outcome of those users in treatment who engaged with the treatment. Now because <span class="math inline">\(LATE = E[y^1_j \mid d^1] - E[y^0_j \mid d^1]\)</span>, the second estimate we need is obtained from some algebra.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate from the data</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>E_y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(y[d<span class="sc">==</span><span class="dv">1</span>])</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>E_y0 <span class="ot">&lt;-</span> E_y1 <span class="sc">-</span> est_late <span class="co"># use the estimate, not the truth</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>E_y1<span class="sc">/</span>E_y0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate from the data</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>E_y1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(y[d<span class="sc">==</span><span class="dv">1</span>])</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>E_y0 <span class="ot">&lt;-</span> E_y1 <span class="sc">-</span> est_late <span class="co"># use the estimate, not the truth</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>E_y1<span class="sc">/</span>E_y0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.389267</code></pre>
 </div>
 </div>
 <p>Let’s compare this to the true estimate of the causal risk ratio using potential outcomes</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(y_1[complier])<span class="sc">/</span><span class="fu">mean</span>(y_0[complier])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(y_1[complier])<span class="sc">/</span><span class="fu">mean</span>(y_0[complier])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.381259</code></pre>
 </div>
 </div>
 <p>Which is pretty damn close.</p>
 </section>
-<section id="simulation-across-different-parameteriztions" class="level1">
-<h1>Simulation Across Different Parameteriztions</h1>
+<section id="a-real-example" class="level1">
+<h1>A Real Example</h1>
+<p>We ran an experiment where users could optionally watch a video. The video was intended to drive some other metric <span class="math inline">\(y\)</span>. Here are the results from the experiment.</p>
 <div class="cell">
+<div class="cell-output-display">
 
+<div id="zvewtafbqe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+:where(#zvewtafbqe) .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+:where(#zvewtafbqe) .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+:where(#zvewtafbqe) .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+:where(#zvewtafbqe) .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+:where(#zvewtafbqe) .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+:where(#zvewtafbqe) .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+:where(#zvewtafbqe) .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+:where(#zvewtafbqe) .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+:where(#zvewtafbqe) .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+:where(#zvewtafbqe) .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+:where(#zvewtafbqe) .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+:where(#zvewtafbqe) .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+:where(#zvewtafbqe) .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+:where(#zvewtafbqe) .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#zvewtafbqe) .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+:where(#zvewtafbqe) .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+:where(#zvewtafbqe) .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#zvewtafbqe) .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+:where(#zvewtafbqe) .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#zvewtafbqe) .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+:where(#zvewtafbqe) .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#zvewtafbqe) .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+:where(#zvewtafbqe) .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+:where(#zvewtafbqe) .gt_left {
+  text-align: left;
+}
+
+:where(#zvewtafbqe) .gt_center {
+  text-align: center;
+}
+
+:where(#zvewtafbqe) .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+:where(#zvewtafbqe) .gt_font_normal {
+  font-weight: normal;
+}
+
+:where(#zvewtafbqe) .gt_font_bold {
+  font-weight: bold;
+}
+
+:where(#zvewtafbqe) .gt_font_italic {
+  font-style: italic;
+}
+
+:where(#zvewtafbqe) .gt_super {
+  font-size: 65%;
+}
+
+:where(#zvewtafbqe) .gt_footnote_marks {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 75%;
+  vertical-align: 0.4em;
+}
+
+:where(#zvewtafbqe) .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+:where(#zvewtafbqe) .gt_indent_1 {
+  text-indent: 5px;
+}
+
+:where(#zvewtafbqe) .gt_indent_2 {
+  text-indent: 10px;
+}
+
+:where(#zvewtafbqe) .gt_indent_3 {
+  text-indent: 15px;
+}
+
+:where(#zvewtafbqe) .gt_indent_4 {
+  text-indent: 20px;
+}
+
+:where(#zvewtafbqe) .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="<strong>Characteristic</strong>"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>Overall</strong>, N = 10,119<sup class=&quot;gt_footnote_marks&quot;>1</sup>"><strong>Overall</strong>, N = 10,119<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>Complied</strong>, N = 219<sup class=&quot;gt_footnote_marks&quot;>1</sup>"><strong>Complied</strong>, N = 219<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>Never Taker</strong>, N = 9,900<sup class=&quot;gt_footnote_marks&quot;>1</sup>"><strong>Never Taker</strong>, N = 9,900<sup class="gt_footnote_marks">1</sup></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">Y</td>
+<td headers="stat_0" class="gt_row gt_center"></td>
+<td headers="stat_1" class="gt_row gt_center"></td>
+<td headers="stat_2" class="gt_row gt_center"></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
+<td headers="stat_0" class="gt_row gt_center">5,932.0 (58.6%)</td>
+<td headers="stat_1" class="gt_row gt_center">145.0 (66.2%)</td>
+<td headers="stat_2" class="gt_row gt_center">5,787.0 (58.5%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td headers="stat_0" class="gt_row gt_center">4,187.0 (41.4%)</td>
+<td headers="stat_1" class="gt_row gt_center">74.0 (33.8%)</td>
+<td headers="stat_2" class="gt_row gt_center">4,113.0 (41.5%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Treatment</td>
+<td headers="stat_0" class="gt_row gt_center"></td>
+<td headers="stat_1" class="gt_row gt_center"></td>
+<td headers="stat_2" class="gt_row gt_center"></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;Control</td>
+<td headers="stat_0" class="gt_row gt_center">5,083.0 (50.2%)</td>
+<td headers="stat_1" class="gt_row gt_center">0.0 (0.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">5,083.0 (51.3%)</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;Treatment</td>
+<td headers="stat_0" class="gt_row gt_center">5,036.0 (49.8%)</td>
+<td headers="stat_1" class="gt_row gt_center">219.0 (100.0%)</td>
+<td headers="stat_2" class="gt_row gt_center">4,817.0 (48.7%)</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="4"><sup class="gt_footnote_marks">1</sup> n (%)</td>
+    </tr>
+  </tfoot>
+</table>
 </div>
+</div>
+</div>
+<p>We can see that 74 of the 219 compliers actually had the outcome. This means we can estimate <span class="math inline">\(E[y^1\mid d^1] \approx 74/219 \approx 33.8\%\)</span>. Using <code>ivreg</code>, the LATE is estimated to be 0.256, so the lift is estimated to be <span class="math inline">\(0.338/(0.388-0.256) \approx 2.56\)</span>. But there is still a problem.</p>
+<section id="oh-shit-i-forgot-a-bound" class="level2">
+<h2 class="anchored" data-anchor-id="oh-shit-i-forgot-a-bound">Oh Shit, I Forgot a Bound</h2>
+<p>Note that there is no bound on the LATE because it is estimated via OLS (sure, there are realistic bounds on how big this can be, but OLS isn’t enforcing those). In particular, what if <span class="math inline">\(LATE = E[y^1 \mid d_1]\)</span>? Then the denominator of the causal risk ratio would be 0. That’s…bad.</p>
+<p>More over, what if <span class="math inline">\(LATE \approx E[y^1 \mid d_1]\)</span> so that the denominator was really small? Then the causal risk ratio would basically blow up (that’s a technical term for “embiggen”).</p>
+<p>The only reason I bring this up is because it happens in this example. Let’s bootstrap the estimated causal risk ratio (what we call “lift”) and look at the distribuion of bootstrap replicates.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>LMAO look at that tail! The long tail us due to the problem’s I’ve highlighted. In fact, we can highlight the “Oh shit zone” on a plot of the bootstraps (below in the figure below). The red line is where the tail behavour comes from; of you have a bootstrap replicate on that line, you should be saying “oh shit”.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In fact, there are some estimates from the bootstrap which yield <span class="math inline">\(E[y^0\mid d^1]&lt;0\)</span> so… what was the point if this?</p>
+</section>
+<section id="what-was-the-point-of-this-post" class="level2">
+<h2 class="anchored" data-anchor-id="what-was-the-point-of-this-post">What Was The Point Of This Post</h2>
+<p>Ok, so estimating the causal risk ratio in a randomized experiment with one sided non-compliance is technically possible, but the math can get…weird. In particular, bootstrapping the standard errors (which is probably the most sensible way of estimating the standard errors unless you’re a glutton for delta method punishment) shows that we can get non-nonsensical bootstrapped estimates of the counterfacutal average outcome for compliers.</p>
+<p>Honestly…I’m not sure where to go from here. Point estimates are possible but incomplete. Bootstrapping is a sanest way to get standard errors, but have no way of ensuring the estimates are bounded appropriately. All is not lost, its nice to know this sort of thing can happen. Maybe the most sensible thing to say here is “do not ask for causal risk ratios for these types of experiments” and that is worth its weight in gold.</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
