@@ -5,7 +5,6 @@ date: "2023-02-11"
 code-fold: false
 echo: false
 fig-cap-location: top
-draft: true
 categories: [AB Tests, Statistics, Causal Inference]
 number-sections: false
 ---
