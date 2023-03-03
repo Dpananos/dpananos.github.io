@@ -1,0 +1,149 @@
+---
+title: "Choosing the Optimal MDE for Experimentation"
+date: "2023-03-31"
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: [AB Tests, Statistics]
+number-sections: false
+draft: true
+---
+
+```{r, echo=F, warning=F, message=F}
+library(pwr)
+library(tidyverse)
+
+n_uuids <- 2500000
+baseline <- 0.1
+latent_lift <- 1.02
+
+
+lift_dist <-\(n) rlnorm(n, log(latent_lift), 0.01)
+one_sided_power = function(real_lift, n_per_group){
+  pwr.2p.test(h = ES.h(real_lift*baseline, baseline), 
+              n = n_per_group,
+              alternative = 'greater',
+              sig.level = 0.025
+              )$power
+}
+
+```
+
+One of the most prevalent questions I'm asked about AB tests concerns sample size, and in particular its the minimal detectable effect (MDE).  Without a meta-analysis of your experiments, its hard to say what you should use (aside from the sort of trite thought experiment of "what effect would you want to tell your boss?").
+ 
+I've been thinking about how to better choose the MDE based on data, and I think I've come up with a scheme to do so.  In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments.  The MDE is chosen so as to optimize the "cumulative improvement" to the metric, under some mild and some strong assumptions.  I assume team's can perform a hierarchical analysis of their experiments as I described in [this](https://dpananos.github.io/posts/2022-07-20-pooling-experiments/) post.
+
+
+The post begins with a list of assumptions about the team, constraints imposed thereon, and the nature of experimental effects.  I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer the MDE question.  
+
+## Assumptions
+
+Here some assumptions that makes life a little easier:
+
+* Your team's entire job is running CRO experiments.  Due to resourcing constraints, you can only run 24 experiments per year (or 2 experiments per month on average).
+* Your primary metric is signup rate, which is the number of unique users who sign up divided by the number of unique users who land on your site in some given time.
+* You work in a frequentist framework, and you always run 2 tailed tests because you want to know if you hurt your signup rate.  That is useful for posterity.
+* Your main causal contrast is relative risk (signup rate in treatment divided by sign up rate in control).  In industry, we call this the "lift".
+* Your baseline signup rate is `r scales::percent(baseline)` and you get about `r scales::comma(n_uuids)` unique visitors to your website per year.
+* Assume your team generates lift fairly reliably and that these lifts sustain through time.  There is no decay of the effect, no interaction between experiments, nor is there any seasonality to signup rate.  These are blatantly false, but they simplify enough for us to get traction.
+* Unbeknownst to you, your team generates experimental lift according by drawing from a log normal distribution, with parameters $\mu=\log(1.02)$ and  $\sigma=0.01$ on the log scale.
+* You are really only interested in positive effects (lift > 1) so you won't implement anything with lift < 1, and if the null fails to be rejected you will stick with the status quo.
+* You use the same MDE for each experiment.
+
+
+## Procedure
+
+* Let's refer to the number of unique visitors as `n_uuid` and the baseline signup rate as `baseline`.
+* Given an MDE, its easy to determine the requisite sample size.  Call this `n_per_group`.
+* This means you can run `min(24,  n_uuid/n_per_group)` experiments per year.
+* Each experiment has some true underlying lift called `real_lift`.
+* Given the sample size, you can compute the power to detect `real_lift` *but* we're only interested in rejecting the null when the probability the estimated lift is greater than 1. Call this power `power`.
+* Now, all we have to do is simulate binomial numbers for each experiment with probability of success `power`.  When the simulated number is 1, that means we detected that effect, else we failed to detect the effect.
+* Because we assumed lifts sustain through time, then the cumulative improvement to the sign up rate is the product of the detected lifts.
+* The number we are optimizing for is the cumulative improvement to the signup rate (the cumulative lift).
+
+This is fairly easy to program in R.
+
+
+```{r}
+# Draw lifts for experiments from this distribution
+lift_dist <-\(n) rlnorm(n, log(1.02), 0.01)
+
+
+one_sided_power = function(real_lift, n_per_group){
+  # Only interested in the case when the estimated lift is
+  # Greater than one, which corresponds to a one sided test.
+  # However, you always run 2 tailed tests, so the significance level
+  # is half of what is typically is.
+  pwr.2p.test(h = ES.h(real_lift*baseline, baseline), 
+              n = n_per_group,
+              alternative = 'greater',
+              sig.level = 0.025
+              )$power
+}
+
+
+
+f = function(mde){
+  
+  # Given the MDE, here is how many users you need per group in each experiment.
+  n_per_group = ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
+  
+  # Here is how many experiments you could run per year
+  # Why the factor of 2?  Because the computation above is the szie of each group.
+  n_experiments_per_year <- pmin(24, floor(n_uuids/(2*n_per_group)))
+  
+  # Here is a grid of experiments.  Simulate 
+  # Running these experiments 1000 times
+  # each experiment has n_per_group users in each group
+  simulations <- crossing(
+    sim = 1:1000, 
+    experiment = 1:n_experiments_per_year,
+    n_per_group = n_per_group
+  )
+  
+  simulations %>% 
+    mutate(
+      # draw a real lift for each experiment from your lift distribution
+      real_lift = lift_dist(n()),
+      # Compute the power to detect that lift given the sample size you have
+      power = map2_dbl(real_lift, n_per_group, one_sided_power),
+      # Simulate detecting the lift
+      detect = as.logical(rbinom(n(), 1, power)),
+      # Did you implement the result or not?
+      # If you didn't, this is equivalent to a lift of 1
+      # and won't change the product.
+      result = if_else(detect, real_lift, 1),
+    ) %>% 
+    group_by(sim) %>% 
+    #finally, take the product, grouping among simulations.
+    summarise(lift = prod(result)) 
+  
+  
+}
+
+
+mdes <- tibble(mde = seq(1.01, 1.1, 0.005)) %>% 
+        mutate(mde_id = as.character(seq_along(mde)))
+
+results = map_dfr(mdes$mde, f, .id = 'mde_id')  %>% 
+          left_join(mdes)
+
+
+results %>% 
+ggplot(aes(mde, lift)) + 
+  stat_summary() + 
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
+  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
+  labs(x='MDE', y='Cumulative Improvement Over all Experiments')
+  
+
+```
+
+What I find most interesting here is that the "optimal MDE" (i.e the MDE which yields maximal cumulative improvement to signup rate) *is not the average lift the team make*.  Its actually a little larger (~5% MDE where as the team generates a 2% lift on average).  Moreover, its actually *better* to aim for large MDEs than low MDEs, as the expected cumulative improvement to signup rate tapers off much more slowly as the MDE grows large.  This is likely because large MDEs allow for more experiments, meaning more opportunity to improve as opposed to running long experiments to detect small effects.  That makes sense; large MDEs give you more kicks at the can.
+
+
+
+
+
+
