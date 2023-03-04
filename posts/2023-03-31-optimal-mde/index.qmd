@@ -1,7 +1,7 @@
 ---
 title: "Choosing the Optimal MDE for Experimentation"
 date: "2023-03-31"
-code-fold: false
+code-fold: true
 echo: false
 fig-cap-location: top
 categories: [AB Tests, Statistics]
@@ -13,63 +13,68 @@ draft: true
 library(pwr)
 library(tidyverse)
 
+my_blue <- rgb(45/250, 62/250, 80/250, 1)
+my_theme<- theme_classic() %+replace% 
+           theme(panel.grid.major = element_line(),
+                 aspect.ratio = 1/1.61)
+theme_set(my_theme)
+
 n_uuids <- 2500000
-baseline <- 0.1
-latent_lift <- 1.02
-
-
-lift_dist <-\(n) rlnorm(n, log(latent_lift), 0.01)
-one_sided_power = function(real_lift, n_per_group){
-  pwr.2p.test(h = ES.h(real_lift*baseline, baseline), 
-              n = n_per_group,
-              alternative = 'greater',
-              sig.level = 0.025
-              )$power
-}
+baseline <- 0.08
+latent_lift <- 1.01
 
 ```
 
-One of the most prevalent questions I'm asked about AB tests concerns sample size, and in particular its the minimal detectable effect (MDE).  Without a meta-analysis of your experiments, its hard to say what you should use (aside from the sort of trite thought experiment of "what effect would you want to tell your boss?").
- 
-I've been thinking about how to better choose the MDE based on data, and I think I've come up with a scheme to do so.  In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments.  The MDE is chosen so as to optimize the "cumulative improvement" to the metric, under some mild and some strong assumptions.  I assume team's can perform a hierarchical analysis of their experiments as I described in [this](https://dpananos.github.io/posts/2022-07-20-pooling-experiments/) post.
+One of the most prevalent questions I'm asked about AB tests concerns sample size, and in particular about the minimal detectable effect (MDE).  Set your MDE too big and your experiments are under powered, but you can run a lof of them (at least as many as your team can produce in a given window of time).  Set your MDE too small and you are wasting valuable time because you need to collect large samples.  There is very clearly a trade off between large/small MDEs, and a valuable question concerns the "Goldilocks" MDE; not too big, not too small, just right.
 
+I've been thinking about how to better choose the MDE based on previous data, and I think I've come up with a scheme to do so.  In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments.  The MDE is chosen so as to optimize the "cumulative improvement" to the metric, under some mild and some strong assumptions. A starting assumption is that the experimenting team can model their experiments using a hierarchical linear model, as I've shown in [this](https://dpananos.github.io/posts/2022-07-20-pooling-experiments/) post.
 
-The post begins with a list of assumptions about the team, constraints imposed thereon, and the nature of experimental effects.  I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer the MDE question.  
+The post begins with additional assumptions about the team, constraints imposed thereon, and the nature of experimental effects.  I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer "what MDE should we use?".
 
 ## Assumptions
 
 Here some assumptions that makes life a little easier:
 
-* Your team's entire job is running CRO experiments.  Due to resourcing constraints, you can only run 24 experiments per year (or 2 experiments per month on average).
-* Your primary metric is signup rate, which is the number of unique users who sign up divided by the number of unique users who land on your site in some given time.
-* You work in a frequentist framework, and you always run 2 tailed tests because you want to know if you hurt your signup rate.  That is useful for posterity.
-* Your main causal contrast is relative risk (signup rate in treatment divided by sign up rate in control).  In industry, we call this the "lift".
-* Your baseline signup rate is `r scales::percent(baseline)` and you get about `r scales::comma(n_uuids)` unique visitors to your website per year.
-* Assume your team generates lift fairly reliably and that these lifts sustain through time.  There is no decay of the effect, no interaction between experiments, nor is there any seasonality to signup rate.  These are blatantly false, but they simplify enough for us to get traction.
-* Unbeknownst to you, your team generates experimental lift according by drawing from a log normal distribution, with parameters $\mu=\log(1.02)$ and  $\sigma=0.01$ on the log scale.
-* You are really only interested in positive effects (lift > 1) so you won't implement anything with lift < 1, and if the null fails to be rejected you will stick with the status quo.
-* You use the same MDE for each experiment.
+* The team's entire job is running experiments.  Due to resourcing constraints, they can only run a finite number experiments per year.  For this case study, I'm going to assume the team can run 24 experiments a year (or 2 per month on average).  The team can run experiments back to back.
+* The team works in a frequentist framework, and they always run 2 tailed tests because there is a chance they could hurt the product, and they would want to know that.
+* The main causal contrast is relative risk.  In industry, we call this the "lift".
+* The outcome is a binary outcome, and the baseline rate is `r scales::percent(baseline)`.
+* `r scales::comma(n_uuids)` unique visitors to your website per year.
+* The team generates lift fairly reliably and these lifts sustain through time.  There is no decay of the effect, no interaction between experiments, nor is there any seasonality.  These are blatantly false, but they simplify enough for us to get traction.
+* The population level lift distribution is log normal, with parameters $\mu=\log(1.01)$ and  $\sigma=0.01$ on the log scale.  This means the team increases the metric by approximately 2% on average.
+* The team is really only interested in positive effects (lift > 1) so you they implement anything with lift < 1, and if the null fails to be rejected you will stick with the status quo.
+* The same MDE is used to plan all experiments.
 
+From here, we have enough to proceed.
 
-## Procedure
+## Description of the Procedure
 
-* Let's refer to the number of unique visitors as `n_uuid` and the baseline signup rate as `baseline`.
-* Given an MDE, its easy to determine the requisite sample size.  Call this `n_per_group`.
-* This means you can run `min(24,  n_uuid/n_per_group)` experiments per year.
-* Each experiment has some true underlying lift called `real_lift`.
-* Given the sample size, you can compute the power to detect `real_lift` *but* we're only interested in rejecting the null when the probability the estimated lift is greater than 1. Call this power `power`.
-* Now, all we have to do is simulate binomial numbers for each experiment with probability of success `power`.  When the simulated number is 1, that means we detected that effect, else we failed to detect the effect.
-* Because we assumed lifts sustain through time, then the cumulative improvement to the sign up rate is the product of the detected lifts.
-* The number we are optimizing for is the cumulative improvement to the signup rate (the cumulative lift).
-
-This is fairly easy to program in R.
-
+Let the number of unique users landing on the page be `n_uuid`.  Since the team is constrained, the team can run the minimum of 24 and `floor(n_uuid/(2*n_per_group))` experiments per year.  Since the MDE is used in the sample size calculation, the MDE determines the number of experiments.
 
 ```{r}
-# Draw lifts for experiments from this distribution
-lift_dist <-\(n) rlnorm(n, log(1.02), 0.01)
+samp_size <- \(mde) ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
+mde <- seq(1.01, 1.2, 0.01)
+ns <- floor(pmin(24, n_uuids/(2*sapply(mde, samp_size))))
+
+tibble(mde, ns) %>% 
+  ggplot(aes(mde, ns)) + 
+  geom_step(color=my_blue) + 
+  labs(x='Lift', y='Number of Experiments')
+  
+```
+
+Each intervention has some latent lift, and the whole reason we experiment is to estimate that lift. The next step assumes we have a reasonable estimate of the population level distribution for experimental lift (i.e. the lift we see in our next experiment).  I've written about how to do that in my post [Forecasting Experimental Lift Using Hierarchical Bayesian Modelling](https://dpananos.github.io/posts/2022-07-20-pooling-experiments/), so I will assume we have some model in hand for the lift generated from the team.
+
+Given this model, we can sample a new lift, `real_lift`, for each of the `n_experiments = min(24, floor(n_uuid/(2*n_per_group)))` experiments.  Although we plan each experiment to have 80% power assuming the true lift was the MDE, there is some probability, `actual_power`, we detect the `real_lift`.  We can compute that, and then simulate how many of the experiments would detect the `real_lift`; its just a binomial random variable with probability of success `actual_power`. Importantly, we only want the power detecting a positive effect (since we won't implement a change f we don't estimate it to improve the metric).
+
+Lastly, we want to optimize our expected cumulative improvement to the metric.  For each experiment we will either detect `real_lift` or we will not (resulting in a lift of 1, the null lift).  The cumulative improvement to the metric is then `prod(if_else(detected, real_lift, 1))`.  Multiplying by 1 is like adding 0, so if we fail to detect a lift in an experiment, we just multiply our cumulative lift by 1.
+
+Because we're optimizing over a single number (the MDE for our experiments), we can just plot the objective function to get a rough idea for where the optima is.
+
+This is fairly easy to program in R, and the objective function for the scenario described above is shown in the plot.
 
 
+```{r, echo=T}
 one_sided_power = function(real_lift, n_per_group){
   # Only interested in the case when the estimated lift is
   # Greater than one, which corresponds to a one sided test.
@@ -84,7 +89,10 @@ one_sided_power = function(real_lift, n_per_group){
 
 
 
-f = function(mde){
+f = function(mde, baseline=0.08, n_uuids=2500000, latent_lift = 1.01){
+  
+  # Draw lifts for experiments from this distribution
+  lift_dist <-\(n) rlnorm(n, log(latent_lift), 0.01)
   
   # Given the MDE, here is how many users you need per group in each experiment.
   n_per_group = ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
@@ -97,7 +105,7 @@ f = function(mde){
   # Running these experiments 1000 times
   # each experiment has n_per_group users in each group
   simulations <- crossing(
-    sim = 1:1000, 
+    sim = 1:4000, 
     experiment = 1:n_experiments_per_year,
     n_per_group = n_per_group
   )
@@ -107,9 +115,9 @@ f = function(mde){
       # draw a real lift for each experiment from your lift distribution
       real_lift = lift_dist(n()),
       # Compute the power to detect that lift given the sample size you have
-      power = map2_dbl(real_lift, n_per_group, one_sided_power),
+      actual_power = map2_dbl(real_lift, n_per_group, one_sided_power),
       # Simulate detecting the lift
-      detect = as.logical(rbinom(n(), 1, power)),
+      detect = as.logical(rbinom(n(), 1, actual_power)),
       # Did you implement the result or not?
       # If you didn't, this is equivalent to a lift of 1
       # and won't change the product.
@@ -119,11 +127,10 @@ f = function(mde){
     #finally, take the product, grouping among simulations.
     summarise(lift = prod(result)) 
   
-  
 }
 
 
-mdes <- tibble(mde = seq(1.01, 1.1, 0.005)) %>% 
+mdes <- tibble(mde = seq(1.01, 1.2, 0.01)) %>% 
         mutate(mde_id = as.character(seq_along(mde)))
 
 results = map_dfr(mdes$mde, f, .id = 'mde_id')  %>% 
@@ -135,15 +142,83 @@ ggplot(aes(mde, lift)) +
   stat_summary() + 
   scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
   scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
-  labs(x='MDE', y='Cumulative Improvement Over all Experiments')
+  labs(x='MDE', y='Cumulative Improvement Over all Experiments',
+       title = 'Swing for the Fences',
+       subtitle = 'The optimal MDE is not the expected lift the team generates')
   
 
 ```
 
-What I find most interesting here is that the "optimal MDE" (i.e the MDE which yields maximal cumulative improvement to signup rate) *is not the average lift the team make*.  Its actually a little larger (~5% MDE where as the team generates a 2% lift on average).  Moreover, its actually *better* to aim for large MDEs than low MDEs, as the expected cumulative improvement to signup rate tapers off much more slowly as the MDE grows large.  This is likely because large MDEs allow for more experiments, meaning more opportunity to improve as opposed to running long experiments to detect small effects.  That makes sense; large MDEs give you more kicks at the can.
+What I find most interesting here is that the "optimal MDE" (i.e the MDE which yields maximal cumulative improvement to the metric) *is not the average lift the team make*.  Its actually a little larger (~6% MDE where as the team generates a 1% lift on average).  Moreover, its actually *better* to aim for large MDEs than low MDEs, as the expected cumulative improvement to signup rate tapers off much more slowly as the MDE grows large.  This is likely because large MDEs allow for more experiments, meaning more opportunity to improve as opposed to running long experiments to detect small effects.  That makes sense; large MDEs give you more kicks at the can.
+
+There is something interesting happening at the far left of the plot.  The cumulative imrovement to the metric seems to actually decrease and then increase again.  That is because when the MDE is that small, the team can only run 1 experiment a year, and that slight increase in the MDE changes the sample size from `r scales::comma(1813465)` to `r scales::comma(455416)`.  So the sample size is cut by nearly a fifth meaning the `actual_power` to detect a `real_lift` also shrinks. This can change if the sole experiment of the year detects `real_lift`.  The rest of the objective function is fairly consistent with intuition.  
 
 
+## How Do The Various Parts of The Problem Change The Objective Function?
+
+Changing the baseline of the metric moves the optima, with larger MDEs being considered optimal for smaller baselines.
+
+```{r}
+
+mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
+                 baseline = c(0.01, 0.05, 0.15, 0.25))
+
+result <-mdes %>% 
+         mutate(data = map2(mde, baseline, ~f(mde=.x, baseline=.y)))
+
+result %>% 
+  unnest(data) %>% 
+  mutate(bse = scales::percent(baseline),
+         bse = fct_reorder(bse, baseline, .desc = T)) %>% 
+  ggplot(aes(mde, lift, color=bse)) + 
+  stat_summary(geom='line') + 
+  scale_color_brewer(palette = 'Set1')+
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
+  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
+  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Baseline')
+```
+As the number of unique visitors to the website increases, the optimal MDE decreases, but only slightly.
+
+```{r}
+mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
+                 n_uuids = c(1e6, 3e6, 5e6, 10e6))
+
+result <-mdes %>% 
+         mutate(data = map2(mde, n_uuids, ~f(mde=.x, n_uuids=.y)))
+
+result %>% 
+  unnest(data) %>% 
+  mutate(nuids = scales::comma(n_uuids),
+         nuids = fct_reorder(nuids, .x = n_uuids, .desc = T)) %>% 
+  ggplot(aes(mde, lift, color=nuids)) + 
+  stat_summary(geom='line') + 
+  scale_color_brewer(palette = 'Set1')+
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
+  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
+  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Unique Visitors')
+
+```
 
 
+As the expectation of the latent lift increases, the optima does not move but the expected cumulative improvement to the metric increases.  This is unsurprising.
 
+```{r}
+mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
+                 latent_lift = c(1.01, 1.02, 1.03, 1.04))
+
+result <-mdes %>% 
+         mutate(data = map2(mde, latent_lift, ~f(mde=.x, latent_lift = .y)))
+
+result %>% 
+  unnest(data) %>% 
+  mutate(lat_lift = scales::percent(latent_lift-1),
+         lat_lift = fct_reorder(lat_lift, latent_lift, .desc = T)) %>% 
+  ggplot(aes(mde, lift, color=lat_lift)) + 
+  stat_summary(geom='line') + 
+  scale_color_brewer(palette = 'Set1')+
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
+  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
+  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Latent Lift')
+
+```
 
