@@ -6,7 +6,7 @@ echo: false
 fig-cap-location: top
 categories: [AB Tests, Statistics]
 number-sections: false
-draft: true
+draft: false
 ---
 
 ```{r, echo=F, warning=F, message=F}
