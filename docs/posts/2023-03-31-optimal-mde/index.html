@@ -65,10 +65,10 @@ ul.task-list li input[type="checkbox"] {
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Demetri Pananos Ph.D - Choosing the Optimal MDE for Experimentation">
-<meta property="og:description" content="One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular its the minimal detectable effect (MDE).">
+<meta property="og:description" content="One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular about the minimal detectable effect (MDE).">
 <meta property="og:site-name" content="Demetri Pananos Ph.D">
 <meta name="twitter:title" content="Demetri Pananos Ph.D - Choosing the Optimal MDE for Experimentation">
-<meta name="twitter:description" content="One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular its the minimal detectable effect (MDE).">
+<meta name="twitter:description" content="One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular about the minimal detectable effect (MDE).">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -155,7 +155,7 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#assumptions" id="toc-assumptions" class="nav-link active" data-scroll-target="#assumptions">Assumptions</a></li>
-  <li><a href="#procedure" id="toc-procedure" class="nav-link" data-scroll-target="#procedure">Procedure</a></li>
+  <li><a href="#description-of-the-procedure" id="toc-description-of-the-procedure" class="nav-link" data-scroll-target="#description-of-the-procedure">Description of the Procedure</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-03-31-optimal-mde/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -168,26 +168,33 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 
 </div>
-<p>One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular its the minimal detectable effect (MDE). Without a meta-analysis of your experiments, its hard to say what you should use (aside from the sort of trite thought experiment of “what effect would you want to tell your boss?”).</p>
-<p>I’ve been thinking about how to better choose the MDE based on data, and I think I’ve come up with a scheme to do so. In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments. The MDE is chosen so as to optimize the “cumulative improvement” to the metric, under some mild and some strong assumptions. I assume team’s can perform a hierarchical analysis of their experiments as I described in <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">this</a> post.</p>
-<p>The post begins with a list of assumptions about the team, constraints imposed thereon, and the nature of experimental effects. I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer the MDE question.</p>
+<p>One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular about the minimal detectable effect (MDE). Set your MDE too big and your experiments are under powered, but you can run a lof of them (at least as many as your team can produce in a given window of time). Set your MDE too small and you are wasting valuable time because you need to collect large samples. There is very clearly a trade off between large/small MDEs, and a valuable question concerns the “Goldilocks” MDE; not too big, not too small, just right.</p>
+<p>I’ve been thinking about how to better choose the MDE based on previous data, and I think I’ve come up with a scheme to do so. In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments. The MDE is chosen so as to optimize the “cumulative improvement” to the metric, under some mild and some strong assumptions. A starting assumption is that the experimenting team can model their experiments using a hierarchical linear model, as I’ve shown in <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">this</a> post.</p>
+<p>The post begins with additional assumptions about the team, constraints imposed thereon, and the nature of experimental effects. I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer “what MDE should we use?”.</p>
 <section id="assumptions" class="level2">
 <h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
 <p>Here some assumptions that makes life a little easier:</p>
 <ul>
-<li>Your team’s entire job is running CRO experiments. Due to resourcing constraints, you can only run 24 experiments per year (or 2 experiments per month on average).</li>
-<li>Your primary metric is signup rate, which is the number of unique users who sign up divided by the number of unique users who land on your site in some given time.</li>
-<li>You work in a frequentist framework, and you always run 2 tailed tests because you want to know if you hurt your signup rate. That is useful for posterity.</li>
-<li>Your main causal contrast is relative risk (signup rate in treatment divided by sign up rate in control). In industry, we call this the “lift”.</li>
-<li>Your baseline signup rate is 10% and you get about 2,500,000 unique visitors to your website per year.</li>
-<li>Assume your team generates lift fairly reliably and that these lifts sustain through time. There is no decay of the effect, no interaction between experiments, nor is there any seasonality to signup rate. These are blatantly false, but they simplify enough for us to get traction.</li>
-<li>Unbeknownst to you, your team generates experimental lift according by drawing from a log normal distribution, with parameters <span class="math inline">\(\mu=\log(1.02)\)</span> and <span class="math inline">\(\sigma=0.01\)</span> on the log scale.</li>
-<li>You are really only interested in positive effects (lift &gt; 1) so you won’t implement anything with lift &lt; 1, and if the null fails to be rejected you will stick with the status quo.</li>
-<li>You use the same MDE for each experiment.</li>
+<li>The team’s entire job is running experiments. Due to resourcing constraints, they can only run a finite number experiments per year. For this case study, I’m going to assume the team can run 24 experiments a year (or 2 per month on average). The team can run experiments back to back.</li>
+<li>The team works in a frequentist framework, and they always run 2 tailed tests because there is a chance they could hurt the product, and they would want to know that.</li>
+<li>The main causal contrast is relative risk. In industry, we call this the “lift”.</li>
+<li>The outcome is a binary outcome, and the baseline rate is 8%.</li>
+<li>2,500,000 unique visitors to your website per year.</li>
+<li>The team generates lift fairly reliably and these lifts sustain through time. There is no decay of the effect, no interaction between experiments, nor is there any seasonality. These are blatantly false, but they simplify enough for us to get traction.</li>
+<li>The population level lift distribution is log normal, with parameters <span class="math inline">\(\mu=\log(1.01)\)</span> and <span class="math inline">\(\sigma=0.01\)</span> on the log scale. This means the team increases the metric by approximately 2% on average.</li>
+<li>The team is really only interested in positive effects (lift &gt; 1) so you they implement anything with lift &lt; 1, and if the null fails to be rejected you will stick with the status quo.</li>
+<li>The same MDE is used to plan all experiments.</li>
 </ul>
+<p>From here, we have enough to proceed.</p>
 </section>
-<section id="procedure" class="level2">
-<h2 class="anchored" data-anchor-id="procedure">Procedure</h2>
+<section id="description-of-the-procedure" class="level2">
+<h2 class="anchored" data-anchor-id="description-of-the-procedure">Description of the Procedure</h2>
+<p>Let the number of unique users landing on the page be <code>n_uuid</code>. This means we can run the minimum of 24 and <code>floor(n_uuid/(2*n_per_group))</code> experiments per year. Since the MDE is used in the sample size calculation, the MDE determines the number of experiments.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 <ul>
 <li>Let’s refer to the number of unique visitors as <code>n_uuid</code> and the baseline signup rate as <code>baseline</code>.</li>
 <li>Given an MDE, its easy to determine the requisite sample size. Call this <code>n_per_group</code>.</li>
@@ -201,10 +208,15 @@ ul.task-list li input[type="checkbox"] {
 <p>This is fairly easy to program in R.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>What I find most interesting here is that the “optimal MDE” (i.e the MDE which yields maximal cumulative improvement to signup rate) <em>is not the average lift the team make</em>. Its actually a little larger (~5% MDE where as the team generates a 2% lift on average). Moreover, its actually <em>better</em> to aim for large MDEs than low MDEs, as the expected cumulative improvement to signup rate tapers off much more slowly as the MDE grows large. This is likely because large MDEs allow for more experiments, meaning more opportunity to improve as opposed to running long experiments to detect small effects. That makes sense; large MDEs give you more kicks at the can.</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
 </section>
