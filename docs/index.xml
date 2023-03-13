@@ -23,38 +23,50 @@
 <div class="cell">
 
 </div>
-<p>One of the most prevalent questions I’m asked about AB tests concerns sample size, and in particular about the minimal detectable effect (MDE). Set your MDE too big and your experiments are under powered, but you can run a lof of them (at least as many as your team can produce in a given window of time). Set your MDE too small and you are wasting valuable time because you need to collect large samples. There is very clearly a trade off between large/small MDEs, and a valuable question concerns the “Goldilocks” MDE; not too big, not too small, just right.</p>
-<p>I’ve been thinking about how to better choose the MDE based on previous data, and I think I’ve come up with a scheme to do so. In this post, I demonstrate how to use simulation to determine the optimal MDE for experiments. The MDE is chosen so as to optimize the “cumulative improvement” to the metric, under some mild and some strong assumptions. A starting assumption is that the experimenting team can model their experiments using a hierarchical linear model, as I’ve shown in <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">this</a> post.</p>
-<p>The post begins with additional assumptions about the team, constraints imposed thereon, and the nature of experimental effects. I then describe the simulation procedure, demonstrating how to perform the computations in R. While imperfect, I think this is at least a half way objective method to answer “what MDE should we use?”.</p>
-<section id="assumptions" class="level2">
-<h2 class="anchored" data-anchor-id="assumptions">Assumptions</h2>
-<p>Here some assumptions that makes life a little easier:</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Planning experiments means deciding how long to run the experiment (by doing a sample size calculation). A big factor in this decision is agreeing on a minimal detectable effect or MDE. Smaller MDEs mean longer experiments and hence fewer of them in a given window of time. Larger MDEs mean shorter experiments, but they also mean there is a chance we could fail to reject smaller effects <sup>1</sup>. Clearly, there is a sweet spot for the MDE; not so large that we are passing over interventions which would improve a given metric, but not so small that we are wasting our time collecting samples.</p>
+<p>This blog post is intended to demonstrate how data scientists can empirically estimate the “optimal” MDE for experimenting teams. Here, “optimal” refers to the MDE which optimizes the long run cumulative improvement to the metric (i.e.&nbsp;the MDE which is estimated to improve the metric the most in a given window of time) under some mild and some strong assumptions. I begin by assuming teams have a model of likely effect sizes for their interventions vis a vis a Bayesian model like I have done in my past post <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">Forecasting Experimental Lift Using Hierarchical Bayesian Modelling</a>.</p>
+<p>I begin with an illustration of the larger idea, at a level I hope would be appropriate for a product manager. Then, I formally describe the procedure and implement it in R, making some illustrative assumptions about a hypothetical team running experiments. Lastly, I demonstrate how various assumptions can effect the estimate of the optimal MDE and estimate a linear model for the optimal MDE as a function of the assumptions.</p>
+<p>Although imperfect, I believe this approach offers a superior approach to determining the MDE for experimenting teams, and also has the benefit of being re-estimable experiment over experiment thanks to the Bayesian modelling driving the approach.</p>
+</section>
+<section id="big-idea" class="level2">
+<h2 class="anchored" data-anchor-id="big-idea">Big Idea</h2>
+<p>Let’s consider how many experiments a team can run in a year. Teams usually have some upper limit for the number of experiments because they need time to tend to their other responsibilities. Let’s assume a team can run 24 experiments in a year (~2 experiments a month on average). While the team has a maximum number of experiments they can run, the number of experiments <em>they actually run</em> will depend on how the experiments are planned. For example, if the team has on average 10,000,000 unique visitors each year, and each experiment needs 200, 000 users, then the team can run 50 experiments (you can’t run half an experiment so you have to round down to the nearest number). So the number of experiments that can be run for this team is the smaller of the ratio of unique visitors per year to total sample size per experiment and 24. The key insight here is that because the MDE determines the sample size per experiment (again, larger/smaller MDEs mean smaller/larger sample sizes), then the MDE implicitly determines the number of experiments we can.</p>
+<p>Each change to the product has some true effect that is unknown to us. In fact, the whole reason we run an experiment is to estimate that effect. Because the MDE determines the sample size per experiment, it also determines the probability we detect the effect. Increase the MDE, and the probability we detect a given effect decreases (because the sample size for the experiment decreases). Conversely, decreasing the MDE increases the probability we detect an effect.</p>
+<p>We need to choose an MDE so that we can run lots of experiments <em>and</em> have a good chance of detecting positive effects in those experiments. The problem is that we don’t know what kinds of effects our experiments are going to have, which is why we use an MDE. The MDE basically is a stand in for what we think the effect of the change is going to be <em>at its smallest</em>. If the effect of the change is bigger than the MDE, then we have a really good chance to detect the effect.</p>
+<p>However, we actually can estimate what kinds of effects our changes will produce. It isn’t worth getting into, but we can estimate a distribution of likely effect sizes, meaning we can reasonably guess what kinds of effects we are going to see in future experiments. This means that we can use this distribution of plausible future effects to simulate future experiments. These simulations can then be used to determine the MDE which strikes the balance we need. A good way to determine which MDE is best is to consider the “cumulative impact” on the metric. Think of it this way; if we run lots of experiments and they all have a reasonable chance of detecting effects then the metric we’re seeking to improve is going to change in a big way. So our goal is to find the MDE which results in the largest improvement to our metric over a given window of time in which we can experiment. This MDE which results in the largest improvement is called the “optimal MDE”.</p>
+<p>Let’s formalize the optimization problem using some math.</p>
+</section>
+<section id="mathematical-details" class="level2">
+<h2 class="anchored" data-anchor-id="mathematical-details">Mathematical Details</h2>
+<p>Let <img src="https://latex.codecogs.com/png.latex?N_%7Buuid%7D"> be the number of unique subjects available for experimentation in a given time frame, let <img src="https://latex.codecogs.com/png.latex?%5Cdelta%20%5Cin%20%5Cmathbb%7BR%7D_+"> be an arbitrary MDE, and let <img src="https://latex.codecogs.com/png.latex?K"> be the maximum number of experiments for a given team. Let <img src="https://latex.codecogs.com/png.latex?n_%7Bss%7D:%20%5Cmathbb%7BR%7D_+%20%5Cto%20%5Cmathbb%7BN%7D"> be a function which maps MDEs to sample sizes for experiments. The number of experiments which can be run in a given time frame is <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D(%5Cdelta)%20=%20%5Cmin%5Cleft(K,%20%5Clfloor%5Cfrac%7BN_%7Buuid%7D%7D%7Bn_%7Bss%7D(%5Cdelta)%7D%20%5Crfloor%20%5Cright)">. Here, I have included an explicit dependency of <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D"> on <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> to remind us that the MDE implicitly determines the number of experiments. I’ve made the assumption that experiments can be run back to back.</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?%5Ctheta_k"> be a latent effect from an intervention, and let <img src="https://latex.codecogs.com/png.latex?%5Cpsi(%5Ctheta_k;%20%5Cdelta)"> be the statistical power to detect an effect of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> when the experiment is designed with an MDE of <img src="https://latex.codecogs.com/png.latex?%5Cdelta">. I assume that: a) All interventions are independent of one another, and the effect of one intervention is not changed by the implementation of another, b) effects of interventions are additive (on the appropriate scale), and c) effects persist through time (there is now decay of an effect once implemented).</p>
+<p>The objective function we seek to optimize is the expected cumulative improvement to the metric we are opting to experiment on. We get <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D"> draws from our population distribution of effects (because we are running that many experiments), and the expected cumulative improvement is the sum of the products of the effects and the probability we detect the effect</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20C(%5Cdelta)%20=%20%5Csum_%7Bk=1%7D%5E%7Bn_%7B%5Cexp%7D(%5Cdelta)%7D%20%5Ctheta_k%20%5Cpsi(%5Ctheta_k;%20%5Cdelta)%20%20"> Note here that the MDE <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> determines both the number of experiments run (<img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D">) <em>and</em> the probability those experiments detect an effect. The optimal MDE is then</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta_%7B%5Cmbox%7Bopt%7D%7D%20=%20%5Cunderset%7B%5Cdelta%20%5Cin%20%5Cmathbb%7BR%7D_+%7D%7B%5Carg%5Cmax%7D%20%20%5CBig%5C%7B%20C(%5Cdelta)%20%5CBig%20%5C%7D"> While the <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> are latent, this quantity can still be optimized by using draws from a Bayesian model for experimental effects. See <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">this previous post of mine</a> for an example of what I mean.</p>
+<p>In the next section, I demonstrate how to estimate <img src="https://latex.codecogs.com/png.latex?%5Cdelta_%7B%5Cmbox%7Bopt%7D%7D"> using simulation. To fill in some missing information (e.g.&nbsp;the maximum number of experiments run by the team), I explicitly write out some assumptions.</p>
+</section>
+<section id="additional-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="additional-assumptions">Additional Assumptions</h2>
+<p>Imagine a team who runs experiments. I make the following assumptions about the team:</p>
 <ul>
-<li>The team’s entire job is running experiments. Due to resourcing constraints, they can only run a finite number experiments per year. For this case study, I’m going to assume the team can run 24 experiments a year (or 2 per month on average). The team can run experiments back to back.</li>
+<li>The team’s entire job is running experiments. Due to resourcing constraints, they can only run a finite number experiments per year. I assume the team can run 24 experiments a year (or 2 per month on average). The team can run experiments back to back.</li>
 <li>The team works in a frequentist framework, and they always run 2 tailed tests because there is a chance they could hurt the product, and they would want to know that.</li>
 <li>The main causal contrast is relative risk. In industry, we call this the “lift”.</li>
 <li>The outcome is a binary outcome, and the baseline rate is 8%.</li>
-<li>2,500,000 unique visitors to your website per year.</li>
+<li>10,000,000 unique visitors to your website per year.</li>
 <li>The team generates lift fairly reliably and these lifts sustain through time. There is no decay of the effect, no interaction between experiments, nor is there any seasonality. These are blatantly false, but they simplify enough for us to get traction.</li>
-<li>The population level lift distribution is log normal, with parameters <img src="https://latex.codecogs.com/png.latex?%5Cmu=%5Clog(1.01)"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma=0.01"> on the log scale. This means the team increases the metric by approximately 2% on average.</li>
-<li>The team is really only interested in positive effects (lift &gt; 1) so you they implement anything with lift &lt; 1, and if the null fails to be rejected you will stick with the status quo.</li>
+<li>The population level lift distribution is log normal, with parameters <img src="https://latex.codecogs.com/png.latex?%5Cmu=%5Clog(1.01)"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma=0.1"> on the log scale. This means the team increases the metric by approximately 1% on average.</li>
+<li>The team is really only interested in positive effects (lift &gt; 1) so they will not implement anything with lift &lt; 1, and if the null fails to be rejected they will stick with the status quo.</li>
 <li>The same MDE is used to plan all experiments.</li>
 </ul>
-<p>From here, we have enough to proceed.</p>
+<p>Under these assumptions, a procedure can be devised to optimize the cumulative improvement to the metric of interest.</p>
 </section>
-<section id="description-of-the-procedure" class="level2">
-<h2 class="anchored" data-anchor-id="description-of-the-procedure">Description of the Procedure</h2>
-<p>Let the number of unique users landing on the page be <code>n_uuid</code>. Since the team is constrained, the team can run the minimum of 24 and <code>floor(n_uuid/(2*n_per_group))</code> experiments per year. Since the MDE is used in the sample size calculation, the MDE determines the number of experiments.</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Each intervention has some latent lift, and the whole reason we experiment is to estimate that lift. The next step assumes we have a reasonable estimate of the population level distribution for experimental lift (i.e.&nbsp;the lift we see in our next experiment). I’ve written about how to do that in my post <a href="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/">Forecasting Experimental Lift Using Hierarchical Bayesian Modelling</a>, so I will assume we have some model in hand for the lift generated from the team.</p>
-<p>Given this model, we can sample a new lift, <code>real_lift</code>, for each of the <code>n_experiments = min(24, floor(n_uuid/(2*n_per_group)))</code> experiments. Although we plan each experiment to have 80% power assuming the true lift was the MDE, there is some probability, <code>actual_power</code>, we detect the <code>real_lift</code>. We can compute that, and then simulate how many of the experiments would detect the <code>real_lift</code>; its just a binomial random variable with probability of success <code>actual_power</code>. Importantly, we only want the power detecting a positive effect (since we won’t implement a change f we don’t estimate it to improve the metric).</p>
-<p>Lastly, we want to optimize our expected cumulative improvement to the metric. For each experiment we will either detect <code>real_lift</code> or we will not (resulting in a lift of 1, the null lift). The cumulative improvement to the metric is then <code>prod(if_else(detected, real_lift, 1))</code>. Multiplying by 1 is like adding 0, so if we fail to detect a lift in an experiment, we just multiply our cumulative lift by 1.</p>
-<p>Because we’re optimizing over a single number (the MDE for our experiments), we can just plot the objective function to get a rough idea for where the optima is.</p>
-<p>This is fairly easy to program in R, and the objective function for the scenario described above is shown in the plot.</p>
+<section id="results-from-a-simulation-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="results-from-a-simulation-experiment">Results from a Simulation Experiment</h2>
+<p>Shown in the code cell below is simulation of the process for finding the optimal MDE under the assumptions listed above. Rather than simulate every experiment (e.g.&nbsp;by drawing random numbers and performing a statistical test), we can draw a binomial random variable with probability of success equal to the statistical power of detecting the latent lift with the indicated MDE and hence sample size.</p>
+<p>The optimal lift is somewhere between 5% and 6%. Explicit optimization methods could be used find the optima, but I think for the purposes of experimentation you just want to be in the right ballpark, so a plot is more than enough.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -70,71 +82,67 @@
 <span id="cb1-10">              )<span class="sc" style="color: #5E5E5E;">$</span>power</span>
 <span id="cb1-11">}</span>
 <span id="cb1-12"></span>
-<span id="cb1-13"></span>
-<span id="cb1-14"></span>
-<span id="cb1-15">f <span class="ot" style="color: #003B4F;">=</span> <span class="cf" style="color: #003B4F;">function</span>(mde, <span class="at" style="color: #657422;">baseline=</span><span class="fl" style="color: #AD0000;">0.08</span>, <span class="at" style="color: #657422;">n_uuids=</span><span class="dv" style="color: #AD0000;">2500000</span>, <span class="at" style="color: #657422;">latent_lift =</span> <span class="fl" style="color: #AD0000;">1.01</span>){</span>
-<span id="cb1-16">  </span>
-<span id="cb1-17">  <span class="co" style="color: #5E5E5E;"># Draw lifts for experiments from this distribution</span></span>
-<span id="cb1-18">  lift_dist <span class="ot" style="color: #003B4F;">&lt;-</span>\(n) <span class="fu" style="color: #4758AB;">rlnorm</span>(n, <span class="fu" style="color: #4758AB;">log</span>(latent_lift), <span class="fl" style="color: #AD0000;">0.01</span>)</span>
-<span id="cb1-19">  </span>
-<span id="cb1-20">  <span class="co" style="color: #5E5E5E;"># Given the MDE, here is how many users you need per group in each experiment.</span></span>
-<span id="cb1-21">  n_per_group <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">ceiling</span>(<span class="fu" style="color: #4758AB;">pwr.2p.test</span>(<span class="at" style="color: #657422;">h =</span> <span class="fu" style="color: #4758AB;">ES.h</span>(mde<span class="sc" style="color: #5E5E5E;">*</span>baseline, baseline), <span class="at" style="color: #657422;">power =</span> <span class="fl" style="color: #AD0000;">0.8</span>)<span class="sc" style="color: #5E5E5E;">$</span>n)</span>
-<span id="cb1-22">  </span>
-<span id="cb1-23">  <span class="co" style="color: #5E5E5E;"># Here is how many experiments you could run per year</span></span>
-<span id="cb1-24">  <span class="co" style="color: #5E5E5E;"># Why the factor of 2?  Because the computation above is the szie of each group.</span></span>
-<span id="cb1-25">  n_experiments_per_year <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">pmin</span>(<span class="dv" style="color: #AD0000;">24</span>, <span class="fu" style="color: #4758AB;">floor</span>(n_uuids<span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n_per_group)))</span>
-<span id="cb1-26">  </span>
-<span id="cb1-27">  <span class="co" style="color: #5E5E5E;"># Here is a grid of experiments.  Simulate </span></span>
-<span id="cb1-28">  <span class="co" style="color: #5E5E5E;"># Running these experiments 1000 times</span></span>
-<span id="cb1-29">  <span class="co" style="color: #5E5E5E;"># each experiment has n_per_group users in each group</span></span>
-<span id="cb1-30">  simulations <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">crossing</span>(</span>
-<span id="cb1-31">    <span class="at" style="color: #657422;">sim =</span> <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">4000</span>, </span>
-<span id="cb1-32">    <span class="at" style="color: #657422;">experiment =</span> <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span>n_experiments_per_year,</span>
-<span id="cb1-33">    <span class="at" style="color: #657422;">n_per_group =</span> n_per_group</span>
-<span id="cb1-34">  )</span>
-<span id="cb1-35">  </span>
-<span id="cb1-36">  simulations <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-37">    <span class="fu" style="color: #4758AB;">mutate</span>(</span>
-<span id="cb1-38">      <span class="co" style="color: #5E5E5E;"># draw a real lift for each experiment from your lift distribution</span></span>
-<span id="cb1-39">      <span class="at" style="color: #657422;">real_lift =</span> <span class="fu" style="color: #4758AB;">lift_dist</span>(<span class="fu" style="color: #4758AB;">n</span>()),</span>
-<span id="cb1-40">      <span class="co" style="color: #5E5E5E;"># Compute the power to detect that lift given the sample size you have</span></span>
-<span id="cb1-41">      <span class="at" style="color: #657422;">actual_power =</span> <span class="fu" style="color: #4758AB;">map2_dbl</span>(real_lift, n_per_group, one_sided_power),</span>
-<span id="cb1-42">      <span class="co" style="color: #5E5E5E;"># Simulate detecting the lift</span></span>
-<span id="cb1-43">      <span class="at" style="color: #657422;">detect =</span> <span class="fu" style="color: #4758AB;">as.logical</span>(<span class="fu" style="color: #4758AB;">rbinom</span>(<span class="fu" style="color: #4758AB;">n</span>(), <span class="dv" style="color: #AD0000;">1</span>, actual_power)),</span>
-<span id="cb1-44">      <span class="co" style="color: #5E5E5E;"># Did you implement the result or not?</span></span>
-<span id="cb1-45">      <span class="co" style="color: #5E5E5E;"># If you didn't, this is equivalent to a lift of 1</span></span>
-<span id="cb1-46">      <span class="co" style="color: #5E5E5E;"># and won't change the product.</span></span>
-<span id="cb1-47">      <span class="at" style="color: #657422;">result =</span> <span class="fu" style="color: #4758AB;">if_else</span>(detect, real_lift, <span class="dv" style="color: #AD0000;">1</span>),</span>
-<span id="cb1-48">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-49">    <span class="fu" style="color: #4758AB;">group_by</span>(sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-50">    <span class="co" style="color: #5E5E5E;">#finally, take the product, grouping among simulations.</span></span>
-<span id="cb1-51">    <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">lift =</span> <span class="fu" style="color: #4758AB;">prod</span>(result)) </span>
-<span id="cb1-52">  </span>
-<span id="cb1-53">}</span>
-<span id="cb1-54"></span>
-<span id="cb1-55"></span>
-<span id="cb1-56">mdes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">tibble</span>(<span class="at" style="color: #657422;">mde =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="fl" style="color: #AD0000;">1.01</span>, <span class="fl" style="color: #AD0000;">1.2</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-57">        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">mde_id =</span> <span class="fu" style="color: #4758AB;">as.character</span>(<span class="fu" style="color: #4758AB;">seq_along</span>(mde)))</span>
-<span id="cb1-58"></span>
-<span id="cb1-59">results <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(mdes<span class="sc" style="color: #5E5E5E;">$</span>mde, f, <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'mde_id'</span>)  <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-60">          <span class="fu" style="color: #4758AB;">left_join</span>(mdes)</span>
-<span id="cb1-61"></span>
-<span id="cb1-62"></span>
-<span id="cb1-63">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb1-64"><span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(mde, lift)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb1-65">  <span class="fu" style="color: #4758AB;">stat_summary</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb1-66">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">labels =</span> \(x) scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">percent</span>(x<span class="dv" style="color: #AD0000;">-1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb1-67">  <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> \(x) scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">percent</span>(x<span class="dv" style="color: #AD0000;">-1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb1-68">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'MDE'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Cumulative Improvement Over all Experiments'</span>,</span>
-<span id="cb1-69">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">'Swing for the Fences'</span>,</span>
-<span id="cb1-70">       <span class="at" style="color: #657422;">subtitle =</span> <span class="st" style="color: #20794D;">'The optimal MDE is not the expected lift the team generates'</span>)</span></code></pre></div>
+<span id="cb1-13">f <span class="ot" style="color: #003B4F;">=</span> <span class="cf" style="color: #003B4F;">function</span>(mde, <span class="at" style="color: #657422;">baseline=</span><span class="fl" style="color: #AD0000;">0.08</span>, <span class="at" style="color: #657422;">n_uuids=</span><span class="dv" style="color: #AD0000;">2500000</span>, <span class="at" style="color: #657422;">latent_lift =</span> <span class="fl" style="color: #AD0000;">1.01</span>){</span>
+<span id="cb1-14">  </span>
+<span id="cb1-15">  <span class="co" style="color: #5E5E5E;"># Draw lifts for experiments from this distribution</span></span>
+<span id="cb1-16">  lift_dist <span class="ot" style="color: #003B4F;">&lt;-</span>\(n) <span class="fu" style="color: #4758AB;">rlnorm</span>(n, <span class="fu" style="color: #4758AB;">log</span>(latent_lift), <span class="fl" style="color: #AD0000;">0.1</span>)</span>
+<span id="cb1-17">  </span>
+<span id="cb1-18">  <span class="co" style="color: #5E5E5E;"># Given the MDE, here is how many users you need per group in each experiment.</span></span>
+<span id="cb1-19">  n_per_group <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">ceiling</span>(<span class="fu" style="color: #4758AB;">pwr.2p.test</span>(<span class="at" style="color: #657422;">h =</span> <span class="fu" style="color: #4758AB;">ES.h</span>(mde<span class="sc" style="color: #5E5E5E;">*</span>baseline, baseline), <span class="at" style="color: #657422;">power =</span> <span class="fl" style="color: #AD0000;">0.8</span>)<span class="sc" style="color: #5E5E5E;">$</span>n)</span>
+<span id="cb1-20">  </span>
+<span id="cb1-21">  <span class="co" style="color: #5E5E5E;"># Here is how many experiments you could run per year</span></span>
+<span id="cb1-22">  <span class="co" style="color: #5E5E5E;"># Why the factor of 2?  Because the computation above is the szie of each group.</span></span>
+<span id="cb1-23">  n_experiments_per_year <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">pmin</span>(<span class="dv" style="color: #AD0000;">24</span>, <span class="fu" style="color: #4758AB;">floor</span>(n_uuids<span class="sc" style="color: #5E5E5E;">/</span>(<span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">*</span>n_per_group)))</span>
+<span id="cb1-24">  </span>
+<span id="cb1-25">  <span class="co" style="color: #5E5E5E;"># Here is a grid of experiments.  Simulate </span></span>
+<span id="cb1-26">  <span class="co" style="color: #5E5E5E;"># Running these experiments 1000 times</span></span>
+<span id="cb1-27">  <span class="co" style="color: #5E5E5E;"># each experiment has n_per_group users in each group</span></span>
+<span id="cb1-28">  simulations <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">crossing</span>(</span>
+<span id="cb1-29">    <span class="at" style="color: #657422;">sim =</span> <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">4000</span>, </span>
+<span id="cb1-30">    <span class="at" style="color: #657422;">experiment =</span> <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span>n_experiments_per_year,</span>
+<span id="cb1-31">    <span class="at" style="color: #657422;">n_per_group =</span> n_per_group</span>
+<span id="cb1-32">  )</span>
+<span id="cb1-33">  </span>
+<span id="cb1-34">  simulations <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-35">    <span class="fu" style="color: #4758AB;">mutate</span>(</span>
+<span id="cb1-36">      <span class="co" style="color: #5E5E5E;"># draw a real lift for each experiment from your lift distribution</span></span>
+<span id="cb1-37">      <span class="at" style="color: #657422;">real_lift =</span> <span class="fu" style="color: #4758AB;">lift_dist</span>(<span class="fu" style="color: #4758AB;">n</span>()),</span>
+<span id="cb1-38">      <span class="co" style="color: #5E5E5E;"># Compute the power to detect that lift given the sample size you have</span></span>
+<span id="cb1-39">      <span class="at" style="color: #657422;">actual_power =</span> <span class="fu" style="color: #4758AB;">map2_dbl</span>(real_lift, n_per_group, one_sided_power),</span>
+<span id="cb1-40">      <span class="co" style="color: #5E5E5E;"># Simulate detecting the lift</span></span>
+<span id="cb1-41">      <span class="at" style="color: #657422;">detect =</span> <span class="fu" style="color: #4758AB;">as.logical</span>(<span class="fu" style="color: #4758AB;">rbinom</span>(<span class="fu" style="color: #4758AB;">n</span>(), <span class="dv" style="color: #AD0000;">1</span>, actual_power)),</span>
+<span id="cb1-42">      <span class="co" style="color: #5E5E5E;"># Did you implement the result or not?</span></span>
+<span id="cb1-43">      <span class="co" style="color: #5E5E5E;"># If you didn't, this is equivalent to a lift of 1</span></span>
+<span id="cb1-44">      <span class="co" style="color: #5E5E5E;"># and won't change the product.</span></span>
+<span id="cb1-45">      <span class="at" style="color: #657422;">result =</span> <span class="fu" style="color: #4758AB;">if_else</span>(detect, real_lift, <span class="dv" style="color: #AD0000;">1</span>),</span>
+<span id="cb1-46">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-47">    <span class="fu" style="color: #4758AB;">group_by</span>(sim) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-48">    <span class="co" style="color: #5E5E5E;">#finally, take the product, grouping among simulations.</span></span>
+<span id="cb1-49">    <span class="fu" style="color: #4758AB;">summarise</span>(<span class="at" style="color: #657422;">lift =</span> <span class="fu" style="color: #4758AB;">prod</span>(result)) </span>
+<span id="cb1-50">  </span>
+<span id="cb1-51">}</span>
+<span id="cb1-52"></span>
+<span id="cb1-53"></span>
+<span id="cb1-54">mdes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">tibble</span>(<span class="at" style="color: #657422;">mde =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="fl" style="color: #AD0000;">1.01</span>, <span class="fl" style="color: #AD0000;">1.2</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-55">        <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">mde_id =</span> <span class="fu" style="color: #4758AB;">as.character</span>(<span class="fu" style="color: #4758AB;">seq_along</span>(mde)))</span>
+<span id="cb1-56"></span>
+<span id="cb1-57">results <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(mdes<span class="sc" style="color: #5E5E5E;">$</span>mde, f, <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'mde_id'</span>)  <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-58">          <span class="fu" style="color: #4758AB;">left_join</span>(mdes)</span>
+<span id="cb1-59"></span>
+<span id="cb1-60"></span>
+<span id="cb1-61">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb1-62"><span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(mde, lift)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-63">  <span class="fu" style="color: #4758AB;">stat_summary</span>(<span class="at" style="color: #657422;">fun.data =</span> \(x) <span class="fu" style="color: #4758AB;">mean_se</span>(x, <span class="dv" style="color: #AD0000;">2</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-64">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">labels =</span> \(x) scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">percent</span>(x<span class="dv" style="color: #AD0000;">-1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb1-65">  <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> \(x) scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">percent</span>(x<span class="dv" style="color: #AD0000;">-1</span>, <span class="fl" style="color: #AD0000;">0.01</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb1-66">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'MDE'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Cumulative Improvement Over all Experiments'</span>,</span>
+<span id="cb1-67">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">'Swing for the Fences'</span>,</span>
+<span id="cb1-68">       <span class="at" style="color: #657422;">subtitle =</span> <span class="st" style="color: #20794D;">'The optimal MDE is not the expected lift the team generates'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>What I find most interesting here is that the “optimal MDE” (i.e the MDE which yields maximal cumulative improvement to the metric) <em>is not the average lift the team make</em>. Its actually a little larger (~6% MDE where as the team generates a 1% lift on average). Moreover, its actually <em>better</em> to aim for large MDEs than low MDEs, as the expected cumulative improvement to signup rate tapers off much more slowly as the MDE grows large. This is likely because large MDEs allow for more experiments, meaning more opportunity to improve as opposed to running long experiments to detect small effects. That makes sense; large MDEs give you more kicks at the can.</p>
-<p>There is something interesting happening at the far left of the plot. The cumulative imrovement to the metric seems to actually decrease and then increase again. That is because when the MDE is that small, the team can only run 1 experiment a year, and that slight increase in the MDE changes the sample size from 1,813,465 to 455,416. So the sample size is cut by nearly a fifth meaning the <code>actual_power</code> to detect a <code>real_lift</code> also shrinks. This can change if the sole experiment of the year detects <code>real_lift</code>. The rest of the objective function is fairly consistent with intuition.</p>
 </section>
 <section id="how-do-the-various-parts-of-the-problem-change-the-objective-function" class="level2">
 <h2 class="anchored" data-anchor-id="how-do-the-various-parts-of-the-problem-change-the-objective-function">How Do The Various Parts of The Problem Change The Objective Function?</h2>
@@ -160,7 +168,13 @@
 
 </section>
 
- ]]></description>
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>1↩︎</p></li>
+</ol>
+</section></div> ]]></description>
   <category>AB Tests</category>
   <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2023-03-31-optimal-mde/index.html</guid>
