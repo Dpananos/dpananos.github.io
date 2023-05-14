@@ -12,6 +12,7 @@ draft: false
 ```{r, echo=F, warning=F, message=F}
 library(pwr)
 library(tidyverse)
+library(patchwork)
 
 my_blue <- rgb(45/250, 62/250, 80/250, 1)
 my_theme<- theme_classic() %+replace% 
@@ -22,8 +23,13 @@ theme_set(my_theme)
 n_uuids <- 10000000
 baseline <- 0.08
 latent_lift <- 1.01
+max_exp_per_year <- 24
+
 
 ```
+
+
+
 
 ## Introduction
 
@@ -88,23 +94,28 @@ Shown in the code cell below is simulation of the process for finding the optima
 The optimal lift is somewhere between 5% and 6%.  Explicit optimization methods could be used find the optima, but I think for the purposes of experimentation you just want to be in the right ballpark, so a plot is more than enough.
 
 
-```{r, include=F}
-samp_size <- \(mde) ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
-mde <- seq(1.01, 1.2, 0.01)
-ns <- floor(pmin(24, n_uuids/(2*sapply(mde, samp_size))))
-
-tibble(mde, ns) %>% 
-  ggplot(aes(mde, ns)) + 
-  geom_step(color=my_blue) + 
-  labs(x='Lift', y='Number of Experiments')
-  
-```
 
 
 
 
 ```{r, echo=T}
-one_sided_power = function(real_lift, n_per_group){
+
+f = function(mde, baseline=0.08, n_uuids=2500000, latent_lift = 1.01, max_exp_per_year = 24){
+  
+  samp_size <- Vectorize(function(mde){
+  
+  # Group size which ensures 24 experiments per year
+  n_min = n_uuids/max_exp_per_year/2
+  # Estimated sample size for the mde
+  n_est = ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
+  
+  # Take the max.  If n_est is smaller than n_min, then we would just run the experiment longer since
+  # we can't run more of them.
+  pmax( n_min, n_est )
+  
+})
+  
+  one_sided_power = function(real_lift, n_per_group){
   # Only interested in the case when the estimated lift is
   # Greater than one, which corresponds to a one sided test.
   # However, you always run 2 tailed tests, so the significance level
@@ -116,23 +127,23 @@ one_sided_power = function(real_lift, n_per_group){
               )$power
 }
 
-f = function(mde, baseline=0.08, n_uuids=2500000, latent_lift = 1.01){
   
   # Draw lifts for experiments from this distribution
   lift_dist <-\(n) rlnorm(n, log(latent_lift), 0.1)
   
   # Given the MDE, here is how many users you need per group in each experiment.
-  n_per_group = ceiling(pwr.2p.test(h = ES.h(mde*baseline, baseline), power = 0.8)$n)
+  # If mde is too big, will give a group size resulting in 24 experiments per year.
+  n_per_group = samp_size(mde)
   
   # Here is how many experiments you could run per year
   # Why the factor of 2?  Because the computation above is the szie of each group.
-  n_experiments_per_year <- pmin(24, floor(n_uuids/(2*n_per_group)))
+  n_experiments_per_year <- floor(n_uuids/(2*n_per_group))
   
   # Here is a grid of experiments.  Simulate 
   # Running these experiments 1000 times
   # each experiment has n_per_group users in each group
   simulations <- crossing(
-    sim = 1:4000, 
+    sim = 1:1000, 
     experiment = 1:n_experiments_per_year,
     n_per_group = n_per_group
   )
@@ -157,93 +168,47 @@ f = function(mde, baseline=0.08, n_uuids=2500000, latent_lift = 1.01){
 }
 
 
-mdes <- tibble(mde = seq(1.01, 1.2, 0.01)) %>% 
+mdes <- tibble(mde = seq(1.01, 1.1, 0.001)) %>% 
         mutate(mde_id = as.character(seq_along(mde)))
 
 results = map_dfr(mdes$mde, f, .id = 'mde_id')  %>% 
           left_join(mdes)
 
 
-results %>% 
+p1<-results %>% 
+  group_by(mde) %>% 
+  summarise(lift = mean(lift)) %>% 
 ggplot(aes(mde, lift)) + 
-  stat_summary(fun.data = \(x) mean_se(x, 2)) + 
-  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
-  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
-  labs(x='MDE', y='Cumulative Improvement Over all Experiments',
-       title = 'Swing for the Fences',
-       subtitle = 'The optimal MDE is not the expected lift the team generates')
+  geom_step() + 
+  geom_rect(xmin=1.03, xmax=1.1, ymin=0, ymax=Inf, alpha = 0.005, fill=my_blue)+
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.1)) + 
+  scale_y_continuous(labels = \(x) scales::percent(x-1)) +
+  labs(x='MDE', y='Cumulative Improvement\nOver all Experiments')
   
 
-```
+p2<-results %>% 
+  group_by(mde) %>% 
+  summarise(lift = mean(lift)) %>% 
+  mutate(n_exp =  pmin(max_exp_per_year ,floor(n_uuids/(2*samp_size(mde))) ))  %>% 
+ggplot(aes(mde, n_exp)) + 
+  geom_rect(xmin=1.03, xmax=1.1, ymin=0, ymax=Inf, alpha = 0.005, fill=my_blue)+
+  geom_step() + 
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.1)) + 
+  labs(x='MDE', y='Num. Experiments')
 
 
+p3<-results %>% 
+  group_by(mde) %>% 
+  summarise(lift = mean(lift)) %>% 
+  mutate(n_ss =  samp_size(mde))  %>% 
+ggplot(aes(mde, log(n_ss))) + 
+  geom_rect(xmin=1.03, xmax=1.1, ymin=0, ymax=Inf, alpha = 0.005, fill=my_blue)+
+  geom_step() + 
+  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.1)) + 
+  labs(x='MDE', y='log(Group Size)')
 
-
-## How Do The Various Parts of The Problem Change The Objective Function?
-
-Changing the baseline of the metric moves the optima, with larger MDEs being considered optimal for smaller baselines.
-
-```{r}
-
-mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
-                 baseline = c(0.01, 0.05, 0.15, 0.25))
-
-result <-mdes %>% 
-         mutate(data = map2(mde, baseline, ~f(mde=.x, baseline=.y)))
-
-result %>% 
-  unnest(data) %>% 
-  mutate(bse = scales::percent(baseline),
-         bse = fct_reorder(bse, baseline, .desc = T)) %>% 
-  ggplot(aes(mde, lift, color=bse)) + 
-  stat_summary(geom='line') + 
-  scale_color_brewer(palette = 'Set1')+
-  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
-  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
-  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Baseline')
-```
-As the number of unique visitors to the website increases, the optimal MDE decreases, but only slightly.
-
-```{r}
-mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
-                 n_uuids = c(1e6, 3e6, 5e6, 10e6))
-
-result <-mdes %>% 
-         mutate(data = map2(mde, n_uuids, ~f(mde=.x, n_uuids=.y)))
-
-result %>% 
-  unnest(data) %>% 
-  mutate(nuids = scales::comma(n_uuids),
-         nuids = fct_reorder(nuids, .x = n_uuids, .desc = T)) %>% 
-  ggplot(aes(mde, lift, color=nuids)) + 
-  stat_summary(geom='line') + 
-  scale_color_brewer(palette = 'Set1')+
-  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
-  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
-  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Unique Visitors')
+(p1/p3) + (p2) + plot_layout(nrow = 2, ncol=2)
 
 ```
 
-
-As the expectation of the latent lift increases, the optima does not move but the expected cumulative improvement to the metric increases.  This is unsurprising.
-
-```{r}
-mdes <- crossing(mde = seq(1.01, 1.2, 0.01),
-                 latent_lift = c(1.01, 1.02, 1.03, 1.04))
-
-result <-mdes %>% 
-         mutate(data = map2(mde, latent_lift, ~f(mde=.x, latent_lift = .y)))
-
-result %>% 
-  unnest(data) %>% 
-  mutate(lat_lift = scales::percent(latent_lift-1),
-         lat_lift = fct_reorder(lat_lift, latent_lift, .desc = T)) %>% 
-  ggplot(aes(mde, lift, color=lat_lift)) + 
-  stat_summary(geom='line') + 
-  scale_color_brewer(palette = 'Set1')+
-  scale_x_continuous(labels = \(x) scales::percent(x-1, 0.01)) + 
-  scale_y_continuous(labels = \(x) scales::percent(x-1, 0.01)) +
-  labs(x='MDE', y='Cumulative Improvement Over all Experiments', color='Latent Lift')
-
-```
 

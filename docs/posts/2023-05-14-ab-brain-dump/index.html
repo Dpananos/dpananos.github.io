@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2023-05-14">
+
+<title>Demetri Pananos Ph.D - A Practical A/B Testing Brain Dump</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - A Practical A/B Testing Brain Dump">
+<meta property="og:description" content="Over the past year or so, I’ve helped move Zapier towards doing better experiments and more of them.">
+<meta property="og:site-name" content="Demetri Pananos Ph.D">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - A Practical A/B Testing Brain Dump">
+<meta name="twitter:description" content="Over the past year or so, I’ve helped move Zapier towards doing better experiments and more of them.">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html">
+ <span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">A Practical A/B Testing Brain Dump</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">AB Tests</div>
+                <div class="quarto-category">Statistics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 14, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#what-is-this-post" id="toc-what-is-this-post" class="nav-link active" data-scroll-target="#what-is-this-post">What Is This Post?</a></li>
+  <li><a href="#what-this-post-is-not" id="toc-what-this-post-is-not" class="nav-link" data-scroll-target="#what-this-post-is-not">What This Post Is Not</a></li>
+  <li><a href="#what-am-i-going-to-cover" id="toc-what-am-i-going-to-cover" class="nav-link" data-scroll-target="#what-am-i-going-to-cover">What Am I Going To Cover</a></li>
+  <li><a href="#empathy-understanding-where-we-are-and-where-we-came-from" id="toc-empathy-understanding-where-we-are-and-where-we-came-from" class="nav-link" data-scroll-target="#empathy-understanding-where-we-are-and-where-we-came-from">Empathy: Understanding Where We Are and Where We Came From</a></li>
+  <li><a href="#determining-the-quickest-way-to-improve-the-situation" id="toc-determining-the-quickest-way-to-improve-the-situation" class="nav-link" data-scroll-target="#determining-the-quickest-way-to-improve-the-situation">Determining The Quickest Way To Improve The Situation</a>
+  <ul class="collapse">
+  <li><a href="#an-important-side-about-frequentism-vs-bayesianism" id="toc-an-important-side-about-frequentism-vs-bayesianism" class="nav-link" data-scroll-target="#an-important-side-about-frequentism-vs-bayesianism">An Important Side About Frequentism vs Bayesianism</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-05-14-ab-brain-dump/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="what-is-this-post" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-this-post">What Is This Post?</h2>
+<p>Over the past year or so, I’ve helped move Zapier towards doing better experiments and more of them. I wanted to document some of this for posterity; what I did, what worked, how we know it worked, and where I might want to go in the future. This is more of a story rather than a set of instructions.</p>
+<p>My hope is that there is some sort of generalizable knowledge here. I don’t want to turn this into a set of instructions, but I do think there is something to learn (even if this has been written about before. I mean, I couldn’t find anything I needed, so here I am making it). As such, its going to be a <strong>long post</strong>. I might periodically update this post from time to time so that I can just put something out there initially.</p>
+</section>
+<section id="what-this-post-is-not" class="level2">
+<h2 class="anchored" data-anchor-id="what-this-post-is-not">What This Post Is Not</h2>
+<p>This is not a list of statistical tests to run (spoiler: its all regression anyway). Nor is this a technical post about feature flagging, persisting experiences across sessions, caching, or any other techincal aspects of running online experiments.</p>
+</section>
+<section id="what-am-i-going-to-cover" class="level2">
+<h2 class="anchored" data-anchor-id="what-am-i-going-to-cover">What Am I Going To Cover</h2>
+<p>Roughly, I want to go through the steps I took over the last year. Much of it was off the cuff and improvisation, but a lot of it was inspired by working with clinicians and contents of the book <strong>Trustworthy Online Controlled Experiments</strong>. Topics will include:</p>
+<ul>
+<li>Understanding where we are and where we came from</li>
+<li>Determining the quickest way to improve the situation</li>
+<li>Building credibility and trust</li>
+<li>Scaling experimentation – even if it means buying rather than building</li>
+<li>(Counter intuitive) signs we are moving in the right direction</li>
+<li>Next Steps</li>
+</ul>
+<hr>
+</section>
+<section id="empathy-understanding-where-we-are-and-where-we-came-from" class="level1">
+<h1>Empathy: Understanding Where We Are and Where We Came From</h1>
+<p>The first thing I did when I arrived at Zapier was shut up and listen. It would have been very easy for me to come in, see a few experiments, and then insist we do everything as Bayesians and use exotic methods to estimate quantities that didn’t actually matter but sounded important. There is a folk theorem I like that goes like</p>
+<blockquote class="blockquote">
+<p>“If you have a problem, someone smarter than you has already solved it”.</p>
+</blockquote>
+<p>A small corollary to that theorem is</p>
+<blockquote class="blockquote">
+<p>“If you have a possible solution, someone has already tried it and failed.”</p>
+</blockquote>
+<p>That failure is likely not because they just did it wrong. Don’t recreate stuff that doesn’t work. I set up a “listening tour” (basically a bunch of 1:1s) with anyone who was interested in talking to me or had something to say about experimentation. This was the single best thing I could have done. I learned a lot – which I will get to – but before that I want to talk about how to run these.</p>
+<p>Your main job here is to empathize and be curious about what you’re hearing. Don’t solution, don’t look for a nail you can hit with your statistical hammer, just listen. I politely asked everyone if I could record the sessions so that I could come back and listen more intently later. This removed the burden of taking notes during the meeting, I could do that after. Instead, we were able to have a real connection. If you find yourself in the same position as I found myself, do the following: Shut up, listen, and empathize.</p>
+<p>What did I learn? A few things:</p>
+<ul>
+<li><p>There was a culture of experimentation. People were running experiments and generating insights. However, the way experiments were being run was heterogeneous. There was no global process for ideating, hypothesizing, designing, implementing, analyzing, and reporting on an experiment. People were running experiments differently between teams, and in some cases were running them differently <em>within teams</em>. If the process for running experiments differs person to person, there is no consistency. That needs to be solved.</p></li>
+<li><p>Experimentation was seen as a roadblock for a lot of people. It took time, engineering effort, and would often not result in a clear winner which was frustrating. Not only that, but it took data some time to actually analyze these experiments. Data was considered a bottleneck because we would have to make a JIRA ticket to analyze the data, and then once we did analyze it stakeholders just had more questions so we’d have to repeat the process.</p></li>
+<li><p>Additionally, there was just no guidance on how to run experiments. I remember one conversation so viscerally because a stakeholder told me “If I wanted to run an experiment, I wouldn’t know where to start”. We needed some basic information on why we experiment, how we experiment, and even <em>when</em> to experiment. When we couldn’t run an experiment, we needed some guidance on what other forms of learning we could use and when those were appropriate.</p></li>
+</ul>
+<p>There were a few other pain points, but these were the biggest three in my opinion.</p>
+<p>I don’t have much advice on empathizing except the following: You’re not going to solve someone’s problems with math. Do not go into these conversations looking for evidence that your sexy model is going to work. Instead, be curious, collect data, and try to see if problems you are hearing exist elsewhere. There is a whole art to this that I will not pretend to have mastered. In any case, <strong>do not go in thinking more math will save the day. It won’t</strong>.</p>
+<p>After these interviews, I consolidated all my learning and presented them to other data scientists. The one thing I wish I added to my research was <em>why previous attempts to solve these problems failed</em>. There were at least two attempts to improve experimentation at Zapier and it would have been useful to get a more robust understanding of what they attempted to solve and how.</p>
+<hr>
+</section>
+<section id="determining-the-quickest-way-to-improve-the-situation" class="level1">
+<h1>Determining The Quickest Way To Improve The Situation</h1>
+<p>At this point, I had a pretty good understanding of what people thought the problems with experimentation were. It was time for me to get some skin in the game and analyze a few experiments myself. After getting a few experiment reps in, the first thing I sought to introduce to improve the situation was an A/B Testing Brief Template.</p>
+<p>My hope here was that this would be an evergreen place to learn about experiments being run. It includes all the information I would need to know about to help run an experiment. This includes, but is not limited to:</p>
+<ul>
+<li>Phase of development (are we planning, are we developing, are we running, have we finished, etc)</li>
+<li>Experiment start and end dates</li>
+<li>Variant names and links to Figma</li>
+<li>Hypotheses, metrics, and assumptions, etc</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p></p><figcaption class="figure-caption">Here is the template brief I created. Its simple, and has a lot more than what is shown here, including some steps to estimate sample size.</figcaption><p></p>
+<p><img src="https://cdn.zappy.app/a6022ad19406dfa7531506824ad4b395.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>It was a really simple document that tried to extract the most information with the least amount of pain. To my surprise, <em>people loved it</em>. I quickly saw teams adopt this template, and would even encourage other teams to use it too. This was the quickest way to improve the situation. It gave a small global process to think about what was important when planning an experiment. This helped pave the way to introducing more global processes and an eventual repository of experimentation information (more on that later maybe).</p>
+<p>Of course, nothing is perfect. I was hoping teams would be able to self serve sample size requests with just a few simple steps. Some of these questions are easy to answer (like baseline performance) but others created a lot of questions. What <em>should</em> our MDE be? what <em>should</em> our significance level be? This section is rarely filled out by stakeholders and left to data scientists, which is too bad because it really should be something a stakeholder can do. I’ll talk about how this was solved later.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p></p><figcaption class="figure-caption">Sample size instructions</figcaption><p></p>
+<p><img src="https://cdn.zappy.app/e3e465a29c32f1b889d0691b12686782.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>Additionally, the quality and depth of these briefs varied team to team. Some teams were very verbose, offering links and tons of details. Others would kind of slap something in there, maybe a few bullet points at the most. It isn’t my job to say what is good and what is bad, but certainly more info made it feel like the hypotheses were better researched and supported. No word yet on if more complete briefs yielded more successful experiments.</p>
+<section id="an-important-side-about-frequentism-vs-bayesianism" class="level3">
+<h3 class="anchored" data-anchor-id="an-important-side-about-frequentism-vs-bayesianism">An Important Side About Frequentism vs Bayesianism</h3>
+<p>You may have noticed the mention of sample size and significance level, implying a Frequentist and NHST framework being adopted here. I’m well aware of the problems with this framework, so why did I allow us to keep using this approach?</p>
+<ul>
+<li><p>First, keep in mind that 80% of A/B testing is not about what model you use. It is more about the stuff that comes prior to hitting <code>Run</code> on your R or python script. We needed to work on that 80%, and letting people use Frequentist models at least let them be familliar with the harder parts of AB testing. Keeping that familiarity and not introducing exotic models (again, math solution to a non-math problem) helped me build trust with those data scientists instead of having me be perceived as some egg-head completely detached from business needs. I’m not saying this would be the case for everyone, but I made the decision to leave some things the same as we fixed the more important pieces. P values were one of those things.</p></li>
+<li><p>Not only that, but you need to remember that you are working with people on various different stages in their journey. You had some people like <a href="https://twitter.com/statwonk">Statwonk</a>, who really knows his stuff, and you had others who hadn’t taken stats in 10 years and didn’t understand that all statistical tests are forms of regression. Bayesian stats is hard, and once we were to move past Beta-Binomial models for conversion, I would have to hold many people’s hands as they fit and interpreted their Bayesian model. That doesn’t scale very well.</p></li>
+<li><p>Not only that, but I’m no longer interested in teaching statistics to people. There are plenty of resources online that are leagues better than what I could put together, so why waste my breath? If you wanna learn Bayesian stats then go read McElreath or Gelman or Kruschke or whomever. Its just not something I’m interested in doing ever again.</p></li>
+</ul>
+<p>That being said, there is no reason to stay Frequentist. If we feel there is a real advantage to being Bayesian, we can and have used Bayesian models. These are especially useful in revenue experiments where we statistical significance is not our concern and we should instead be using decision theory. So let’s do what we know for now and re-evaluate when all the supporting processes are working as we intend them too. Don’t be so infelxible as to think “Bayes or bust”, that isn’t helpful and lacks empathy.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
