@@ -17,7 +17,7 @@ My hope is that there is some sort of generalizable knowledge here.  I don't wan
 
 ## What This Post Is Not
 
-This is not a list of statistical tests to run (spoiler: its all regression anyway).  Nor is this a technical post about feature flagging, persisting experiences across sessions, caching, or any other techincal aspects of running online experiments.
+This is not a list of statistical tests to run (spoiler: its all regression anyway).  Nor is this a technical post about feature flagging, persisting experiences across sessions, caching, or any other technical aspects of running online experiments.
 
 ## What Am I Going To Cover
 
@@ -30,6 +30,8 @@ Roughly, I want to go through the steps I took over the last year.  Much of it w
 * (Counter intuitive) signs we are moving in the right direction
 * Next Steps
 
+
+**You should know:** This was not a one man effort.  There are lots of people to thank for any success I've had.  Guidance from leadership, all the people who let me touch their projects, and all the data scientists who tapped me for help or a consult.  
 ---
 
 # Empathy: Understanding Where We Are and Where We Came From

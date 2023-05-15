@@ -81,14 +81,14 @@
     "href": "posts/2023-05-14-ab-brain-dump/index.html#what-this-post-is-not",
     "title": "A Practical A/B Testing Brain Dump",
     "section": "What This Post Is Not",
-    "text": "What This Post Is Not\nThis is not a list of statistical tests to run (spoiler: its all regression anyway). Nor is this a technical post about feature flagging, persisting experiences across sessions, caching, or any other techincal aspects of running online experiments."
+    "text": "What This Post Is Not\nThis is not a list of statistical tests to run (spoiler: its all regression anyway). Nor is this a technical post about feature flagging, persisting experiences across sessions, caching, or any other technical aspects of running online experiments."
   },
   {
     "objectID": "posts/2023-05-14-ab-brain-dump/index.html#what-am-i-going-to-cover",
     "href": "posts/2023-05-14-ab-brain-dump/index.html#what-am-i-going-to-cover",
     "title": "A Practical A/B Testing Brain Dump",
     "section": "What Am I Going To Cover",
-    "text": "What Am I Going To Cover\nRoughly, I want to go through the steps I took over the last year. Much of it was off the cuff and improvisation, but a lot of it was inspired by working with clinicians and contents of the book Trustworthy Online Controlled Experiments. Topics will include:\n\nUnderstanding where we are and where we came from\nDetermining the quickest way to improve the situation\nBuilding credibility and trust\nScaling experimentation – even if it means buying rather than building\n(Counter intuitive) signs we are moving in the right direction\nNext Steps"
+    "text": "What Am I Going To Cover\nRoughly, I want to go through the steps I took over the last year. Much of it was off the cuff and improvisation, but a lot of it was inspired by working with clinicians and contents of the book Trustworthy Online Controlled Experiments. Topics will include:\n\nUnderstanding where we are and where we came from\nDetermining the quickest way to improve the situation\nBuilding credibility and trust\nScaling experimentation – even if it means buying rather than building\n(Counter intuitive) signs we are moving in the right direction\nNext Steps\n\nYou should know: This was not a one man effort. There are lots of people to thank for any success I’ve had. Guidance from leadership, all the people who let me touch their projects, and all the data scientists who tapped me for help or a consult."
   },
   {
     "objectID": "posts/2017-12-29-coins/index.html",
