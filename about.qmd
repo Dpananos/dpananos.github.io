@@ -16,6 +16,6 @@ about:
 
 ---
 
-I'm a senior data scientist at Zapier. I hold a Ph.D in Biostatistics from Western University. I'm usually playing chess, having a coffee, and playing fetch with my dog. 
+I'm a staff data scientist at Zapier. I hold a Ph.D in Biostatistics from Western University. I'm usually playing chess, having a coffee, and playing fetch with my dog. 
 
 I'm more interested in experimentation and inference than I am in machine learning.  Questions like "What is the estimated impact of the new approach" and "What do we stand to lose if we are wrong" are the most prevelant types of questions I try to answer.
