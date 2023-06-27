@@ -10,7 +10,60 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Sun, 14 May 2023 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 26 Jun 2023 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Did You Do Your Homework?</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><a href="https://twitter.com/quantian1/status/1673358773178585091">This tweet</a> made its way to my corner of the Bird Site. I’m a glutton for math homework punishment so I attempted it (and failed) but do not confuse my interest as legitimizing the tweet.</p>
+<p>Frankly, I think asking questions found in Wooldridge is not a good litmus test of anything aside for your memory from undergrad. But that isn’t the point of this post. The point is to reply to <a href="https://ryxcommar.com/2023/06/26/should-you-ask-data-science-job-candidates-this-tricky-math-question/">Senior Powerpoint Engineer’s (SPE for short here, or should I call them @ryxcommar) blog post</a> which came as a response to the aforementioned tweet.</p>
+<p>If I can summarize the post (which you should read), SPE makes the following points:</p>
+<ul>
+<li>The question should not be if you should ask this tricky math question to candidates, but rather you should ask yourself if you really need to hire a data scientist or some other role like a software engineer, analytics engineer, data analyst, ML engineer, etc.</li>
+</ul>
+<!-- -->
+<ul>
+<li><p>The term “data scientist” signals some sort of advanced knowledge in applied math/stats. Many bootcamps go about teaching modelling material as if that is most of the job (it isn’t) and even then most data scientists don’t actually understand one of the most foundational models well enough to even begin answering a homework question correctly. If they aren’t toiling and they don’t understand the theory, what are they really doing?</p></li>
+<li><p>Additional anecdotes about how simple heuristics beat some data scientist’s logistic regression.</p></li>
+</ul>
+<p>The post is paired nicely with his <a href="https://twitter.com/ryxcommar/status/1672265739527417865">thread on why 2023 is a bad year to bootcamp your way to a data science job</a>, which hits on a some of the same points.</p>
+<p>In brief, I agree with SPE’s post but would like to add a little nuance. I think SPE is just kind of saying stuff we’ve all heard before. It isn’t wrong, I just think there is probably a little more to say.</p>
+<section id="value-proposition" class="level2">
+<h2 class="anchored" data-anchor-id="value-proposition">Value Proposition</h2>
+<p>My main contention here is the value proposition of a data scientist. If my summary is a fair, then SPE’s point is that data scientists are not in the trenches working with the data, instead they “twiddle with models in Jupyter”. But even then they don’t understand those models deeply enough (as evidenced by their inability to do homework questions). If they aren’t working with data and they can’t do science, what are they doing? What is their value?</p>
+<p>In my opinion, that is fairly reductive and not the whole story. I don’t disagree with SPE , but I don’t think much of the content in that post is new and hence just adds noise. I can only speak to my (limited) experience in tech, but many of the problems facing data scientists are not purely tech or math problems; they are people problems. Those don’t fit nicely into the presented dichotomy.</p>
+<p>Along the lines of people problems, the value proposition of a data scientist– in my humble opinion– is to get people to think about their problems scientifically. That is a lot harder than it sounds when the people you work with have not spent 4-10 years ostensibly<sup>1</sup> doing science.</p>
+<p>Here is an example from my work. Data analysts, toiling in the data as they do, routinely made dashboards for the AB tests we ran prior to my ownership of experimentation protocols. Many of the top of funnel metrics we measured were measured in terms of one another (e.g.&nbsp;Signup Rate = Signups per Visitor, Activation Rate = Activations per Signup) etc. Fine from a business perspective.</p>
+<p>When it comes to inference, I don’t need to tell you that if you measure those two metrics as I’ve written them then anything that increases signup rate is going to decrease activation rate. Its going to look like everything is a stalemate<sup>2</sup>. But I did have to share that with most everyone I talked to about experimentation, data analysts included. And it wasn’t just one person or team doing it, it was nearly the entire company. Measuring the right thing (and most importantly, knowing how to explain that to people because it isn’t as easy as mentioning conditioning on a post treatment variable) is like 20% math problem and 80% people problem due to all the stakeholder management that has to go into explanation why we are now changing the metrics, and how the numbers don’t match, no we can’t keep doing it like we’ve been doing it, what the source of truth is now, and on and on and on.</p>
+<p>I think SPE would call this a “job perk” – thought leadership for internal decision making. That assumes you’re in a company that thinks scientifically and you’re free to do higher level stuff. We should all be so lucky. Thought leadership isn’t a perk, <strong>it is the job, and you’re leading people to think scientifically</strong>. This is the disconnect I think SPE mentions. If you buy my rant, the title data scientist can imply an advanced understanding of applied math and not be expected to answer homework questions because remembering tricks from econometrics class isn’t used regularly in thinking scientifically. Candidates and interviewers aren’t being measured for/measuring the right thing (the ability to think scientifically and convince/teach others to follow suit) and here we are talking about if remembering <img src="https://latex.codecogs.com/png.latex?E%5B%5Chat%7B%5Cbeta%7D_1%5D%20=%20%5Cfrac%7B%5Coperatorname%7BCov%7D(X,%20Y)%7D%7B%5Coperatorname%7BVar%7D(X)%7D"> is a good barometer for being a data scientist or not.</p>
+</section>
+<section id="we-agree" class="level2">
+<h2 class="anchored" data-anchor-id="we-agree">We Agree</h2>
+<p>None of this undermines SPE’s points, it isn’t like bootcamps are teaching how to think scientifically. But it isn’t news that data science is over hyped, nor is it news that fresh grads aren’t well equipped for the job, nor is it news that correct linear algebra problem sets are not a good indicator for success on the job.</p>
+<p>If I could amend SPE’s blog post, it would be as follows:</p>
+<blockquote class="blockquote">
+<p>But I don’t think “should you ask it?” is the right question. The real question here is: “Should you be hiring a data scientist? <strong>If so, are you actually willing to listen to what they have to say? Are you even capable of recognizing scientific ability and probing to further test it?</strong>” And the answer to that is probably not. – (<em>Emphasis mine</em>).</p>
+</blockquote>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I say “ostensibly” because I’m not sure what I did was “science” as much as it was survival.↩︎</p></li>
+<li id="fn2"><p>Because <img src="https://latex.codecogs.com/png.latex?y/x%20=%20%5Cfrac%7By/N%7D%7Bx/N%7D">, provided <img src="https://latex.codecogs.com/png.latex?x,%20N%5Cneq%200">.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/index.html</guid>
+  <pubDate>Mon, 26 Jun 2023 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A Practical A/B Testing Brain Dump</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -100,12 +153,33 @@
 <li><p>Not only that, but I’m no longer interested in teaching statistics to people. There are plenty of resources online that are leagues better than what I could put together, so why waste my breath? If you wanna learn Bayesian stats then go read McElreath or Gelman or Kruschke or whomever. Its just not something I’m interested in doing ever again.</p></li>
 </ul>
 <p>That being said, there is no reason to stay Frequentist. If we feel there is a real advantage to being Bayesian, we can and have used Bayesian models. These are especially useful in revenue experiments where we statistical significance is not our concern and we should instead be using decision theory. So let’s do what we know for now and re-evaluate when all the supporting processes are working as we intend them too. Don’t be so infelxible as to think “Bayes or bust”, that isn’t helpful and lacks empathy.</p>
+</section>
+</section>
+<section id="an-experimentation-hub" class="level1">
+<h1>An Experimentation Hub</h1>
+<p>The AB testing Brief was a really good move. It saw quick and wide spread adoption and helped Zapier begin to think about planning experiments in the same way by making everyone answer the same questions. This helped a lot with the variance problem.</p>
+<p>There was, however, a scalability problem. While I was very keen to consult on as many A/B tests as I could, I very quickly learned that I was not a scalable solution; I could not realistically consult on experiment ideation, design, quality control, monitoring, analysis, and reporting for every experiment we would run. As soon as I got up to about 3 or 4 experiments simultaneously, I started to get really bogged down. Not only that, but I became a victim of my own success. Teams would have a good experience with an experiment I helped run and then come back to me, which lead to another good experience, and soon enough I became their go to person for experimentation. My goal was not to give myself too much work, my goal was to improve experimentation across the org and this workflow was actively working against me.</p>
+<p>I’ve learned that as you become more senior, your job is less writing code and more writing documentation<sup>1</sup>. I began writing documentation on experimentation with the help of my VP. Much of the content was mine, but the idea was his and he helped me identify where and what to write about. I didn’t try to re-write textbooks, and neither should you if you’re thinking of doing the same. Instead, my goal was to capture the most salient information so that people would be able to self serve as much as possible, and when I was required to consult I could do the most important work only I could do and then dip. Examples include:</p>
+<ul>
+<li>Here are the criteria you need in order to experiment. Here is the decision tree for if you should experiment. It isn’t perfect and that is OK.</li>
+<li>Sample size? Nope, here is a calculator and what each of the fields mean. Let me know when you’ve got a number and I will check it.</li>
+<li>Need to run a test of some sort? Here is the R function. Don’t know R? Here is the python function. Don’t code all that much? Here is a link to an online calculator.</li>
+<li>Here are suggested checks you should do on your experiment data.</li>
+</ul>
+<p>You get the jist. This worked…OK. What I found is that this “just in time” education is extremely prone to edge cases and that means I just created different problems to solve initially (which was good, that is progress).</p>
+<p><sup>2</sup>: For more on this, I would recommend reading “The Staff Engineer’s Path”.</p>
 
 
 </section>
-</section>
 
- ]]></description>
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>1↩︎</p></li>
+<li id="fn2"><p>1↩︎</p></li>
+</ol>
+</section></div> ]]></description>
   <category>AB Tests</category>
   <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/index.html</guid>

@@ -98,3 +98,21 @@ You may have noticed the mention of sample size and significance level, implying
 * Not only that, but I'm no longer interested in teaching statistics to people.  There are plenty of resources online that are leagues better than what I could put together, so why waste my breath?  If you wanna learn Bayesian stats then go read McElreath or Gelman or Kruschke or whomever.  Its just not something I'm interested in doing ever again.
 
 That being said, there is no reason to stay Frequentist.  If we feel there is a real advantage to being Bayesian, we can and have used Bayesian models.  These are especially useful in revenue experiments where we statistical significance is not our concern and we should instead be using decision theory.  So let's do what we know for now and re-evaluate when all the supporting processes are working as we intend them too.  Don't be so infelxible as to think "Bayes or bust", that isn't helpful and lacks empathy.
+
+# An Experimentation Hub
+
+The AB testing Brief was a really good move.  It saw quick and wide spread adoption and helped Zapier begin to think about planning experiments in the same way by making everyone answer the same questions.  This helped a lot with the variance problem.
+
+There was, however, a scalability problem.  While I was very keen to consult on as many A/B tests as I could, I very quickly learned that I was not a scalable solution; I could not realistically consult on experiment ideation, design, quality control, monitoring, analysis, and reporting for every experiment we would run.  As soon as I got up to about 3 or 4 experiments simultaneously, I started to get really bogged down.  Not only that, but I became a victim of my own success.  Teams would have a good experience with an experiment I helped run and then come back to me, which lead to another good experience, and soon enough I became their go to person for experimentation.  My goal was not to give myself too much work, my goal was to improve experimentation across the org and this workflow was actively working against me.
+
+I've learned that as you become more senior, your job is less writing code and more writing documentation^[1].  I began writing documentation on experimentation with the help of my VP.  Much of the content was mine, but the idea was his and he helped me identify where and what to write about.  I didn't try to re-write textbooks, and neither should you if you're thinking of doing the same.  Instead, my goal was to capture the most salient information so that people would be able to self serve as much as possible, and when I was required to consult I could do the most important work only I could do and then dip. Examples include:
+
+* Here are the criteria you need in order to experiment.  Here is the decision tree for if you should experiment.  It isn't perfect and that is OK.
+* Sample size?  Nope, here is a calculator and what each of the fields mean.  Let me know when you've got a number and I will check it.
+* Need to run a test of some sort?  Here is the R function.  Don't know R? Here is the python function.  Don't code all that much? Here is a link to an online calculator.
+* Here are suggested checks you should do on your experiment data.  
+
+You get the jist.  This worked...OK.  What I found is that this "just in time" education is extremely prone to edge cases and that means I just created different problems to solve initially (which was good, that is progress).
+
+
+^[1]: For more on this, I would recommend reading "The Staff Engineer's Path".

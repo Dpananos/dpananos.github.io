@@ -161,6 +161,7 @@ ul.task-list li input[type="checkbox"] {
   <ul class="collapse">
   <li><a href="#an-important-side-about-frequentism-vs-bayesianism" id="toc-an-important-side-about-frequentism-vs-bayesianism" class="nav-link" data-scroll-target="#an-important-side-about-frequentism-vs-bayesianism">An Important Side About Frequentism vs Bayesianism</a></li>
   </ul></li>
+  <li><a href="#an-experimentation-hub" id="toc-an-experimentation-hub" class="nav-link" data-scroll-target="#an-experimentation-hub">An Experimentation Hub</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-05-14-ab-brain-dump/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -250,12 +251,33 @@ ul.task-list li input[type="checkbox"] {
 <li><p>Not only that, but I’m no longer interested in teaching statistics to people. There are plenty of resources online that are leagues better than what I could put together, so why waste my breath? If you wanna learn Bayesian stats then go read McElreath or Gelman or Kruschke or whomever. Its just not something I’m interested in doing ever again.</p></li>
 </ul>
 <p>That being said, there is no reason to stay Frequentist. If we feel there is a real advantage to being Bayesian, we can and have used Bayesian models. These are especially useful in revenue experiments where we statistical significance is not our concern and we should instead be using decision theory. So let’s do what we know for now and re-evaluate when all the supporting processes are working as we intend them too. Don’t be so infelxible as to think “Bayes or bust”, that isn’t helpful and lacks empathy.</p>
+</section>
+</section>
+<section id="an-experimentation-hub" class="level1">
+<h1>An Experimentation Hub</h1>
+<p>The AB testing Brief was a really good move. It saw quick and wide spread adoption and helped Zapier begin to think about planning experiments in the same way by making everyone answer the same questions. This helped a lot with the variance problem.</p>
+<p>There was, however, a scalability problem. While I was very keen to consult on as many A/B tests as I could, I very quickly learned that I was not a scalable solution; I could not realistically consult on experiment ideation, design, quality control, monitoring, analysis, and reporting for every experiment we would run. As soon as I got up to about 3 or 4 experiments simultaneously, I started to get really bogged down. Not only that, but I became a victim of my own success. Teams would have a good experience with an experiment I helped run and then come back to me, which lead to another good experience, and soon enough I became their go to person for experimentation. My goal was not to give myself too much work, my goal was to improve experimentation across the org and this workflow was actively working against me.</p>
+<p>I’ve learned that as you become more senior, your job is less writing code and more writing documentation<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. I began writing documentation on experimentation with the help of my VP. Much of the content was mine, but the idea was his and he helped me identify where and what to write about. I didn’t try to re-write textbooks, and neither should you if you’re thinking of doing the same. Instead, my goal was to capture the most salient information so that people would be able to self serve as much as possible, and when I was required to consult I could do the most important work only I could do and then dip. Examples include:</p>
+<ul>
+<li>Here are the criteria you need in order to experiment. Here is the decision tree for if you should experiment. It isn’t perfect and that is OK.</li>
+<li>Sample size? Nope, here is a calculator and what each of the fields mean. Let me know when you’ve got a number and I will check it.</li>
+<li>Need to run a test of some sort? Here is the R function. Don’t know R? Here is the python function. Don’t code all that much? Here is a link to an online calculator.</li>
+<li>Here are suggested checks you should do on your experiment data.</li>
+</ul>
+<p>You get the jist. This worked…OK. What I found is that this “just in time” education is extremely prone to edge cases and that means I just created different problems to solve initially (which was good, that is progress).</p>
+<p><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>: For more on this, I would recommend reading “The Staff Engineer’s Path”.</p>
 
 
 </section>
-</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>1<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>1<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
