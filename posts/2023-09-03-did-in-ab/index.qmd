@@ -1,5 +1,5 @@
 ---
-title: Difference in Difference Estimates Can Be Biased When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments
+title: Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments
 date: "2023-09-03"
 code-fold: true
 echo: true
@@ -20,55 +20,74 @@ library(ggExtra)
 theme_set(theme_minimal(base_size = 16))
 ```
 
+Edits:
+
+* @devonbancroft1 mentions that in AB testing, users are highly correlated between periods. It would be useful to examine how that correlation changes outcomes.  I've edited the simulation to allow for drawing correlated pre and post data.
+
+* @fiftycente1 mentions that bias is about expectation.  That's true, I've edited my post to explicitly distinguish between bias and accuracy.
+
 
 ## Introduction
 
-I've run into people randomizing units to treatment and control and then looking to see if there are pre-treatment differences.  If there are, I've heard -- at Zapier and [cross validated](https://stats.stackexchange.com/questions/625007/ab-testing-control-was-performing-0-5-better-than-experiment-set-before-the-in/625523#625523) -- that a difference in difference (DiD) should be performed.  After all, there are baseline differences!  We need to adjust for those.
+I've run into people randomizing units to treatment and control and then looking to see if there are pre-treatment differences with a hypothesis test.  If there are, I've heard -- at Zapier and [cross validated](https://stats.stackexchange.com/questions/625007/ab-testing-control-was-performing-0-5-better-than-experiment-set-before-the-in/625523#625523) -- that a difference in difference (DiD) should be performed.  After all, there are baseline differences!  We need to adjust for those.
 
 To be clear -- using DiD to analyze randomized experiments is fine.  The resulting estimate of the ATE should be unbiased assuming the experiment was run without a hitch. You don't need to do difference in difference because prior to treatment the two groups will have the same distribution of potential outcomes.  Their pre-treatment differences are 0 *in expectation*.  Any detection of a difference -- again, assuming the experiment was run well -- is sampling variability.
 
-Running DiD because we found baseline differences is a form of deciding on analysis based on the observed data, and we all know that is a statistical faux pas.  But how bad could it be?  Are our estimates of the treatment effect biased?  What do we lose when we let the data decide if we should run a DiD or a t-test?
+Running DiD because we found baseline differences is a form of deciding on analysis based on the observed data, and we all know that is a statistical faux pas.  But how bad could it be?  Are our estimates of the treatment effect biased?  Are they precise?  What do we lose when we let the data decide if we should run a DiD or a t-test?
 
 ## Simulation
 
-To find out, let's simulate a very simple example.  Let's assume that I run an experiment and measure units before and after.  The observations on each unit are uncorrelated and have standard normal distribution in the absence of the treatment.  If $A$ is a binary indicator for treatment (1 for treatment, 0 else) then the data are
+To find out, let's simulate a very simple example.  Let's assume that I run an experiment and measure units before and after.  The observations on each unit are iid and have standard normal distribution in the absence of the treatment.  If $A$ is a binary indicator for treatment (1 for treatment, 0 else) then the data are
 
 $$ y_{pre} \sim \mbox{Normal}\left(0, \sigma^2\right) \>, $$
 $$ y_{post} \sim \mbox{Normal}\left(\tau \cdot A, \sigma^2 \right) \>. $$
 
 
-I'll run 20, 000 simulations of a simple randomized experiment.  Each time, I'll sample $N$ units in each arm, enough to detect a treatment effect from a t-test with 80% power.  I'll then run a t-test via OLS and a DiD.  I'll record the pre-treatment difference in each group and if it was statistically significant at the 5% level.  For these simulations, I'll set $\tau=1$ and $\sigma=1$ which means I need $N=17$ users per arm.
+We will allow for the pre and post observations to be correlated with correlation $\rho$.
+
+I'll run 5, 000 simulations of a simple randomized experiment.  Each time, I'll sample $N$ units in each arm, enough to detect a treatment effect from a t-test with 80% power.  I'll then run a t-test via OLS and a DiD.  I'll record the pre-treatment difference in each group and if it was statistically significant at the 5% level.  I'm also going to carry around the estimates from an ANCOVA since this seems to be the recommended approach for when we have pre-treatment information that is correlated with the outcome.  For these simulations, I'll set $\tau=1$ and $\sigma=1$ which means I need $N=17$ users per arm to achieve 80% power.
 
 We'll plot some treatment effect estimates and see what is happening when we choose to do DiD when the data suggest we do. Now importantly, I'm making very strong assumptions about the experiment being run.  In particular, I'm making assumptions that all went well, there is no funny business with timing or randomization, etc.  In terms of a medical trial, I got 34 people to all stand in a line, randomly gave each placebo or drug, watched them all take it at the same time, and recorded outcomes.  The purpose of these simulation and blog post is to investigate statistical properties and not to wring about whatabouts.
 
 In the code cell below is the code to run these simulations
 
 ```{r}
-simulate_data <- function(N_per_arm=17, tau=1, sigma=1){
+simulate_data <- function(N_per_arm=17, tau=1, sigma=1, rho=0, ...){
   
   
-  A <- rbinom(2*N_per_arm, 1, 0.5)
-  y_pre <- rnorm(2*N_per_arm, 0, sigma)
-  y_post <- rnorm(2*N_per_arm, tau*A, sigma)
-
+  Sigma <- diag(rep(sigma, 2)) %*% matrix(c(1, rho, rho, 1), nrow=2) %*% diag(rep(sigma, 2))
   
-  pre <- tibble(y=y_pre, trt=A, period=0)
-  post <- tibble(y=y_post, trt=A, period=1)
+  A <- rep(0:1, N_per_arm)
+  Y <- cbind(0, tau*A) + MASS::mvrnorm(2*N_per_arm, mu = c(0, 0), Sigma = Sigma)
+  
+  y_pre <- Y[, 1]
+  y_post <- Y[, 2]
+  
+  pre <- tibble(i = seq_along(A), y=y_pre, trt=A, period=0)
+  post <- tibble(i = seq_along(A), y=y_post, trt=A, period=1)
   
   bind_rows(pre, post)
       
 }
 
-do_analysis <- function(i){
-  d <- simulate_data()
+do_analysis <- function(...){
+  
+  d <- simulate_data(...)
+  
+  dwide <- d %>% 
+           mutate(period = if_else(period==1, 'post','pre'))  %>% 
+          pivot_wider(id_cols = c(i, trt), names_from = period, values_from = y)
   
   #DiD 
   did <- lm(y ~ trt*period, data=d)
   # t-test, only on post data
   tt <- lm(y ~ trt, data=filter(d, period==1))
+  ## Ancova
+  ancova <- lm(post ~ pre + trt, data=dwide)
   
   tt_ate <- coef(tt)['trt']
   did_ate <- coef(did)['trt:period']
+  ancova_ate <- coef(ancova)['trt']
   
   pre_test <- t.test(y~trt, data = filter(d, period==0))
   
@@ -78,32 +97,34 @@ do_analysis <- function(i){
   tibble(
     tt_ate, 
     did_ate, 
+    ancova_ate,
     pre_period_diff, 
     detected
   )
 }
 
 
-results <- map_dfr(1:20000, do_analysis, .id = 'sim')
+results <- map_dfr(1:5000, ~do_analysis(), .id = 'sim')
 ```
 
 
-## Results
+## Case 1:  Uncorrelated Pre and Post Observations
 
 
 
-Shown below are the ATEs from each analysis.  Nothing too surprising here, the ATEs are unbiased (the histograms are centered at $\tau=1$).  There might be some differences in variance, but I don't care about that right now.
-
+Shown below are the ATEs from each analysis when the pre and post are uncorrelated.  Nothing too surprising here, the ATEs are unbiased (the histograms are centered at $\tau=1$).  It seems that the t-test has lower sampling variance/higher precision, which means lower MSE.
 
 
 ```{r}
+#| fig-height: 5
 plot <- results %>% 
         ggplot(aes(tt_ate, did_ate)) + 
         geom_point(alpha = 0.5) + 
         labs(
           x= 'T-test ATE',
           y='DiD ATE'
-        )
+        ) + 
+  theme(aspect.ratio = 1)
 
 ggMarginal(plot, type='histogram')
 ```
@@ -113,16 +134,22 @@ Let's now plot the ATEs for each method against the pre-period differences.  Bec
 
 
 ```{r}
+#| fig-height: 5
 plot <- results %>% 
-  pivot_longer(tt_ate:did_ate, names_to = 'analysis', values_to = 'ate') %>% 
+  pivot_longer(tt_ate:ancova_ate, names_to = 'analysis', values_to = 'ate') %>% 
   mutate(
-    analysis = if_else(analysis=='tt_ate', 'T-test', 'DiD')
+    analysis = case_when(
+      analysis == 'tt_ate' ~ 'T-test',
+      analysis == 'did_ate' ~ 'DiD',
+      analysis == 'ancova_ate' ~ 'Ancova'
+    )
   ) %>% 
   ggplot(aes(pre_period_diff, ate)) + 
   geom_point(alpha=0.5) + 
   facet_grid( ~ analysis) + 
   labs(x='Pre period difference',
-       y = 'ATE')
+       y = 'ATE') +
+  theme(aspect.ratio = 1)
 
 
 plot 
@@ -131,34 +158,134 @@ plot
 Great, this makes sense.  The ATE is for the t-test is uncorrelated with the pre-period difference, as expected.  The ATE DiD is correlated with the pre-period difference, and that's likely due to regression to the mean.  Now, let's stratify by cases when the pre-period difference is (erroneously) thought to be non-zero.
 
 ```{r}
+#| fig-height: 5
 plot + facet_grid(detected ~ analysis)
 ```
 
-It is unsurprising that the tails of each of these blogs is cut off.  After all, the pre-period difference needs to be extreme enough to reject the null.  Let's first talk about that bottom right cell -- the t test when there is a detected pre-period difference.  Because there is no correlation between pre-period difference and the ATE, the ATEs are still unbiased.  That's great.  What about DiD?
+It isn't unsurprising that the tails of each of these blobs is cut off.  After all, the pre-period difference needs to be extreme enough to reject the null.  Let's first talk about that bottom right cell -- the t test when there is a detected pre-period difference.  Because there is no correlation between pre-period difference and the ATE, the ATEs are still unbiased.  That's great.  What about DiD (bottom middle cell)?
 
-Note that the correlation means that those blobs don't have the same mean.  In fact, if you run K-means on those blobs, you can very easily seperate them and estimate the ATE and its very far from 1!  That's bias!  How big those biases (plural, because it depends on the size of the pre-treatment difference) depends on the strength of the correlation between the ATE anf the pre-period difference.  In this particular example, the left most cluster has an average ATE of about 1.8 while the right most cluster has an average ATE of about 0.24.  That's a big amount of bias in either direction.
+Note that the correlation means that those blobs don't have the same mean.  In fact, if you run K-means on those blobs, you can very easily separate them and estimate the ATE and its very far from 1! Technically, this is unbiased because we have to average over each blob.  So it isn't that the estimates are biased from DiD, but they are *inaccurate*.  Take a look at the MSE for each estimate (shown below).  Using DiD when you detect a pre-treatment difference may be unbiased, but it has very high MSE as compared to the two other methods.
 
+While those estimates are unbiased, the low precision/high MSE is a good argument against checking for pre-treatment differences and then deciding on analysis style. This would be like saying "the river is a foot deep" when in reality the river is an inch deep in most places, and a mile deep in others.  While the estimates are unbiased, any one particular estimate is fairly far from the true ATE.
 ```{r, include=FALSE}
-blob_tails <- results %>% 
-              pivot_longer(tt_ate:did_ate, names_to = 'analysis', values_to = 'ate') %>% 
-              mutate(
-                analysis = if_else(analysis=='tt_ate', 'T-test', 'DiD')
-              ) %>% 
-              filter((detected=='Pre-Period Difference')&(analysis=='DiD')) %>% 
-              select(pre_period_diff, ate)
 
-X <- as.matrix(blob_tails)
-means <- kmeans(scale(X),centers = 2)
 
-blob_tails$cluster <- means$cluster
+results %>% 
+  pivot_longer(tt_ate:ancova_ate, names_to = 'analysis', values_to = 'ate') %>% 
+  mutate(
+    analysis = case_when(
+      analysis == 'tt_ate' ~ 'T-test',
+      analysis == 'did_ate' ~ 'DiD',
+      analysis == 'ancova_ate' ~ 'Ancova'
+    )
+  ) %>% 
+  group_by(analysis, detected) %>% 
+  summarise(
+    MSE = mean((ate-1)^2)
+  ) %>% 
+  ggplot(aes(analysis, MSE, fill=detected)) + 
+  geom_col(position = position_dodge2()) + 
+  theme(legend.position = 'top') + 
+  labs(x='Analysis', fill='')
 
-blob_tails %>% 
-  group_by(cluster) %>% 
-  summarise(ate = mean(ate))
+
 ```
+
+
+## Case 2: Moderate Correlation Between Pre and Post
+
+Let's now let pre and post correlation be non-zero, but still moderate in size.  We'll let $\rho = 0.45$ which is still much smaller than most correlation coefficients I've seen in real AB tests at Zapier.
+
+
+
+Making the same plot as we did before, we see that DiD still suffers from poor accuracy as measured by MSE, bow now the T-test is starting to demonstrate some positive correlation between pre-period difference and ATE.  Its worth mentioning again that we would not really do anything different with the information that there was a pre-period difference when using the t-test.  The estimate of the ATE would still be unbiased and have low MSE.
+
+
+```{r}
+#| fig-height: 5
+
+results <- map_dfr(1:5000, ~do_analysis(N_per_arm=17, tau=1, sigma=1, rho=0.45), .id = 'sim')
+
+results %>% 
+  pivot_longer(tt_ate:ancova_ate, names_to = 'analysis', values_to = 'ate') %>% 
+  mutate(
+    analysis = case_when(
+      analysis == 'tt_ate' ~ 'T-test',
+      analysis == 'did_ate' ~ 'DiD',
+      analysis == 'ancova_ate' ~ 'Ancova'
+    )
+  ) %>% 
+  ggplot(aes(pre_period_diff, ate)) + 
+  geom_point(alpha=0.5, color = 'gray 45') + 
+  facet_grid( ~ analysis) + 
+  labs(x='Pre period difference',
+       y = 'ATE') +
+  theme(aspect.ratio = 1) + 
+  facet_grid(detected ~ analysis)
+```
+
+
+
+
+## Case 3: Strong Correlation Between Pre and Post
+
+In AB testing, it isn't uncommon to see $\rho>0.9$ between pre and post outcomes. When we run experiments and seek to have an effect on existing user's monthly payments, many users won't change at all meaning they are typically paying the same amount this month as they were last.  That results in very high $\rho$.
+
+Let's rerun the simulation, but this time specify that pre and post have a correlation of 0.95.
+
+```{r}
+#| fig-height: 5
+
+results <- map_dfr(1:5000, ~do_analysis(N_per_arm=17, tau=1, sigma=1, rho=0.95), .id = 'sim')
+
+
+myblue <- rgb(48/255, 61/255, 78/255, 0.5)
+
+plot <- results %>% 
+        ggplot(aes(tt_ate, did_ate)) + 
+        geom_point( color=myblue) + 
+        labs(
+          x= 'T-test ATE',
+          y='DiD ATE'
+        ) + 
+  theme(aspect.ratio = 1)
+
+ggMarginal(plot, type='histogram')
+```
+
+
+I'm fairly surprised to see that the results almost completely switch.  First, the DiD estimator becomes much more efficient (see the joint distribution of ATEs) which is cool.  Second, now the estimates from DiD become unbiased *and* accurate which is a nice change.  Ancova seems to do just as well as DiD in terms of precision and accuracy, which was not expected simply because I didn't think DiD would work this well under these assumptions.
+
+
+```{r}
+#| fig-height: 5
+results %>% 
+  pivot_longer(tt_ate:ancova_ate, names_to = 'analysis', values_to = 'ate') %>% 
+  mutate(
+    analysis = case_when(
+      analysis == 'tt_ate' ~ 'T-test',
+      analysis == 'did_ate' ~ 'DiD',
+      analysis == 'ancova_ate' ~ 'Ancova'
+    )
+  ) %>% 
+  ggplot(aes(pre_period_diff, ate)) + 
+  geom_point(color=myblue) + 
+  facet_grid( ~ analysis) + 
+  labs(x='Pre period difference',
+       y = 'ATE') +
+  theme(aspect.ratio = 1) + 
+  facet_grid(detected ~ analysis)
+```
+
 
 ## Conclusion
 
-Both DiD and the T-test are ways to obtain unbiased estimates of the ATE for randomized experiments.  DiD isn't needed since the distribution of potential outcomes in the pre-period is the same, so prior to intervention the null hypothesis would be true.  Additionally, the ATE in DiD is correlated with the pre-period difference in means.  This is likely due to regression to the mean.  This correlation means that when you test for pre-period differences and then choose to do DiD based on the results of that analysis, you will likely end up with a biased estimate of the ATE when the analysis tells you there is a pre-period difference.
+Randomization creates two artificial groups who have the same distribution of potential outcomes.  There is no need to correct for baseline differences in randomized groups a la DiD, and there is certainly no need to check for baseline differences after randomizing groups.
 
-The way to avoid these biases is to choose a method of analysis -- DiD or t-test, like I said it doesn't matter -- prior to seeing the data.  Checks for data quality are welcomed, but do not use statistics to tell you what statistics to compute.  I've clearly shown that can go awry.
+However, deciding to adjust for baseline differences with DiD can result in unbiased but inaccurate estimates of the treatment effect under some circumstances.  From this post, those conditions seemed to be when pre and post treatment outcomes were uncorrelated. That can happen when the outcomes are very noisy or when outcomes are homogeneous across units.  While unbiased, any one particular estimate from this procedure was very far away from the true ATE, as evidenced by the larger MSE.
+
+However, when outcomes are correlated between pre and post (like they can be in AB tests), then the story flips.  DiD becomes very efficient, nearly as efficient as Ancova, with good accuracy and unbiased estimates.
+
+Generally it seems then that using DiD for a randomized experiment is fine. In cases where the outcomes are highly correlated, you could even check for baseline differences with out much harm.  But it isn't needed, and there are circumstances where deciding to use DiD because of detected baseline differences can hurt your estimates.
+
+If you want unbiasedness and low variance/high precision, the results from this post (and advice elsewhere) seems to be to stick with Ancova.  
