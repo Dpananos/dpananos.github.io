@@ -167,7 +167,7 @@ It isn't unsurprising that the tails of each of these blobs is cut off.  After a
 Note that the correlation means that those blobs don't have the same mean.  In fact, if you run K-means on those blobs, you can very easily separate them and estimate the ATE and its very far from 1! Technically, this is unbiased because we have to average over each blob.  So it isn't that the estimates are biased from DiD, but they are *inaccurate*.  Take a look at the MSE for each estimate (shown below).  Using DiD when you detect a pre-treatment difference may be unbiased, but it has very high MSE as compared to the two other methods.
 
 While those estimates are unbiased, the low precision/high MSE is a good argument against checking for pre-treatment differences and then deciding on analysis style. This would be like saying "the river is a foot deep" when in reality the river is an inch deep in most places, and a mile deep in others.  While the estimates are unbiased, any one particular estimate is fairly far from the true ATE.
-```{r, include=FALSE}
+```{r}
 
 
 results %>% 

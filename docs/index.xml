@@ -160,6 +160,31 @@ font-style: italic;">## Ancova</span></span>
 <p>It isn’t unsurprising that the tails of each of these blobs is cut off. After all, the pre-period difference needs to be extreme enough to reject the null. Let’s first talk about that bottom right cell – the t test when there is a detected pre-period difference. Because there is no correlation between pre-period difference and the ATE, the ATEs are still unbiased. That’s great. What about DiD (bottom middle cell)?</p>
 <p>Note that the correlation means that those blobs don’t have the same mean. In fact, if you run K-means on those blobs, you can very easily separate them and estimate the ATE and its very far from 1! Technically, this is unbiased because we have to average over each blob. So it isn’t that the estimates are biased from DiD, but they are <em>inaccurate</em>. Take a look at the MSE for each estimate (shown below). Using DiD when you detect a pre-treatment difference may be unbiased, but it has very high MSE as compared to the two other methods.</p>
 <p>While those estimates are unbiased, the low precision/high MSE is a good argument against checking for pre-treatment differences and then deciding on analysis style. This would be like saying “the river is a foot deep” when in reality the river is an inch deep in most places, and a mile deep in others. While the estimates are unbiased, any one particular estimate is fairly far from the true ATE.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-2">  <span class="fu" style="color: #4758AB;">pivot_longer</span>(tt_ate<span class="sc" style="color: #5E5E5E;">:</span>ancova_ate, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'analysis'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'ate'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-3">  <span class="fu" style="color: #4758AB;">mutate</span>(</span>
+<span id="cb5-4">    <span class="at" style="color: #657422;">analysis =</span> <span class="fu" style="color: #4758AB;">case_when</span>(</span>
+<span id="cb5-5">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'tt_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'T-test'</span>,</span>
+<span id="cb5-6">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'did_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'DiD'</span>,</span>
+<span id="cb5-7">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'ancova_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'Ancova'</span></span>
+<span id="cb5-8">    )</span>
+<span id="cb5-9">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-10">  <span class="fu" style="color: #4758AB;">group_by</span>(analysis, detected) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-11">  <span class="fu" style="color: #4758AB;">summarise</span>(</span>
+<span id="cb5-12">    <span class="at" style="color: #657422;">MSE =</span> <span class="fu" style="color: #4758AB;">mean</span>((ate<span class="dv" style="color: #AD0000;">-1</span>)<span class="sc" style="color: #5E5E5E;">^</span><span class="dv" style="color: #AD0000;">2</span>)</span>
+<span id="cb5-13">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-14">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(analysis, MSE, <span class="at" style="color: #657422;">fill=</span>detected)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-15">  <span class="fu" style="color: #4758AB;">geom_col</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_dodge2</span>()) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-16">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">legend.position =</span> <span class="st" style="color: #20794D;">'top'</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-17">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Analysis'</span>, <span class="at" style="color: #657422;">fill=</span><span class="st" style="color: #20794D;">''</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section>
 <section id="case-2-moderate-correlation-between-pre-and-post" class="level2">
 <h2 class="anchored" data-anchor-id="case-2-moderate-correlation-between-pre-and-post">Case 2: Moderate Correlation Between Pre and Post</h2>
@@ -168,24 +193,24 @@ font-style: italic;">## Ancova</span></span>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">5000</span>, <span class="sc" style="color: #5E5E5E;">~</span><span class="fu" style="color: #4758AB;">do_analysis</span>(<span class="at" style="color: #657422;">N_per_arm=</span><span class="dv" style="color: #AD0000;">17</span>, <span class="at" style="color: #657422;">tau=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">sigma=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rho=</span><span class="fl" style="color: #AD0000;">0.45</span>), <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'sim'</span>)</span>
-<span id="cb5-2"></span>
-<span id="cb5-3">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb5-4">  <span class="fu" style="color: #4758AB;">pivot_longer</span>(tt_ate<span class="sc" style="color: #5E5E5E;">:</span>ancova_ate, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'analysis'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'ate'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb5-5">  <span class="fu" style="color: #4758AB;">mutate</span>(</span>
-<span id="cb5-6">    <span class="at" style="color: #657422;">analysis =</span> <span class="fu" style="color: #4758AB;">case_when</span>(</span>
-<span id="cb5-7">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'tt_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'T-test'</span>,</span>
-<span id="cb5-8">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'did_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'DiD'</span>,</span>
-<span id="cb5-9">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'ancova_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'Ancova'</span></span>
-<span id="cb5-10">    )</span>
-<span id="cb5-11">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb5-12">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(pre_period_diff, ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb5-13">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">alpha=</span><span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'gray 45'</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb5-14">  <span class="fu" style="color: #4758AB;">facet_grid</span>( <span class="sc" style="color: #5E5E5E;">~</span> analysis) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb5-15">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Pre period difference'</span>,</span>
-<span id="cb5-16">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">'ATE'</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb5-17">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb5-18">  <span class="fu" style="color: #4758AB;">facet_grid</span>(detected <span class="sc" style="color: #5E5E5E;">~</span> analysis)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">5000</span>, <span class="sc" style="color: #5E5E5E;">~</span><span class="fu" style="color: #4758AB;">do_analysis</span>(<span class="at" style="color: #657422;">N_per_arm=</span><span class="dv" style="color: #AD0000;">17</span>, <span class="at" style="color: #657422;">tau=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">sigma=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rho=</span><span class="fl" style="color: #AD0000;">0.45</span>), <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'sim'</span>)</span>
+<span id="cb6-2"></span>
+<span id="cb6-3">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb6-4">  <span class="fu" style="color: #4758AB;">pivot_longer</span>(tt_ate<span class="sc" style="color: #5E5E5E;">:</span>ancova_ate, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'analysis'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'ate'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb6-5">  <span class="fu" style="color: #4758AB;">mutate</span>(</span>
+<span id="cb6-6">    <span class="at" style="color: #657422;">analysis =</span> <span class="fu" style="color: #4758AB;">case_when</span>(</span>
+<span id="cb6-7">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'tt_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'T-test'</span>,</span>
+<span id="cb6-8">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'did_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'DiD'</span>,</span>
+<span id="cb6-9">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'ancova_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'Ancova'</span></span>
+<span id="cb6-10">    )</span>
+<span id="cb6-11">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb6-12">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(pre_period_diff, ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb6-13">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">alpha=</span><span class="fl" style="color: #AD0000;">0.5</span>, <span class="at" style="color: #657422;">color =</span> <span class="st" style="color: #20794D;">'gray 45'</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb6-14">  <span class="fu" style="color: #4758AB;">facet_grid</span>( <span class="sc" style="color: #5E5E5E;">~</span> analysis) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb6-15">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Pre period difference'</span>,</span>
+<span id="cb6-16">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">'ATE'</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb6-17">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb6-18">  <span class="fu" style="color: #4758AB;">facet_grid</span>(detected <span class="sc" style="color: #5E5E5E;">~</span> analysis)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
@@ -199,21 +224,21 @@ font-style: italic;">## Ancova</span></span>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">5000</span>, <span class="sc" style="color: #5E5E5E;">~</span><span class="fu" style="color: #4758AB;">do_analysis</span>(<span class="at" style="color: #657422;">N_per_arm=</span><span class="dv" style="color: #AD0000;">17</span>, <span class="at" style="color: #657422;">tau=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">sigma=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rho=</span><span class="fl" style="color: #AD0000;">0.95</span>), <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'sim'</span>)</span>
-<span id="cb6-2"></span>
-<span id="cb6-3"></span>
-<span id="cb6-4">myblue <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rgb</span>(<span class="dv" style="color: #AD0000;">48</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="dv" style="color: #AD0000;">61</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="dv" style="color: #AD0000;">78</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="fl" style="color: #AD0000;">0.5</span>)</span>
-<span id="cb6-5"></span>
-<span id="cb6-6">plot <span class="ot" style="color: #003B4F;">&lt;-</span> results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb6-7">        <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(tt_ate, did_ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb6-8">        <span class="fu" style="color: #4758AB;">geom_point</span>( <span class="at" style="color: #657422;">color=</span>myblue) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb6-9">        <span class="fu" style="color: #4758AB;">labs</span>(</span>
-<span id="cb6-10">          <span class="at" style="color: #657422;">x=</span> <span class="st" style="color: #20794D;">'T-test ATE'</span>,</span>
-<span id="cb6-11">          <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'DiD ATE'</span></span>
-<span id="cb6-12">        ) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb6-13">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb6-14"></span>
-<span id="cb6-15"><span class="fu" style="color: #4758AB;">ggMarginal</span>(plot, <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'histogram'</span>)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(<span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">:</span><span class="dv" style="color: #AD0000;">5000</span>, <span class="sc" style="color: #5E5E5E;">~</span><span class="fu" style="color: #4758AB;">do_analysis</span>(<span class="at" style="color: #657422;">N_per_arm=</span><span class="dv" style="color: #AD0000;">17</span>, <span class="at" style="color: #657422;">tau=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">sigma=</span><span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rho=</span><span class="fl" style="color: #AD0000;">0.95</span>), <span class="at" style="color: #657422;">.id =</span> <span class="st" style="color: #20794D;">'sim'</span>)</span>
+<span id="cb7-2"></span>
+<span id="cb7-3"></span>
+<span id="cb7-4">myblue <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rgb</span>(<span class="dv" style="color: #AD0000;">48</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="dv" style="color: #AD0000;">61</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="dv" style="color: #AD0000;">78</span><span class="sc" style="color: #5E5E5E;">/</span><span class="dv" style="color: #AD0000;">255</span>, <span class="fl" style="color: #AD0000;">0.5</span>)</span>
+<span id="cb7-5"></span>
+<span id="cb7-6">plot <span class="ot" style="color: #003B4F;">&lt;-</span> results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb7-7">        <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(tt_ate, did_ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb7-8">        <span class="fu" style="color: #4758AB;">geom_point</span>( <span class="at" style="color: #657422;">color=</span>myblue) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb7-9">        <span class="fu" style="color: #4758AB;">labs</span>(</span>
+<span id="cb7-10">          <span class="at" style="color: #657422;">x=</span> <span class="st" style="color: #20794D;">'T-test ATE'</span>,</span>
+<span id="cb7-11">          <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'DiD ATE'</span></span>
+<span id="cb7-12">        ) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb7-13">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb7-14"></span>
+<span id="cb7-15"><span class="fu" style="color: #4758AB;">ggMarginal</span>(plot, <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'histogram'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
@@ -223,22 +248,22 @@ font-style: italic;">## Ancova</span></span>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb7-2">  <span class="fu" style="color: #4758AB;">pivot_longer</span>(tt_ate<span class="sc" style="color: #5E5E5E;">:</span>ancova_ate, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'analysis'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'ate'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb7-3">  <span class="fu" style="color: #4758AB;">mutate</span>(</span>
-<span id="cb7-4">    <span class="at" style="color: #657422;">analysis =</span> <span class="fu" style="color: #4758AB;">case_when</span>(</span>
-<span id="cb7-5">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'tt_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'T-test'</span>,</span>
-<span id="cb7-6">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'did_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'DiD'</span>,</span>
-<span id="cb7-7">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'ancova_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'Ancova'</span></span>
-<span id="cb7-8">    )</span>
-<span id="cb7-9">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb7-10">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(pre_period_diff, ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb7-11">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color=</span>myblue) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb7-12">  <span class="fu" style="color: #4758AB;">facet_grid</span>( <span class="sc" style="color: #5E5E5E;">~</span> analysis) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb7-13">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Pre period difference'</span>,</span>
-<span id="cb7-14">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">'ATE'</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb7-15">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb7-16">  <span class="fu" style="color: #4758AB;">facet_grid</span>(detected <span class="sc" style="color: #5E5E5E;">~</span> analysis)</span></code></pre></div>
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">results <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb8-2">  <span class="fu" style="color: #4758AB;">pivot_longer</span>(tt_ate<span class="sc" style="color: #5E5E5E;">:</span>ancova_ate, <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">'analysis'</span>, <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">'ate'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb8-3">  <span class="fu" style="color: #4758AB;">mutate</span>(</span>
+<span id="cb8-4">    <span class="at" style="color: #657422;">analysis =</span> <span class="fu" style="color: #4758AB;">case_when</span>(</span>
+<span id="cb8-5">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'tt_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'T-test'</span>,</span>
+<span id="cb8-6">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'did_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'DiD'</span>,</span>
+<span id="cb8-7">      analysis <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">'ancova_ate'</span> <span class="sc" style="color: #5E5E5E;">~</span> <span class="st" style="color: #20794D;">'Ancova'</span></span>
+<span id="cb8-8">    )</span>
+<span id="cb8-9">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb8-10">  <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(pre_period_diff, ate)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb8-11">  <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">color=</span>myblue) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb8-12">  <span class="fu" style="color: #4758AB;">facet_grid</span>( <span class="sc" style="color: #5E5E5E;">~</span> analysis) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb8-13">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Pre period difference'</span>,</span>
+<span id="cb8-14">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">'ATE'</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb8-15">  <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb8-16">  <span class="fu" style="color: #4758AB;">facet_grid</span>(detected <span class="sc" style="color: #5E5E5E;">~</span> analysis)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
