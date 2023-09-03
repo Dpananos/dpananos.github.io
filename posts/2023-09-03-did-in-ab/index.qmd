@@ -6,7 +6,7 @@ echo: true
 fig-cap-location: top
 categories: [AB Testing, Statistics, Causal Inference]
 number-sections: false
-draft: true
+draft: false
 ---
 
 ```{r}

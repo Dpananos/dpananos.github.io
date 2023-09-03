@@ -78,7 +78,7 @@
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2023-09-03T18:06:12.098Z</lastmod>
+    <lastmod>2023-09-03T18:08:33.997Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
@@ -87,5 +87,9 @@
   <url>
     <loc>https://dpananos.github.io/consulting/index.html</loc>
     <lastmod>2023-09-03T18:06:12.720Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</loc>
+    <lastmod>2023-09-03T18:08:33.423Z</lastmod>
   </url>
 </urlset>

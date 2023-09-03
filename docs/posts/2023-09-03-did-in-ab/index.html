@@ -180,7 +180,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Difference in Difference Estimates are Biased When Randomizing And Testing For Pre-Treatment Differences</h1>
+      <h1 class="title">Difference in Difference Estimates Can Be Biased When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">AB Testing</div>
                 <div class="quarto-category">Statistics</div>
@@ -221,6 +221,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#simulation" id="toc-simulation" class="nav-link" data-scroll-target="#simulation">Simulation</a></li>
   <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-09-03-did-in-ab/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -241,7 +242,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>To find out, let’s simulate a very simple example. Let’s assume that I run an experiment and measure units before and after. The observations on each unit are uncorrelated and have standard normal distribution in the absence of the treatment. If <span class="math inline">\(A\)</span> is a binary indicator for treatment (1 for treatment, 0 else) then the data are</p>
 <p><span class="math display">\[ y_{pre} \sim \mbox{Normal}\left(0, \sigma^2\right) \&gt;, \]</span> <span class="math display">\[ y_{post} \sim \mbox{Normal}\left(\tau \cdot A, \sigma^2 \right) \&gt;. \]</span></p>
 <p>I’ll run 20, 000 simulations of a simple randomized experiment. Each time, I’ll sample <span class="math inline">\(N\)</span> units in each arm, enough to detect a treatment effect from a t-test with 80% power. I’ll then run a t-test via OLS and a DiD. I’ll record the pre-treatment difference in each group and if it was statistically significant at the 5% level. For these simulations, I’ll set <span class="math inline">\(\tau=1\)</span> and <span class="math inline">\(\sigma=1\)</span> which means I need <span class="math inline">\(N=17\)</span> users per arm.</p>
-<p>We’ll plot some treatment effect estimates and see what is happening when we choose to do DiD when the data suggest we do.</p>
+<p>We’ll plot some treatment effect estimates and see what is happening when we choose to do DiD when the data suggest we do. Now importantly, I’m making very strong assumptions about the experiment being run. In particular, I’m making assumptions that all went well, there is no funny business with timing or randomization, etc. In terms of a medical trial, I got 34 people to all stand in a line, randomly gave each placebo or drug, watched them all take it at the same time, and recorded outcomes. The purpose of these simulation and blog post is to investigate statistical properties and not to wring about whatabouts.</p>
 <p>In the code cell below is the code to run these simulations</p>
 <div class="cell">
 <details>
@@ -271,20 +272,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  tt_ate <span class="ot">&lt;-</span> <span class="fu">coef</span>(tt)[<span class="st">'trt'</span>]</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  did_ate <span class="ot">&lt;-</span> <span class="fu">coef</span>(did)[<span class="st">'trt:period'</span>]</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  pre_test <span class="ot">&lt;-</span> <span class="fu">t.test</span>(y<span class="sc">~</span>trt, <span class="at">data =</span> <span class="fu">filter</span>(d, period<span class="sc">==</span><span class="dv">0</span>))</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  pre_period_diff <span class="ot">&lt;-</span> <span class="fu">diff</span>(pre_test<span class="sc">$</span>estimate)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  detected <span class="ot">&lt;-</span> <span class="fu">if_else</span>(pre_test<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>, <span class="st">'Pre-Period Difference'</span>, <span class="st">'No Pre-Period Difference'</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    tt_ate, </span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    did_ate, </span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    pre_period_diff, </span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    detected</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20000</span>, do_analysis, <span class="at">.id =</span> <span class="st">'sim'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  pre_test <span class="ot">&lt;-</span> <span class="fu">t.test</span>(y<span class="sc">~</span>trt, <span class="at">data =</span> <span class="fu">filter</span>(d, period<span class="sc">==</span><span class="dv">0</span>))</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  pre_period_diff <span class="ot">&lt;-</span> <span class="fu">diff</span>(pre_test<span class="sc">$</span>estimate)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  detected <span class="ot">&lt;-</span> <span class="fu">if_else</span>(pre_test<span class="sc">$</span>p.value<span class="sc">&lt;</span><span class="fl">0.05</span>, <span class="st">'Pre-Period Difference'</span>, <span class="st">'No Pre-Period Difference'</span>)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    tt_ate, </span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    did_ate, </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    pre_period_diff, </span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    detected</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">20000</span>, do_analysis, <span class="at">.id =</span> <span class="st">'sim'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -341,7 +344,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 <p>It is unsurprising that the tails of each of these blogs is cut off. After all, the pre-period difference needs to be extreme enough to reject the null. Let’s first talk about that bottom right cell – the t test when there is a detected pre-period difference. Because there is no correlation between pre-period difference and the ATE, the ATEs are still unbiased. That’s great. What about DiD?</p>
-<p>Note that the correlation means that those blobs don’t have the same mean. In fact, if you run K-means on those blobs, you can very easily seperate them and estimate the ATE and its very far from 1! That’s bias!</p>
+<p>Note that the correlation means that those blobs don’t have the same mean. In fact, if you run K-means on those blobs, you can very easily seperate them and estimate the ATE and its very far from 1! That’s bias! How big those biases (plural, because it depends on the size of the pre-treatment difference) depends on the strength of the correlation between the ATE anf the pre-period difference. In this particular example, the left most cluster has an average ATE of about 1.8 while the right most cluster has an average ATE of about 0.24. That’s a big amount of bias in either direction.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Both DiD and the T-test are ways to obtain unbiased estimates of the ATE for randomized experiments. DiD isn’t needed since the distribution of potential outcomes in the pre-period is the same, so prior to intervention the null hypothesis would be true. Additionally, the ATE in DiD is correlated with the pre-period difference in means. This is likely due to regression to the mean. This correlation means that when you test for pre-period differences and then choose to do DiD based on the results of that analysis, you will likely end up with a biased estimate of the ATE when the analysis tells you there is a pre-period difference.</p>
+<p>The way to avoid these biases is to choose a method of analysis – DiD or t-test, like I said it doesn’t matter – prior to seeing the data. Checks for data quality are welcomed, but do not use statistics to tell you what statistics to compute. I’ve clearly shown that can go awry.</p>
 
 
 </section>
