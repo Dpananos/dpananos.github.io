@@ -10,7 +10,29 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Sun, 03 Sep 2023 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 11 Sep 2023 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Right In Ways You Don’t Care About</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-09-11-right/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I’ve typically <a href="https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/">been long on the value of data scientists</a> but I think I’m starting to lose my optimism.</p>
+<p>I was fucking around in git late one night and ran into merge conflicts. The first step when you get a merge conflict is to ask yourself “jesus christ, how did I keep this job?” which reminded me on <a href="https://twitter.com/vboykis/status/1681050831850811401">this tweet</a> from Vicky Boykis. Long story short, its a screen grab from a HN comment section in which some user laments how engineering gets instant errors while things like data science see errors pass silently.</p>
+<p>Tune hyperparameters on the test set? Everyone else does it.</p>
+<p>Run experiments “until significance”? Have a promotion.</p>
+<p>Run a pre-post? If numbers are good, yay us! It numbers are bad, did you try data dreding until they look good?</p>
+<p>Data Scientists are mentioned by name in David Graeber’s <em>Bullshit Jobs</em> and it is only now that I’ve begun to work (again) that I understand why. The irony is that because errors pass silently in data work, it is often difficult to assign blame or even to determine that someone should be blamed at all. You could be terrible at your job and keep it so long as you’re terrible in the right way. It makes me wonder why I put so much effort into being right in ways people don’t seem to care about. I should get an MBA or something.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-09-11-right/index.html</guid>
+  <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -3655,74 +3677,6 @@ Number of Fisher Scoring iterations: 5</code></pre>
   <category>Probability</category>
   <guid>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</guid>
   <pubDate>Fri, 31 Aug 2018 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Coins and Factors</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2017-12-29-coins/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>I love Fivethirtyeight’s Riddler column. Usually, I can solve the problem with computation, but on some rare occasions I can do some interesting math to get the solution without having to code. <a href="https://fivethirtyeight.com/features/can-you-survive-this-deadly-board-game/">Here</a> is the first puzzle I ever solved. It is a simple puzzle, yet it has an elegant computational and analytic solution. Let’s take a look.</p>
-<p>The puzzle says:</p>
-<blockquote class="blockquote">
-<p>You place 100 coins heads up in a row and number them by position, with the coin all the way on the left No.&nbsp;1 and the one on the rightmost edge No.&nbsp;100. Next, for every number N, from 1 to 100, you flip over every coin whose position is a multiple of N. For example, first you’ll flip over all the coins, because every number is a multiple of 1. Then you’ll flip over all the even-numbered coins, because they’re multiples of 2. Then you flip coins No.&nbsp;3, 6, 9, 12 , And so on.</p>
-<p>What do the coins look like when you’re done? Specifically, which coins are heads down?</p>
-</blockquote>
-<section id="computing-the-solution" class="level2">
-<h2 class="anchored" data-anchor-id="computing-the-solution">Computing the Solution</h2>
-<p>This is really easy to program. Here is a little python script to compute the solution:</p>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;">as</span> plt</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;">from</span> itertools <span class="im" style="color: #00769E;">import</span> product</span>
-<span id="cb1-4"></span>
-<span id="cb1-5"></span>
-<span id="cb1-6"><span class="co" style="color: #5E5E5E;"># Array of 100 True.  True is Heads up</span></span>
-<span id="cb1-7">Ncoins <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">100</span></span>
-<span id="cb1-8">coins <span class="op" style="color: #5E5E5E;">=</span> np.ones(Ncoins,dtype <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">bool</span>)</span>
-<span id="cb1-9">index <span class="op" style="color: #5E5E5E;">=</span> np.arange(<span class="dv" style="color: #AD0000;">1</span>,Ncoins<span class="op" style="color: #5E5E5E;">+</span><span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb1-10"></span>
-<span id="cb1-11"><span class="co" style="color: #5E5E5E;">#Go through the coins</span></span>
-<span id="cb1-12"><span class="cf" style="color: #003B4F;">for</span> N <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1</span>,Ncoins<span class="op" style="color: #5E5E5E;">+</span><span class="dv" style="color: #AD0000;">1</span>):</span>
-<span id="cb1-13">    </span>
-<span id="cb1-14">    coins[index<span class="op" style="color: #5E5E5E;">%</span>N<span class="op" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">0</span>] <span class="op" style="color: #5E5E5E;">=</span> <span class="op" style="color: #5E5E5E;">~</span>coins[index<span class="op" style="color: #5E5E5E;">%</span>N<span class="op" style="color: #5E5E5E;">==</span><span class="dv" style="color: #AD0000;">0</span>]  <span class="co" style="color: #5E5E5E;">#Flip the coin.  </span></span></code></pre></div>
-<p>Shown below is the solution. In dark blue are the coins face down (I’ve arranged them in a 10 by 10 grid and annotated them with their position for clarity). When we take a look at the <code>coins</code> variable, we see that those coins in positions which are perfect squares pop out. That is an interesting result, but what is more interesting is reasoning out the solution without doing any computation at all!</p>
-<div class="cell" data-fig-dpi="240" data-execution_count="2">
-<div class="cell-output cell-output-display">
-<div id="fig-grid" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2017-12-29-coins/index_files/figure-html/fig-grid-output-1.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Coins after flipping. Dark squares are face down coins.</figcaption><p></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="reasoning-out-the-solution." class="level2">
-<h2 class="anchored" data-anchor-id="reasoning-out-the-solution.">Reasoning Out the Solution.</h2>
-<p>First, let’s think why a coin would end up face down. If all coins start heads up, then it would take an odd number of flips for the coin to end up face down. Since coins are only flipped when we pass a factor of a coin’s position, then those coins in positions with an odd number of factors will be heads down at the end.</p>
-<p>So 9 would end up heads down because it has factors 1 (flip face down), 3 (flip face up), and 9 (flip face down), while 6 would be heads up because it has factors 1, 2, 3, and 6.</p>
-<p>So which numbers have an odd number of factors? Here is where we get to do some interesting math. The Fundamental Theorem of Arithmetic says that every integer <img src="https://latex.codecogs.com/png.latex?N%3E1"> is either prime or can be uniquely factored as a product of primes</p>
-<p><img src="https://latex.codecogs.com/png.latex?N%20=%20%5Cprod_%7Bj%7D%20p_j%5E%7Ba_j%7D%20%5C%3E."></p>
-<p>If <img src="https://latex.codecogs.com/png.latex?N"> can be factored like this, that means it has</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cprod_%7Bj%7D%20(a_j%20+1)"></p>
-<p>unique factors.</p>
-<p>It is straight forward to argue that a composite odd number must be the product of odd numbers, so we know that the <img src="https://latex.codecogs.com/png.latex?a_j+1"> must be odd <img src="https://latex.codecogs.com/png.latex?%5Cforall%20j">, and so that means the <img src="https://latex.codecogs.com/png.latex?a_j"> are even and can be written as <img src="https://latex.codecogs.com/png.latex?a_j%20=%202n_j">. Thus, our factorization becomes</p>
-<p><img src="https://latex.codecogs.com/png.latex?N%20=%20%5Cprod_j%20p_j%5E%7B2n_j%7D%20=%20%5Cprod_j%20(p_j%5E%7Bn_j%7D)%5E2%20=%20%5Cleft(%5Cprod_j%20p_j%5E%7Bn_j%7D%20%5Cright)%5E2%20%5C%3E,"></p>
-<p>which means that if <img src="https://latex.codecogs.com/png.latex?N"> has an odd number of factors, it must be a perfect square! All done.</p>
-<p>I love trying to solve the Riddler’s puzzle without coding. It makes me draw upon knowledge I haven’t used in a while, and may force me to learn something new.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Python</category>
-  <category>Riddler</category>
-  <guid>https://dpananos.github.io/posts/2017-12-29-coins/index.html</guid>
-  <pubDate>Fri, 29 Dec 2017 05:00:00 GMT</pubDate>
-  <media:content url="https://dpananos.github.io/posts/2017-12-29-coins/coins.png" medium="image" type="image/png" height="144" width="144"/>
 </item>
 </channel>
 </rss>

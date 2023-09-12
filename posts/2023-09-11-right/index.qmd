@@ -1,0 +1,22 @@
+---
+title: Right In Ways You Don't Care About
+date: "2023-09-11"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+---
+
+I've typically [been long on the value of data scientists](https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/) but I think I'm starting to lose my optimism.
+
+I was fucking around in git late one night and ran into merge conflicts.  The first step when you get a merge conflict is to ask yourself "jesus christ, how did I keep this job?" which reminded me on [this tweet](https://twitter.com/vboykis/status/1681050831850811401) from Vicky Boykis.  Long story short, its a screen grab from a HN comment section in which some user laments how engineering gets instant errors while things like data science see errors pass silently.
+
+Tune hyperparameters on the test set?  Everyone else does it.
+
+Run experiments "until significance"?  Have a promotion.
+
+Run a pre-post?  If numbers are good, yay us!  It numbers are bad, did you try data dreding until they look good?
+
+Data Scientists are mentioned by name in David Graeber's *Bullshit Jobs* and it is only now that I've begun to work (again) that I understand why.  The irony is that because errors pass silently in data work, it is often difficult to assign blame or even to determine that someone should be blamed at all.  You could be terrible at your job and keep it so long as you're terrible in the right way.  It makes me wonder why I put so much effort into being right in ways people don't seem to care about.  I should get an MBA or something.
