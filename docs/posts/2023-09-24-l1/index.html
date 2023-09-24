@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2023-09-08">
+<meta name="dcterms.date" content="2023-09-24">
 
 <title>Demetri Pananos Ph.D - Regularization of Noisy Multinomial Countrs</title>
 <style>
@@ -200,7 +200,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">September 8, 2023</p>
+        <p class="date">September 24, 2023</p>
       </div>
     </div>
     
@@ -341,7 +341,7 @@ order by cast(A.CreationDate as date)
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, num_posts_p, <span class="at">color=</span><span class="st">'All Posts'</span>)) <span class="sc">+</span> </span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, reg_posts_p, <span class="at">color=</span><span class="st">'Regularization Posts'</span>)) <span class="sc">+</span> </span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Day'</span>, <span class="at">y=</span><span class="st">'Post Frequency'</span>, <span class="at">color=</span><span class="st">''</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Day'</span>, <span class="at">y=</span><span class="st">'Post Frequency'</span>, <span class="at">color=</span><span class="st">''</span>) </span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            </span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>base_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -361,7 +361,7 @@ order by cast(A.CreationDate as date)
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Grid of penalties to search over</span></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>lambda.grid <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">^</span><span class="fu">seq</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">0</span>, <span class="fl">0.005</span>)</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Fir the model and compute the difference between the largest error and our tolerance</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the model and compute the difference between the largest error and our tolerance</span></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>fit_lasso <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(X, r, <span class="at">family=</span><span class="st">'poisson'</span>, <span class="at">offset=</span><span class="fu">log</span>(u), <span class="at">lambda=</span>x)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  p <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newx=</span>X, <span class="at">newoffset=</span><span class="fu">log</span>(u), <span class="at">type=</span><span class="st">'response'</span>)</span>
@@ -369,24 +369,26 @@ order by cast(A.CreationDate as date)
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>errors<span class="ot">&lt;-</span><span class="fu">map_dbl</span>(lambda.grid, fit_lasso)</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> lambda.grid[<span class="fu">which.min</span>(errors)]</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(X, r, <span class="at">family=</span><span class="st">'poisson'</span>, <span class="at">offset=</span><span class="fu">log</span>(u), <span class="at">lambda=</span>lambda)</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>predicted <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newx=</span>X, <span class="at">newoffset=</span><span class="fu">log</span>(u), <span class="at">type=</span><span class="st">'response'</span>)[, <span class="st">'s0'</span>]</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>new_plot <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span> </span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, num_posts_p, <span class="at">color=</span><span class="st">'All Posts'</span>)) <span class="sc">+</span> </span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, reg_posts_p, <span class="at">color=</span><span class="st">'Regularization Posts'</span>)) <span class="sc">+</span> </span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, predicted, <span class="at">color=</span><span class="st">'Predicted Posts'</span>)) <span class="sc">+</span> </span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Day'</span>, <span class="at">y=</span><span class="st">'Post Frequency'</span>, <span class="at">color=</span><span class="st">''</span>)</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>new_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the lambda which produces error closest to 0.03</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> lambda.grid[<span class="fu">which.min</span>(errors)]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Make predictions under this model</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glmnet</span>(X, r, <span class="at">family=</span><span class="st">'poisson'</span>, <span class="at">offset=</span><span class="fu">log</span>(u), <span class="at">lambda=</span>lambda)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>predicted <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, <span class="at">newx=</span>X, <span class="at">newoffset=</span><span class="fu">log</span>(u), <span class="at">type=</span><span class="st">'response'</span>)[, <span class="st">'s0'</span>]</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>new_plot <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span> </span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>            <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, num_posts_p, <span class="at">color=</span><span class="st">'All Posts'</span>)) <span class="sc">+</span> </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, reg_posts_p, <span class="at">color=</span><span class="st">'Regularization Posts'</span>)) <span class="sc">+</span> </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, predicted, <span class="at">color=</span><span class="st">'Predicted Posts'</span>)) <span class="sc">+</span> </span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Day'</span>, <span class="at">y=</span><span class="st">'Post Frequency'</span>, <span class="at">color=</span><span class="st">''</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>new_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>This might be easier to see if we follow Tuffte and show small multiples</p>
+<p>This might be easier to see if we follow Tufte and show small multiples. You can see as the penalty increases, the green dots (predicted) go from the blue dots (observed frequencies of regularization related posts) to the pink dots (the frequencies of all plots).</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -407,13 +409,16 @@ order by cast(A.CreationDate as date)
 <span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="fu">aes</span>(oday, predicted, <span class="at">color=</span><span class="st">'Predicted Posts'</span>)) <span class="sc">+</span> </span>
 <span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
 <span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Day'</span>, <span class="at">y=</span><span class="st">'Post Frequency'</span>, <span class="at">color=</span><span class="st">''</span>) <span class="sc">+</span> </span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_wrap</span>(<span class="sc">~</span>lambda, <span class="at">labeller =</span> label_both)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">facet_wrap</span>(<span class="sc">~</span>lambda, <span class="at">labeller =</span> label_both) <span class="sc">+</span> </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_x_discrete</span>(</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">'Sun'</span>, <span class="st">'Mon'</span>, <span class="st">'Tue'</span>, <span class="st">'Wed'</span>, <span class="st">'Thu'</span>, <span class="st">'Fri'</span>, <span class="st">'Sat'</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>      )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Cool! Using <span class="math inline">\(\mathbf{u}\)</span> (here, the frequency of total posts on each day) acts as a sort of target towards wich to regularize.</p>
+<p>Cool! Using <span class="math inline">\(\mathbf{u}\)</span> (here, the frequency of total posts on each day) as an offset acts as a sort of target towards which to regularize.</p>
 
 
 

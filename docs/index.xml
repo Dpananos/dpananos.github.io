@@ -141,7 +141,7 @@ order by cast(A.CreationDate as date)
 <span id="cb3-3">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
 <span id="cb3-4">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
 <span id="cb3-5">            <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb3-6">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>)</span>
+<span id="cb3-6">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>) </span>
 <span id="cb3-7">            </span>
 <span id="cb3-8">base_plot</span></code></pre></div>
 </details>
@@ -161,7 +161,7 @@ order by cast(A.CreationDate as date)
 <span id="cb4-6"><span class="co" style="color: #5E5E5E;"># Grid of penalties to search over</span></span>
 <span id="cb4-7">lambda.grid <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">^</span><span class="fu" style="color: #4758AB;">seq</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">0.005</span>)</span>
 <span id="cb4-8"></span>
-<span id="cb4-9"><span class="co" style="color: #5E5E5E;"># Fir the model and compute the difference between the largest error and our tolerance</span></span>
+<span id="cb4-9"><span class="co" style="color: #5E5E5E;"># Fit the model and compute the difference between the largest error and our tolerance</span></span>
 <span id="cb4-10">fit_lasso <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="cf" style="color: #003B4F;">function</span>(x){</span>
 <span id="cb4-11">  fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>x)</span>
 <span id="cb4-12">  p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)</span>
@@ -169,24 +169,26 @@ order by cast(A.CreationDate as date)
 <span id="cb4-14">}</span>
 <span id="cb4-15"></span>
 <span id="cb4-16">errors<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">map_dbl</span>(lambda.grid, fit_lasso)</span>
-<span id="cb4-17">lambda <span class="ot" style="color: #003B4F;">&lt;-</span> lambda.grid[<span class="fu" style="color: #4758AB;">which.min</span>(errors)]</span>
-<span id="cb4-18">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>lambda)</span>
-<span id="cb4-19">d<span class="sc" style="color: #5E5E5E;">$</span>predicted <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)[, <span class="st" style="color: #20794D;">'s0'</span>]</span>
-<span id="cb4-20"></span>
-<span id="cb4-21">new_plot <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
-<span id="cb4-22">            <span class="fu" style="color: #4758AB;">ggplot</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb4-23">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb4-24">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb4-25">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, predicted, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Predicted Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb4-26">            <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb4-27">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>)</span>
-<span id="cb4-28"></span>
-<span id="cb4-29">new_plot</span></code></pre></div>
+<span id="cb4-17"><span class="co" style="color: #5E5E5E;"># Select the lambda which produces error closest to 0.03</span></span>
+<span id="cb4-18">lambda <span class="ot" style="color: #003B4F;">&lt;-</span> lambda.grid[<span class="fu" style="color: #4758AB;">which.min</span>(errors)]</span>
+<span id="cb4-19"><span class="co" style="color: #5E5E5E;"># Make predictions under this model</span></span>
+<span id="cb4-20">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>lambda)</span>
+<span id="cb4-21">d<span class="sc" style="color: #5E5E5E;">$</span>predicted <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)[, <span class="st" style="color: #20794D;">'s0'</span>]</span>
+<span id="cb4-22"></span>
+<span id="cb4-23">new_plot <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb4-24">            <span class="fu" style="color: #4758AB;">ggplot</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-25">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-26">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-27">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, predicted, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Predicted Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-28">            <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-29">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>)</span>
+<span id="cb4-30"></span>
+<span id="cb4-31">new_plot</span></code></pre></div>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>This might be easier to see if we follow Tuffte and show small multiples</p>
+<p>This might be easier to see if we follow Tufte and show small multiples. You can see as the penalty increases, the green dots (predicted) go from the blue dots (observed frequencies of regularization related posts) to the pink dots (the frequencies of all plots).</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -207,13 +209,16 @@ order by cast(A.CreationDate as date)
 <span id="cb5-15">      <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, predicted, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Predicted Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
 <span id="cb5-16">      <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
 <span id="cb5-17">      <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb5-18">      <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>lambda, <span class="at" style="color: #657422;">labeller =</span> label_both)</span></code></pre></div>
+<span id="cb5-18">      <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>lambda, <span class="at" style="color: #657422;">labeller =</span> label_both) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-19">      <span class="fu" style="color: #4758AB;">scale_x_discrete</span>(</span>
+<span id="cb5-20">        <span class="at" style="color: #657422;">labels =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">'Sun'</span>, <span class="st" style="color: #20794D;">'Mon'</span>, <span class="st" style="color: #20794D;">'Tue'</span>, <span class="st" style="color: #20794D;">'Wed'</span>, <span class="st" style="color: #20794D;">'Thu'</span>, <span class="st" style="color: #20794D;">'Fri'</span>, <span class="st" style="color: #20794D;">'Sat'</span>)</span>
+<span id="cb5-21">      )</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>Cool! Using <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> (here, the frequency of total posts on each day) acts as a sort of target towards wich to regularize.</p>
+<p>Cool! Using <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> (here, the frequency of total posts on each day) as an offset acts as a sort of target towards which to regularize.</p>
 
 
 
