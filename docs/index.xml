@@ -10,29 +10,7 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.2.269</generator>
-<lastBuildDate>Mon, 11 Sep 2023 04:00:00 GMT</lastBuildDate>
-<item>
-  <title>Right In Ways You Don’t Care About</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-09-11-right/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>I’ve typically <a href="https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/">been long on the value of data scientists</a> but I think I’m starting to lose my optimism.</p>
-<p>I was fucking around in git late one night and ran into merge conflicts. The first step when you get a merge conflict is to ask yourself “jesus christ, how did I keep this job?” which reminded me on <a href="https://twitter.com/vboykis/status/1681050831850811401">this tweet</a> from Vicky Boykis. Long story short, its a screen grab from a HN comment section in which some user laments how engineering gets instant errors while things like data science see errors pass silently.</p>
-<p>Tune hyperparameters on the test set? Everyone else does it.</p>
-<p>Run experiments “until significance”? Have a promotion.</p>
-<p>Run a pre-post? If numbers are good, yay us! It numbers are bad, did you try data dreding until they look good?</p>
-<p>Data Scientists are mentioned by name in David Graeber’s <em>Bullshit Jobs</em> and it is only now that I’ve begun to work (again) that I understand why. The irony is that because errors pass silently in data work, it is often difficult to assign blame or even to determine that someone should be blamed at all. You could be terrible at your job and keep it so long as you’re terrible in the right way. It makes me wonder why I put so much effort into being right in ways people don’t seem to care about. I should get an MBA or something.</p>
-
-
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-09-11-right/index.html</guid>
-  <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
-</item>
+<lastBuildDate>Sun, 24 Sep 2023 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Regularization of Noisy Multinomial Countrs</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -241,7 +219,29 @@ order by cast(A.CreationDate as date)
 
  ]]></description>
   <guid>https://dpananos.github.io/posts/2023-09-24-l1/index.html</guid>
-  <pubDate>Fri, 08 Sep 2023 04:00:00 GMT</pubDate>
+  <pubDate>Sun, 24 Sep 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Right In Ways You Don’t Care About</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-09-11-right/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I’ve typically <a href="https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/">been long on the value of data scientists</a> but I think I’m starting to lose my optimism.</p>
+<p>I was fucking around in git late one night and ran into merge conflicts. The first step when you get a merge conflict is to ask yourself “jesus christ, how did I keep this job?” which reminded me on <a href="https://twitter.com/vboykis/status/1681050831850811401">this tweet</a> from Vicky Boykis. Long story short, its a screen grab from a HN comment section in which some user laments how engineering gets instant errors while things like data science see errors pass silently.</p>
+<p>Tune hyperparameters on the test set? Everyone else does it.</p>
+<p>Run experiments “until significance”? Have a promotion.</p>
+<p>Run a pre-post? If numbers are good, yay us! It numbers are bad, did you try data dreding until they look good?</p>
+<p>Data Scientists are mentioned by name in David Graeber’s <em>Bullshit Jobs</em> and it is only now that I’ve begun to work (again) that I understand why. The irony is that because errors pass silently in data work, it is often difficult to assign blame or even to determine that someone should be blamed at all. You could be terrible at your job and keep it so long as you’re terrible in the right way. It makes me wonder why I put so much effort into being right in ways people don’t seem to care about. I should get an MBA or something.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-09-11-right/index.html</guid>
+  <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</title>

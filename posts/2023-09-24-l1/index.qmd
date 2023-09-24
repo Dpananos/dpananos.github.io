@@ -1,6 +1,6 @@
 ---
 title: Regularization of Noisy Multinomial Countrs
-date: "2023-09-08"
+date: "2023-09-24"
 code-fold: true
 echo: true
 fig-cap-location: top
