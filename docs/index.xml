@@ -34,6 +34,216 @@
   <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Regularization of Noisy Multinomial Countrs</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-09-24-l1/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>I’m reading <a href="https://hastie.su.domains/StatLearnSparsity/"><em>Statistical Learning with Sparsity</em></a>. Its like Elements of Statistical Learning, but just for the LASSO. In chapter 3, there is this interesting example of using the LASSO to estimate rates for noisy multinomial processes. Here is the setup from the book</p>
+<blockquote class="blockquote">
+<p>Suppose we have a sample of <img src="https://latex.codecogs.com/png.latex?N"> counts <img src="https://latex.codecogs.com/png.latex?%5C%7B%20y_k%20%5C%7D_%7Bk-=1%7D%5EN"> from an <img src="https://latex.codecogs.com/png.latex?N">-cell multinomial distribution, and let <img src="https://latex.codecogs.com/png.latex?r_k%20=%20y_k%20/%20%5Csum_%7B%5Cell=1%7D%5EN%20y_%7B%5Cell%7D"> be the corresponding vector of proportions. For example, in large-scale web applications, these counts might represent the number of people in each country in teh YSA that visited a particular website during a given week. This vector could be sparse depending on the specifics, so there is desire to regularize toward a broader, more stable distribution <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D%20=%20%5C%7B%20u_k%20%5C%7D_%7Bk=1%7D%5EN"> (for example, the same demographic, except measured over years)</p>
+</blockquote>
+<p>In essence, we fit a LASSO using the <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> as an offset.The authors go on to show how minimizing a discrete version of the KL-divergence with some error tolerance between estimated and observed can be re-framed as constrained optimization of the Poisson log likelihood. In short, you can fit a glmnet model with <code>family="poisson"</code> to do the procedure described in that quote.</p>
+<p>The authors kind of give a half hearted attempt at an application of such a procedure, so I tried to come up with one myself. In a <a href="https://dpananos.github.io/posts/2022-08-16-pca/">previous blog post</a>, we used looked at what kind of experts exist on statsexchange. We can use the data explorer I used for that post to look at two frequencies:</p>
+<ul>
+<li>Frequencies of total posts over a typical week in the year 2022, and</li>
+<li>Frequencies of posts tagged “regularization” posts over a typical week in the year 2022.</li>
+</ul>
+<p>There are considerably more non-regularization posts than there are regularization posts, so while we should expect the frequencies to be similar there is probably some noise. Let’s use the query (below) to get our data and make a plot of those frequencies.</p>
+<details>
+<summary>
+Click to see SQL Query
+</summary>
+<p>
+</p><pre><code>select
+cast(A.CreationDate as date) as creation_date,
+count(distinct A.id) as num_posts,
+count(distinct case when lower(TargetTagName) = 'regularization' then A.id end) as reg_posts
+from Posts A
+left join PostTags as B on A.Id = B.PostId
+left join TagSynonyms as C on B.TagId = C.Id
+where A.PostTypeId = 1 and A.CreationDate between '2022-01-01' and '2022-12-31'
+group by cast(A.CreationDate as date)
+order by cast(A.CreationDate as date)
+</code></pre>
+<p></p>
+</details>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;">library</span>(tidyverse)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;">library</span>(tidymodels)</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;">library</span>(glmnet)</span>
+<span id="cb2-4"><span class="fu" style="color: #4758AB;">library</span>(kableExtra)</span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="fu" style="color: #4758AB;">theme_set</span>(</span>
+<span id="cb2-7">  <span class="fu" style="color: #4758AB;">theme_minimal</span>(<span class="at" style="color: #657422;">base_size =</span> <span class="dv" style="color: #AD0000;">12</span>) <span class="sc" style="color: #5E5E5E;">%+replace%</span></span>
+<span id="cb2-8">    <span class="fu" style="color: #4758AB;">theme</span>(</span>
+<span id="cb2-9">      <span class="at" style="color: #657422;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;">1</span><span class="sc" style="color: #5E5E5E;">/</span><span class="fl" style="color: #AD0000;">1.61</span>,</span>
+<span id="cb2-10">      <span class="at" style="color: #657422;">legend.position =</span> <span class="st" style="color: #20794D;">'top'</span></span>
+<span id="cb2-11">    )</span>
+<span id="cb2-12">  )</span>
+<span id="cb2-13"></span>
+<span id="cb2-14"></span>
+<span id="cb2-15">d <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read_csv</span>(<span class="st" style="color: #20794D;">'QueryResults.csv'</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-16">     <span class="fu" style="color: #4758AB;">mutate_at</span>(</span>
+<span id="cb2-17">       <span class="at" style="color: #657422;">.vars =</span> <span class="fu" style="color: #4758AB;">vars</span>(<span class="fu" style="color: #4758AB;">contains</span>(<span class="st" style="color: #20794D;">'post'</span>)),</span>
+<span id="cb2-18">       <span class="at" style="color: #657422;">.funs =</span> <span class="fu" style="color: #4758AB;">list</span>(<span class="at" style="color: #657422;">p =</span> \(x) x<span class="sc" style="color: #5E5E5E;">/</span><span class="fu" style="color: #4758AB;">sum</span>(x))</span>
+<span id="cb2-19">     )</span>
+<span id="cb2-20"></span>
+<span id="cb2-21">d<span class="sc" style="color: #5E5E5E;">$</span>oday <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">factor</span>(d<span class="sc" style="color: #5E5E5E;">$</span>Day, <span class="at" style="color: #657422;">ordered=</span>T, <span class="at" style="color: #657422;">levels =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">'Sunday'</span>, <span class="st" style="color: #20794D;">'Monday'</span>, <span class="st" style="color: #20794D;">'Tuesday'</span>, <span class="st" style="color: #20794D;">'Wednesday'</span>, <span class="st" style="color: #20794D;">'Thursday'</span>, <span class="st" style="color: #20794D;">'Friday'</span>, <span class="st" style="color: #20794D;">'Saturday'</span>))</span>
+<span id="cb2-22"></span>
+<span id="cb2-23">d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-24">  <span class="fu" style="color: #4758AB;">arrange</span>(oday) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-25">  <span class="fu" style="color: #4758AB;">select</span>(oday, num_posts, reg_posts) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-26">  <span class="fu" style="color: #4758AB;">kbl</span>(</span>
+<span id="cb2-27">    <span class="at" style="color: #657422;">col.names =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">'Day of Week'</span>, <span class="st" style="color: #20794D;">'Total Post Count'</span>, <span class="st" style="color: #20794D;">'Regularization Post Count'</span>)</span>
+<span id="cb2-28">  ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb2-29">  <span class="fu" style="color: #4758AB;">kable_styling</span>(<span class="at" style="color: #657422;">bootstrap_options =</span> <span class="st" style="color: #20794D;">'striped'</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Day of Week </th>
+   <th style="text-align:right;"> Total Post Count </th>
+   <th style="text-align:right;"> Regularization Post Count </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Sunday </td>
+   <td style="text-align:right;"> 1699 </td>
+   <td style="text-align:right;"> 13 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Monday </td>
+   <td style="text-align:right;"> 2494 </td>
+   <td style="text-align:right;"> 37 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Tuesday </td>
+   <td style="text-align:right;"> 2759 </td>
+   <td style="text-align:right;"> 24 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Wednesday </td>
+   <td style="text-align:right;"> 2805 </td>
+   <td style="text-align:right;"> 26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Thursday </td>
+   <td style="text-align:right;"> 2689 </td>
+   <td style="text-align:right;"> 32 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Friday </td>
+   <td style="text-align:right;"> 2500 </td>
+   <td style="text-align:right;"> 27 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Saturday </td>
+   <td style="text-align:right;"> 1703 </td>
+   <td style="text-align:right;"> 10 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">base_plot <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb3-2">            <span class="fu" style="color: #4758AB;">ggplot</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb3-3">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb3-4">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb3-5">            <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb3-6">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>)</span>
+<span id="cb3-7">            </span>
+<span id="cb3-8">base_plot</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Obviously, the smaller number of posts about regularization leads to larger noise in the multinomial estimates. You can very easily see that in the plot; Monday is not special, its very likely noise.</p>
+<p>So here is where we can use LASSO to reign in some of that noise. We just need to specify how discordant we want our predicted frequencies to be from the observed frequencies, and fit a LASSO model with a penalty which achieves this desired tolerance.</p>
+<p>So let’s say my predictions from the LASSO are the vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%7D"> and the observed frequencies for regularization posts are <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Br%7D">. Let’s say I want the largest error between the two to be no larger than 0.05. Shown below is some code for how to do that:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="co" style="color: #5E5E5E;"># Set up the regression problem</span></span>
+<span id="cb4-2">u <span class="ot" style="color: #003B4F;">&lt;-</span> d<span class="sc" style="color: #5E5E5E;">$</span>num_posts_p</span>
+<span id="cb4-3">r <span class="ot" style="color: #003B4F;">&lt;-</span> d<span class="sc" style="color: #5E5E5E;">$</span>reg_posts_p</span>
+<span id="cb4-4">X <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">model.matrix</span>(<span class="sc" style="color: #5E5E5E;">~</span>Day<span class="dv" style="color: #AD0000;">-1</span>, <span class="at" style="color: #657422;">data=</span>d)</span>
+<span id="cb4-5"></span>
+<span id="cb4-6"><span class="co" style="color: #5E5E5E;"># Grid of penalties to search over</span></span>
+<span id="cb4-7">lambda.grid <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="dv" style="color: #AD0000;">2</span><span class="sc" style="color: #5E5E5E;">^</span><span class="fu" style="color: #4758AB;">seq</span>(<span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">0.005</span>)</span>
+<span id="cb4-8"></span>
+<span id="cb4-9"><span class="co" style="color: #5E5E5E;"># Fir the model and compute the difference between the largest error and our tolerance</span></span>
+<span id="cb4-10">fit_lasso <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="cf" style="color: #003B4F;">function</span>(x){</span>
+<span id="cb4-11">  fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>x)</span>
+<span id="cb4-12">  p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)</span>
+<span id="cb4-13">  <span class="fu" style="color: #4758AB;">abs</span>(<span class="fu" style="color: #4758AB;">max</span>(r<span class="sc" style="color: #5E5E5E;">-</span>p) <span class="sc" style="color: #5E5E5E;">-</span> <span class="fl" style="color: #AD0000;">0.03</span>)</span>
+<span id="cb4-14">}</span>
+<span id="cb4-15"></span>
+<span id="cb4-16">errors<span class="ot" style="color: #003B4F;">&lt;-</span><span class="fu" style="color: #4758AB;">map_dbl</span>(lambda.grid, fit_lasso)</span>
+<span id="cb4-17">lambda <span class="ot" style="color: #003B4F;">&lt;-</span> lambda.grid[<span class="fu" style="color: #4758AB;">which.min</span>(errors)]</span>
+<span id="cb4-18">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>lambda)</span>
+<span id="cb4-19">d<span class="sc" style="color: #5E5E5E;">$</span>predicted <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)[, <span class="st" style="color: #20794D;">'s0'</span>]</span>
+<span id="cb4-20"></span>
+<span id="cb4-21">new_plot <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb4-22">            <span class="fu" style="color: #4758AB;">ggplot</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-23">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-24">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-25">            <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, predicted, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Predicted Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-26">            <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb4-27">            <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>)</span>
+<span id="cb4-28"></span>
+<span id="cb4-29">new_plot</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>This might be easier to see if we follow Tuffte and show small multiples</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">lam <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="fl" style="color: #AD0000;">0.001</span>, <span class="fl" style="color: #AD0000;">0.01</span>, <span class="fl" style="color: #AD0000;">0.02</span>, <span class="fl" style="color: #AD0000;">0.04</span>)</span>
+<span id="cb5-2"></span>
+<span id="cb5-3">all_d <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">map_dfr</span>(lam, <span class="sc" style="color: #5E5E5E;">~</span>{</span>
+<span id="cb5-4">  fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">glmnet</span>(X, r, <span class="at" style="color: #657422;">family=</span><span class="st" style="color: #20794D;">'poisson'</span>, <span class="at" style="color: #657422;">offset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">lambda=</span>.x)</span>
+<span id="cb5-5">  d<span class="sc" style="color: #5E5E5E;">$</span>predicted <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">predict</span>(fit, <span class="at" style="color: #657422;">newx=</span>X, <span class="at" style="color: #657422;">newoffset=</span><span class="fu" style="color: #4758AB;">log</span>(u), <span class="at" style="color: #657422;">type=</span><span class="st" style="color: #20794D;">'response'</span>)[, <span class="st" style="color: #20794D;">'s0'</span>]</span>
+<span id="cb5-6">  d<span class="sc" style="color: #5E5E5E;">$</span>lambda <span class="ot" style="color: #003B4F;">=</span> .x</span>
+<span id="cb5-7">  </span>
+<span id="cb5-8">  d</span>
+<span id="cb5-9">})</span>
+<span id="cb5-10"></span>
+<span id="cb5-11">all_d <span class="sc" style="color: #5E5E5E;">%&gt;%</span> </span>
+<span id="cb5-12">      <span class="fu" style="color: #4758AB;">ggplot</span>() <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-13">      <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, num_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'All Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-14">      <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, reg_posts_p, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Regularization Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-15">      <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="fu" style="color: #4758AB;">aes</span>(oday, predicted, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">'Predicted Posts'</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-16">      <span class="fu" style="color: #4758AB;">scale_y_continuous</span>(<span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span>percent) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-17">      <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x=</span><span class="st" style="color: #20794D;">'Day'</span>, <span class="at" style="color: #657422;">y=</span><span class="st" style="color: #20794D;">'Post Frequency'</span>, <span class="at" style="color: #657422;">color=</span><span class="st" style="color: #20794D;">''</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb5-18">      <span class="fu" style="color: #4758AB;">facet_wrap</span>(<span class="sc" style="color: #5E5E5E;">~</span>lambda, <span class="at" style="color: #657422;">labeller =</span> label_both)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Cool! Using <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> (here, the frequency of total posts on each day) acts as a sort of target towards wich to regularize.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-09-24-l1/index.html</guid>
+  <pubDate>Fri, 08 Sep 2023 04:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</link>
@@ -3597,86 +3807,6 @@ Number of Fisher Scoring iterations: 5</code></pre>
   <guid>https://dpananos.github.io/posts/2019-05-21-odes/index.html</guid>
   <pubDate>Tue, 21 May 2019 04:00:00 GMT</pubDate>
   <media:content url="https://dpananos.github.io/posts/2019-05-21-odes/sir_curves.png" medium="image" type="image/png" height="96" width="144"/>
-</item>
-<item>
-  <title>Neat Litle Combinatorics Problem</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>I’ll cut right to it. Consider the set <img src="https://latex.codecogs.com/png.latex?S%20=%20(49,%208,%2048,%2015,%2047,%204,%2016,%2023,%2043,%2044,%2042,%2045,%2046%20)">. What is the expected value for the minimum of 6 samples from this set?</p>
-<p>We could always just sample form the set to estimate the expected value. Here is a python script to do just that.</p>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
-<span id="cb1-2">x <span class="op" style="color: #5E5E5E;">=</span> np.array([<span class="dv" style="color: #AD0000;">49</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>])</span>
-<span id="cb1-3"></span>
-<span id="cb1-4">mins <span class="op" style="color: #5E5E5E;">=</span> []</span>
-<span id="cb1-5"><span class="cf" style="color: #003B4F;">for</span> _ <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">range</span>(<span class="dv" style="color: #AD0000;">1000</span>):</span>
-<span id="cb1-6">    mins.append(np.random.choice(x,size <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">6</span>, replace <span class="op" style="color: #5E5E5E;">=</span> <span class="va" style="color: #111111;">False</span>).<span class="bu" style="color: null;">min</span>())</span>
-<span id="cb1-7"></span>
-<span id="cb1-8"><span class="bu" style="color: null;">print</span>(np.mean(mins))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>9.098</code></pre>
-</div>
-</div>
-<p>But that is estimating the mean. We can do better and directly compute it. Here is some python code to create all subsets from <img src="https://latex.codecogs.com/png.latex?S"> of size 6. Then, we simply take out the minimum from each subset and compute the mean.</p>
-<div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
-<span id="cb3-2"><span class="im" style="color: #00769E;">from</span> itertools <span class="im" style="color: #00769E;">import</span> combinations, groupby</span>
-<span id="cb3-3"></span>
-<span id="cb3-4">x <span class="op" style="color: #5E5E5E;">=</span> np.array([<span class="dv" style="color: #AD0000;">49</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>])</span>
-<span id="cb3-5">x <span class="op" style="color: #5E5E5E;">=</span> np.sort(x)</span>
-<span id="cb3-6"></span>
-<span id="cb3-7">c <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">list</span>(combinations(x,<span class="dv" style="color: #AD0000;">6</span>))</span>
-<span id="cb3-8"></span>
-<span id="cb3-9">mins <span class="op" style="color: #5E5E5E;">=</span> <span class="bu" style="color: null;">list</span>(<span class="bu" style="color: null;">map</span>(<span class="kw" style="color: #003B4F;">lambda</span> x: x[<span class="dv" style="color: #AD0000;">0</span>], c))</span>
-<span id="cb3-10"></span>
-<span id="cb3-11">s <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span></span>
-<span id="cb3-12"><span class="cf" style="color: #003B4F;">for</span> k, g <span class="kw" style="color: #003B4F;">in</span> groupby(<span class="bu" style="color: null;">sorted</span>(mins)):</span>
-<span id="cb3-13">    s<span class="op" style="color: #5E5E5E;">+=</span>k<span class="op" style="color: #5E5E5E;">*</span>(<span class="bu" style="color: null;">len</span>(<span class="bu" style="color: null;">list</span>(g))<span class="op" style="color: #5E5E5E;">/</span><span class="bu" style="color: null;">len</span>(mins))</span>
-<span id="cb3-14"></span>
-<span id="cb3-15"><span class="bu" style="color: null;">print</span>( s )</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>8.818181818181818</code></pre>
-</div>
-</div>
-<p>The script returns 8.18 repeating. Great, but we can do even better! If we can compute the probability density function, we can compute the mean analytically. Let’s consider a smaller problem to outline the solution.</p>
-<p>Let our set in question be <img src="https://latex.codecogs.com/png.latex?(1,2,3,4,5)">. Let the minimum of a sample of 3 numbers from this set be the random variable <img src="https://latex.codecogs.com/png.latex?z">. Now, note there are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B5%7D%7B3%7D%20=%2010"> ways to choose 3 elements from a set of 5.</p>
-<p>How many subsets exist where the minimum is 1? Well, if I sampled 1, then I would still have to pick 2 numbers from a possible 4 numbers larger than 1. There are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B4%7D%7B2%7D"> ways to do this. So <img src="https://latex.codecogs.com/png.latex?p(z=1)%20=%20%5Cbinom%7B4%7D%7B2%7D%20/%20%5Cbinom%7B5%7D%7B3%7D">.</p>
-<p>In a similar fashion, there are <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B3%7D%7B2%7D"> subsets where 2 is the minimum, and <img src="https://latex.codecogs.com/png.latex?%5Cbinom%7B2%7D%7B2%7D"> subsets where 3 is the minimum. There are no subsets where 4 or 5 are the minimum (why?). So that means the expected minimum value for this set would be</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7BE%7D(z)%20=%20%5Cdfrac%7B%20%5Csum_%7Bk%20=%201%7D%5E%7B3%7D%20k%5Cbinom%7B5-k%7D%7B2%7D%20%7D%7B%5Cbinom%7B5%7D%7B3%7D%7D%20%20"></p>
-<p>Whatever that sum happens to be. Here is how you could code up the analytic solution to our problem.</p>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;">import</span> numpy <span class="im" style="color: #00769E;">as</span> np</span>
-<span id="cb5-2"><span class="im" style="color: #00769E;">from</span> scipy.special <span class="im" style="color: #00769E;">import</span> binom</span>
-<span id="cb5-3"></span>
-<span id="cb5-4">x <span class="op" style="color: #5E5E5E;">=</span> np.array([ <span class="dv" style="color: #AD0000;">4</span>, <span class="dv" style="color: #AD0000;">8</span>, <span class="dv" style="color: #AD0000;">15</span>, <span class="dv" style="color: #AD0000;">16</span>, <span class="dv" style="color: #AD0000;">23</span>, <span class="dv" style="color: #AD0000;">42</span>, <span class="dv" style="color: #AD0000;">43</span>, <span class="dv" style="color: #AD0000;">44</span>, <span class="dv" style="color: #AD0000;">45</span>, <span class="dv" style="color: #AD0000;">46</span>, <span class="dv" style="color: #AD0000;">47</span>, <span class="dv" style="color: #AD0000;">48</span>, <span class="dv" style="color: #AD0000;">49</span>])</span>
-<span id="cb5-5">x <span class="op" style="color: #5E5E5E;">=</span> np.sort(x)</span>
-<span id="cb5-6"></span>
-<span id="cb5-7">sample_size <span class="op" style="color: #5E5E5E;">=</span><span class="dv" style="color: #AD0000;">6</span></span>
-<span id="cb5-8">sample_space <span class="op" style="color: #5E5E5E;">=</span> x[:<span class="op" style="color: #5E5E5E;">-</span>(sample_size<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>)]</span>
-<span id="cb5-9">E <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">0</span></span>
-<span id="cb5-10"><span class="cf" style="color: #003B4F;">for</span> i,s <span class="kw" style="color: #003B4F;">in</span> <span class="bu" style="color: null;">enumerate</span>(sample_space,start <span class="op" style="color: #5E5E5E;">=</span> <span class="dv" style="color: #AD0000;">1</span>):</span>
-<span id="cb5-11"></span>
-<span id="cb5-12">    E<span class="op" style="color: #5E5E5E;">+=</span> s<span class="op" style="color: #5E5E5E;">*</span>binom(x.size<span class="op" style="color: #5E5E5E;">-</span>i,sample_size<span class="op" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb5-13"></span>
-<span id="cb5-14"><span class="bu" style="color: null;">print</span>(E<span class="op" style="color: #5E5E5E;">/</span>binom(x.size, sample_size))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>8.818181818181818</code></pre>
-</div>
-</div>
-<p>Full disclosure, this was on a job application (literally, on the job application), so sorry KiK for putting the answer out there, but the question was too fun not to write up!</p>
-
-
-
- ]]></description>
-  <category>Python</category>
-  <category>Probability</category>
-  <guid>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</guid>
-  <pubDate>Fri, 31 Aug 2018 04:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
