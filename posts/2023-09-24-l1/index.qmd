@@ -1,5 +1,5 @@
 ---
-title: Regularization of Noisy Multinomial Countrs
+title: Regularization of Noisy Multinomial Counts
 date: "2023-09-24"
 code-fold: true
 echo: true
