@@ -103,6 +103,7 @@ So let's say my predictions from the LASSO are the vector $\mathbf{p}$ and the o
 u <- d$num_posts_p
 r <- d$reg_posts_p
 X <- model.matrix(~Day-1, data=d)
+max_error <- 0.03
 
 # Grid of penalties to search over
 lambda.grid <- 2^seq(-8, 0, 0.005)
@@ -111,7 +112,7 @@ lambda.grid <- 2^seq(-8, 0, 0.005)
 fit_lasso <- function(x){
   fit <- glmnet(X, r, family='poisson', offset=log(u), lambda=x)
   p <- predict(fit, newx=X, newoffset=log(u), type='response')
-  abs(max(r-p) - 0.03)
+  abs(max(r-p) - max_error)
 }
 
 errors<-map_dbl(lambda.grid, fit_lasso)
