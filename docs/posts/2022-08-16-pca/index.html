@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,9 +19,10 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -48,43 +49,13 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -120,7 +91,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -130,12 +102,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
-<meta property="og:description" content="Julia Silge gave a really good talk in 2018 about PCA ond tags on stack overflow.">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png">
 <meta property="og:site-name" content="Demetri Pananos Ph.D">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
 <meta name="twitter:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
-<meta name="twitter:description" content="Julia Silge gave a really good talk in 2018 about PCA ond tags on stack overflow.">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="960">
+<meta name="twitter:image-width" content="1344">
 </head>
 
 <body class="nav-fixed">
@@ -149,31 +127,33 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <span class="navbar-title">Demetri Pananos Ph.D</span>
     </a>
   </div>
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html">
+    <a class="nav-link" href="../../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../consulting/index.html">
+    <a class="nav-link" href="../../consulting/index.html" rel="" target="">
  <span class="menu-text">Consulting</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/Dpananos"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/Dpananos" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/PhDemetri"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/PhDemetri" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -287,73 +267,73 @@ order by rnk</code></pre>
 <p>Let’s Take a peek at the data, using me as an example. Below are my top 10 tags as a percent of my total answers. Looks like I like to answer questions about regression, hypothesis testing, and R most frequently. Each of the top 250 users has data similar to this in my dataset. I need to pivot it so that tags become features. Then, I can normalize the data and perform PCA.</p>
 <div class="cell">
 <div class="cell-output-display">
-
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> Name </th>
-   <th style="text-align:left;"> Tag </th>
-   <th style="text-align:left;"> Percent </th>
-  </tr>
- </thead>
+<table class="table table-striped table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Name</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tag</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Percent</th>
+</tr>
+</thead>
 <tbody>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Regression </td>
-   <td style="text-align:left;"> 11.40% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Hypothesis-Testing </td>
-   <td style="text-align:left;"> 6.01% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> R </td>
-   <td style="text-align:left;"> 5.90% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Machine-Learning </td>
-   <td style="text-align:left;"> 5.45% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Logistic </td>
-   <td style="text-align:left;"> 4.85% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Bayesian </td>
-   <td style="text-align:left;"> 3.58% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Statistical-Significance </td>
-   <td style="text-align:left;"> 3.42% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Confidence-Interval </td>
-   <td style="text-align:left;"> 2.75% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> T-Test </td>
-   <td style="text-align:left;"> 2.64% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Probability </td>
-   <td style="text-align:left;"> 2.31% </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> Demetri Pananos </td>
-   <td style="text-align:left;"> Generalized-Linear-Model </td>
-   <td style="text-align:left;"> 2.31% </td>
-  </tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Regression</td>
+<td style="text-align: left;">11.40%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Hypothesis-Testing</td>
+<td style="text-align: left;">6.01%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">R</td>
+<td style="text-align: left;">5.90%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Machine-Learning</td>
+<td style="text-align: left;">5.45%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Logistic</td>
+<td style="text-align: left;">4.85%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Bayesian</td>
+<td style="text-align: left;">3.58%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Statistical-Significance</td>
+<td style="text-align: left;">3.42%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Confidence-Interval</td>
+<td style="text-align: left;">2.75%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">T-Test</td>
+<td style="text-align: left;">2.64%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Probability</td>
+<td style="text-align: left;">2.31%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Demetri Pananos</td>
+<td style="text-align: left;">Generalized-Linear-Model</td>
+<td style="text-align: left;">2.31%</td>
+</tr>
 </tbody>
 </table>
+
 
 </div>
 </div>
@@ -375,9 +355,6 @@ order by rnk</code></pre>
 <p>The results for the first 3 principal componensts are shown below. I’ve shown the 20 most extreme components for clarity.</p>
 <p>The first principal compnent has tags like “Anova”, “T-Test” and “SPSS” as heavily weighted positive, while “Machine Learning”, “Mathematical Statistics” and “Probability” are all weighted heavily negative (the direction of the weights doesn’t matter, it isn’t like one direction is better or worse). To me, I read this as “Beginner” vs “Advanced” answers. Questions with the former tags are usually from users who are maybe taking a stats class for the first time and are learning about the t test or Anova. The dead give away for this is the “SPSS” tag being weighted so heavily<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Looking at more weights verifies this, with the negative weights being associated with topics like “Neural Nets”, and “Maximum Likelihod” while the positive weights have tags like “Statistical Significance” and “Interpretation”.</p>
 <p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
-<div class="cell">
-
-</div>
 <div class="cell" data-layout-row="3" data-fig.dpi="240">
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/prin-comp-1.png" class="img-fluid" width="672"></p>
@@ -446,9 +423,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -513,6 +504,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
