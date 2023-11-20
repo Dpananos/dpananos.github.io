@@ -10,7 +10,542 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Sun, 24 Sep 2023 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 20 Nov 2023 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Estimating the Shifted Beta Geometric Model in Stan</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cmdstanr)</span></code></pre></div>
+</details>
+</div>
+<p>The shifted beta geometric model (sBG) is a model that is used to forecast retention/survival of users in contractual settings (think netflix, disney plus, tinder gold, etc). The model is quite simple and posits:</p>
+<ul>
+<li>At the end of each period, a customer flips a coin: “heads” she cancels he contract, “tails” she renews it.</li>
+<li>For each individual, the probability of a coin coming up “heads” does not change over time</li>
+<li>The probabiliuty of heads varies across customers. Fader and Hardie motivate the model in their paper <em>How to Project Customer Retention</em> and even provide a way to fit the model in excel. Neat!</li>
+</ul>
+<p>Excel isn’t a great tool for fitting models, so Let’s write this in Stan.</p>
+<section id="sbg-in-stan" class="level2">
+<h2 class="anchored" data-anchor-id="sbg-in-stan">sBG in Stan</h2>
+<p>The two things we need are the probability density function and the survival function. Fader and Hardie provide these in their paper. Mathematically, the probability density and survival function are</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20P(T=t%20%5Cmid%20%5Calpha,%20%5Cbeta)%20=%20%5Cdfrac%7BB(%5Calpha+1,%20%5Cbeta+t-1)%7D%7BB(%5Calpha,%20%5Cbeta)%7D%20%5C%3E,"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20S(T=t%20%5Cmid%20%5Calpha,%20%5Cbeta)%20=%20%5Cdfrac%7BB(%5Calpha,%20%5Cbeta+t)%7D%7BB(%5Calpha,%20%5Cbeta)%7D%20%5C%3E.%20"> Here, <img src="https://latex.codecogs.com/png.latex?B(%5Calpha,%20%5Cbeta)"> is the beta function <em>and not the beta distribution</em> (I made that mistake early). Stan operates on the log scale, and so we’ll have to take the log of these. Stan has a log beta function called <code>lbeta</code> so we’ll use that in our functions for the density and survival function.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">functions</span>{</span>
+<span id="cb2-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sbg_lpdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> time, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> alpha, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> beta){</span>
+<span id="cb2-3">    </span>
+<span id="cb2-4">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> lbeta(alpha+<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, beta+time<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>) - lbeta(alpha, beta);</span>
+<span id="cb2-5">  }</span>
+<span id="cb2-6">  </span>
+<span id="cb2-7">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sbg_lccdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> time, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> alpha, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> beta){</span>
+<span id="cb2-8">    </span>
+<span id="cb2-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> lbeta(alpha, beta + time) - lbeta(alpha, beta);</span>
+<span id="cb2-10">  }</span>
+<span id="cb2-11">  </span>
+<span id="cb2-12">}</span></code></pre></div>
+</div>
+</div>
+<p>The data we need to fit the model include:</p>
+<ul>
+<li>How many customers were lost at each time period,</li>
+<li>The times at which customers were lost, and</li>
+<li>The total number of customers under observation</li>
+</ul>
+<p>We’ll also include an array of times at which to estimate the survival curve</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">data</span>{</span>
+<span id="cb3-2">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Fitting the model</span></span>
+<span id="cb3-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> N;</span>
+<span id="cb3-4">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> n_total;</span>
+<span id="cb3-5">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">array</span>[N] <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> lost;</span>
+<span id="cb3-6">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">array</span>[N] <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> time;</span>
+<span id="cb3-7">  </span>
+<span id="cb3-8">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Making Predictions</span></span>
+<span id="cb3-9">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> N_pred;</span>
+<span id="cb3-10">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">array</span>[N_pred] <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> pred_times;</span>
+<span id="cb3-11">}</span></code></pre></div>
+</div>
+</div>
+<p>Later, we’ll need the last time point we observed customers who haven’t churned. This is the truncation time</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">transformed data</span>{</span>
+<span id="cb4-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> truncation_time = max(time);</span>
+<span id="cb4-3">}</span></code></pre></div>
+</div>
+</div>
+<p>All that is left to do is specify parameters, write the model block, and generate predictions for our survival curve. The likelihood computations are shown in the paper I referenced, so I’ll let you read that if you’re interested</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">parameters</span>{</span>
+<span id="cb5-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; alpha;</span>
+<span id="cb5-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; beta;</span>
+<span id="cb5-4">}</span>
+<span id="cb5-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">model</span>{</span>
+<span id="cb5-6">  alpha ~ cauchy(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb5-7">  beta ~ cauchy(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb5-8">  </span>
+<span id="cb5-9">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span>(i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:N){</span>
+<span id="cb5-10">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">target +=</span> lost[i] * sbg_lpdf(time[i]| alpha, beta);</span>
+<span id="cb5-11">  }</span>
+<span id="cb5-12">  <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">target +=</span> (n_total - sum(lost)) * sbg_lccdf(truncation_time| alpha, beta);</span>
+<span id="cb5-13">}</span>
+<span id="cb5-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">generated quantities</span>{</span>
+<span id="cb5-15">  </span>
+<span id="cb5-16">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">array</span>[N_pred] <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> expected_surviving;</span>
+<span id="cb5-17">  </span>
+<span id="cb5-18">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span>(i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:N_pred){</span>
+<span id="cb5-19">    expected_surviving[i] = exp(sbg_lccdf(pred_times[i]| alpha, beta));</span>
+<span id="cb5-20">  }</span>
+<span id="cb5-21">  </span>
+<span id="cb5-22">}</span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="fitting-the-model" class="level1">
+<h1>Fitting the Model</h1>
+<p>Fader and Hardie provide an example in their appendix for fitting the model. We’ll use that data to check our fit. Let’s take a look at that data now</p>
+<div class="cell" data-fig.asp="0.6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cmdstanr)</span>
+<span id="cb6-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb6-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidybayes)</span>
+<span id="cb6-4"></span>
+<span id="cb6-5">stan_data <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(</span>
+<span id="cb6-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">active =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">863</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">743</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">653</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">593</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">551</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">517</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">491</span>),</span>
+<span id="cb6-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lost =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">131</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">126</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">90</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">60</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">34</span> ,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">26</span>),</span>
+<span id="cb6-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">N =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>,</span>
+<span id="cb6-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_total =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>,</span>
+<span id="cb6-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>,</span>
+<span id="cb6-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">N_pred =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>,</span>
+<span id="cb6-12">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pred_times =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">length.out=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>)</span>
+<span id="cb6-13">)</span>
+<span id="cb6-14"></span>
+<span id="cb6-15"></span>
+<span id="cb6-16">surv_plot <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> stan_data<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">active=</span>stan_data<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>active) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb6-17">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(time, active)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-18">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-19">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-20">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ylim</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-21">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ylab</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Customers Surviving'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb6-22">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">xlab</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Time'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-23">              see<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_modern</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb6-24">              <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">aspect.ratio =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.61</span>,</span>
+<span id="cb6-25">                    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">panel.grid.major =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">element_line</span>())</span>
+<span id="cb6-26"></span>
+<span id="cb6-27">surv_plot</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<p>Now, let’s compare with the fit</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">model <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> cmdstanr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cmdstan_model</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'sbg.stan'</span>)</span>
+<span id="cb7-2"></span>
+<span id="cb7-3">fit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> model<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample</span>(stan_data, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 sequential chains...
+
+Chain 1 finished in 0.0 seconds.
+Chain 2 finished in 0.0 seconds.
+Chain 3 finished in 0.0 seconds.
+Chain 4 finished in 0.0 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.0 seconds.
+Total execution time: 0.5 seconds.</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">pred_times <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pred_times=</span>stan_data<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>pred_times, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">i =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq_along</span>(pred_times))</span>
+<span id="cb9-2">fit_predict <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> fit <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb9-3">               <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">spread_draws</span>(expected_surviving[i]) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb9-4">               <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">expected_surviving =</span> expected_surviving <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb9-5">               <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean_qi</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb9-6">               <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">left_join</span>(pred_times)</span>
+<span id="cb9-7"></span>
+<span id="cb9-8"></span>
+<span id="cb9-9"></span>
+<span id="cb9-10">surv_plot <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb9-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>fit_predict, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(pred_times, expected_surviving), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> F, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'red'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb9-12">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_ribbon</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>fit_predict, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(pred_times, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymin =</span> .lower, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymax=</span>.upper), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> F, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'red'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Nice, not a bad fit.</p>
+<p>Model extensions seem fairly straight forward. You could maybe model alpha and beta much in the same way you do for a beta regression.</p>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<p>Fader, Peter S., and Bruce GS Hardie. “How to project customer retention.” Journal of Interactive Marketing 21.1 (2007): 76-90.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index.html</guid>
+  <pubDate>Mon, 20 Nov 2023 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Regularization of Noisy Multinomial Counts</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -7826,569 +8361,6 @@ font-style: inherit;">2</span>)</span></code></pre></div>
   <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2020-10-06-links/index.html</guid>
   <pubDate>Tue, 06 Oct 2020 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Gradient Descent with ODEs</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2019-05-21-odes/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Gradient descent usually isn’t used to fit Ordinary Differential Equations (ODEs) to data (at least, that isn’t how the Applied Mathematics departments to which I have been a part have done it). Nevertheless, that doesn’t mean that it can’t be done. For some of my recent GSoC work, I’ve been investigating how to compute gradients of solutions to ODEs without access to the solution’s analytical form. In this blog post, I describe how these gradients can be computed and how they can be used to fit ODEs to synchronous data with gradient descent.</p>
-<section id="up-to-speed-with-odes" class="level2">
-<h2 class="anchored" data-anchor-id="up-to-speed-with-odes">Up To Speed With ODEs</h2>
-<p>I realize not everyone might have studied ODEs. Here is everything you need to know:</p>
-<p>A differential equation relates an unknown function <img src="https://latex.codecogs.com/png.latex?y%20%5Cin%20%5Cmathbb%7BR%7D%5En"> to it’s own derivative through a function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5En%20%5Ctimes%20%5Cmathbb%7BR%7D%20%5Ctimes%20%5Cmathbb%7BR%7D%5Em%20%5Crightarrow%20%5Cmathbb%7BR%7D%5En">, which also depends on time <img src="https://latex.codecogs.com/png.latex?t%20%5Cin%20%5Cmathbb%7BR%7D"> and possibly a set of parameters <img src="https://latex.codecogs.com/png.latex?%5Ctheta%20%5Cin%20%5Cmathbb%7BR%7D%5Em">. We usually write ODEs as</p>
-<p><img src="https://latex.codecogs.com/png.latex?y'%20=%20f(y,t,%5Ctheta)%20%5Cquad%20y(t_0)%20=%20y_0"></p>
-<p>Here, we refer to the vector <img src="https://latex.codecogs.com/png.latex?y"> as “the system”, since the ODE above really defines a system of equations. The problem is usually equipped with an initial state of the system <img src="https://latex.codecogs.com/png.latex?y(t_0)%20=%20y_0"> from which the system evolves forward in <img src="https://latex.codecogs.com/png.latex?t">. Solutions to ODEs in analytic form are often <em>very hard</em> if not impossible, so most of the time we just numerically approximate the solution. It doesn’t matter how this is done because numerical integration is not the point of this post. If you’re interested, look up the class of <em>Runge-Kutta</em> methods.</p>
-</section>
-<section id="computing-gradients-for-odes" class="level2">
-<h2 class="anchored" data-anchor-id="computing-gradients-for-odes">Computing Gradients for ODEs</h2>
-<p>In this section, I’m going to be using derivative notation rather than <img src="https://latex.codecogs.com/png.latex?%5Cnabla"> for gradients. I think it is less ambiguous.</p>
-<p>If we want to fit an ODE model to data by minimizing some loss function <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D">, then gradient descent looks like</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta_%7Bn+1%7D%20=%20%5Ctheta_n%20-%20%5Calpha%20%5Cdfrac%7B%5Cpartial%20%5Cmathcal%7BL%7D%7D%7B%5Cpartial%20%5Ctheta%7D%20"></p>
-<p>In order to compute the gradient of the loss, we need the gradient of the solution, <img src="https://latex.codecogs.com/png.latex?y">, with respect to <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. The gradient of the solution is the hard part here because it can not be computed (a) analytically (because analytic solutions are hard AF), or (b) through automatic differentiation without differentiating through the numerical integration of our ODE (which seems computationally wasteful).</p>
-<p>Thankfully, years of research into ODEs yields a way to do this (that is not the adjoint method. Surprise! You thought I was going to say the adjoint method didn’t you?). Forward mode sensitivity analysis calculates gradients by extending the ODE system to include the following equations:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7Bd%7D%7Bdt%7D%5Cleft(%20%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20%5Cright)%20=%20%5Cmathcal%7BJ%7D_f%20%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20+%5Cdfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20%5Ctheta%7D%20"></p>
-<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BJ%7D"> is the Jacobian of <img src="https://latex.codecogs.com/png.latex?f"> with respect to <img src="https://latex.codecogs.com/png.latex?y">. The forward sensitivity analysis is <em>just another differential equation</em> (see how it relates the derivative of the unknown <img src="https://latex.codecogs.com/png.latex?%5Cpartial%20y%20/%20%5Cpartial%20%5Ctheta"> to itself?)! In order to compute the gradient of <img src="https://latex.codecogs.com/png.latex?y"> with respect to <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> at time <img src="https://latex.codecogs.com/png.latex?t_i">, we compute</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20=%20%5Cint_%7Bt_0%7D%5E%7Bt_i%7D%20%5Cmathcal%7BJ%7D_f%20%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20+%20%5Cdfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20%5Ctheta%7D%20%5C,%20dt%20"></p>
-<p>I know this looks scary, but since forward mode sensitivities are just ODEs, we actually just get this from what we can consider to be a black box</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20=%20%5Coperatorname%7BBlackBox%7D(f(y,t,%5Ctheta),%20t_0,%20y_0,%20%5Ctheta)"></p>
-<p>So now that we have our gradient in hand, we can use the chain rule to write</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cdfrac%7B%5Cpartial%20%5Cmathcal%7BL%7D%7D%7B%5Cpartial%20%5Ctheta%7D%20=%5Cdfrac%7B%5Cpartial%20%5Cmathcal%7BL%7D%7D%7B%5Cpartial%20y%7D%20%5Cdfrac%7B%5Cpartial%20y%7D%7B%5Cpartial%20%5Ctheta%7D%20"></p>
-<p>We can use automatic differentiation to compute <img src="https://latex.codecogs.com/png.latex?%5Cdfrac%7B%5Cpartial%20%5Cmathcal%7BL%7D%7D%7B%5Cpartial%20y%7D">.</p>
-<p>OK, so that is some math (interesting to me, maybe not so much to you). Let’s actually implement this in python.</p>
-</section>
-<section id="gradient-descent-for-the-sir-model" class="level2">
-<h2 class="anchored" data-anchor-id="gradient-descent-for-the-sir-model">Gradient Descent for the SIR Model</h2>
-<p>The SIR model is a set of differential equations which govern how a disease spreads through a homogeneously mixed closed populations. I could write an entire thesis on this model and its various extensions (in fact, I have), so I’ll let you read about those on your free time.</p>
-<p>The system, shown below, is parameterized by a single parameter:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7BdS%7D%7Bdt%7D%20=%20-%5Ctheta%20SI%20%5Cquad%20S(0)%20=%200.99%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7BdI%7D%7Bdt%7D%20=%20%5Ctheta%20SI%20-%20I%20%5Cquad%20I(0)%20=%200.01%20"></p>
-<p>Let’s define the system, the appropriate derivatives, generate some observations and fit <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> using gradient descent. Here si what you’ll need to get started:</p>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> autograd</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> autograd.builtins <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">tuple</span></span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> autograd.numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-4"></span>
-<span id="cb1-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Import ode solver and rename as BlackBox for consistency with blog</span></span>
-<span id="cb1-6"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> scipy.integrate <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> odeint <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> BlackBox</span>
-<span id="cb1-7"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span></code></pre></div>
-<p>Let’s then define the ODE system</p>
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> f(y,t,theta):</span>
-<span id="cb2-2">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">'''Function describing dynamics of the system'''</span></span>
-<span id="cb2-3">    S,I <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y</span>
-<span id="cb2-4">    ds <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>theta<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>S<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>I</span>
-<span id="cb2-5">    di <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> theta<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>S<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>I <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> I</span>
-<span id="cb2-6"></span>
-<span id="cb2-7">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> np.array([ds,di])</span></code></pre></div>
-<p>and take appropriate derivatives</p>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Jacobian wrt y</span></span>
-<span id="cb3-2">J <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> autograd.jacobian(f,argnum<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)</span>
-<span id="cb3-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Gradient wrt theta</span></span>
-<span id="cb3-4">grad_f_theta <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> autograd.jacobian(f,argnum<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-<p>Next, we’ll define the augmented system (that is, the ODE plus the sensitivities).</p>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> ODESYS(Y,t,theta):</span>
-<span id="cb4-2"></span>
-<span id="cb4-3">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Y will be length 4.</span></span>
-<span id="cb4-4">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Y[0], Y[1] are the ODEs</span></span>
-<span id="cb4-5">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Y[2], Y[3] are the sensitivities</span></span>
-<span id="cb4-6"></span>
-<span id="cb4-7">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#ODE</span></span>
-<span id="cb4-8">    dy_dt <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> f(Y[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>],t,theta)</span>
-<span id="cb4-9">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Sensitivities</span></span>
-<span id="cb4-10">    grad_y_theta <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> J(Y[:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>],t,theta)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">@</span>Y[<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>::] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> grad_f_theta(Y[:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>],t,theta)</span>
-<span id="cb4-11"></span>
-<span id="cb4-12">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> np.concatenate([dy_dt,grad_y_theta])</span></code></pre></div>
-<p>We’ll optimize the <img src="https://latex.codecogs.com/png.latex?L_2"> norm of the error</p>
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> Cost(y_obs):</span>
-<span id="cb5-2">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> cost(Y):</span>
-<span id="cb5-3">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">'''Squared Error Loss'''</span></span>
-<span id="cb5-4">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y_obs.shape[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]</span>
-<span id="cb5-5">        err <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.linalg.norm(y_obs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> Y, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, axis <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb5-6"></span>
-<span id="cb5-7">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> np.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>(err)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span>n</span>
-<span id="cb5-8"></span>
-<span id="cb5-9">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">return</span> cost</span></code></pre></div>
-<p>Create some observations from which to fit</p>
-<div class="cell" data-fig-height="5" data-fig-width="5" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">np.random.seed(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">19920908</span>)</span>
-<span id="cb6-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">## Generate Data</span></span>
-<span id="cb6-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Initial Condition</span></span>
-<span id="cb6-4">Y0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array([<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.99</span>,<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.01</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.0</span>])</span>
-<span id="cb6-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Space to compute solutions</span></span>
-<span id="cb6-6">t <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.linspace(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">101</span>)</span>
-<span id="cb6-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#True param value</span></span>
-<span id="cb6-8">theta <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5.5</span></span>
-<span id="cb6-9"></span>
-<span id="cb6-10">sol <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> BlackBox(ODESYS, y0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Y0, t <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> t, args <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">tuple</span>([theta]))</span>
-<span id="cb6-11"></span>
-<span id="cb6-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Corupt the observations with noise</span></span>
-<span id="cb6-13">y_obs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sol[:,:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> np.random.normal(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>,<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.05</span>,size <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sol[:,:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>].shape)</span>
-<span id="cb6-14"></span>
-<span id="cb6-15">plt.scatter(t,y_obs[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], marker <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'.'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'S'</span>)</span>
-<span id="cb6-16">plt.scatter(t,y_obs[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], marker <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'.'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'I'</span>)</span>
-<span id="cb6-17"></span>
-<span id="cb6-18"></span>
-<span id="cb6-19">plt.legend()</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>&lt;matplotlib.legend.Legend at 0x7f8e9d0b3d30&gt;</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2019-05-21-odes/index_files/figure-html/cell-7-output-2.png" width="571" height="404"></p>
-</div>
-</div>
-<p>Perform Gradient Descent</p>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">theta_iter <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span></span>
-<span id="cb8-2">cost <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Cost(y_obs[:,:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>])</span>
-<span id="cb8-3">grad_C <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> autograd.grad(cost)</span>
-<span id="cb8-4"></span>
-<span id="cb8-5">maxiter <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span></span>
-<span id="cb8-6">learning_rate <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Big steps</span></span>
-<span id="cb8-7"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(maxiter):</span>
-<span id="cb8-8"></span>
-<span id="cb8-9">    sol <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> BlackBox(ODESYS,y0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Y0, t <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> t, args <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">tuple</span>([theta_iter]))</span>
-<span id="cb8-10"></span>
-<span id="cb8-11">    Y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> sol[:,:<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>]</span>
-<span id="cb8-12"></span>
-<span id="cb8-13">    theta_iter <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-=</span>learning_rate<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>(grad_C(Y)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>sol[:,<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>:]).<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">sum</span>()</span>
-<span id="cb8-14"></span>
-<span id="cb8-15">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">if</span> i<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>:</span>
-<span id="cb8-16">        <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Theta estimate: "</span>, theta_iter)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  1.697027594337629</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  3.9189060278370365</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  4.810038385538704</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.251499985105974</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.427206219478129</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.46957706068474</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.47744643541383</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.4792194685272095</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.479636817124458</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Theta estimate:  5.47973599525063</code></pre>
-</div>
-</div>
-<p>And lastly, compare our fitted curves to the true curves</p>
-<div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">sol <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> BlackBox(ODESYS, y0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Y0, t <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> t, args <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">tuple</span>([theta_iter]))</span>
-<span id="cb19-2">true_sol <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> BlackBox(ODESYS, y0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> Y0, t <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> t, args <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">tuple</span>([theta]))</span>
-<span id="cb19-3"></span>
-<span id="cb19-4"></span>
-<span id="cb19-5">plt.plot(t,sol[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'S'</span>, color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'C0'</span>, linewidth <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb19-6">plt.plot(t,sol[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'I'</span>, color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'C1'</span>, linewidth <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb19-7"></span>
-<span id="cb19-8">plt.scatter(t,y_obs[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], marker <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'.'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb19-9">plt.scatter(t,y_obs[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], marker <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'.'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb19-10"></span>
-<span id="cb19-11"></span>
-<span id="cb19-12">plt.plot(t,true_sol[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>], label <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Estimated '</span>, color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k'</span>)</span>
-<span id="cb19-13">plt.plot(t,true_sol[:,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k'</span>)</span>
-<span id="cb19-14"></span>
-<span id="cb19-15">plt.legend()</span></code></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>&lt;matplotlib.legend.Legend at 0x7f8e9de4e5e0&gt;</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2019-05-21-odes/index_files/figure-html/cell-9-output-2.png" width="571" height="404"></p>
-</div>
-</div>
-</section>
-<section id="conclusions" class="level2">
-<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
-<p>Fitting ODEs via gradient descent is possible, and not as complicated as I had initially thought. There are still some relaxations to be explored. Namely: what happens if we have observations at time <img src="https://latex.codecogs.com/png.latex?t_i"> for one part of the system but not the other? How does this scale as we add more parameters to the model? Can we speed up gradient descent some how (because it takes too long to converge as it is, hence the <code>maxiter</code> variable). In any case, this was an interesting, yet related, divergence from my GSoC work. I hope you learned something.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Python</category>
-  <category>Machine Learning</category>
-  <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2019-05-21-odes/index.html</guid>
-  <pubDate>Tue, 21 May 2019 04:00:00 GMT</pubDate>
-  <media:content url="https://dpananos.github.io/posts/2019-05-21-odes/sir_curves.png" medium="image" type="image/png" height="96" width="144"/>
 </item>
 </channel>
 </rss>
