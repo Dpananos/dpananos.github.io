@@ -21,7 +21,7 @@ The shifted beta geometric model (sBG) is a model that is used to forecast reten
 * For each individual, the probability of a coin coming up "heads" does not change over time
 * The probabiliuty of heads varies across customers.  Fader and Hardie motivate the model in their paper *How to Project Customer Retention* and even provide a way to fit the model in excel. Neat!
 
-Excel isn't a great tool for fitting models, so Let's write this in Stan.
+Excel isn't a great tool for fitting models, so let's write this in Stan.
 
 ## sBG in Stan
 
