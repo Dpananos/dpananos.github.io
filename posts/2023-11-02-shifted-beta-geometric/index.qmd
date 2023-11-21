@@ -127,6 +127,8 @@ Now, let's compare with the fit
 ```{r}
 #| message: false
 #| warning: false
+#| fig-width: 8
+#| fig-asp: 0.6
 model <- cmdstanr::cmdstan_model('sbg.stan')
 
 fit <- model$sample(stan_data, refresh = 0)
@@ -148,6 +150,87 @@ surv_plot +
 Nice, not a bad fit.
 
 Model extensions seem fairly straight forward.  You could maybe model alpha and beta much in the same way you do for a beta regression.
+
+# Regression
+
+In that same paper are two examples of survival curves; one for "high end" customers and another for "regular" customers.  It should be fairly straight forward to write this as a regression model. If you've written a beta regression before, you can do this fairly readily.
+
+Now, be warned:  My approach is pretty hacky, but its just meant to illustrate a point.  Here is the regression model in full
+
+```{r}
+#| class-output: stan
+#| echo: false
+code_lines <- readLines("sbg_regression.stan")
+
+code_lines %>% 
+  cat(sep='\n')
+```
+
+
+```{r}
+#| fig-width: 8
+#| fig-asp: 0.6
+
+# Sorry for the spaghetti
+
+regular_surv <- c( 631, 468, 382, 326, 289, 262, 241, 223, 207, 194, 183, 173)
+highend_surv <- c( 869, 743, 653, 593, 551, 517, 491, 468, 445, 427, 409, 394)
+
+d <- tibble(
+  Regular = regular_surv,
+  `High End` = highend_surv,
+  time = 1:length(regular_surv)
+) %>% 
+  pivot_longer(Regular:`High End`, 
+               names_to = 'customer', 
+               values_to = 'surviving') %>% 
+  group_by(customer) %>% 
+  arrange(customer) %>% 
+  mutate(high_end = as.numeric(customer=='High End'),
+         lost = if_else(time ==1, 1000-surviving, lag(surviving, 1) - surviving),
+         n_total=1000,
+         sum_lost = sum(lost)) %>% 
+  ungroup %>% 
+  mutate(i = seq_along(time))
+  
+X <- model.matrix(~high_end, data=d)
+
+stan_data <- list(
+  n=nrow(X),
+  p=ncol(X),
+  X=X,
+  n_total=d$n_total,
+  lost=d$lost,
+  time=d$time,
+  sum_lost = d$sum_lost
+)
+
+model <- cmdstanr::cmdstan_model('sbg_regression.stan')
+
+chains <- parallel::detectCores()
+fit <- model$sample(stan_data, parallel_chains = chains, refresh = 0)
+
+fit %>% 
+  spread_draws(expected_surviving[i]) %>% 
+  mean_qi %>% 
+  left_join(d) %>% 
+  ggplot() + 
+  geom_point(aes(time, surviving, color=customer)) + 
+  geom_line(aes(time, 1000*expected_surviving, color=customer)) + 
+  geom_ribbon(aes(time, 1000*expected_surviving, ymin = 1000*.lower, ymax = 1000*.upper, fill=customer), alpha = 0.25) + 
+  see::theme_modern() + 
+  ylim(c(0, 1000)) + 
+  ylab('Customers Surviving') +
+  xlab('Time') + 
+  see::theme_modern() + 
+  theme(aspect.ratio = 1/1.61,
+        panel.grid.major = element_line()) + 
+  scale_color_brewer(palette = 'Set1') + 
+  scale_fill_brewer(palette = 'Set1')
+
+  
+```
+
 
 
 # References
