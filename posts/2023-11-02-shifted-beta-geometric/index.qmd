@@ -17,7 +17,7 @@ library(cmdstanr)
 
 The shifted beta geometric model (sBG) is a model that is used to forecast retention/survival of users in contractual settings (think netflix, disney plus, tinder gold, etc). The model is quite simple and posits:
 
-* At the end of each period, a customer flips a coin: "heads" she cancels he contract, "tails" she renews it.
+* At the end of each period, a customer flips a coin: "heads" she cancels the contract, "tails" she renews it.
 * For each individual, the probability of a coin coming up "heads" does not change over time
 * The probabiliuty of heads varies across customers.  Fader and Hardie motivate the model in their paper *How to Project Customer Retention* and even provide a way to fit the model in excel. Neat!
 
