@@ -1,6 +1,6 @@
 ---
 title: Brain Teaser About Frequentist Statistics
-date: "2023-11-20"
+date: "2023-12-01"
 code-fold: true
 echo: true
 fig-cap-location: top
