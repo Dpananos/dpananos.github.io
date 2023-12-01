@@ -10,7 +10,324 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Mon, 20 Nov 2023 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 01 Dec 2023 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Brain Teaser About Frequentist Statistics</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-12-01-ron/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Ron Kohavi is somewhat of a prominent figure in the A/B testing community. Armed with having coauthored “Trustworthy Online Controlled Experiments”, experience at places like AirBNB and Microsoft, and what seems to be a $20/month subscription to ChatGPT, he will often post these kinds of questions on LinkedIn.</p>
+<p>The post below really caught my attention (probably because of the AI generated accompanying picture, a fad everyone seems to be doing for some reason).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/linkedin.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+<p>This should be fairly simple to reason through. Below is a plot depicting the concept of statistical power. The black curve is the sampling distribution under the null, the blue curve is the sampling distribution under the alternative implied by the minimal detectable effect (MDE). The area under the blue curve is the statsitical power (its the probability we observe a test statistic greater than the critical value).</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">x <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb1-4">xs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb1-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels=</span>F, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ylab=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">''</span>)</span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lines</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>)</span>
+<span id="cb1-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">polygon</span>(</span>
+<span id="cb1-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(xs, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rev</span>(xs)),</span>
+<span id="cb1-9">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(xs, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(xs))),</span>
+<span id="cb1-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">alpha</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>),</span>
+<span id="cb1-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">border =</span> F</span>
+<span id="cb1-12">)</span>
+<span id="cb1-13"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">legend</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'topleft'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[A])), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lty=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>According to Ron, we run our experiment and observe the our (MDE) exactly. In our picture, that means we observe the mean of the sampling distribution under the alternative, so we just need to find how far out the MDE is with respect to the null distribution.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb2-2"></span>
+<span id="cb2-3">x <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb2-4">xs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels=</span>F, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ylab=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">''</span>)</span>
+<span id="cb2-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lines</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>)</span>
+<span id="cb2-7"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">polygon</span>(</span>
+<span id="cb2-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(xs, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rev</span>(xs)),</span>
+<span id="cb2-9">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(xs, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(xs))),</span>
+<span id="cb2-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">alpha</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>),</span>
+<span id="cb2-11">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">border =</span> F</span>
+<span id="cb2-12">)</span>
+<span id="cb2-13"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">legend</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'topleft'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[A])), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lty=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb2-14"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">v=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Let’s do a little bit of math. Assuming the sampling distribution under the null is standard normal, the critical value would be <img src="https://latex.codecogs.com/png.latex?%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D">. The critical value under the alternative would then be <img src="https://latex.codecogs.com/png.latex?%5Cmu_1%20+%20z_%7B1-%5Cbeta%7D%5Csigma_1">. Plugging in some numbers, this means the mean under the alternative should have a z-zcore of <img src="https://latex.codecogs.com/png.latex?%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D%20-%20%5Csigma_1z_%7B1-%5Cbeta%7D">. Now, we just need to evaluate <img src="https://latex.codecogs.com/png.latex?1%20-%20%5Cmathbf%7B%5CPhi%7D(%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D%20-%20%5Csigma_1z_%7B1-%5Cbeta%7D)">.</p>
+<p>Assume that these distributions are standardized so that <img src="https://latex.codecogs.com/png.latex?%5Cmu_0%20=%200"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma_0%20=%20%5Csigma_1=1">. This results in a p-value of</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pnorm</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.8</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lower.tail =</span> F)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00255513</code></pre>
+</div>
+</div>
+<p>and I bet because I’ve only focused on one tail I should multiply by 2, so a p value of ~ 0.005, <a href="https://www.linkedin.com/posts/ronnyk_test-your-intuition-on-p-values-you-design-activity-7136272639823663104-H7u8">which seems to be correct</a>.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-12-01-ron/index.html</guid>
+  <pubDate>Fri, 01 Dec 2023 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Estimating the Shifted Beta Geometric Model in Stan</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8772,230 +9089,6 @@ regular cv: 3000.38</code></pre>
   <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</guid>
   <pubDate>Sat, 03 Apr 2021 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Log Link vs. Log(y)</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2020-10-06-links/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>You wanna see a little gotcha in statistics? Take the following data</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)</span>
-<span id="cb1-2">N <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span></span>
-<span id="cb1-3">y <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rlnorm</span>(N, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span></code></pre></div>
-</div>
-<p>and explain why <code>glm(y ~ 1, family = gaussian(link=log)</code> and <code>lm(log(y)~1)</code> produce different estimates of the coefficients. In case you don’t have an R terminal, here are the outputs</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">log_lm <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(y) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb2-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(log_lm)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-lm(formula = log(y) ~ 1)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.61028 -0.34631 -0.02152  0.35173  1.64112 
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  0.49209    0.01578   31.18   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.499 on 999 degrees of freedom</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">glm_mod <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">glm</span>(y <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> , <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">family =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">gaussian</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">link=</span>log))</span>
-<span id="cb4-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(glm_mod)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-glm(formula = y ~ 1, family = gaussian(link = log))
-
-Deviance Residuals: 
-    Min       1Q   Median       3Q      Max  
--1.5282  -0.6981  -0.2541   0.4702   6.5869  
-
-Coefficients:
-            Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)  0.61791    0.01698    36.4   &lt;2e-16 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-(Dispersion parameter for gaussian family taken to be 0.9918425)
-
-    Null deviance: 990.85  on 999  degrees of freedom
-Residual deviance: 990.85  on 999  degrees of freedom
-AIC: 2832.7
-
-Number of Fisher Scoring iterations: 5</code></pre>
-</div>
-</div>
-<p>Answer is the same as the difference between <img src="https://latex.codecogs.com/png.latex?E(g(X))"> and <img src="https://latex.codecogs.com/png.latex?g(E(X))"> which are not always the same. Let me explain.</p>
-<p>First, let’s start with the lognormal random variable. <img src="https://latex.codecogs.com/png.latex?y%20%5Csim%20%5Coperatorname%7BLognormal%7D(%5Cmu,%20%5Csigma)"> means <img src="https://latex.codecogs.com/png.latex?%5Clog(y)%20%5Csim%20%5Coperatorname%7BNormal%7D(%5Cmu,%20%5Csigma)">. So <img src="https://latex.codecogs.com/png.latex?%5Cmu,%20%5Csigma"> are the parameters of the underlying normal distribution. When we do <code>lm(log(y) ~ 1)</code>, we are modelling <img src="https://latex.codecogs.com/png.latex?E(%5Clog(y))%20=%20%5Cbeta_0">. So <img src="https://latex.codecogs.com/png.latex?%5Cbeta_0"> is an estimate of <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cmu)"> is an estimate of the median of the lognormal. That is an easy check</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">median</span>(y)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.600898</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Meh, close enough</span></span>
-<span id="cb8-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">exp</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(log_lm))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(Intercept) 
-   1.635723 </code></pre>
-</div>
-</div>
-<p>If I wanted an estimate of the mean of the lognormal, I would need to add <img src="https://latex.codecogs.com/png.latex?%5Csigma%5E2/2"> to my estimate of <img src="https://latex.codecogs.com/png.latex?%5Cmu">.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.855038</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#Meh, close enough</span></span>
-<span id="cb12-2">sigma <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">var</span>(log_lm<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>residuals)</span>
-<span id="cb12-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">exp</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(log_lm) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> sigma<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(Intercept) 
-   1.852594 </code></pre>
-</div>
-</div>
-<p>Ok, onto the glm now. When we use the glm, we model <img src="https://latex.codecogs.com/png.latex?%5Clog(E(y))%20=%20%5Cbeta_0">, so we model the mean of the lognormal directly. Case in point</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.855038</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">exp</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(glm_mod))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(Intercept) 
-   1.855038 </code></pre>
-</div>
-</div>
-<p>and if I wanted the median, I would need to consider the extra factor of <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Csigma%5E2/2)"></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">median</span>(y)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.600898</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">exp</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(glm_mod) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> sigma<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>(Intercept) 
-   1.637881 </code></pre>
-</div>
-</div>
-<p>Log link vs.&nbsp;log outcome can be tricky. Just be sure to know what you’re modelling when you use either.</p>
-
-
-
- ]]></description>
-  <category>R</category>
-  <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2020-10-06-links/index.html</guid>
-  <pubDate>Tue, 06 Oct 2020 04:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
