@@ -1,0 +1,117 @@
+---
+title: The Generalized Gamma Distribution For Parametric Survival
+date: "2023-12-02"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+---
+
+A couple weeks back, I posted a little something something on [the Shifted Beta Geometric distribution](https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/).  That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly).
+
+Its a nice model, but I want something more flexible.  I've been aware of the generalized gamma  distribution (GDD) through Jordan Nafa (who likely uses it for some very interesting decision theory applications).  The GGD is a three parameter extension of your typical gamma distribution that looks like
+
+$$ f(t) = \dfrac{\beta}{\Gamma(k) \cdot \theta} \left( \dfrac{t}{\theta} \right)^{k\cdot \beta-1} \exp\left(-\left[\frac{t}{\theta} \right]^\beta\right) \>.$$
+
+where $\theta>0$ is a scale parameter, $\beta>0$ and $k>0$ are shape parameters, and $\Gamma(x)$ is the gamma function.  
+
+Note that the exponential, gamma, and weibull distributions are special cases (and the log normal is a limiting distribution) [^1].  
+
+That is especially nice for me.  I'm working on some life time value modelling and it would be great if I didn't have to try several models.  Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.
+
+In this post, I want to implement some survival analyses using the generalized gamma.  We'll steal some code from Krzysztof Sakrejda, and make some connections to the `{flexsurv}` implementation of the distribution as well.
+
+Let's get started.
+
+## Data
+
+We'll need some data. Rather than simulate it myself, I'll use the `veteran` data from `{survival}`.  The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle.  There is a `treatment` indicator in these data, so we'll fit one survival curve to each strata.  Shown below are the Kaplan Meir non-parametric estimates for these data.
+
+```{r}
+library(tidyverse)
+library(cmdstanr)
+library(survival)
+
+my_blue <- rgb(45/250, 62/250, 80/250, 1)
+
+my_theme<- theme_classic() %+replace% 
+           theme(panel.grid.major = element_line(),
+                 aspect.ratio = 1/1.61)
+
+vet_km <- survfit(Surv(time, status) ~ strata(trt), data=veteran)
+
+base_plot <- broom::tidy(vet_km) %>% 
+              mutate(strata = str_remove(strata, 'strata\\(trt\\)=')) %>% 
+              ggplot(aes(time, estimate, ymin=conf.low, ymax=conf.high, color=strata, fill=strata)) + 
+              geom_step() + 
+              pammtools::geom_stepribbon(alpha=0.5, size=0) 
+
+base_plot +
+  my_theme + 
+  labs(x='Time', y=expression(S(t))) +
+  scale_fill_brewer(palette = 'Set1') +
+  scale_color_brewer(palette = 'Set1') +
+  xlim(0, 500)
+```
+
+## `_lpdf`, `_lcdf`, and `_lccdf` Implementations in Stan
+
+We're going to need three functions in Stan:
+
+* `generalized_gamma_lpdf` so we can increment the log posterior density when we observe an outcome.
+* `generalized_gamma_lccdf` so we can increment the log posterior density when we observe a censoring event, and 
+* `generalized_gamma_lcdf` so we can implement the `_lccdf`.
+
+
+The first and third functions are implemented already by Krzysztof Sakrejda in [this repo](https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part).  Krzysztof uses a slightly different parameterization than what I've written here.  The density is
+
+$$ f(x) $$
+
+The `_lpdf` and `_lcdf` are given, so now we just need the complementary cdf function `_lccdf`. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf.  Since we have the log cdf we could just do
+
+```{r}
+#| class-output: stan
+#| echo: false
+
+
+cat('
+
+real lawless_generalized_gamma_lccdf(real x, real k, real mu, real sigma) {
+ 
+ return log(1 - exp(lawless_generalized_gamma_lcdf(x | k, mu sigma)));
+ 
+}'
+)
+
+```
+
+
+Stan has a nicer function to do this called `log_diff_exp` which can be used to take differences in exponential space and then take the log of the result.  Our `functions` block then looks like
+
+```{r}
+#| class-output: stan
+#| echo: false
+code_lines <- readLines("generalized_gamma_right_censoring.stan")
+
+code_lines[1:26] %>%   
+  cat(sep='\n')
+
+```
+
+The `data` and `paramaters` block are not all that interesting, and if you've coded in Stan before you can probably guess what they look like (if not, everything is on github, so take a look there).
+
+The `model` block is where the meat of the work is.  For each observation, we will increment `target` by `_lpdf` if the observation is observed, else we will increment by `_lccdf`. The `model` block looks like
+
+```{r}
+#| class-output: stan
+#| echo: false
+code_lines <- readLines("generalized_gamma_right_censoring.stan")
+
+code_lines[37:50] %>% 
+  cat(sep='\n')
+
+```
+
+[^1]: Left as an exercise to the reader.
