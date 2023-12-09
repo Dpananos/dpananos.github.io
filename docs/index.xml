@@ -10,7 +10,263 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Fri, 01 Dec 2023 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 02 Dec 2023 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>The Generalized Gamma Distribution For Parametric Survival</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2023-12-02-gen-gamma/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>A couple weeks back, I posted a little something something on <a href="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/">the Shifted Beta Geometric distribution</a>. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly). Its a nice model, but I want something more flexible.</p>
+<p>I’ve been aware of the generalized gamma distribution through Jordan Nafa (who likely uses it for some very interesting decision theory applications). Briefly, if <img src="https://latex.codecogs.com/png.latex?T"> is the event time, then let <img src="https://latex.codecogs.com/png.latex?Y=%5Clog(T)">, and <img src="https://latex.codecogs.com/png.latex?Z%20=%20(Y-%5Cmu)/%5Csigma">. Then <img src="https://latex.codecogs.com/png.latex?Z"> has the following density</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20f(z%20;%20k)=%5Cfrac%7Bk%5E%7Bk-1%20/%202%7D%7D%7B%5CGamma(k)%7D%20%5Cexp%20%5Cleft(k%5E%7B1%20/%202%7D%20z-k%20e%5E%7Bk%5E%7B-1%20/%202%7D%20z%7D%5Cright)"></p>
+<p>and <img src="https://latex.codecogs.com/png.latex?T%20=%20%5Clog(Y)"> is distributed according to the generalized gamma distribution . Here, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20z%20%5Clt%20%5Cinfty">, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20%5Cmu%20%5Clt%20%5Cinfty">, and <img src="https://latex.codecogs.com/png.latex?%5Csigma,%20k%3E0">. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
+<p>The nice thing about the generalized gamma is that the exponential, gamma, and weibull distributions – all common parmetric survival likelihoods – are special cases (and the log normal is a limiting distribution) <sup>1</sup>.<br>
+That is especially nice for me. I’m working on some life time value modelling and it would be great if I didn’t have to try several models. Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.</p>
+<p>In this post, I want to implement some survival analyses using the generalized gamma. Let’s get started.</p>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <img src="https://latex.codecogs.com/png.latex?S(t)">, I choose to plot <img src="https://latex.codecogs.com/png.latex?1-S(t)"> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <img src="https://latex.codecogs.com/png.latex?t">”. The log of this quantity is the cumulative hazard, but I don’t know if <img src="https://latex.codecogs.com/png.latex?1-S(t)"> has a proper name. I mean … it is techincally an estimate of teh CDF of the event time distribution.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Non-parametric estimate of <img src="https://latex.codecogs.com/png.latex?1%20-%20S(t%7Ctrt)"> for each <code>trt</code> strata in the veteran dataset. The curves look roughly exponential meaning the generalized gamma should provide a good fit.</figcaption>
+<p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Stan does not have an implementation for the generalized gamma, so we’ll have to write that ourselves in the <code>functions</code> block.</p>
+</section>
+<section id="lpdf-_lcdf-and-_lccdf-implementations-in-stan" class="level2">
+<h2 class="anchored" data-anchor-id="lpdf-_lcdf-and-_lccdf-implementations-in-stan"><code>_lpdf</code>, <code>_lcdf</code>, and <code>_lccdf</code> Implementations in Stan</h2>
+<p>To do parametric survival analysis in Stan, we need three functions:</p>
+<ul>
+<li>The log probability density as <code>generalized_gamma_lpdf</code> so we can increment the log posterior density when we observe an outcome,</li>
+<li>The log complementary CDF as <code>generalized_gamma_lccdf</code> so we can increment the log posterior density when we observe a censoring event, and</li>
+<li>The log CDF as <code>generalized_gamma_lcdf</code> so we can implement the <code>_lccdf</code>.</li>
+</ul>
+<p>The first and third functions are implemented already by Krzysztof Sakrejda in <a href="https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part">this repo</a>. The <code>_lpdf</code> and <code>_lcdf</code> are given, so now we just need the complementary cdf function <code>_lccdf</code>. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf. Since we have the log cdf we could just do</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_lccdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> x, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb1-4"> </span>
+<span id="cb1-5"> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> log(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - exp(generalized_gamma_lcdf(x | k, mu sigma)));</span>
+<span id="cb1-6"> </span>
+<span id="cb1-7">}</span></code></pre></div>
+</div>
+</div>
+<p>Stan has a nicer function to do this called <code>log_diff_exp</code> which can be used to take differences in exponential space and then take the log of the result.</p>
+<p>Additionally, we can create a random number generator for the generalized gamma distribution by noting that <code>flexsurv</code>’s implementation of the generalized gamma is equivalent to ours if we let <img src="https://latex.codecogs.com/png.latex?Q=1/%5Csqrt%7Bk%7D">. Our <code>functions</code> block then looks like</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">functions</span> {</span>
+<span id="cb2-2">  </span>
+<span id="cb2-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_lpdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> x, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb2-4">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> w;</span>
+<span id="cb2-5">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> d;</span>
+<span id="cb2-6">    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-7">    d = (k - .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>) * log(k) - log(sigma) - lgamma(k) + (sqrt(k) * w - k * exp(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> / sqrt(k) * w)) - log(x);</span>
+<span id="cb2-8">    </span>
+<span id="cb2-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> d;</span>
+<span id="cb2-10">  }</span>
+<span id="cb2-11">  </span>
+<span id="cb2-12">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_cdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> x, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb2-13">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> w;</span>
+<span id="cb2-14">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> d;</span>
+<span id="cb2-15">    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-16">    d = gamma_p(k, k * exp(w / sqrt(k)));</span>
+<span id="cb2-17">    </span>
+<span id="cb2-18">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> d;</span>
+<span id="cb2-19">  }</span>
+<span id="cb2-20">  </span>
+<span id="cb2-21">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_lcdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> x, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb2-22">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> w;</span>
+<span id="cb2-23">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> d;</span>
+<span id="cb2-24">    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-25">    d = log(gamma_p(k, k * exp(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> / sqrt(k) * w)));</span>
+<span id="cb2-26">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> d;</span>
+<span id="cb2-27">  }</span>
+<span id="cb2-28">  </span>
+<span id="cb2-29">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_lccdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> x, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb2-30">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> log_diff_exp(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, generalized_gamma_lcdf(x | k, mu, sigma));</span>
+<span id="cb2-31">  }</span>
+<span id="cb2-32">  </span>
+<span id="cb2-33">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> generalized_gamma_rng(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> k, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma) {</span>
+<span id="cb2-34">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> Q = <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span> / sqrt(k);</span>
+<span id="cb2-35">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> gamma = gamma_rng(Q^-<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb2-36">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> w = log(Q^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> * gamma) / Q;</span>
+<span id="cb2-37">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> exp(mu + sigma * w);</span>
+<span id="cb2-38">  }</span>
+<span id="cb2-39">  </span></code></pre></div>
+</div>
+</div>
+</section>
+<section id="fitting-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-the-model">Fitting The Model</h2>
+<p>The model fits fairly quickly (4 chains in parallel takes &lt;2 seconds on my M1 Pro macbook pro). We can easily plot the survival curve against the Kaplan-Meir estimate to compare, however a better comparison would be to draw samples from the event time distribution and compute the ecdf of those samples. That plot is shown below, and is equivalent to a posterior predictive check in the case where there is no censoring. You can see that the KM estimates look similar to the ecdfs, which is good enough for me.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 chains, at most 10 in parallel...
+
+Chain 1 finished in 1.4 seconds.
+Chain 2 finished in 1.4 seconds.
+Chain 3 finished in 1.4 seconds.
+Chain 4 finished in 1.4 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 1.4 seconds.
+Total execution time: 1.5 seconds.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Kaplan-Meir estimates (black) with posterior survival functions.</figcaption>
+<p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Kaplan-Meir estimates (black) with estimated ECDFs computed from draws of the posterior distribution. Each colored line corresponds to one sample of event times from the posterior distribution, conditional on <img src="https://latex.codecogs.com/png.latex?%5Cmu">, <img src="https://latex.codecogs.com/png.latex?%5Csigma">, and <img src="https://latex.codecogs.com/png.latex?k">.</figcaption>
+<p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Left as an exercise to the reader.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2023-12-02-gen-gamma/index.html</guid>
+  <pubDate>Sat, 02 Dec 2023 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Brain Teaser About Frequentist Statistics</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -9037,58 +9293,6 @@ regular cv: 3000.38</code></pre>
   <category>Scikit-Learn</category>
   <guid>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</guid>
   <pubDate>Tue, 23 Nov 2021 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>On Interpretations of Confidence Intervals</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>The 95% in 95% confidence interval refers not to the probability that any one interval contains the estimand, but rather to the long term relative frequency of the estimator containing the estimand in an infinite sequence of replicated experiments under ideal conditions.</p>
-<p>Now, if this were twitter I would get ratioed so hard I might have to take a break and walk it off. Luckily, this is my blog and not yours so I can say whatever I want with impunity. But, rather than shout my opinions and demand people listen, I thought it might be a good exercise to explain to you why I think this and perhaps why people might disagree. Let’s for a moment ignore the fact that the interpretation I use above is the <em>de jure</em> definition of a confidence interval and instead start where a good proportion of statistical learning starts; with a deck of shuffled cards.</p>
-<p>I present to you a shuffled deck. Its a regular deck of cards, no funny business with the cards or the shuffling. What is the probability the top card of <em>this</em> deck an ace? I’d wager a good portion of people would say 4/52. If you, dear reader, said 4/52 then I believe you have made a benign mistake, but a mistake all the same. And I suspect the reason you’ve made this mistake is because you’ve swapped a hard question (the question about <em>this</em> deck) for an easier question (a question about the long term relative frequencies of coming to shuffled decks with no funny business and finding aces).</p>
-<p>Swapping hard questions for easy questions is not a new observation. Daniel Khaneman writes about it in <em>Thinking Fast and Slow</em> and provides numerous examples. I’ll repeat some examples from the book here. We might swap the question:</p>
-<ul>
-<li>“How much would you contribute to save dolphins?” for “how much emotion do I feel when I think of dying dolphins?”</li>
-<li>“How happy are you with your life?” for “What is my mood right now?”, and poignantly</li>
-<li>“This woman is running for the primary. How far will she go in politics?” for “Does this woman look like a political winner”.</li>
-</ul>
-<p>The book <em>Thinking Fast and Slow</em> explains why we do this, or better yet why we have no control over this. I won’t explain it here. But it is important to know that this is something we do, mostly unconsciously.</p>
-<p>So back to the deck of cards. Questions about the deck in front of you are hard. Its either an ace or not, but you can’t tell! The card is face down and there is no other information you could use to make the decision. So, you answer an easier one using information that you do know, namely the number of aces in the deck, the number of cards in the deck, the information that each card is equally likely to be on top given the fact there is no funny business with the cards or the shuffling, and the basic rules of probability you might have learned in high school if not elsewhere. But the answer you give is for a fundamentally different question, namely “If I were to observe a long sequence of well shuffled decks with no funny business, what fraction of them have an ace on top?”. Your answer is about that long sequence of shuffled decks. It isn’t about any one particular deck, and certainly not the one in front of you.</p>
-<p>I think the same thing happens with confidence intervals. The estimator has the property that 95% of the time it is constructed (under ideal circumstances) it will contain the estimand. But any one interval does or does not contain the estimand. And unlike the deck of cards which can easily be examined, we can’t ever know for certain if the interval successfully captured the estimand. There is no moment where we get to verify the estimand is in the confidence interval, and so we are sort of left guessing thus prompting us to offer a probability that we are right.</p>
-<p>The mistake is benign. It hurts no one to think about confidence intervals as having a 95% probability of containing the estimand. Your company will not lose money, your paper will (hopefully) not be rejected, and the world will not end. That being said, it is unfortunately incorrect if not by appealing to the definition, then perhaps for other reasons.</p>
-<p>I’ll start with an appeal to authority. Sander Greenland and coauthors (who include notable epidemiologist Ken Rothman and motherfucking Doug Altman) include interpretation of a confidence interval as having 95% probability of containing the true effect as misconception 19 in <a href="https://link.springer.com/content/pdf/10.1007/s10654-016-0149-3.pdf">this amazing paper</a>. They note ” It is possible to compute an interval that can be interpreted as having 95% probability of containing the true value” but go on to say that this results in us doing a Bayesian analysis and computing a credible interval. If these guys are wrong, I don’t want to be right.</p>
-<p>Additionally, when I say “The probability of a coin being flipped heads is 0.5” that references a long term frequency. I could, in principle, demonstrate that frequency by flipping a coin a lot and computing the empirical frequency of heads, which assuming the coin is fair and the number of flips large enough, will be within an acceptable range 0.5. To those people who say “This interval contains the estimand with 95% probability” I say “prove it”. Demonstrate to me via simulation or otherwise this long term relative frequency. I can’t imagine how this could be demonstrated because any fixed dataset will yield same answer over and over. Perhaps what supporters of this perspective mean is something closer to the Bayesian interpretation of probability (where probability is akin to strength in a belief). If so, the debate is decidedly answered because probability in frequentism is not about belief strength but about frequencies. Additionally, what is the random component in this probability? The data from the experiment are fixed, to allow these to vary is to appeal to my interpretation of the interval. If the estimand is random, then we are in another realm all together as frequentism assumes fixed parameters and random data. Maybe they mean something else which I just can’t think of. If there is something else, please let me know.</p>
-<p>I’ve gotten flack about confidence intervals on twitter.</p>
-<section id="flack-1-framing-it-as-a-bet" class="level2">
-<h2 class="anchored" data-anchor-id="flack-1-framing-it-as-a-bet">Flack 1: Framing It As A Bet</h2>
-<p>You present to me a shuffled deck with no funny business and offer me a bet in which I win X0,000 dollars if the card is an ace and lose X0 dollars if the card is not. “Aha Demetri! If you think the probability of the card on top being an ace is 0 or 1 you are either a fool for not taking the bet or are a fool for being so over confident! Your position is indefensible!” one person on twitter said to me (ok, they didn’t say it verbatim like this, but that was the intent).</p>
-<p>Well, not so fast. Nothing about my interpretation precludes me from using the answer to a simpler question to make decisions (I would argue statistics is the practice of doing jus that, but I digress). The top card is still an ace or not, but I can still think about an infinite sequence of shuffled decks anyway. In most of those scenarios, the card on top is an ace. Thus, I take the bet and hope the top card is an ace (much like I hope the confidence interval captures the true estimand, even though I know it either does or does not).</p>
-</section>
-<section id="flack-2-my-next-interval-has-95-probability" class="level2">
-<h2 class="anchored" data-anchor-id="flack-2-my-next-interval-has-95-probability">Flack 2: My Next Interval Has 95% Probability</h2>
-<p>“But Demetri, if 95% refers to the frequency of intervals containing the estimand, then surely my next interval has 95% probability of capturing the estimand prior to seeing data. Hence, individual intervals <em>do</em> have 95% probability of containing the estimand”.</p>
-<p>I get this sometimes, but don’t fully understand how it is supposed to be convincing. I see no problem with saying “the next interval has 95% probability” just like I have no problem with saying “If you shuffle those cards, the probability an ace is on top is 4/52” or “My next <a href="https://en.wikipedia.org/wiki/Tim_Hortons#Roll_Up_the_Rim_to_Win_campaign">Roll Up The Rim</a> cup has a 1 in 6 chance of winning”. This is starting to get more philosophical than I care it to, but those all reference non-existent things. Once they are brought into existence, it would be silly to think that they retain these properties. My cup is either winner or loser, even if I don’t roll it.</p>
-</section>
-<section id="flack-3-but-schrödingers-cat" class="level2">
-<h2 class="anchored" data-anchor-id="flack-3-but-schrödingers-cat">Flack 3: But Schrödinger’s Cat…</h2>
-<p>No.&nbsp;Stop. This is not relevant in the least. I’m talking about cards and coins, not quarks or electrons. The Wikipedia article even says “Schrödinger did not wish to promote the idea of dead-and-live cats as a serious possibility; on the contrary, he intended the example to illustrate the absurdity of the existing view of quantum mechanics”. Cards can’t be and not-be aces until flipped. Get out of here.</p>
-</section>
-<section id="wrapping-up-dont-me" class="level2">
-<h2 class="anchored" data-anchor-id="wrapping-up-dont-me">Wrapping Up, Don’t @ Me</h2>
-<p>To be completely fair, I think the question about the cards I’ve presented to you is unfair. The question asks for a probability, and while 0 and 1 are valid probabilities, the question is phrased in a way so that you are prompted for a number between 0 and 1. Likewise, the name “95% confidence interval” begs for the wrong interpretation. That is the problem we face when we use language, which is naturally imprecise and full of shortcuts and ambiguity, to talk about things as precise as mathematics. It is a seminal case study in what I like to call the precision-usefulness trade off; precise statements are not useful. It is by, interpreting them and communicating them in common language that they become useful and that usefulness comes at the cost of precision (note, this explanation of the trade off is <em>itself</em> susceptible to the trade off). The important part is that we use confidence intervals to convey uncertainty in the estimate for which they are derived from. It isn’t important what you or I think about it, as the confidence interval is merely a means to an end.</p>
-<p>AS I noted, the mistake is benign, and these arguments are mostly a mental exercise than a fight against a method which may induce harm. Were it not for COVID19, I would encourage us all to go out for a beer and have these conversations rather than do it over twitter. Anyway, if you promise not to @ me anymore about this and I promise not to tweet about it anymore.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</guid>
-  <pubDate>Sat, 03 Apr 2021 04:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

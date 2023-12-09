@@ -6,31 +6,35 @@ echo: true
 fig-cap-location: top
 categories: []
 number-sections: false
-draft: true
+draft: false
 ---
 
-A couple weeks back, I posted a little something something on [the Shifted Beta Geometric distribution](https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/).  That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly).
+A couple weeks back, I posted a little something something on [the Shifted Beta Geometric distribution](https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/).  That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly).  Its a nice model, but I want something more flexible.  
 
-Its a nice model, but I want something more flexible.  I've been aware of the generalized gamma  distribution (GDD) through Jordan Nafa (who likely uses it for some very interesting decision theory applications).  The GGD is a three parameter extension of your typical gamma distribution that looks like
+I've been aware of the generalized gamma  distribution through Jordan Nafa (who likely uses it for some very interesting decision theory applications). Briefly, if $T$ is the event time, then let $Y=\log(T)$, and $Z = (Y-\mu)/\sigma$.  Then $Z$ has the following density
 
-$$ f(t) = \dfrac{\beta}{\Gamma(k) \cdot \theta} \left( \dfrac{t}{\theta} \right)^{k\cdot \beta-1} \exp\left(-\left[\frac{t}{\theta} \right]^\beta\right) \>.$$
+$$ f(z ; k)=\frac{k^{k-1 / 2}}{\Gamma(k)} \exp \left(k^{1 / 2} z-k e^{k^{-1 / 2} z}\right)$$
 
-where $\theta>0$ is a scale parameter, $\beta>0$ and $k>0$ are shape parameters, and $\Gamma(x)$ is the gamma function.  
+and $T = \log(Y)$ is distributed according to the generalized gamma distribution .  Here, $-\infty \lt z \lt \infty$, $-\infty \lt \mu \lt \infty$,  and $\sigma, k>0$.  For more on the generalized gamma, especially for use in survival analysis, see *Statistical Models and Methods for Lifetime Data* by Jerry Lawless (1982).
 
-Note that the exponential, gamma, and weibull distributions are special cases (and the log normal is a limiting distribution) [^1].  
-
+The nice thing about the generalized gamma is that the exponential,  gamma, and  weibull distributions -- all common parmetric survival likelihoods -- are special cases (and the log normal is a limiting distribution) [^1].  
 That is especially nice for me.  I'm working on some life time value modelling and it would be great if I didn't have to try several models.  Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.
 
-In this post, I want to implement some survival analyses using the generalized gamma.  We'll steal some code from Krzysztof Sakrejda, and make some connections to the `{flexsurv}` implementation of the distribution as well.
-
+In this post, I want to implement some survival analyses using the generalized gamma. 
 Let's get started.
 
 ## Data
 
-We'll need some data. Rather than simulate it myself, I'll use the `veteran` data from `{survival}`.  The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle.  There is a `treatment` indicator in these data, so we'll fit one survival curve to each strata.  Shown below are the Kaplan Meir non-parametric estimates for these data.
+We'll need some data. Rather than simulate it myself, I'll use the `veteran` data from `{survival}`.  The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle.  There is a `trt` indicator in these data, so we'll fit one survival curve to each strata.  Shown below are the Kaplan-Meir non-parametric estimates for these data.  Rather than plot the survival curve $S(t)$, I choose to plot $1-S(t)$ because my brain groks the plot easier as "the proportion of individuals in a cohort who would have experienced the outcome by time $t$".  The log of this quantity is the cumulative hazard, but I don't know if $1-S(t)$ has a proper name.  I mean ... it is techincally an estimate of teh CDF of the event time distribution.  
 
 ```{r}
+#| fig-cap: Non-parametric estimate of $1 - S(t|trt)$ for each `trt` strata in the veteran dataset.  The curves look roughly exponential meaning the generalized gamma should provide a good fit.
+#| code-fold: false
+#| echo: false
+#| message: false
+
 library(tidyverse)
+library(tidybayes)
 library(cmdstanr)
 library(survival)
 
@@ -41,35 +45,37 @@ my_theme<- theme_classic() %+replace%
                  aspect.ratio = 1/1.61)
 
 vet_km <- survfit(Surv(time, status) ~ strata(trt), data=veteran)
+bkm <- broom::tidy(vet_km) %>% 
+       mutate(strata = str_remove(strata, 'strata\\(trt\\)=trt=')) %>% 
+       rename(trt=strata)
 
-base_plot <- broom::tidy(vet_km) %>% 
-              mutate(strata = str_remove(strata, 'strata\\(trt\\)=')) %>% 
-              ggplot(aes(time, estimate, ymin=conf.low, ymax=conf.high, color=strata, fill=strata)) + 
+
+base_plot <- bkm %>% 
+              ggplot(aes(time, 1-estimate, ymax=1-conf.low, ymin=1-conf.high, color=trt, fill=trt)) + 
               geom_step() + 
               pammtools::geom_stepribbon(alpha=0.5, size=0) 
 
 base_plot +
   my_theme + 
-  labs(x='Time', y=expression(S(t))) +
+  labs(x='Time', y=expression(1-S(t))) +
   scale_fill_brewer(palette = 'Set1') +
   scale_color_brewer(palette = 'Set1') +
-  xlim(0, 500)
+  coord_cartesian(xlim=c(0, 250)) + 
+  scale_y_continuous(labels = scales::percent)
 ```
+
+Stan does not have an implementation for the generalized gamma, so we'll have to write that ourselves in the `functions` block.
 
 ## `_lpdf`, `_lcdf`, and `_lccdf` Implementations in Stan
 
-We're going to need three functions in Stan:
+To do parametric survival analysis in Stan, we need three functions:
 
-* `generalized_gamma_lpdf` so we can increment the log posterior density when we observe an outcome.
-* `generalized_gamma_lccdf` so we can increment the log posterior density when we observe a censoring event, and 
-* `generalized_gamma_lcdf` so we can implement the `_lccdf`.
+* The log probability density as `generalized_gamma_lpdf` so we can increment the log posterior density when we observe an outcome,
+* The log complementary CDF as `generalized_gamma_lccdf` so we can increment the log posterior density when we observe a censoring event, and 
+* The log CDF as `generalized_gamma_lcdf` so we can implement the `_lccdf`.
 
 
-The first and third functions are implemented already by Krzysztof Sakrejda in [this repo](https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part).  Krzysztof uses a slightly different parameterization than what I've written here.  The density is
-
-$$ f(x) $$
-
-The `_lpdf` and `_lcdf` are given, so now we just need the complementary cdf function `_lccdf`. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf.  Since we have the log cdf we could just do
+The first and third functions are implemented already by Krzysztof Sakrejda in [this repo](https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part).  The `_lpdf` and `_lcdf` are given, so now we just need the complementary cdf function `_lccdf`. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf.  Since we have the log cdf we could just do
 
 ```{r}
 #| class-output: stan
@@ -78,9 +84,9 @@ The `_lpdf` and `_lcdf` are given, so now we just need the complementary cdf fun
 
 cat('
 
-real lawless_generalized_gamma_lccdf(real x, real k, real mu, real sigma) {
+real generalized_gamma_lccdf(real x, real k, real mu, real sigma) {
  
- return log(1 - exp(lawless_generalized_gamma_lcdf(x | k, mu sigma)));
+ return log(1 - exp(generalized_gamma_lcdf(x | k, mu sigma)));
  
 }'
 )
@@ -88,30 +94,126 @@ real lawless_generalized_gamma_lccdf(real x, real k, real mu, real sigma) {
 ```
 
 
-Stan has a nicer function to do this called `log_diff_exp` which can be used to take differences in exponential space and then take the log of the result.  Our `functions` block then looks like
+Stan has a nicer function to do this called `log_diff_exp` which can be used to take differences in exponential space and then take the log of the result.  
+
+
+Additionally, we can create a random number generator for the generalized gamma distribution by noting that `flexsurv`'s implementation of the generalized gamma is equivalent to ours if we let $Q=1/\sqrt{k}$.  Our `functions` block then looks like
 
 ```{r}
 #| class-output: stan
 #| echo: false
+
 code_lines <- readLines("generalized_gamma_right_censoring.stan")
 
-code_lines[1:26] %>%   
+code_lines[1:39] %>% 
   cat(sep='\n')
 
 ```
 
-The `data` and `paramaters` block are not all that interesting, and if you've coded in Stan before you can probably guess what they look like (if not, everything is on github, so take a look there).
 
-The `model` block is where the meat of the work is.  For each observation, we will increment `target` by `_lpdf` if the observation is observed, else we will increment by `_lccdf`. The `model` block looks like
+## Fitting The Model
+
+The model fits fairly quickly (4 chains in parallel takes <2 seconds on my M1 Pro macbook pro).  We can easily plot the survival curve against the Kaplan-Meir estimate to compare, however a better comparison would be to draw samples from the event time distribution and compute the ecdf of those samples. That plot is shown below, and is equivalent to a posterior predictive check in the case where there is no censoring.  You can see that the KM estimates look similar to the ecdfs, which is good enough for me.
 
 ```{r}
-#| class-output: stan
+#| code-fold: false
 #| echo: false
-code_lines <- readLines("generalized_gamma_right_censoring.stan")
+#| message: false
 
-code_lines[37:50] %>% 
-  cat(sep='\n')
 
+stan_data <- list(
+  n = nrow(veteran),
+  n_trt = length(unique(veteran$trt)),
+  time = veteran$time,
+  trt = veteran$trt,
+  censored = 1 - veteran$status,
+  nt = 1000,
+  pred_time = seq(0, 250, length.out=1000),
+  
+  mu_df = 10,
+  mu_loc = 0,
+  mu_scale = 1,
+  
+  sigma_df = 30,
+  sigma_loc = 1,
+  sigma_scale = 1,
+  
+  k_df = 30,
+  k_loc = 1,
+  k_scale = 1
+)
+
+model <- cmdstan_model('generalized_gamma_right_censoring.stan')
+fit <- model$sample(stan_data, refresh = 0, parallel_chains = 10)
+
+
+surv_plot <- fit %>% 
+  spread_draws(survival_curve[i, trt]) %>% 
+  mutate(time = stan_data$pred_time[i]) %>% 
+  group_by(time, trt) %>% 
+  mean_qi %>% 
+  mutate(trt = as.character(trt)) %>% 
+  ggplot(aes(time, survival_curve, ymin = survival_curve.lower, ymax = survival_curve.upper, color=trt, fill=trt)) + 
+  geom_line() +
+  geom_step(
+    data=bkm,
+    aes(time, 1-estimate),
+    inherit.aes = F
+  ) + 
+  geom_ribbon(alpha=0.5, size=0) + 
+  scale_fill_brewer(palette = 'Set1')+
+  scale_color_brewer(palette = 'Set1')+
+  facet_wrap(~trt, labeller = label_both) + 
+  theme(aspect.ratio = 1/1.61) + 
+  my_theme + 
+  xlim(0, 250) + 
+  labs(
+    x='Time',
+    y = expression(1-S(t))
+  ) + 
+  scale_y_continuous(labels=scales::percent)
+
+
+ppc_plot <- fit %>% 
+  spread_draws(time_ppc[i, trt], ndraws = 250) %>% 
+  group_by(time_ppc, trt) %>% 
+  mutate(trt = as.character(trt)) %>% 
+  ggplot() + 
+  stat_ecdf(aes(time_ppc, color=trt, group=interaction(.chain, .iteration, .draw)), alpha=0.25) + 
+  facet_wrap(~trt, labeller = label_both) + 
+  theme(aspect.ratio = 1/1.61) + 
+  geom_step(
+    data=bkm,
+    aes(time, 1-estimate),
+    inherit.aes = F
+  ) +
+  scale_fill_brewer(palette = 'Set1')+
+  scale_color_brewer(palette = 'Set1')+
+  labs(
+    x='Time',
+    y = expression(1-S(t))
+  ) +
+  coord_cartesian(xlim = c(0, 250)) + 
+  my_theme + 
+  scale_y_continuous(labels=scales::percent)
+
+
+```   
+
+```{r}
+#| fig-cap: Kaplan-Meir estimates (black) with posterior survival functions.
+#| code-fold: false
+#| echo: false
+surv_plot + 
+  theme(aspect.ratio = 1) 
+```
+
+```{r}
+#| fig-cap: Kaplan-Meir estimates (black) with estimated ECDFs computed from draws of the posterior distribution.  Each colored line corresponds to one sample of event times from the posterior distribution, conditional on $\mu$, $\sigma$, and $k$.
+#| code-fold: false
+#| echo: false
+ppc_plot + 
+    theme(aspect.ratio = 1) 
 ```
 
 [^1]: Left as an exercise to the reader.

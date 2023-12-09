@@ -2,110 +2,114 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://dpananos.github.io/consulting/index.html</loc>
-    <lastmod>2023-12-01T15:53:29.324Z</lastmod>
+    <lastmod>2023-12-09T02:38:55.380Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/index.html</loc>
-    <lastmod>2023-12-07T19:57:15.203Z</lastmod>
+    <lastmod>2023-12-09T02:39:14.651Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-04-03-confidence-intervals/index.html</loc>
-    <lastmod>2023-12-01T15:53:26.921Z</lastmod>
+    <lastmod>2023-12-09T02:38:52.739Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</loc>
-    <lastmod>2023-12-01T15:53:25.996Z</lastmod>
+    <lastmod>2023-12-09T02:38:51.641Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/index.html</loc>
-    <lastmod>2023-12-01T15:53:24.768Z</lastmod>
+    <lastmod>2023-12-09T02:38:50.352Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</loc>
-    <lastmod>2023-12-01T15:53:23.700Z</lastmod>
+    <lastmod>2023-12-09T02:38:49.247Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index.html</loc>
-    <lastmod>2023-12-01T15:53:22.719Z</lastmod>
+    <lastmod>2023-12-09T02:38:48.212Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</loc>
-    <lastmod>2023-12-01T15:53:21.559Z</lastmod>
+    <lastmod>2023-12-09T02:38:46.966Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</loc>
-    <lastmod>2023-12-01T15:53:20.313Z</lastmod>
+    <lastmod>2023-12-09T02:38:45.659Z</lastmod>
   </url>
   <url>
-    <loc>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</loc>
-    <lastmod>2023-12-01T15:53:19.655Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2023-03-31-optimal-mde/index.html</loc>
-    <lastmod>2023-12-01T15:53:18.704Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</loc>
-    <lastmod>2023-12-01T15:53:17.828Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2017-12-29-coins/index.html</loc>
-    <lastmod>2023-12-01T15:53:16.918Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2019-05-21-odes/index.html</loc>
-    <lastmod>2023-12-01T15:53:15.057Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</loc>
-    <lastmod>2023-12-01T15:53:14.330Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/index.html</loc>
-    <lastmod>2023-12-01T15:53:15.619Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</loc>
-    <lastmod>2023-12-01T15:53:16.551Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2022-12-06-journeyman/index.html</loc>
-    <lastmod>2023-12-01T15:53:17.288Z</lastmod>
-  </url>
-  <url>
-    <loc>https://dpananos.github.io/posts/2023-09-11-right/index.html</loc>
-    <lastmod>2023-12-01T15:53:18.066Z</lastmod>
+    <loc>https://dpananos.github.io/posts/2023-12-02-gen-gamma/index.html</loc>
+    <lastmod>2023-12-09T02:38:44.898Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</loc>
-    <lastmod>2023-12-01T15:53:19.286Z</lastmod>
+    <lastmod>2023-12-09T02:38:44.018Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-09-11-right/index.html</loc>
+    <lastmod>2023-12-09T02:38:42.617Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2022-12-06-journeyman/index.html</loc>
+    <lastmod>2023-12-09T02:38:41.691Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</loc>
+    <lastmod>2023-12-09T02:38:40.779Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/index.html</loc>
+    <lastmod>2023-12-09T02:38:39.635Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</loc>
+    <lastmod>2023-12-09T02:38:38.141Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2019-05-21-odes/index.html</loc>
+    <lastmod>2023-12-09T02:38:38.976Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2017-12-29-coins/index.html</loc>
+    <lastmod>2023-12-09T02:38:41.237Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</loc>
+    <lastmod>2023-12-09T02:38:42.318Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2023-03-31-optimal-mde/index.html</loc>
+    <lastmod>2023-12-09T02:38:43.376Z</lastmod>
+  </url>
+  <url>
+    <loc>https://dpananos.github.io/posts/2018-08-31-combinatorics/index.html</loc>
+    <lastmod>2023-12-09T02:38:44.461Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</loc>
-    <lastmod>2023-12-01T15:53:21.130Z</lastmod>
+    <lastmod>2023-12-09T02:38:46.495Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2023-12-01-ron/index.html</loc>
-    <lastmod>2023-12-02T19:53:45.351Z</lastmod>
+    <lastmod>2023-12-09T02:38:47.519Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2022-08-16-pca/index.html</loc>
-    <lastmod>2023-12-01T15:53:23.294Z</lastmod>
+    <lastmod>2023-12-09T02:38:48.893Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index.html</loc>
-    <lastmod>2023-12-02T19:53:45.963Z</lastmod>
+    <lastmod>2023-12-09T02:38:49.908Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2020-10-06-links/index.html</loc>
-    <lastmod>2023-12-01T15:53:25.227Z</lastmod>
+    <lastmod>2023-12-09T02:38:50.865Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/posts/2023-09-24-l1/index.html</loc>
-    <lastmod>2023-12-01T15:53:27.471Z</lastmod>
+    <lastmod>2023-12-09T02:38:53.348Z</lastmod>
   </url>
   <url>
     <loc>https://dpananos.github.io/about.html</loc>
-    <lastmod>2023-12-01T15:53:29.088Z</lastmod>
+    <lastmod>2023-12-09T02:38:55.093Z</lastmod>
   </url>
 </urlset>

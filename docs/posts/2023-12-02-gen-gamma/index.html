@@ -196,6 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data">Data</a></li>
   <li><a href="#lpdf-_lcdf-and-_lccdf-implementations-in-stan" id="toc-lpdf-_lcdf-and-_lccdf-implementations-in-stan" class="nav-link" data-scroll-target="#lpdf-_lcdf-and-_lccdf-implementations-in-stan"><code>_lpdf</code>, <code>_lcdf</code>, and <code>_lccdf</code> Implementations in Stan</a></li>
+  <li><a href="#fitting-the-model" id="toc-fitting-the-model" class="nav-link" data-scroll-target="#fitting-the-model">Fitting The Model</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-12-02-gen-gamma/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -205,120 +206,129 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>A couple weeks back, I posted a little something something on <a href="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/">the Shifted Beta Geometric distribution</a>. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly).</p>
-<p>Its a nice model, but I want something more flexible. I’ve been aware of the generalized gamma distribution (GDD) through Jordan Nafa (who likely uses it for some very interesting decision theory applications). The GGD is a three parameter extension of your typical gamma distribution that looks like</p>
-<p><span class="math display">\[ f(t) = \dfrac{\beta}{\Gamma(k) \cdot \theta} \left( \dfrac{t}{\theta} \right)^{k\cdot \beta-1} \exp\left(-\left[\frac{t}{\theta} \right]^\beta\right) \&gt;.\]</span></p>
-<p>where <span class="math inline">\(\theta&gt;0\)</span> is a scale parameter, <span class="math inline">\(\beta&gt;0\)</span> and <span class="math inline">\(k&gt;0\)</span> are shape parameters, and <span class="math inline">\(\Gamma(x)\)</span> is the gamma function.</p>
-<p>Note that the exponential, gamma, and weibull distributions are special cases (and the log normal is a limiting distribution) <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<p>That is especially nice for me. I’m working on some life time value modelling and it would be great if I didn’t have to try several models. Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.</p>
-<p>In this post, I want to implement some survival analyses using the generalized gamma. We’ll steal some code from Krzysztof Sakrejda, and make some connections to the <code>{flexsurv}</code> implementation of the distribution as well.</p>
-<p>Let’s get started.</p>
+<p>A couple weeks back, I posted a little something something on <a href="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/">the Shifted Beta Geometric distribution</a>. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly). Its a nice model, but I want something more flexible.</p>
+<p>I’ve been aware of the generalized gamma distribution through Jordan Nafa (who likely uses it for some very interesting decision theory applications). Briefly, if <span class="math inline">\(T\)</span> is the event time, then let <span class="math inline">\(Y=\log(T)\)</span>, and <span class="math inline">\(Z = (Y-\mu)/\sigma\)</span>. Then <span class="math inline">\(Z\)</span> has the following density</p>
+<p><span class="math display">\[ f(z ; k)=\frac{k^{k-1 / 2}}{\Gamma(k)} \exp \left(k^{1 / 2} z-k e^{k^{-1 / 2} z}\right)\]</span></p>
+<p>and <span class="math inline">\(T = \log(Y)\)</span> is distributed according to the generalized gamma distribution . Here, <span class="math inline">\(-\infty \lt z \lt \infty\)</span>, <span class="math inline">\(-\infty \lt \mu \lt \infty\)</span>, and <span class="math inline">\(\sigma, k&gt;0\)</span>. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
+<p>The nice thing about the generalized gamma is that the exponential, gamma, and weibull distributions – all common parmetric survival likelihoods – are special cases (and the log normal is a limiting distribution) <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.<br>
+That is especially nice for me. I’m working on some life time value modelling and it would be great if I didn’t have to try several models. Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.</p>
+<p>In this post, I want to implement some survival analyses using the generalized gamma. Let’s get started.</p>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>treatment</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan Meir non-parametric estimates for these data.</p>
+<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <span class="math inline">\(S(t)\)</span>, I choose to plot <span class="math inline">\(1-S(t)\)</span> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <span class="math inline">\(t\)</span>”. The log of this quantity is the cumulative hazard, but I don’t know if <span class="math inline">\(1-S(t)\)</span> has a proper name. I mean … it is techincally an estimate of teh CDF of the event time distribution.</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>my_blue <span class="ot">&lt;-</span> <span class="fu">rgb</span>(<span class="dv">45</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">62</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">80</span><span class="sc">/</span><span class="dv">250</span>, <span class="dv">1</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>my_theme<span class="ot">&lt;-</span> <span class="fu">theme_classic</span>() <span class="sc">%+replace%</span> </span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">theme</span>(<span class="at">panel.grid.major =</span> <span class="fu">element_line</span>(),</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">aspect.ratio =</span> <span class="dv">1</span><span class="sc">/</span><span class="fl">1.61</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>vet_km <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time, status) <span class="sc">~</span> <span class="fu">strata</span>(trt), <span class="at">data=</span>veteran)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>base_plot <span class="ot">&lt;-</span> broom<span class="sc">::</span><span class="fu">tidy</span>(vet_km) <span class="sc">%&gt;%</span> </span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">mutate</span>(<span class="at">strata =</span> <span class="fu">str_remove</span>(strata, <span class="st">'strata</span><span class="sc">\\</span><span class="st">(trt</span><span class="sc">\\</span><span class="st">)='</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>              <span class="fu">ggplot</span>(<span class="fu">aes</span>(time, estimate, <span class="at">ymin=</span>conf.low, <span class="at">ymax=</span>conf.high, <span class="at">color=</span>strata, <span class="at">fill=</span>strata)) <span class="sc">+</span> </span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>              <span class="fu">geom_step</span>() <span class="sc">+</span> </span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>              pammtools<span class="sc">::</span><span class="fu">geom_stepribbon</span>(<span class="at">alpha=</span><span class="fl">0.5</span>, <span class="at">size=</span><span class="dv">0</span>) </span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>base_plot <span class="sc">+</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  my_theme <span class="sc">+</span> </span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">'Time'</span>, <span class="at">y=</span><span class="fu">expression</span>(<span class="fu">S</span>(t))) <span class="sc">+</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>) <span class="sc">+</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">'Set1'</span>) <span class="sc">+</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="dv">500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Non-parametric estimate of <span class="math inline">\(1 - S(t|trt)\)</span> for each <code>trt</code> strata in the veteran dataset. The curves look roughly exponential meaning the generalized gamma should provide a good fit.</figcaption>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+</div>
+<p>Stan does not have an implementation for the generalized gamma, so we’ll have to write that ourselves in the <code>functions</code> block.</p>
 </section>
 <section id="lpdf-_lcdf-and-_lccdf-implementations-in-stan" class="level2">
 <h2 class="anchored" data-anchor-id="lpdf-_lcdf-and-_lccdf-implementations-in-stan"><code>_lpdf</code>, <code>_lcdf</code>, and <code>_lccdf</code> Implementations in Stan</h2>
-<p>We’re going to need three functions in Stan:</p>
+<p>To do parametric survival analysis in Stan, we need three functions:</p>
 <ul>
-<li><code>generalized_gamma_lpdf</code> so we can increment the log posterior density when we observe an outcome.</li>
-<li><code>generalized_gamma_lccdf</code> so we can increment the log posterior density when we observe a censoring event, and</li>
-<li><code>generalized_gamma_lcdf</code> so we can implement the <code>_lccdf</code>.</li>
+<li>The log probability density as <code>generalized_gamma_lpdf</code> so we can increment the log posterior density when we observe an outcome,</li>
+<li>The log complementary CDF as <code>generalized_gamma_lccdf</code> so we can increment the log posterior density when we observe a censoring event, and</li>
+<li>The log CDF as <code>generalized_gamma_lcdf</code> so we can implement the <code>_lccdf</code>.</li>
 </ul>
-<p>The first and third functions are implemented already by Krzysztof Sakrejda in <a href="https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part">this repo</a>. Krzysztof uses a slightly different parameterization than what I’ve written here. The density is</p>
-<p><span class="math display">\[ f(x) \]</span></p>
-<p>The <code>_lpdf</code> and <code>_lcdf</code> are given, so now we just need the complementary cdf function <code>_lccdf</code>. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf. Since we have the log cdf we could just do</p>
+<p>The first and third functions are implemented already by Krzysztof Sakrejda in <a href="https://github.com/sakrejda/tooling/blob/master/models/stan-lang/functions/generalized-gamma.stan.part">this repo</a>. The <code>_lpdf</code> and <code>_lcdf</code> are given, so now we just need the complementary cdf function <code>_lccdf</code>. Since Stan works on the log probability scale, we need to return the the log of the complementary cdf. Since we have the log cdf we could just do</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> lawless_generalized_gamma_lccdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a> <span class="cf">return</span> log(<span class="dv">1</span> - exp(lawless_generalized_gamma_lcdf(x | k, mu sigma)));</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> generalized_gamma_lccdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a> <span class="cf">return</span> log(<span class="dv">1</span> - exp(generalized_gamma_lcdf(x | k, mu sigma)));</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>Stan has a nicer function to do this called <code>log_diff_exp</code> which can be used to take differences in exponential space and then take the log of the result. Our <code>functions</code> block then looks like</p>
+<p>Stan has a nicer function to do this called <code>log_diff_exp</code> which can be used to take differences in exponential space and then take the log of the result.</p>
+<p>Additionally, we can create a random number generator for the generalized gamma distribution by noting that <code>flexsurv</code>’s implementation of the generalized gamma is equivalent to ours if we let <span class="math inline">\(Q=1/\sqrt{k}\)</span>. Our <code>functions</code> block then looks like</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> lawless_generalized_gamma_lpdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> w;</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> d;</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  w = (log(x)-mu)/sigma;</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  d = (k<span class="fl">-.5</span>)*log(k) - log(sigma) - lgamma(k) +</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    (sqrt(k)*w - k*exp(<span class="dv">1</span>/sqrt(k)*w)) - y;</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> d;</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> lawless_generalized_gamma_cdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> w;</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> d;</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  w = (log(x) - mu)/sigma;</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  d = gamma_p(k, k*exp(w/sqrt(k)));</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> d;</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> lawless_generalized_gamma_lccdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a> <span class="cf">return</span> log_diff_exp(<span class="dv">0</span>, lawless_generalized_gamma_lcdf(x| k, mu, sigma));</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> generalized_gamma_lpdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> w;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> d;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    d = (k - .<span class="dv">5</span>) * log(k) - log(sigma) - lgamma(k) + (sqrt(k) * w - k * exp(<span class="dv">1</span> / sqrt(k) * w)) - log(x);</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d;</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> generalized_gamma_cdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> w;</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> d;</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    d = gamma_p(k, k * exp(w / sqrt(k)));</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d;</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> generalized_gamma_lcdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> w;</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> d;</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    w = (log(x) - mu) / sigma;</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    d = log(gamma_p(k, k * exp(<span class="dv">1</span> / sqrt(k) * w)));</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> d;</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> generalized_gamma_lccdf(<span class="dt">real</span> x, <span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> log_diff_exp(<span class="dv">0</span>, generalized_gamma_lcdf(x | k, mu, sigma));</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> generalized_gamma_rng(<span class="dt">real</span> k, <span class="dt">real</span> mu, <span class="dt">real</span> sigma) {</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> Q = <span class="fl">1.0</span> / sqrt(k);</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> gamma = gamma_rng(Q^-<span class="dv">2</span>, <span class="dv">1</span>);</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> w = log(Q^<span class="dv">2</span> * gamma) / Q;</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exp(mu + sigma * w);</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-<p>The <code>data</code> and <code>paramaters</code> block are not all that interesting, and if you’ve coded in Stan before you can probably guess what they look like (if not, everything is on github, so take a look there).</p>
-<p>The <code>model</code> block is where the meat of the work is. For each observation, we will increment <code>target</code> by <code>_lpdf</code> if the observation is observed, else we will increment by <code>_lccdf</code>. The <code>model</code> block looks like</p>
+</section>
+<section id="fitting-the-model" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-the-model">Fitting The Model</h2>
+<p>The model fits fairly quickly (4 chains in parallel takes &lt;2 seconds on my M1 Pro macbook pro). We can easily plot the survival curve against the Kaplan-Meir estimate to compare, however a better comparison would be to draw samples from the event time distribution and compute the ecdf of those samples. That plot is shown below, and is equivalent to a posterior predictive check in the case where there is no censoring. You can see that the KM estimates look similar to the ecdfs, which is good enough for me.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb4"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  mu ~ student_t(<span class="dv">30</span>, <span class="dv">0</span>, <span class="dv">1</span>);</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  sigma ~ student_t(<span class="dv">30</span>, <span class="dv">1</span>, <span class="fl">0.05</span>);</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  k ~ student_t(<span class="dv">30</span>, <span class="dv">1</span>, <span class="fl">0.05</span>);</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span>:n) {</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(censored[i] == <span class="dv">1</span>) {</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> lawless_generalized_gamma_lccdf(time[i] | k, mu, sigma);</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> lawless_generalized_gamma_lpdf(time[i] | k, mu, sigma);</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>Running MCMC with 4 chains, at most 10 in parallel...
+
+Chain 1 finished in 1.4 seconds.
+Chain 2 finished in 1.4 seconds.
+Chain 3 finished in 1.4 seconds.
+Chain 4 finished in 1.4 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 1.4 seconds.
+Total execution time: 1.5 seconds.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Kaplan-Meir estimates (black) with posterior survival functions.</figcaption>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption class="figure-caption">Kaplan-Meir estimates (black) with estimated ECDFs computed from draws of the posterior distribution. Each colored line corresponds to one sample of event times from the posterior distribution, conditional on <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\sigma\)</span>, and <span class="math inline">\(k\)</span>.</figcaption>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
