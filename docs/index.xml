@@ -23,13 +23,13 @@
 <p>A couple weeks back, I posted a little something something on <a href="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/">the Shifted Beta Geometric distribution</a>. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly). Its a nice model, but I want something more flexible.</p>
 <p>I’ve been aware of the generalized gamma distribution through Jordan Nafa (who likely uses it for some very interesting decision theory applications). Briefly, if <img src="https://latex.codecogs.com/png.latex?T"> is the event time, then let <img src="https://latex.codecogs.com/png.latex?Y=%5Clog(T)">, and <img src="https://latex.codecogs.com/png.latex?Z%20=%20(Y-%5Cmu)/%5Csigma">. Then <img src="https://latex.codecogs.com/png.latex?Z"> has the following density</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20f(z%20;%20k)=%5Cfrac%7Bk%5E%7Bk-1%20/%202%7D%7D%7B%5CGamma(k)%7D%20%5Cexp%20%5Cleft(k%5E%7B1%20/%202%7D%20z-k%20e%5E%7Bk%5E%7B-1%20/%202%7D%20z%7D%5Cright)"></p>
-<p>and <img src="https://latex.codecogs.com/png.latex?T%20=%20%5Clog(Y)"> is distributed according to the generalized gamma distribution . Here, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20z%20%5Clt%20%5Cinfty">, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20%5Cmu%20%5Clt%20%5Cinfty">, and <img src="https://latex.codecogs.com/png.latex?%5Csigma,%20k%3E0">. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
+<p>and <img src="https://latex.codecogs.com/png.latex?T%20=%20%5Cexp(Y)"> is distributed according to the generalized gamma distribution . Here, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20z%20%5Clt%20%5Cinfty">, <img src="https://latex.codecogs.com/png.latex?-%5Cinfty%20%5Clt%20%5Cmu%20%5Clt%20%5Cinfty">, and <img src="https://latex.codecogs.com/png.latex?%5Csigma,%20k%3E0">. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
 <p>The nice thing about the generalized gamma is that the exponential, gamma, and weibull distributions – all common parmetric survival likelihoods – are special cases (and the log normal is a limiting distribution) <sup>1</sup>.<br>
 That is especially nice for me. I’m working on some life time value modelling and it would be great if I didn’t have to try several models. Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.</p>
 <p>In this post, I want to implement some survival analyses using the generalized gamma. Let’s get started.</p>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <img src="https://latex.codecogs.com/png.latex?S(t)">, I choose to plot <img src="https://latex.codecogs.com/png.latex?1-S(t)"> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <img src="https://latex.codecogs.com/png.latex?t">”. The log of this quantity is the cumulative hazard, but I don’t know if <img src="https://latex.codecogs.com/png.latex?1-S(t)"> has a proper name. I mean … it is techincally an estimate of teh CDF of the event time distribution.</p>
+<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <img src="https://latex.codecogs.com/png.latex?S(t)">, I choose to plot <img src="https://latex.codecogs.com/png.latex?1-S(t)"> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <img src="https://latex.codecogs.com/png.latex?t">”. The log of this quantity is the cumulative hazard, but I don’t know if <img src="https://latex.codecogs.com/png.latex?1-S(t)"> has a proper name. I mean … it is technically an estimate of the CDF of the event time distribution.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -223,14 +223,14 @@ font-style: inherit;">return</span> exp(mu + sigma * w);</span>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 chains, at most 10 in parallel...
 
-Chain 1 finished in 1.4 seconds.
-Chain 2 finished in 1.4 seconds.
-Chain 3 finished in 1.4 seconds.
-Chain 4 finished in 1.4 seconds.
+Chain 1 finished in 1.9 seconds.
+Chain 2 finished in 1.9 seconds.
+Chain 3 finished in 1.9 seconds.
+Chain 4 finished in 1.9 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.4 seconds.
-Total execution time: 1.5 seconds.</code></pre>
+Mean chain execution time: 1.9 seconds.
+Total execution time: 2.0 seconds.</code></pre>
 </div>
 </div>
 <div class="cell">

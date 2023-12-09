@@ -209,13 +209,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>A couple weeks back, I posted a little something something on <a href="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/">the Shifted Beta Geometric distribution</a>. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew your service monthly). Its a nice model, but I want something more flexible.</p>
 <p>I’ve been aware of the generalized gamma distribution through Jordan Nafa (who likely uses it for some very interesting decision theory applications). Briefly, if <span class="math inline">\(T\)</span> is the event time, then let <span class="math inline">\(Y=\log(T)\)</span>, and <span class="math inline">\(Z = (Y-\mu)/\sigma\)</span>. Then <span class="math inline">\(Z\)</span> has the following density</p>
 <p><span class="math display">\[ f(z ; k)=\frac{k^{k-1 / 2}}{\Gamma(k)} \exp \left(k^{1 / 2} z-k e^{k^{-1 / 2} z}\right)\]</span></p>
-<p>and <span class="math inline">\(T = \log(Y)\)</span> is distributed according to the generalized gamma distribution . Here, <span class="math inline">\(-\infty \lt z \lt \infty\)</span>, <span class="math inline">\(-\infty \lt \mu \lt \infty\)</span>, and <span class="math inline">\(\sigma, k&gt;0\)</span>. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
+<p>and <span class="math inline">\(T = \exp(Y)\)</span> is distributed according to the generalized gamma distribution . Here, <span class="math inline">\(-\infty \lt z \lt \infty\)</span>, <span class="math inline">\(-\infty \lt \mu \lt \infty\)</span>, and <span class="math inline">\(\sigma, k&gt;0\)</span>. For more on the generalized gamma, especially for use in survival analysis, see <em>Statistical Models and Methods for Lifetime Data</em> by Jerry Lawless (1982).</p>
 <p>The nice thing about the generalized gamma is that the exponential, gamma, and weibull distributions – all common parmetric survival likelihoods – are special cases (and the log normal is a limiting distribution) <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.<br>
 That is especially nice for me. I’m working on some life time value modelling and it would be great if I didn’t have to try several models. Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.</p>
 <p>In this post, I want to implement some survival analyses using the generalized gamma. Let’s get started.</p>
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
-<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <span class="math inline">\(S(t)\)</span>, I choose to plot <span class="math inline">\(1-S(t)\)</span> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <span class="math inline">\(t\)</span>”. The log of this quantity is the cumulative hazard, but I don’t know if <span class="math inline">\(1-S(t)\)</span> has a proper name. I mean … it is techincally an estimate of teh CDF of the event time distribution.</p>
+<p>We’ll need some data. Rather than simulate it myself, I’ll use the <code>veteran</code> data from <code>{survival}</code>. The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle. There is a <code>trt</code> indicator in these data, so we’ll fit one survival curve to each strata. Shown below are the Kaplan-Meir non-parametric estimates for these data. Rather than plot the survival curve <span class="math inline">\(S(t)\)</span>, I choose to plot <span class="math inline">\(1-S(t)\)</span> because my brain groks the plot easier as “the proportion of individuals in a cohort who would have experienced the outcome by time <span class="math inline">\(t\)</span>”. The log of this quantity is the cumulative hazard, but I don’t know if <span class="math inline">\(1-S(t)\)</span> has a proper name. I mean … it is technically an estimate of the CDF of the event time distribution.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -301,14 +301,14 @@ That is especially nice for me. I’m working on some life time value modelling 
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 chains, at most 10 in parallel...
 
-Chain 1 finished in 1.4 seconds.
-Chain 2 finished in 1.4 seconds.
-Chain 3 finished in 1.4 seconds.
-Chain 4 finished in 1.4 seconds.
+Chain 1 finished in 1.9 seconds.
+Chain 2 finished in 1.9 seconds.
+Chain 3 finished in 1.9 seconds.
+Chain 4 finished in 1.9 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.4 seconds.
-Total execution time: 1.5 seconds.</code></pre>
+Mean chain execution time: 1.9 seconds.
+Total execution time: 2.0 seconds.</code></pre>
 </div>
 </div>
 <div class="cell">
