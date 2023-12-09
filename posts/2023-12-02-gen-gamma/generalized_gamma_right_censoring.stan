@@ -84,11 +84,13 @@ model {
 generated quantities {
   array[n, n_trt] real time_ppc;
   array[nt, n_trt] real survival_curve;
+  array[nt, n_trt] real hazard;
   
   for(i in 1 : nt) {
     for (j in 1 : n_trt) {
       
       survival_curve[i, j] = generalized_gamma_cdf(pred_time[i]| k[j], mu[j], sigma[j]);
+      hazard[i, j] = exp(generalized_gamma_lpdf(pred_time[i]| k[j], mu[j], sigma[j])) / survival_curve[i, j];
       
     }
   }

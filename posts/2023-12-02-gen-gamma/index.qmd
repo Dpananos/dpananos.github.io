@@ -15,7 +15,7 @@ I've been aware of the generalized gamma  distribution through Jordan Nafa (who 
 
 $$ f(z ; k)=\frac{k^{k-1 / 2}}{\Gamma(k)} \exp \left(k^{1 / 2} z-k e^{k^{-1 / 2} z}\right)$$
 
-and $T = \log(Y)$ is distributed according to the generalized gamma distribution .  Here, $-\infty \lt z \lt \infty$, $-\infty \lt \mu \lt \infty$,  and $\sigma, k>0$.  For more on the generalized gamma, especially for use in survival analysis, see *Statistical Models and Methods for Lifetime Data* by Jerry Lawless (1982).
+and $T = \exp(Y)$ is distributed according to the generalized gamma distribution .  Here, $-\infty \lt z \lt \infty$, $-\infty \lt \mu \lt \infty$,  and $\sigma, k>0$.  For more on the generalized gamma, especially for use in survival analysis, see *Statistical Models and Methods for Lifetime Data* by Jerry Lawless (1982).
 
 The nice thing about the generalized gamma is that the exponential,  gamma, and  weibull distributions -- all common parmetric survival likelihoods -- are special cases (and the log normal is a limiting distribution) [^1].  
 That is especially nice for me.  I'm working on some life time value modelling and it would be great if I didn't have to try several models.  Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.
@@ -25,7 +25,7 @@ Let's get started.
 
 ## Data
 
-We'll need some data. Rather than simulate it myself, I'll use the `veteran` data from `{survival}`.  The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle.  There is a `trt` indicator in these data, so we'll fit one survival curve to each strata.  Shown below are the Kaplan-Meir non-parametric estimates for these data.  Rather than plot the survival curve $S(t)$, I choose to plot $1-S(t)$ because my brain groks the plot easier as "the proportion of individuals in a cohort who would have experienced the outcome by time $t$".  The log of this quantity is the cumulative hazard, but I don't know if $1-S(t)$ has a proper name.  I mean ... it is techincally an estimate of teh CDF of the event time distribution.  
+We'll need some data. Rather than simulate it myself, I'll use the `veteran` data from `{survival}`.  The survival function is roughly exponential, which is good because we know the generalized gamma can fit it in principle.  There is a `trt` indicator in these data, so we'll fit one survival curve to each strata.  Shown below are the Kaplan-Meir non-parametric estimates for these data.  Rather than plot the survival curve $S(t)$, I choose to plot $1-S(t)$ because my brain groks the plot easier as "the proportion of individuals in a cohort who would have experienced the outcome by time $t$".  The log of this quantity is the cumulative hazard, but I don't know if $1-S(t)$ has a proper name.  I mean ... it is technically an estimate of the CDF of the event time distribution.  
 
 ```{r}
 #| fig-cap: Non-parametric estimate of $1 - S(t|trt)$ for each `trt` strata in the veteran dataset.  The curves look roughly exponential meaning the generalized gamma should provide a good fit.
