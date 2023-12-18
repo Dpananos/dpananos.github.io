@@ -21,7 +21,7 @@ The nice thing about the generalized gamma is that the exponential,  gamma, and 
 That is especially nice for me.  I'm working on some life time value modelling and it would be great if I didn't have to try several models.  Instead I can just use the generalized gamma and hope it fits well enough if the data are best approximated via one of the aforementioned survival functions.
 
 In this post, I want to implement some survival analyses using the generalized gamma. 
-Let's get started.
+Let's get started. 
 
 ## Data
 
