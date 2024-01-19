@@ -10,7 +10,508 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.3.450</generator>
-<lastBuildDate>Sat, 02 Dec 2023 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 20 Jan 2024 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Survival Analysis With Logistic Regression</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2024-01-20-logistic-survival/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><a href="https://stats.stackexchange.com/questions/636963/logistic-regression-varying-exposure-variable/637018#637018">This</a> question came up on cross validated. In the course of responding to my answer, OP asks “why can’t I adjust for exposure length in a logistic regression” which kind of got me scratching my head. Seems like it <em>could</em> be done.</p>
+<p>I brought the question to twitter, and Dr.&nbsp;Ellie Murray <a href="https://twitter.com/EpiEllie/status/1747987418152612085">responded</a> reminding me that time to death and death are different outcomes and should be treated differently. A logistic regression could be done, depending on what you’re trying to model.</p>
+<p>Finally, Frank Harrell responded to Dr.&nbsp;Murray, with a link to a paper by Brad Efron (because of course Efron wrote something on this) which showed how this can be done quite elegantly.</p>
+<p>Let’s see how we can use logistic regression for survival analysis.</p>
+<section id="the-gist" class="level2">
+<h2 class="anchored" data-anchor-id="the-gist">The Gist</h2>
+<p>Recall that the Kaplan-Meir product limit estimator looks like</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cwidehat%7BS%7D_%7BKM%7D%20(t)%20=%20%5Cprod_%7Bi:%20t_i%20%5Cleq%20t%7D%20%5Cleft(1-%5Cdfrac%7Bd_i%7D%7Bn_i%7D%20%5Cright)%20%5C%3E.%20"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?d_i"> are those who experience the number of subjects who experience the outcome at time <img src="https://latex.codecogs.com/png.latex?t_i"> and <img src="https://latex.codecogs.com/png.latex?n_i"> is the number of individuals known to have survived up to time <img src="https://latex.codecogs.com/png.latex?t_i">. In essence, the product limit estimator is a product of a sequence of probabilities. What else do we use to model probabilities? Logistic regression.</p>
+<p>Efron writes that the main assumption for using logistic regression to model these probabilities is that the number of events <img src="https://latex.codecogs.com/png.latex?d_i"> is binomial given <img src="https://latex.codecogs.com/png.latex?n_i"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20d_i%20%5Cmid%20n_i%20%5Csim%20%5Coperatorname%7BBinomial%7D(h_i;%20n_i)%20%5C%3E.%20"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?h_i"> is the discrete hazard rate (i.e.&nbsp;the probability the subject experiences the outcome during the <img src="https://latex.codecogs.com/png.latex?i%5E%7Bth%7D"> interval given the subject has survived until the beginning of the <img src="https://latex.codecogs.com/png.latex?i%5E%7Bth%7D"> interval).</p>
+<p>The main problem is that the hazard may not be linear in the exposure time. Efron uses splines to allow <img src="https://latex.codecogs.com/png.latex?h_i"> to be flexible in exposure time, and then computes the estimated survival function using</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctilde%7BS%7D(t)%20=%20%20%5Cprod_%7Bi:%20t_i%20%5Cleq%20t%7D%20%5Cleft(1-h_i%5Cright)"></p>
+<p>As an algorithm, the steps might look like:</p>
+<ul>
+<li>Structure your data so that you have number at risk, number of events, and number of censoring events as columns</li>
+<li>Fit a logistic regression on the event/at risk columns (in R this is done by making <code>cbdind(y, n-y)</code> the outcome in the <code>glm</code> call). Ensure the time variable is modeled flexibly (either with splines or something more exotic).</li>
+<li>Predict the risk of death (i.e.&nbsp;the discrete hazard) from the logistic regression on the observed event times.</li>
+<li>Take the cumulative product of one minus the discrete hazards. These are the survival function estimates.</li>
+</ul>
+</section>
+<section id="replicating-efrons-example" class="level2">
+<h2 class="anchored" data-anchor-id="replicating-efrons-example">Replicating Efron’s Example</h2>
+<p>Efron motivates this approach using survival data from a Head-and-Neck cancer study conducted by the Northern California Oncology Group. I’ve extracted this data to replicate the method.</p>
+<p>First, let’s show the Kaplan-Meir estimates</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(survival)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(splines)</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">source</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"make_data.R"</span>)</span>
+<span id="cb1-6"></span>
+<span id="cb1-7">sd <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">make_data</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'survival'</span>)</span>
+<span id="cb1-8">sfit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">survfit</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">Surv</span>(month, event) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">strata</span>(arm), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>sd, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">weights =</span> wt)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10">sfit_tidy <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> broom<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tidy</span>(sfit) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-11">             <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">str_remove</span>(strata, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fixed</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'strata(arm)='</span>)))</span>
+<span id="cb1-12"></span>
+<span id="cb1-13"></span>
+<span id="cb1-14">base_plot <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> sfit_tidy <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-15">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(time, estimate, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span>strata, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">shape=</span>strata)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-16">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-17">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_minimal</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-18">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Set1'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels =</span> scales<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span>percent) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-20">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Month'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Survival Probability'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Arm'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">shape=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Arm'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Kaplan-Meier Estimated Survival Curves for Head-and-Neck Cancer Study'</span>)</span>
+<span id="cb1-21"></span>
+<span id="cb1-22"></span>
+<span id="cb1-23">base_plot <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-24">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_step</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">linetype=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'dashed'</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The intial model presented expands time in the following basis functions</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20x_i%20=%20(1,%20t_i,%20(t_i-11)_-%5E%7B2%7D,%20(t_i-11)_-%5E%7B2%7D)%20"></p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?t_i"> is the the midpoint between months. This is equivalent to estimating the risk of the outcome between the start of month <img src="https://latex.codecogs.com/png.latex?i"> and the start of month <img src="https://latex.codecogs.com/png.latex?i+1">. The function <img src="https://latex.codecogs.com/png.latex?(%20z%20)_-%20=%20%5Cmin(z,%200)">. This particular expansion allows <img src="https://latex.codecogs.com/png.latex?t_i"> to vary as a cubic function before <img src="https://latex.codecogs.com/png.latex?t_i=11">, and then as a linear function thereafter.</p>
+<p>After fitting the model with an interaction by arm (so that the hazards can differ by arm), we can plot the hazards readily <sup>1</sup>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">d <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">make_data</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'logistic'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-2">     <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tm =</span> month <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, </span>
+<span id="cb2-3">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">txt =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.integer</span>(arm<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'A'</span>))</span>
+<span id="cb2-4"></span>
+<span id="cb2-5"></span>
+<span id="cb2-6">f <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(x, d) <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pmin</span>((x), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb2-7"></span>
+<span id="cb2-8">fit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">glm</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cbind</span>(s, n<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>s) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> arm <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (tm <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">I</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">f</span>(tm<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-11</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">I</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">f</span>(tm<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-11</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)),</span>
+<span id="cb2-9">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>d, </span>
+<span id="cb2-10">       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">family =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">binomial</span>())</span>
+<span id="cb2-11"></span>
+<span id="cb2-12">preds <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-13">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">bind_cols</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">predict</span>(fit, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">newdata=</span>., <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">se.fit=</span>T)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-14">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb2-15">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plogis</span>(fit),</span>
+<span id="cb2-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p.low =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plogis</span>(fit <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>se.fit),</span>
+<span id="cb2-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p.high =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plogis</span>(fit <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>se.fit)</span>
+<span id="cb2-18">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(arm) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-20">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">arrange</span>(arm, month) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-21">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">S =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cumprod</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>p),</span>
+<span id="cb2-22">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">S.low =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cumprod</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>p.low),</span>
+<span id="cb2-23">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">S.high =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cumprod</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>p.high))</span>
+<span id="cb2-24"></span>
+<span id="cb2-25"></span>
+<span id="cb2-26">preds <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-27">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(tm, p, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span>arm)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb2-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb2-29">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coord_cartesian</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb2-30">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_minimal</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb2-31">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Set1'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb2-32">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels =</span> scales<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span>percent) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb2-33">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Month'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Hazard'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Arm'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">shape=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Arm'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Hazard (Risk Estimate From Logistic Regression)'</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>And we can also plot the estimated survival function against the Kaplan Meier to compare.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">base_plot <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>preds, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(month, S, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span>arm), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> F) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Kaplan-Meier as Compared to Logistic Regression'</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="final-thoughts" class="level2">
+<h2 class="anchored" data-anchor-id="final-thoughts">Final Thoughts</h2>
+<p>Why would we want to parametrically model the hazard when Kaplan-Meir <em>can’t</em> misspecify the hazard? What do we gain from this? In a word: <em>efficiency</em> , at least according to Efron. Additionally, if we are willing to make assumptions about how the hazard evolves into the future (e.g.&nbsp;linearly) then we can use this approach to forecast survival beyond the last observed timepoint.</p>
+<p>In his paper, Efron has some notes on computing standard errors for this estimator. Its fairly dense, and I haven’t included confidence intervals here lest I naively compute them. That’s a topic for a future blog post.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>I Just can’t get the hazard’s to look the same as Figure 2. Might be an error copying over the data.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2024-01-20-logistic-survival/index.html</guid>
+  <pubDate>Sat, 20 Jan 2024 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>The Generalized Gamma Distribution For Parametric Survival</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -9004,295 +9505,6 @@ generated quantities{
   <guid>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</guid>
   <pubDate>Sat, 07 May 2022 04:00:00 GMT</pubDate>
   <media:content url="https://dpananos.github.io/posts/2022-05-07-flippin/posterior.png" medium="image" type="image/png" height="96" width="144"/>
-</item>
-<item>
-  <title>Hacking Sklearn To Do The Optimism Corrected Bootstrap</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.</p>
-<p>In case you don’t know, epidemiology/biostatistics people working on prediction models like to validate their models in a slightly different way than your run-in-the-mill data scientist. Now, it should be unsurprising that <a href="https://twitter.com/GaelVaroquaux/status/1293818409197731840">this has generated some discussion</a> between ML people and epi/biostats people, but I’m going to ignore this for now. I’m going to assume you have good reason for wanting to do the optimism corrected bootstrap in python, especially with sklearn, and if you don’t and want to discuss the pros and cons fo the method instead then lalalalalala I can’t hear you.</p>
-<section id="the-optimism-corrected-bootstrap-in-7-steps" class="level2">
-<h2 class="anchored" data-anchor-id="the-optimism-corrected-bootstrap-in-7-steps">The Optimism Corrected Bootstrap in 7 Steps</h2>
-<p>As a primer, you might want to tread Alex Hayes’ <a href="https://www.alexpghayes.com/blog/predictive-performance-via-bootstrap-variants/">pretty good blog post about variants of the bootstrap</a> for predictive performance. It is more mathy than I care to be right now and in R should that be your thing.</p>
-<p>To do the optimism corrected bootstrap, follow these 7 steps as found in <a href="https://link.springer.com/book/10.1007/978-0-387-77244-8">Ewout W. Steyerberg’s <em>Clinical Prediction Models</em></a>.</p>
-<ol type="1">
-<li><p>Construct a model in the original sample; determine the apparent performance on the data from the sample used to construct the model.</p></li>
-<li><p>Draw a bootstrap sample (Sample*) with replacement from the original sample.</p></li>
-<li><p>Construct a model (Model<em>) in Sample</em>, replaying every step that was done in the original sample, especially model specification steps such as selection of predictors. Determine the bootstrap performance as the apparent performance of Model* in Sample.</p></li>
-<li><p>Apply Model* to the original sample without any modification to determine the test performance.</p></li>
-<li><p>Calculate the optimism as the difference between bootstrap performance and test performance.</p></li>
-<li><p>Repeat steps 1–4 many times, at least 200, to obtain a stable mean estimate of the optimism.</p></li>
-<li><p>Subtract the mean optimism estimate (step 6) from the apparent performance (step 1) to obtain the optimism-corrected performance estimate.</p></li>
-</ol>
-<p>This procedure is very straight forward, and could easily be coded up from scratch, but I want to use as much existing code as I can and put sklearn on my resume, so let’s talk about what tools exist in sklearn to do cross validation and how we could use them to perform these steps.</p>
-</section>
-<section id="cross-validation-in-sklearn" class="level2">
-<h2 class="anchored" data-anchor-id="cross-validation-in-sklearn">Cross Validation in Sklearn</h2>
-<p>When you pass arguments like <code>cv=5</code> in sklearn’s many functions, what you’re really doing is passing <code>5</code> to <code>sklearn.model_selection.KFold</code>. See <a href="https://github.com/scikit-learn/scikit-learn/blob/0d378913b/sklearn/model_selection/_validation.py#L48"><code>sklearn.model_selection.cross_validate</code></a> which calls a function called <a href="https://github.com/scikit-learn/scikit-learn/blob/0d378913be6d7e485b792ea36e9268be31ed52d0/sklearn/model_selection/_split.py#L2262">‘check_cv’</a> to verify this. <code>KFold.split</code> returns a generator, which when passed to <code>next</code> yields a pair of train and test indicides. The inner workings of <code>KFold</code> might look something like</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(number_folds):</span>
-<span id="cb1-2">    train_ix <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> make_train_ix()</span>
-<span id="cb1-3">    test_ix <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> make_test_ix()</span>
-<span id="cb1-4">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">yield</span> (trian_ix, test_ix)</span></code></pre></div>
-<p>Those incidies are used to slice <code>X</code> and <code>y</code> to do the cross validation. So, if we are going to hack sklearn to do the optimisim corrected bootstrap for us, we really just need to write a generator to give me a bunch of indicies. According to step 2 and 3 above, the train indicies need to be resamples of <code>np.arange(len(X))</code> (ask yourself “why?”). According to step 4, the test indicies need to be <code>np.arnge(len(X))</code> (again….”why?“).</p>
-<p>Once we have a generator to do give us our indicies, we can use <code>sklearn.model_selection.cross_validate</code> to fit models on the resampled data and predict on the original sample (step 4). If we pass <code>return_train_score=True</code> to <code>cross_validate</code> we can get the bootstrap performances as well as the test performances (step 5). All we need to do then is calculate the average difference between the two (step 6) and then add this quantity to the apparent performance we got from step 1.</p>
-<p>That all sounds very complex, but the code is decieptively simple.</p>
-</section>
-<section id="the-code-i-know-you-skipped-here-dont-lie" class="level2">
-<h2 class="anchored" data-anchor-id="the-code-i-know-you-skipped-here-dont-lie">The Code (I Know You Skipped Here, Don’t Lie)</h2>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb2-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> numpy.core.fromnumeric <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> mean</span>
-<span id="cb2-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.model_selection <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> cross_validate, RepeatedKFold</span>
-<span id="cb2-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> mean_squared_error, make_scorer</span>
-<span id="cb2-5"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.linear_model <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> LinearRegression</span>
-<span id="cb2-6"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> load_diabetes</span>
-<span id="cb2-7"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> sklearn.utils <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> resample</span>
-<span id="cb2-8"></span>
-<span id="cb2-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Need some data to predict with</span></span>
-<span id="cb2-10">data <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> load_diabetes()</span>
-<span id="cb2-11">X, y <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> data[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'data'</span>], data[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'target'</span>]</span>
-<span id="cb2-12"></span>
-<span id="cb2-13"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">class</span> OptimisimBootstrap():</span>
-<span id="cb2-14"></span>
-<span id="cb2-15">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, n_bootstraps):</span>
-<span id="cb2-16"></span>
-<span id="cb2-17">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.n_bootstraps <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> n_bootstraps</span>
-<span id="cb2-18"></span>
-<span id="cb2-19">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">def</span> split(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, X, y,<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>_):</span>
-<span id="cb2-20"></span>
-<span id="cb2-21">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(X)</span>
-<span id="cb2-22">        test_ix <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.arange(n)</span>
-<span id="cb2-23"></span>
-<span id="cb2-24">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> _ <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">range</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>.n_bootstraps):</span>
-<span id="cb2-25">            train_ix <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resample(test_ix)</span>
-<span id="cb2-26">            <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">yield</span> (train_ix, test_ix)</span>
-<span id="cb2-27"></span>
-<span id="cb2-28"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Optimism Corrected</span></span>
-<span id="cb2-29">model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> LinearRegression()</span>
-<span id="cb2-30">model.fit(X, y)</span>
-<span id="cb2-31">apparent_performance <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> mean_squared_error(y, model.predict(X))</span>
-<span id="cb2-32"></span>
-<span id="cb2-33">opt_cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> OptimisimBootstrap(n_bootstraps<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">250</span>)</span>
-<span id="cb2-34">mse <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> make_scorer(mean_squared_error)</span>
-<span id="cb2-35">cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cross_validate(model, X, y, cv<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>opt_cv, scoring<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mse, return_train_score<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>)</span>
-<span id="cb2-36">optimism <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cv[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'test_score'</span>] <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> cv[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'train_score'</span>]</span>
-<span id="cb2-37">optimism_corrected <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> apparent_performance <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> optimism.mean()</span>
-<span id="cb2-38"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'Optimism Corrected: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>optimism_corrected<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb2-39"></span>
-<span id="cb2-40"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Compare against regular cv</span></span>
-<span id="cb2-41">cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cross_validate(model, X, y, cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, scoring<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mse)[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'test_score'</span>].mean()</span>
-<span id="cb2-42"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'regular cv: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>cv<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span>
-<span id="cb2-43"></span>
-<span id="cb2-44"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Compare against repeated cv</span></span>
-<span id="cb2-45">cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cross_validate(model, X, y, cv <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> RepeatedKFold(n_splits<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, n_repeats<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>), scoring<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mse)[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'test_score'</span>].mean()</span>
-<span id="cb2-46"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f'repeated cv: </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>cv<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Optimism Corrected: 2999.04
-regular cv: 3000.38</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>repeated cv: 3009.02</code></pre>
-</div>
-</div>
-<p>The three estimates (optimism corrected, 10 fold, and repeated 10 fold) should be reasonably close together, but uh don’t run this code multiple times. You might see that the optimism corrected estimate is quite noisy meaning I’m either wrong or that twitter thread I linked to might have some merit.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <category>Machine Learning</category>
-  <category>Python</category>
-  <category>Scikit-Learn</category>
-  <guid>https://dpananos.github.io/posts/2021-11-23-bootstrap/index.html</guid>
-  <pubDate>Tue, 23 Nov 2021 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
