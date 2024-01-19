@@ -13,7 +13,7 @@ draft: false
 
 I brought the question to twitter, and Dr. Ellie Murray [responded](https://twitter.com/EpiEllie/status/1747987418152612085) reminding me that time to death and death are different outcomes and should be treated differently.  A logistic regression could be done, depending on what you're trying to model.
 
-Finally, Frank Harrell responded to Dr. Murray, with a link to a paper by Brad Efron (because of course Efron wrote something on this) which showed how this can be done quite elegantly.
+Finally, Frank Harrell [responded](https://twitter.com/f2harrell/status/1748327687066652908) to Dr. Murray, with a link to a paper by Brad Efron (because of course Efron wrote something on this) which showed how this can be done quite elegantly.
 
 Let's see how we can use logistic regression for survival analysis.
 

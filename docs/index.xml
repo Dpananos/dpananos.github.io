@@ -22,7 +22,7 @@
 
 <p><a href="https://stats.stackexchange.com/questions/636963/logistic-regression-varying-exposure-variable/637018#637018">This</a> question came up on cross validated. In the course of responding to my answer, OP asks “why can’t I adjust for exposure length in a logistic regression” which kind of got me scratching my head. Seems like it <em>could</em> be done.</p>
 <p>I brought the question to twitter, and Dr.&nbsp;Ellie Murray <a href="https://twitter.com/EpiEllie/status/1747987418152612085">responded</a> reminding me that time to death and death are different outcomes and should be treated differently. A logistic regression could be done, depending on what you’re trying to model.</p>
-<p>Finally, Frank Harrell responded to Dr.&nbsp;Murray, with a link to a paper by Brad Efron (because of course Efron wrote something on this) which showed how this can be done quite elegantly.</p>
+<p>Finally, Frank Harrell <a href="https://twitter.com/f2harrell/status/1748327687066652908">responded</a> to Dr.&nbsp;Murray, with a link to a paper by Brad Efron (because of course Efron wrote something on this) which showed how this can be done quite elegantly.</p>
 <p>Let’s see how we can use logistic regression for survival analysis.</p>
 <section id="the-gist" class="level2">
 <h2 class="anchored" data-anchor-id="the-gist">The Gist</h2>
