@@ -39,7 +39,7 @@ $$ \tilde{S}(t) =  \prod_{i: t_i \leq t} \left(1-h_i\right)$$
 As an algorithm, the steps might look like:
 
 * Structure your data so that you have number at risk, number of events, and number of censoring events as columns
-* Fit a logistic regression on the event/at risk columns (in R this is done by making `cbdind(y, n-y)` the outcome in the `glm` call).  Ensure the time variable is modeled flexibly (either with splines or something more exotic).
+* Fit a logistic regression on the event/at risk columns (in R this is done by making `cbind(y, n-y)` the outcome in the `glm` call).  Ensure the time variable is modeled flexibly (either with splines or something more exotic).
 * Predict the risk of death (i.e. the discrete hazard) from the logistic regression on the observed event times.
 * Take the cumulative product of one minus the discrete hazards.  These are the survival function estimates.
 
@@ -79,7 +79,7 @@ base_plot +
 
 The intial model presented expands time in the following basis functions
 
-$$ x_i = (1, t_i, (t_i-11)_-^{2}, (t_i-11)_-^{2}) $$
+$$ x_i = (1, t_i, (t_i-11)_-^{2}, (t_i-11)_-^{3}) $$
 
 Here, $t_i$ is the the midpoint between months.  This is equivalent to estimating the risk of the outcome between the start of month $i$ and the start of month $i+1$.  The function $( z )_- = \min(z, 0)$.  This particular expansion allows $t_i$ to vary as a cubic function before $t_i=11$, and then as a linear function thereafter.
 
