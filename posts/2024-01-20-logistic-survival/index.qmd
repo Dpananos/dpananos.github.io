@@ -23,7 +23,7 @@ Recall that the Kaplan-Meir product limit estimator looks like
 
 $$ \widehat{S}_{KM} (t) = \prod_{i: t_i \leq t} \left(1-\dfrac{d_i}{n_i} \right) \>. $$
 
-Here, $d_i$ are those who experience the number of subjects who experience the outcome at time $t_i$ and $n_i$ is the number of individuals known to have survived up to time $t_i$.  In essence, the product limit estimator is a product of a sequence of probabilities.  What else do we use to model probabilities?  Logistic regression.
+Here, $d_i$ is the number of subjects who experience the outcome at time $t_i$, and $n_i$ is the number of individuals known to have survived up to time $t_i$.  In essence, the product limit estimator is a product of a sequence of probabilities.  What else do we use to model probabilities?  Logistic regression.
 
 Efron writes that the main assumption for using logistic regression to model these probabilities is that the number of events $d_i$ is binomial given $n_i$
 
