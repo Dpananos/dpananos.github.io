@@ -12,6 +12,174 @@
 <generator>quarto-1.3.450</generator>
 <lastBuildDate>Sat, 20 Jan 2024 05:00:00 GMT</lastBuildDate>
 <item>
+  <title>Exagerated Experiment Returns Are Easy To Understand From This Picture</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2024-01-22-curse/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>If you run A/B tests as part of your job, you likely will want to report on how much you moved a metric in a given quarter.</p>
+<p>If you use “lift”<sup>1</sup> as your main causal contrast in experiments, you may be tempted to take the product of all the lifts you detected and use that as your estimate. So in your first experiment you detected a 2% lift, in your next 3 you failed to detect a lift, and in your last experiment you detected a whopping 5% lift! That means we increased our overal evaluation criterion (OEC) nearly 7%…right?</p>
+<p>Not quite. In general, doing this sort of procedure will systematically <em>over estimate</em> your impact on your OEC. To understand why, have a look at the picture below.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span></code></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">x <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb2-2">xs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels=</span>F, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ylab=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">''</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlab =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Difference in means'</span>)</span>
+<span id="cb2-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lines</span>(x, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>)</span>
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">polygon</span>(</span>
+<span id="cb2-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(xs, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rev</span>(xs)),</span>
+<span id="cb2-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(xs, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(xs))),</span>
+<span id="cb2-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">alpha</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>),</span>
+<span id="cb2-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">border =</span> F</span>
+<span id="cb2-10">)</span>
+<span id="cb2-11"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">legend</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'topleft'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span>,<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'blue'</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(H[A])), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lty=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Lift is sometimes called “relative risk” in epidemiology, and is equal to <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D">↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2024-01-22-curse/index.html</guid>
+  <pubDate>Sat, 20 Jan 2024 05:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Survival Analysis With Logistic Regression</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2024-01-20-logistic-survival/index.html</link>
@@ -37,7 +205,7 @@
 <p>As an algorithm, the steps might look like:</p>
 <ul>
 <li>Structure your data so that you have number at risk, number of events, and number of censoring events as columns</li>
-<li>Fit a logistic regression on the event/at risk columns (in R this is done by making <code>cbdind(y, n-y)</code> the outcome in the <code>glm</code> call). Ensure the time variable is modeled flexibly (either with splines or something more exotic).</li>
+<li>Fit a logistic regression on the event/at risk columns (in R this is done by making <code>cbind(y, n-y)</code> the outcome in the <code>glm</code> call). Ensure the time variable is modeled flexibly (either with splines or something more exotic).</li>
 <li>Predict the risk of death (i.e.&nbsp;the discrete hazard) from the logistic regression on the observed event times.</li>
 <li>Take the cumulative product of one minus the discrete hazards. These are the survival function estimates.</li>
 </ul>
@@ -199,7 +367,7 @@ font-style: inherit;">'dashed'</span>)</span></code></pre></div>
 </div>
 </div>
 <p>The intial model presented expands time in the following basis functions</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20x_i%20=%20(1,%20t_i,%20(t_i-11)_-%5E%7B2%7D,%20(t_i-11)_-%5E%7B2%7D)%20"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20x_i%20=%20(1,%20t_i,%20(t_i-11)_-%5E%7B2%7D,%20(t_i-11)_-%5E%7B3%7D)%20"></p>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?t_i"> is the the midpoint between months. This is equivalent to estimating the risk of the outcome between the start of month <img src="https://latex.codecogs.com/png.latex?i"> and the start of month <img src="https://latex.codecogs.com/png.latex?i+1">. The function <img src="https://latex.codecogs.com/png.latex?(%20z%20)_-%20=%20%5Cmin(z,%200)">. This particular expansion allows <img src="https://latex.codecogs.com/png.latex?t_i"> to vary as a cubic function before <img src="https://latex.codecogs.com/png.latex?t_i=11">, and then as a linear function thereafter.</p>
 <p>After fitting the model with an interaction by arm (so that the hazards can differ by arm), we can plot the hazards readily <sup>1</sup>.</p>
 <div class="cell">
@@ -8732,779 +8900,6 @@ font-style: inherit;">'red'</span>)</span></code></pre></div>
   <category>News</category>
   <guid>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</guid>
   <pubDate>Wed, 22 Jun 2022 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Flippin’ Fun!</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>I wrote an <a href="https://stats.stackexchange.com/a/574359/111259">answer</a> to a question about sequences of coin flips a couple days back that I was quite chuffed with. In short, the question asked for statistical ways to determine if a sequence of coin flips was from an unbiased coin or a human trying to appear random. The resulting model turned into a fun game <a href="https://twitter.com/PhDemetri/status/1523034006626856960">on twitter</a> centered around determining if people who follow me could simulate a sequence of coin flips that looked random (without using a real RNG, or some funny workaround. I have a lot of faith in my twitter followers…maybe too much).</p>
-<p>Anyway, then I thought “I should fit a hierarchical model to this data”. So that’s what I’m doing</p>
-<section id="initial-model" class="level2">
-<h2 class="anchored" data-anchor-id="initial-model">Initial Model</h2>
-<p>To understand the hierarchical model, we first need to understand the model I initially built. Let me give you a quick rundown on that.</p>
-<p>Let <img src="https://latex.codecogs.com/png.latex?S"> be a sequence of bernoulli experiments so that <img src="https://latex.codecogs.com/png.latex?S_i"> is either 1 or a 0 (a heads or a tails if you wish). The question I answered concerns detecting if a given sequence <img src="https://latex.codecogs.com/png.latex?S"> could have been created by a human (or by a non-random process posing as random). I interpreted that as a call to estimate the lag-1 autocorrelation of the flips. The hypothesis being that humans probably perceive long streaks of one outcome or the other as signs of non-randomness and will intentionally switch the outcome if they feel the run is too long. I initially chose a Bayesian approach because I’m a glutton for punishment and someone else already gave a pretty good answer.</p>
-<p>The model is quite straight forward to write down. Let <img src="https://latex.codecogs.com/png.latex?%5Crho"> be the correlation between <img src="https://latex.codecogs.com/png.latex?S_i"> and <img src="https://latex.codecogs.com/png.latex?S_%7Bi+1%7D">, and let <img src="https://latex.codecogs.com/png.latex?q"> be the expected number of heads in the sequence. We can write down the conditional probabilities that we see a 0/1 given the last element in the sequence was a 1/0. Those conditional probabilities are derived <a href="https://stats.stackexchange.com/questions/533217/interpretation-of-the-autocorrelation-of-a-binary-process">here</a> and they are…</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P(1%20%5Cvert%201)%20=%20q%20+%20%5Crho(1-q)%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P(1%20%5Cvert%200)%20=%20q(1-%5Crho)%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P(0%20%5Cvert%201)%20=%20(1-q)(1-%5Crho)%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P(0%20%5Cvert%200)%20=%201%20-%20q%20+%20%5Crho%20%5Ccdot%20q%20"></p>
-<p>The trick is to then count the subsequences of (1, 1), (1, 0), (0, 1), and (0, 0). Let <img src="https://latex.codecogs.com/png.latex?p_%7Bi%5Cvert%20j%7D%20=%20P(i%20%5Cvert%20j)">. We can then consider the count of each subsequence as multinomial</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20y%20%5Csim%20%5Cmbox%7BMultinomial%7D(%5Ctheta)%20%5C%3E.%20"></p>
-<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is the multinomial parameter, wherein each element is <img src="https://latex.codecogs.com/png.latex?%5Ctheta%20=%20%5Bp_%7B1%20%5Cvert%201%7D,%20p_%7B1%5Cvert%200%7D,%20p_%7B0%20%5Cvert%201%7D,%20p_%7B0%5Cvert%200%7D%5D">. Equip this with a uniform prior on both <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> and you’ve got yourself a model.</p>
-</section>
-<section id="the-stan-code" class="level2">
-<h2 class="anchored" data-anchor-id="the-stan-code">The Stan Code</h2>
-<p>The Stan code for this model is quite easy to understand. The <code>data</code> block will consist of the counts of each type of subsequence. We can then concatenate those counts into an <code>int</code> of length 4 via the <code>transformed data</code> block. The concatenated counts will be what we pass to the multinomial likelihood.</p>
-<pre><code>data{
-  int y_1_1; //number of concurrent 1s
-  int y_0_1; //number of 0,1 occurences
-  int y_1_0; //number of 1,0 occurences
-  int y_0_0; //number of concurrent 0s
-}
-transformed data{
-    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};
-}</code></pre>
-<p>The only parameters we are interested in estimating are the autocorrelation <code>rho</code> and the coin’s bias <code>q</code>.</p>
-<pre><code>parameters{
-  real&lt;lower=-1, upper=1&gt; rho;
-  real&lt;lower=0, upper=1&gt; q;
-}</code></pre>
-<p>We can derive the probabilities we need via the equations above, and that is a job for the transformed parameters block. We can then concatenate the conditional probabilities into a <code>simplex</code> data type object, <code>theta</code> to pass to the multinomial likelihood. Be careful though, we need to multiply <code>theta</code> by 0.5 since we are working with conditional probabilities. Note <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert%201%7D%20+%20p_%7B0%20%5Cvert%201%20%7D%20+%20p_%7B1%5Cvert%200%7D%20+%20p_%7B0%20%5Cvert%200%20%7D%20=%202">, hence the scaling factor.</p>
-<pre><code>transformed parameters{
-  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);
-  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);
-  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);
-  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;
-  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';
-}</code></pre>
-<p>The model call is then quite simple</p>
-<pre><code>model{
-  q ~ beta(1, 1);
-  rho ~ uniform(-1, 1);
-  y ~ multinomial(theta); 
-}</code></pre>
-<p>and we can even generate new sequences based off the estimated parameters as a sort of posterior predictive check.</p>
-<pre><code>generated quantities{
-    vector[300] yppc;
-    
-    yppc[1] = bernoulli_rng(q);
-    
-    for(i in 2:300){
-        if(yppc[i-1]==1){
-            yppc[i] = bernoulli_rng(prob_1_1);
-        }
-        else{
-        yppc[i] = bernoulli_rng(prob_1_0);
-        }
-    }
-}</code></pre>
-<p>All in all the model is</p>
-<pre><code>data{
-
-  int y_1_1; //number of concurrent 1s
-  int y_0_1; //number of 0,1 occurences
-  int y_1_0; //number of 1,0 occurences
-  int y_0_0; //number of concurrent 0s
-  
-}
-transformed data{
-    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};
-}
-parameters{
-  real&lt;lower=-1, upper=1&gt; rho;
-  real&lt;lower=0, upper=1&gt; q;
-}
-transformed parameters{
-  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);
-  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);
-  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);
-  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;
-  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';
-}
-model{
-  q ~ beta(1, 1);
-  rho ~ uniform(-1, 1);
-  y ~ multinomial(theta);
-  
-}
-generated quantities{
-    vector[300] yppc;
-    
-    yppc[1] = bernoulli_rng(q);
-    
-    for(i in 2:300){
-        if(yppc[i-1]==1){
-            yppc[i] = bernoulli_rng(prob_1_1);
-        }
-        else{
-        yppc[i] = bernoulli_rng(prob_1_0);
-        }
-    }
-}</code></pre>
-</section>
-<section id="run-from-python" class="level2">
-<h2 class="anchored" data-anchor-id="run-from-python">Run From Python</h2>
-<p>With the model written down, all we need to do is add some python code to create the counts of each subsequence and then run the stan model. Here is teh python code I used to create the response tweets for that game I ran on twitter.</p>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> cmdstanpy</span>
-<span id="cb7-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb7-3"></span>
-<span id="cb7-4">y_1_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># count of (1, 1)</span></span>
-<span id="cb7-5">y_0_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># count of (0, 0)</span></span>
-<span id="cb7-6">y_0_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># count of (0, 1)</span></span>
-<span id="cb7-7">y_1_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># count of (1, 0)</span></span>
-<span id="cb7-8"></span>
-<span id="cb7-9">sequence <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'TTHHTHTTHTTTHTTTHTTTHTTHTHHTHHTHTHHTTTHHTHTHTTHTHHTTHTHHTHTTTHHTTHHTTHHHTHHTHTTHTHTTHHTHHHTTHTHTTTHHTTHTHTHTHTHTTHTHTHHHTTHTHTHHTHHHTHTHTTHTTHHTHTHTHTTHHTTHTHTTHHHTHTHTHTTHTTHHTTHTHHTHHHTTHHTHTTHTHTHTHTHTHTHHHTHTHTHTHHTHHTHTHTTHTTTHHTHTTTHTHHTHHHHTTTHHTHTHTHTHHHTTHHTHTTTHTHHTHTHTHHTHTTHTTHTHHTHTHTTT'</span>.upper())</span>
-<span id="cb7-10"></span>
-<span id="cb7-11"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Do a rolling window trick I saw somewhere on twitter.</span></span>
-<span id="cb7-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># This implements a rollowing window of 2</span></span>
-<span id="cb7-13"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># In python 3.10, this would be a great use case for match</span></span>
-<span id="cb7-14"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">for</span> pairs <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">zip</span>(sequence[:<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], sequence[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>:]):</span>
-<span id="cb7-15">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">if</span> pairs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> (<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'H'</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'H'</span>):</span>
-<span id="cb7-16">        y_1_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb7-17">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">elif</span> pairs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> (<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'T'</span>,<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'H'</span>):</span>
-<span id="cb7-18">        y_0_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb7-19">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">elif</span> pairs <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> (<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'H'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'T'</span>):</span>
-<span id="cb7-20">        y_1_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb7-21">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">else</span>:</span>
-<span id="cb7-22">        y_0_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb7-23"></span>
-<span id="cb7-24"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Write the stan model as a string.  We will then write it to a file</span></span>
-<span id="cb7-25">stan_code <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'''</span></span>
-<span id="cb7-26"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">data{</span></span>
-<span id="cb7-27"></span>
-<span id="cb7-28"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  int y_1_1; //number of concurrent 1s</span></span>
-<span id="cb7-29"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  int y_0_1; //number of 0,1 occurences</span></span>
-<span id="cb7-30"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  int y_1_0; //number of 1,0 occurences</span></span>
-<span id="cb7-31"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  int y_0_0; //number of concurrent 0s</span></span>
-<span id="cb7-32"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  </span></span>
-<span id="cb7-33"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-34"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">transformed data{</span></span>
-<span id="cb7-35"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    int y[4] = {y_1_1, y_0_1, y_1_0, y_0_0};</span></span>
-<span id="cb7-36"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-37"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">parameters{</span></span>
-<span id="cb7-38"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=-1, upper=1&gt; rho;</span></span>
-<span id="cb7-39"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=0, upper=1&gt; q;</span></span>
-<span id="cb7-40"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-41"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">transformed parameters{</span></span>
-<span id="cb7-42"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=0, upper=1&gt; prob_1_1 = q + rho*(1-q);</span></span>
-<span id="cb7-43"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=0, upper=1&gt; prob_0_1 = (1-q)*(1-rho);</span></span>
-<span id="cb7-44"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=0, upper=1&gt; prob_1_0 = q*(1-rho);</span></span>
-<span id="cb7-45"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  real&lt;lower=0, upper=1&gt; prob_0_0 = 1 - q + rho*q;</span></span>
-<span id="cb7-46"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  simplex[4] theta = 0.5*[prob_1_1, prob_0_1, prob_1_0, prob_0_0 ]';</span></span>
-<span id="cb7-47"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-48"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">model{</span></span>
-<span id="cb7-49"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  q ~ beta(1, 1);</span></span>
-<span id="cb7-50"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  rho ~ uniform(-1, 1);</span></span>
-<span id="cb7-51"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  y ~ multinomial(theta);</span></span>
-<span id="cb7-52"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">  </span></span>
-<span id="cb7-53"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-54"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">generated quantities{</span></span>
-<span id="cb7-55"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    vector[300] yppc;</span></span>
-<span id="cb7-56"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    </span></span>
-<span id="cb7-57"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    yppc[1] = bernoulli_rng(q);</span></span>
-<span id="cb7-58"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    </span></span>
-<span id="cb7-59"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    for(i in 2:300){</span></span>
-<span id="cb7-60"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        if(yppc[i-1]==1){</span></span>
-<span id="cb7-61"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">            yppc[i] = bernoulli_rng(prob_1_1);</span></span>
-<span id="cb7-62"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        }</span></span>
-<span id="cb7-63"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        else{</span></span>
-<span id="cb7-64"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        yppc[i] = bernoulli_rng(prob_1_0);</span></span>
-<span id="cb7-65"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        }</span></span>
-<span id="cb7-66"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    }</span></span>
-<span id="cb7-67"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb7-68"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'''</span></span>
-<span id="cb7-69"></span>
-<span id="cb7-70"></span>
-<span id="cb7-71"></span>
-<span id="cb7-72"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Write the model to a temp file</span></span>
-<span id="cb7-73"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">with</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">open</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'model_file.stan'</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'w'</span>) <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> model_file:</span>
-<span id="cb7-74">    model_file.write(stan_code)</span>
-<span id="cb7-75">    </span>
-<span id="cb7-76"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Compile the model</span></span>
-<span id="cb7-77">model <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cmdstanpy.CmdStanModel(stan_file<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'model_file.stan'</span>)</span>
-<span id="cb7-78"></span>
-<span id="cb7-79"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># data to pass to Stan</span></span>
-<span id="cb7-80">data <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">dict</span>(y_1_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y_1_1, y_0_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y_0_0, y_0_1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y_0_1, y_1_0 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> y_1_0)</span>
-<span id="cb7-81"></span>
-<span id="cb7-82"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Plotting stuff.</span></span>
-<span id="cb7-83">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(dpi <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">120</span>, ncols<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, figsize <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">15</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>))</span>
-<span id="cb7-84"></span>
-<span id="cb7-85">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Auto-correlation'</span>)</span>
-<span id="cb7-86">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Bias'</span>)</span>
-<span id="cb7-87"></span>
-<span id="cb7-88">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].set_xlim(<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb7-89">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].set_xlim(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb7-90"></span>
-<span id="cb7-91">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].axvline(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>)</span>
-<span id="cb7-92">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].axvline(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>, color <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'red'</span>)</span>
-<span id="cb7-93"></span>
-<span id="cb7-94">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].annotate(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Uncorrelated Flips'</span>, xy<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.475</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>), xycoords<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'axes fraction'</span>, rotation <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">90</span>)</span>
-<span id="cb7-95">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].annotate(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Unbiased Flips'</span>, xy<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.475</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>), xycoords<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'axes fraction'</span>, rotation <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">90</span>)</span>
-<span id="cb7-96"></span>
-<span id="cb7-97"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># MCMC go brrrr</span></span>
-<span id="cb7-98">fit <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> model.sample(data)</span>
-<span id="cb7-99"></span>
-<span id="cb7-100">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>].hist(fit.stan_variable(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'rho'</span>), edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb7-101">ax[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>].hist(fit.stan_variable(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'q'</span>), edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k'</span>, alpha <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb7-102"></span>
-<span id="cb7-103">autocorr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> fit.stan_variable(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'rho'</span>).mean()</span>
-<span id="cb7-104">bias <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> fit.stan_variable(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'q'</span>).mean()</span>
-<span id="cb7-105"></span>
-<span id="cb7-106">tweet <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Your flips have an expected correlation of </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>autocorr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;"> and your coin's bias is about </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>bias<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span></span>
-<span id="cb7-107"></span>
-<span id="cb7-108"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"Your sequence was </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">''</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>join(sequence)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>)</span>
-<span id="cb7-109"><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">print</span>(tweet)</span></code></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>INFO:cmdstanpy:compiling stan file /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan to exe file /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>INFO:cmdstanpy:compiled model executable: /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>WARNING:cmdstanpy:Stan compiler has produced 1 warnings:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>WARNING:cmdstanpy:
---- Translating Stan model to C++ code ---
-bin/stanc  --o=/Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.hpp /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan
-Warning in '/Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.stan', line 11, column 4: Declaration
-    of arrays by placing brackets after a variable name is deprecated and
-    will be removed in Stan 2.32.0. Instead use the array keyword before the
-    type. This can be changed automatically using the auto-format flag to
-    stanc
-
---- Compiling, linking C++ code ---
-clang++ -std=c++1y -Wno-unknown-warning-option -Wno-tautological-compare -Wno-sign-compare -D_REENTRANT -Wno-ignored-attributes      -I stan/lib/stan_math/lib/tbb_2020.3/include    -O3 -I src -I stan/src -I lib/rapidjson_1.1.0/ -I lib/CLI11-1.9.1/ -I stan/lib/stan_math/ -I stan/lib/stan_math/lib/eigen_3.3.9 -I stan/lib/stan_math/lib/boost_1.75.0 -I stan/lib/stan_math/lib/sundials_6.0.0/include -I stan/lib/stan_math/lib/sundials_6.0.0/src/sundials    -DBOOST_DISABLE_ASSERTS          -c -include-pch stan/src/stan/model/model_header.hpp.gch -x c++ -o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.hpp
-clang++ -std=c++1y -Wno-unknown-warning-option -Wno-tautological-compare -Wno-sign-compare -D_REENTRANT -Wno-ignored-attributes      -I stan/lib/stan_math/lib/tbb_2020.3/include    -O3 -I src -I stan/src -I lib/rapidjson_1.1.0/ -I lib/CLI11-1.9.1/ -I stan/lib/stan_math/ -I stan/lib/stan_math/lib/eigen_3.3.9 -I stan/lib/stan_math/lib/boost_1.75.0 -I stan/lib/stan_math/lib/sundials_6.0.0/include -I stan/lib/stan_math/lib/sundials_6.0.0/src/sundials    -DBOOST_DISABLE_ASSERTS                -Wl,-L,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb" -Wl,-rpath,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb"      /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o src/cmdstan/main.o        -Wl,-L,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb" -Wl,-rpath,"/Users/demetri/.cmdstan/cmdstan-2.29.2/stan/lib/stan_math/lib/tbb"   stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_nvecserial.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_cvodes.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_idas.a stan/lib/stan_math/lib/sundials_6.0.0/lib/libsundials_kinsol.a  stan/lib/stan_math/lib/tbb/libtbb.dylib stan/lib/stan_math/lib/tbb/libtbbmalloc.dylib stan/lib/stan_math/lib/tbb/libtbbmalloc_proxy.dylib -o /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file
-rm -f /Users/demetri/Documents/dpananos.github.io/posts/2022-05-07-flippin/model_file.o
-</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>INFO:cmdstanpy:CmdStan start processing</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"8b4197ff587543abbeaee330aeba92ed","version_major":2,"version_minor":0}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"97e61edfebdc429eb36afe8ac0f512b1","version_major":2,"version_minor":0}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"e78cdbeb72ba4ac2a7d8ddc90e504085","version_major":2,"version_minor":0}
-</script>
-</div>
-<div class="cell-output cell-output-display">
-<script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"53c4fd9502654c479be23e9d7e0663e8","version_major":2,"version_minor":0}
-</script>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                                                                </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                                                                </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                                                                </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                                                                </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>INFO:cmdstanpy:CmdStan done processing.</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code></code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Your sequence was TTHHTHTTHTTTHTTTHTTTHTTHTHHTHHTHTHHTTTHHTHTHTTHTHHTTHTHHTHTTTHHTTHHTTHHHTHHTHTTHTHTTHHTHHHTTHTHTTTHHTTHTHTHTHTHTTHTHTHHHTTHTHTHHTHHHTHTHTTHTTHHTHTHTHTTHHTTHTHTTHHHTHTHTHTTHTTHHTTHTHHTHHHTTHHTHTTHTHTHTHTHTHTHHHTHTHTHTHHTHHTHTHTTHTTTHHTHTTTHTHHTHHHHTTTHHTHTHTHTHHHTTHHTHTTTHTHHTHTHTHHTHTTHTTHTHHTHTHTTT
-Your flips have an expected correlation of -0.36 and your coin's bias is about 0.49</code></pre>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/index_files/figure-html/cell-2-output-17.png" class="img-fluid"></p>
-</div>
-</div>
-</section>
-<section id="stack-layerswait-thats-a-deep-learning-thing" class="level2">
-<h2 class="anchored" data-anchor-id="stack-layerswait-thats-a-deep-learning-thing">Stack Layers…Wait, That’s a Deep Learning Thing</h2>
-<p>Now it’s time to write a hierarchical model, and for that we need to be a little more careful. I initially thought I could just put priors on the population level autocorrelation and bias, but I quickly ran into a problem there, which I will illustrate below.</p>
-<p>Suppose the coin’s bias is 0 (we always get tails). Could the autocorrelation be -1? No, it couldn’t be, because that would mean our next flip would have to be a 1, but the coin’s bias is 0! This illustrates some nuance to the problem I had failed to consider but luckily did not suffer from. The autocorrelation for two binary random variables, <img src="https://latex.codecogs.com/png.latex?X,%20Y">, is defined as</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho%20=%20%5Cdfrac%7B%5Calpha%20-%20q%7D%7Bq(1-q)%7D%20"></p>
-<p>Where <img src="https://latex.codecogs.com/png.latex?E(XY)%20=%20%5Calpha">. You see, <img src="https://latex.codecogs.com/png.latex?%5Calpha"> can only be so big depending on the value of <img src="https://latex.codecogs.com/png.latex?q">, and if you place uniform priors on both <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> you can quickly get conditional probabilities outside the unit interval. That’s exactly what happened, and I was banging my head against the wall for a night trying to figure out the bounds on <img src="https://latex.codecogs.com/png.latex?%5Crho"> given <img src="https://latex.codecogs.com/png.latex?q"> and it quickly became a mess.</p>
-<p>There is another way. Rather than place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q">, we could place priors on the multinomial parameter and then do algebra (two equations, two unknowns) to find out expressions for <img src="https://latex.codecogs.com/png.latex?q"> and <img src="https://latex.codecogs.com/png.latex?%5Crho"> in terms of <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert1%7D"> and <img src="https://latex.codecogs.com/png.latex?p_%7B1%5Cvert0%7D">. This isn’t ideal, because I have very good prior information on what <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> should be, not on what <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> should be. Whatever, let’s proceed and see how our priors look like with a prior predictive check.</p>
-<p>The model is actually simpler to write in Stan than the previous model. We will place a Dirichlet prior on the multinomial parameters (one for each person who responded with a sequence), and then each sequence is multinomial with that multinomial parameter.</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta_j%20%5Csim%20%5Cmbox%7BDirichlet%7D(%5Calpha)%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20y_j%20%5Csim%20%5Cmbox%7BMultinomial%7D(%5Ctheta_j)%20%20"></p>
-<p>The quantities we care about can be expressed in terms of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Crho%20=%20p_%7B1%5Cvert%201%7D%20-%20p_%7B1%5Cvert%200%7D%20%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20q%20=%20%5Cdfrac%7B2p_%7B1%5Cvert%200%7D%7D%7B1%20-%20p_%7B1%5Cvert%201%7D%20+%20p_%7B1%5Cvert%200%7D%7D"></p>
-<p>Here is the model in Stan</p>
-<pre><code>data{
-
-    int N; //How many sequences do we have
-    int y[N, 4]; // matrix of counts of co-occurences of (1,1), (1,0), (0, 1), (0,0)
-    int do_sample; // Flag to do a prior predictive check
-
-}
-parameters{
-    vector&lt;lower=0&gt;[4] a;
-    simplex[4] theta[N];
-}
-model{
-  
-  a ~ cauchy(0, 2.5);
-  
-  if(do_sample&gt;0){
-      for(i in 1:N){
-          theta[i] ~ dirichlet(a);
-          y[i] ~ multinomial(theta[i]);
-      }
-    }
-  
-}
-generated quantities{
-
-    vector[4] theta_ppc = dirichlet_rng(a);
-    real rho = theta_ppc[1] - theta_ppc[2];
-    real q = 2* theta_ppc[2]/(1 - theta_ppc[1] + theta_ppc[2]); 
-    
-    real yppc[N, 4];
-    
-    for(i in 1:N){
-        yppc[i] = multinomial_rng(theta[i], sum(y[i]));
-    }
-}</code></pre>
-<p>Shown below are the priors for the autocorrelation and bias based on the priors I’ve used. They are a little too uncertain for my liking. Humans are pretty smart, and I don’t expect for the population average bias to be very far from 0.5. I would prefer that the prior for <img src="https://latex.codecogs.com/png.latex?q"> be very tightly centered around 0.5, and that the prior for <img src="https://latex.codecogs.com/png.latex?%5Crho"> be tightly centered on 0, but that’s life. The model runs the 76 sequences in about 12 seconds (4 chains, 1000 warmups, 1000 samples) and diagnostics don’t indicate any pathological behavior. Let’s look at the joint posterior.</p>
-<div id="fig-distributions" class="quarto-layout-panel">
-<figure class="figure">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-prior" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/priors.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
-<figcaption class="figure-caption">(a) Priors</figcaption>
-</figure>
-</div>
-</div>
-<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-hanno" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-05-07-flippin/posterior.png" class="img-fluid figure-img" data-ref-parent="fig-distributions"></p>
-<figcaption class="figure-caption">(b) Posteriors</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Prior and Posterior distributions for the model.</figcaption><p></p>
-</figure>
-</div>
-<p>The take home here is that the sequences are largely consistent with an unbiased and uncorrelated coin. The expected correlation is negative (-0.05) meaning humans are more likely to switch from heads to tails, or tails to heads, and the expected bias is 0.53 meaning people seem to favor heads for some reason. The results are largely unsurprising, and I really wish I could place priors on <img src="https://latex.codecogs.com/png.latex?%5Crho"> and <img src="https://latex.codecogs.com/png.latex?q"> directly so that my model really does reflect the state of my knowledge, but this is good enough for now.</p>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>I’ve been thinking about this problem for a while after I watched a talk by Gelman where he mentioned estimating the autocorrelation between bernoulli experiments in passing (he was talking about model criticism and offering examples of other things to check our model with). I’m moderately happy with the hierarchical model, and the results make a lot of sense. Humans are pretty smart, and we have an intuitive sense for what random looks like. I’m willing to bet that if people submitted longer sequences, we would have a more precise estimate of the bias/correlation.</p>
-<p>One thing I’ve shirked is really detailed model criticism, though I have an idea of how I would do that. In that answer on cross validated, COOLSerdash posts a REALLY COOL way to visualize the sequence data. They plot the number of runs (sequences of consecutive heads or tails) against the longest run in the sequence. I think this would make for an excellent way to check that our model has learned the correct autocorrelation for each individual who participated in the game (though I think the sequences were too short to have a precise estimate).</p>
-
-
-</section>
-
- ]]></description>
-  <category>Bayes</category>
-  <category>Stan</category>
-  <category>Python</category>
-  <guid>https://dpananos.github.io/posts/2022-05-07-flippin/index.html</guid>
-  <pubDate>Sat, 07 May 2022 04:00:00 GMT</pubDate>
-  <media:content url="https://dpananos.github.io/posts/2022-05-07-flippin/posterior.png" medium="image" type="image/png" height="96" width="144"/>
 </item>
 </channel>
 </rss>

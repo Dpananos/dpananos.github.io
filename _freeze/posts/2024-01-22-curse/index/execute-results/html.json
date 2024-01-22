@@ -1,0 +1,16 @@
+{
+  "hash": "e9a2aa7ee285b8c669ec2b0336173190",
+  "result": {
+    "markdown": "---\ntitle: Exagerated Experiment Returns Are Easy To Understand From This Picture\ndate: \"2024-01-20\"\ncode-fold: true\necho: true\nfig-cap-location: top\ncategories: []\nnumber-sections: false\ndraft: false\n---\n\n\nIf you run A/B tests as part of your job, you likely will want to report on how much you moved a metric in a given quarter.\n\nIf you use \"lift\"[^1] as your main causal contrast in experiments, you may be tempted to take the product of all the lifts you detected and use that as your estimate.  So in your first experiment you detected a 2% lift, in your next 3 you failed to detect a lift, and in your last experiment you detected a whopping 5% lift!  That means we increased our overal evaluation criterion (OEC) nearly 7%...right?\n\n\n[^1]: Lift is sometimes called \"relative risk\" in epidemiology, and is equal to $\\frac{E[Y(1)]}{E[Y(0)]}$\n\nNot quite.  In general, doing this sort of procedure will systematically _over estimate_ your impact on your OEC.  To understand why, have a look at the picture below.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nx <- seq(-5, 10, 0.1)\nxs <- seq(1.96, 10, 0.1)\nplot(x, dnorm(x), type='l', labels=F, ylab='', xlab = 'Difference in means')\nlines(x, dnorm(x, 3, 1), type='l', col='blue')\npolygon(\n  c(xs, rev(xs)),\n  c(dnorm(xs, 3, 1), rep(0, length(xs))),\n  col=alpha('blue', 0.3),\n  border = F\n)\nlegend('topleft', col=c('black','blue'), legend = c(expression(H[0]), expression(H[A])), lty=c(1, 1))\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,41 @@
+---
+title: Exagerated Experiment Returns Are Easy To Understand From This Picture
+date: "2024-01-20"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+---
+
+If you run A/B tests as part of your job, you likely will want to report on how much you moved a metric in a given quarter.
+
+If you use "lift"[^1] as your main causal contrast in experiments, you may be tempted to take the product of all the lifts you detected and use that as your estimate.  So in your first experiment you detected a 2% lift, in your next 3 you failed to detect a lift, and in your last experiment you detected a whopping 5% lift!  That means we increased our overal evaluation criterion (OEC) nearly 7%...right?
+
+
+[^1]: Lift is sometimes called "relative risk" in epidemiology, and is equal to $\frac{E[Y(1)]}{E[Y(0)]}$
+
+Not quite.  In general, doing this sort of procedure will systematically _over estimate_ your impact on your OEC.  To understand why, have a look at the picture below.
+
+```{r}
+#| code-fold: false
+library(tidyverse)
+```
+
+
+```{r}
+
+x <- seq(-5, 10, 0.1)
+xs <- seq(1.96, 10, 0.1)
+plot(x, dnorm(x), type='l', labels=F, ylab='', xlab = 'Difference in means')
+lines(x, dnorm(x, 3, 1), type='l', col='blue')
+polygon(
+  c(xs, rev(xs)),
+  c(dnorm(xs, 3, 1), rep(0, length(xs))),
+  col=alpha('blue', 0.3),
+  border = F
+)
+legend('topleft', col=c('black','blue'), legend = c(expression(H[0]), expression(H[A])), lty=c(1, 1))
+
+```
