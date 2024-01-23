@@ -1,5 +1,5 @@
 ---
-title: Exagerated Experiment Returns Are Easy To Understand From This Picture
+title: The Winner's Curse Is Easy To Understand From This Picture
 date: "2024-01-20"
 code-fold: true
 echo: true
@@ -7,28 +7,43 @@ fig-cap-location: top
 categories: []
 number-sections: false
 draft: false
+cache: true
 ---
 
-If you run A/B tests as part of your job, you likely will want to report on how much you moved a metric in a given quarter.
+```{r }
+#| code-fold: true
+#| include: false
+library(tidyverse)
+library(kableExtra)
+```
 
-If you use "lift"[^1] as your main causal contrast in experiments, you may be tempted to take the product of all the lifts you detected and use that as your estimate.  So in your first experiment you detected a 2% lift, in your next 3 you failed to detect a lift, and in your last experiment you detected a whopping 5% lift!  That means we increased our overal evaluation criterion (OEC) nearly 7%...right?
-
-
-[^1]: Lift is sometimes called "relative risk" in epidemiology, and is equal to $\frac{E[Y(1)]}{E[Y(0)]}$
-
-Not quite.  In general, doing this sort of procedure will systematically _over estimate_ your impact on your OEC.  To understand why, have a look at the picture below.
 
 ```{r}
-#| code-fold: false
-library(tidyverse)
+#| code-fold: true
+#| include: false
+set.seed(2)
+pc <- 0.1
+lift <-1.03
+pt <- pc * lift
+power <- 0.8
+sig_level <- 0.05
+
+
+pwr_calc <- power.prop.test(p1=pc, p2=pt, power=power, sig.level = sig_level)
+n <- ceiling(pwr_calc$n)
+
 ```
+
+Take a look at the photo below, and it i should be easy to understand why The Winner's Curse (the general tendency for detected effects to be an over estimate of the truth) is a thing.
+
+The plot shows our typical setup for a hypothesis test.  In black is the sampling distribution of the test statistic for a difference in means under the null, and in blue is the statistic's sampling distribution under the alternative.  The shaded blue region represents the statistical power, and those effect sizes in the shaded region would be considered "statistically significant".
 
 
 ```{r}
 
 x <- seq(-5, 10, 0.1)
 xs <- seq(1.96, 10, 0.1)
-plot(x, dnorm(x), type='l', labels=F, ylab='', xlab = 'Difference in means')
+plot(x, dnorm(x), type='l', ylab='', xlab = 'Difference in means', xaxt='n', yaxt='n')
 lines(x, dnorm(x, 3, 1), type='l', col='blue')
 polygon(
   c(xs, rev(xs)),
@@ -36,6 +51,39 @@ polygon(
   col=alpha('blue', 0.3),
   border = F
 )
-legend('topleft', col=c('black','blue'), legend = c(expression(H[0]), expression(H[A])), lty=c(1, 1))
+
+
+```
+ The shaded blue region defines a lower truncated normal distribution.  Were the alternative hypothesis true, and were we to run many experiments to estimate the difference in means, our detected effects would be samples from this distribution.  Hence, using those samples to estimate the mean of the alternative distribution would result in a biased estimate of the mean.
+
+The expectation for a lower truncated normal distribution truncated at $x=a$ is 
+
+$$\mu+\sigma  \dfrac{\varphi\left( \dfrac{a-\mu}{\sigma} \right)}{1 - \Phi\left(\dfrac{a-\mu}{\sigma}\right)}   \>.$$
+
+Here $\mu$ and $\sigma$ are the mean and standard deviation of the distribution under the alternative, $\varphi$ is the standard normal density, $\Phi$ is the standard normal cumulative distribution.  So our estimate of the mean would be biased upwards by $\sigma  \frac{\varphi\left( \frac{a-\mu}{\sigma} \right)}{1 - \Phi\left(\frac{a-\mu}{\sigma}\right)}$.  That can be small or large depending on $\mu$ and $\sigma$.
+
+
+Without doing any differentiation to understand where this bias is largest, it should be intutituve from the picture that the bias is small/large when statistical power is large/small.
+
+Hence, estimates from underpowered studies should be met with <fry_squint.jpg>.
+
+
+```{r}
+#| include: false
+log_rr_mean <- log(pt) - log(pc)
+log_rr_var <- (1-pt)/(pt*n) + (1-pc)/(pc*n)
+log_rr_sd <- sqrt(log_rr_var)
+
+z = log_rr_mean - log_rr_sd * qnorm(0.8)
+
+samples <- rnorm(1000000, log_rr_mean, log_rr_sd)
+
+
+# expectation from truncated normal
+log_rr_mean + log_rr_sd * dnorm((z - log_rr_mean)/ log_rr_sd) / (1 - pnorm((z - log_rr_mean)/ log_rr_sd))
+
+
+mean(samples[samples>z])
+
 
 ```

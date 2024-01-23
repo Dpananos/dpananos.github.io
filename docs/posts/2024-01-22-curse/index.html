@@ -9,7 +9,7 @@
 <meta name="author" content="Demetri Pananos">
 <meta name="dcterms.date" content="2024-01-20">
 
-<title>Demetri Pananos Ph.D - Exagerated Experiment Returns Are Easy To Understand From This Picture</title>
+<title>Demetri Pananos Ph.D - The Winner’s Curse Is Easy To Understand From This Picture</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -100,15 +100,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - Exagerated Experiment Returns Are Easy To Understand From This Picture">
+<meta property="og:title" content="Demetri Pananos Ph.D - The Winner’s Curse Is Easy To Understand From This Picture">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-2-1.png">
+<meta property="og:image" content="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png">
 <meta property="og:site-name" content="Demetri Pananos Ph.D">
 <meta property="og:image:height" content="960">
 <meta property="og:image:width" content="1344">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - Exagerated Experiment Returns Are Easy To Understand From This Picture">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - The Winner’s Curse Is Easy To Understand From This Picture">
 <meta name="twitter:description" content="">
-<meta name="twitter:image" content="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-2-1.png">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image-height" content="960">
@@ -161,7 +161,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Exagerated Experiment Returns Are Easy To Understand From This Picture</h1>
+      <h1 class="title">The Winner’s Curse Is Easy To Understand From This Picture</h1>
                       </div>
   </div>
     
@@ -198,44 +198,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>If you run A/B tests as part of your job, you likely will want to report on how much you moved a metric in a given quarter.</p>
-<p>If you use “lift”<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> as your main causal contrast in experiments, you may be tempted to take the product of all the lifts you detected and use that as your estimate. So in your first experiment you detected a 2% lift, in your next 3 you failed to detect a lift, and in your last experiment you detected a whopping 5% lift! That means we increased our overal evaluation criterion (OEC) nearly 7%…right?</p>
-<p>Not quite. In general, doing this sort of procedure will systematically <em>over estimate</em> your impact on your OEC. To understand why, have a look at the picture below.</p>
-<div class="cell">
+<p>Take a look at the photo below, and it i should be easy to understand why The Winner’s Curse (the general tendency for detected effects to be an over estimate of the truth) is a thing.</p>
+<p>The plot shows our typical setup for a hypothesis test. In black is the sampling distribution of the test statistic for a difference in means under the null, and in blue is the statistic’s sampling distribution under the alternative. The shaded blue region represents the statistical power, and those effect sizes in the shaded region would be considered “statistically significant”.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_f57febe84b86407f210dc36b318d860c">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">1.96</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">dnorm</span>(x), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">labels=</span>F, <span class="at">ylab=</span><span class="st">''</span>, <span class="at">xlab =</span> <span class="st">'Difference in means'</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">col=</span><span class="st">'blue'</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(xs, <span class="fu">rev</span>(xs)),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">dnorm</span>(xs, <span class="dv">3</span>, <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(xs))),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">col=</span><span class="fu">alpha</span>(<span class="st">'blue'</span>, <span class="fl">0.3</span>),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> F</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'topleft'</span>, <span class="at">col=</span><span class="fu">c</span>(<span class="st">'black'</span>,<span class="st">'blue'</span>), <span class="at">legend =</span> <span class="fu">c</span>(<span class="fu">expression</span>(H[<span class="dv">0</span>]), <span class="fu">expression</span>(H[A])), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">1.96</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">dnorm</span>(x), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">ylab=</span><span class="st">''</span>, <span class="at">xlab =</span> <span class="st">'Difference in means'</span>, <span class="at">xaxt=</span><span class="st">'n'</span>, <span class="at">yaxt=</span><span class="st">'n'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">col=</span><span class="st">'blue'</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(xs, <span class="fu">rev</span>(xs)),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">dnorm</span>(xs, <span class="dv">3</span>, <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(xs))),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">col=</span><span class="fu">alpha</span>(<span class="st">'blue'</span>, <span class="fl">0.3</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> F</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<p>The shaded blue region defines a lower truncated normal distribution. Were the alternative hypothesis true, and were we to run many experiments to estimate the difference in means, our detected effects would be samples from this distribution. Hence, using those samples to estimate the mean of the alternative distribution would result in a biased estimate of the mean.</p>
+<p>The expectation for a lower truncated normal distribution truncated at <span class="math inline">\(x=a\)</span> is</p>
+<p><span class="math display">\[\mu+\sigma  \dfrac{\varphi\left( \dfrac{a-\mu}{\sigma} \right)}{1 - \Phi\left(\dfrac{a-\mu}{\sigma}\right)}   \&gt;.\]</span></p>
+<p>Here <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> are the mean and standard deviation of the distribution under the alternative, <span class="math inline">\(\varphi\)</span> is the standard normal density, <span class="math inline">\(\Phi\)</span> is the standard normal cumulative distribution. So our estimate of the mean would be biased upwards by <span class="math inline">\(\sigma \frac{\varphi\left( \frac{a-\mu}{\sigma} \right)}{1 - \Phi\left(\frac{a-\mu}{\sigma}\right)}\)</span>. That can be small or large depending on <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<p>Without doing any differentiation to understand where this bias is largest, it should be intutituve from the picture that the bias is small/large when statistical power is large/small.</p>
+<p>Hence, estimates from underpowered studies should be met with &lt;fry_squint.jpg&gt;.</p>
 
 
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Lift is sometimes called “relative risk” in epidemiology, and is equal to <span class="math inline">\(\frac{E[Y(1)]}{E[Y(0)]}\)</span><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
