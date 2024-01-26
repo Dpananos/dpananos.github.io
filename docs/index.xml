@@ -6,16 +6,17 @@
       version="2.0">
 <channel>
 <title>Demetri Pananos Ph.D</title>
-<link>https://dpananos.github.io/index.html</link>
+<link>https://dpananos.github.io/</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.3.450</generator>
+<generator>quarto-1.4.549</generator>
 <lastBuildDate>Sat, 20 Jan 2024 05:00:00 GMT</lastBuildDate>
 <item>
   <title>The Winner’s Curse Is Easy To Understand From This Picture</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2024-01-22-curse/index.html</link>
+  <link>https://dpananos.github.io/posts/2024-01-22-curse/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -23,7 +24,7 @@
 <p>Take a look at the photo below, and it i should be easy to understand why The Winner’s Curse (the general tendency for detected effects to be an over estimate of the truth) is a thing.</p>
 <p>The plot shows our typical setup for a hypothesis test. In black is the sampling distribution of the test statistic for a difference in means under the null, and in blue is the statistic’s sampling distribution under the alternative. The shaded blue region represents the statistical power, and those effect sizes in the shaded region would be considered “statistically significant”.</p>
 <div class="cell" data-hash="index_cache/html/unnamed-chunk-3_f57febe84b86407f210dc36b318d860c">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">x <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -129,27 +130,32 @@ font-style: inherit;">border =</span> F</span>
 <span id="cb1-10">)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The shaded blue region defines a lower truncated normal distribution. Were the alternative hypothesis true, and were we to run many experiments to estimate the difference in means, our detected effects would be samples from this distribution. Hence, using those samples to estimate the mean of the alternative distribution would result in a biased estimate of the mean.</p>
 <p>The expectation for a lower truncated normal distribution truncated at <img src="https://latex.codecogs.com/png.latex?x=a"> is</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cmu+%5Csigma%20%20%5Cdfrac%7B%5Cvarphi%5Cleft(%20%5Cdfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%20%5Cright)%7D%7B1%20-%20%5CPhi%5Cleft(%5Cdfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%5Cright)%7D%20%20%20%5C%3E."></p>
-<p>Here <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma"> are the mean and standard deviation of the distribution under the alternative, <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> is the standard normal density, <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is the standard normal cumulative distribution. So our estimate of the mean would be biased upwards by <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%5Cfrac%7B%5Cvarphi%5Cleft(%20%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%20%5Cright)%7D%7B1%20-%20%5CPhi%5Cleft(%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%5Cright)%7D">. That can be small or large depending on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma">.</p>
+<p>Here <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma"> are the mean and standard deviation of the distribution under the alternative, <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> is the standard normal density, <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is the standard normal cumulative distribution. So our estimate of the mean would be biased upwards by <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%20%5Cfrac%7B%5Cvarphi%5Cleft(%20%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%20%5Cright)%7D%7B1%20-%20%5CPhi%5Cleft(%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%5Cright)%7D">. That can be small or large depending on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma">.</p>
 <p>Without doing any differentiation to understand where this bias is largest, it should be intutituve from the picture that the bias is small/large when statistical power is large/small.</p>
 <p>Hence, estimates from underpowered studies should be met with &lt;fry_squint.jpg&gt;.</p>
 
 
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2024-01-22-curse/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2024-01-22-curse/</guid>
   <pubDate>Sat, 20 Jan 2024 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Survival Analysis With Logistic Regression</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2024-01-20-logistic-survival/index.html</link>
+  <link>https://dpananos.github.io/posts/2024-01-20-logistic-survival/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -181,7 +187,7 @@ font-style: inherit;">border =</span> F</span>
 <p>Efron motivates this approach using survival data from a Head-and-Neck cancer study conducted by the Northern California Oncology Group. I’ve extracted this data to replicate the method.</p>
 <p>First, let’s show the Kaplan-Meir estimates</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -329,7 +335,11 @@ background-color: null;
 font-style: inherit;">'dashed'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>The intial model presented expands time in the following basis functions</p>
@@ -337,7 +347,7 @@ font-style: inherit;">'dashed'</span>)</span></code></pre></div>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?t_i"> is the the midpoint between months. This is equivalent to estimating the risk of the outcome between the start of month <img src="https://latex.codecogs.com/png.latex?i"> and the start of month <img src="https://latex.codecogs.com/png.latex?i+1">. The function <img src="https://latex.codecogs.com/png.latex?(%20z%20)_-%20=%20%5Cmin(z,%200)">. This particular expansion allows <img src="https://latex.codecogs.com/png.latex?t_i"> to vary as a cubic function before <img src="https://latex.codecogs.com/png.latex?t_i=11">, and then as a linear function thereafter.</p>
 <p>After fitting the model with an interaction by arm (so that the hazards can differ by arm), we can plot the hazards readily <sup>1</sup>.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">d <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -592,12 +602,16 @@ background-color: null;
 font-style: inherit;">'Hazard (Risk Estimate From Logistic Regression)'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>And we can also plot the estimated survival function against the Kaplan Meier to compare.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">base_plot <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -624,7 +638,11 @@ background-color: null;
 font-style: inherit;">'Kaplan-Meier as Compared to Logistic Regression'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -643,14 +661,15 @@ font-style: inherit;">'Kaplan-Meier as Compared to Logistic Regression'</span>)<
 <li id="fn1"><p>I Just can’t get the hazard’s to look the same as Figure 2. Might be an error copying over the data.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
-  <guid>https://dpananos.github.io/posts/2024-01-20-logistic-survival/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2024-01-20-logistic-survival/</guid>
   <pubDate>Sat, 20 Jan 2024 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The Generalized Gamma Distribution For Parametric Survival</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-12-02-gen-gamma/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-12-02-gen-gamma/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -669,7 +688,7 @@ That is especially nice for me. I’m working on some life time value modelling 
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">Non-parametric estimate of <img src="https://latex.codecogs.com/png.latex?1%20-%20S(t%7Ctrt)"> for each <code>trt</code> strata in the veteran dataset. The curves look roughly exponential meaning the generalized gamma should provide a good fit.</figcaption>
+<figcaption>Non-parametric estimate of <img src="https://latex.codecogs.com/png.latex?1%20-%20S(t%7Ctrt)"> for each <code>trt</code> strata in the veteran dataset. The curves look roughly exponential meaning the generalized gamma should provide a good fit.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -872,7 +891,7 @@ Total execution time: 2.0 seconds.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">Kaplan-Meir estimates (black) with posterior survival functions.</figcaption>
+<figcaption>Kaplan-Meir estimates (black) with posterior survival functions.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -882,7 +901,7 @@ Total execution time: 2.0 seconds.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">Kaplan-Meir estimates (black) with estimated ECDFs computed from draws of the posterior distribution. Each colored line corresponds to one sample of event times from the posterior distribution, conditional on <img src="https://latex.codecogs.com/png.latex?%5Cmu">, <img src="https://latex.codecogs.com/png.latex?%5Csigma">, and <img src="https://latex.codecogs.com/png.latex?k">.</figcaption>
+<figcaption>Kaplan-Meir estimates (black) with estimated ECDFs computed from draws of the posterior distribution. Each colored line corresponds to one sample of event times from the posterior distribution, conditional on <img src="https://latex.codecogs.com/png.latex?%5Cmu">, <img src="https://latex.codecogs.com/png.latex?%5Csigma">, and <img src="https://latex.codecogs.com/png.latex?k">.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -899,14 +918,15 @@ Total execution time: 2.0 seconds.</code></pre>
 <li id="fn1"><p>Left as an exercise to the reader.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-12-02-gen-gamma/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-12-02-gen-gamma/</guid>
   <pubDate>Sat, 02 Dec 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Brain Teaser About Frequentist Statistics</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-12-01-ron/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-12-01-ron/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -915,12 +935,12 @@ Total execution time: 2.0 seconds.</code></pre>
 <p>The post below really caught my attention (probably because of the AI generated accompanying picture, a fad everyone seems to be doing for some reason).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/linkedin.png" class="img-fluid figure-img"></p>
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/linkedin.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
 </figure>
 </div>
 <p>This should be fairly simple to reason through. Below is a plot depicting the concept of statistical power. The black curve is the sampling distribution under the null, the blue curve is the sampling distribution under the alternative implied by the minimal detectable effect (MDE). The area under the blue curve is the statsitical power (its the probability we observe a test statistic greater than the critical value).</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -1051,12 +1071,16 @@ background-color: null;
 font-style: inherit;">1</span>))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>According to Ron, we run our experiment and observe the our (MDE) exactly. In our picture, that means we observe the mean of the sampling distribution under the alternative, so we just need to find how far out the MDE is with respect to the null distribution.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -1194,7 +1218,11 @@ background-color: null;
 font-style: inherit;">3</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-12-01-ron/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Let’s do a little bit of math. Assuming the sampling distribution under the null is standard normal, the critical value would be <img src="https://latex.codecogs.com/png.latex?%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D">. The critical value under the alternative would then be <img src="https://latex.codecogs.com/png.latex?%5Cmu_1%20+%20z_%7B1-%5Cbeta%7D%5Csigma_1">. Plugging in some numbers, this means the mean under the alternative should have a z-zcore of <img src="https://latex.codecogs.com/png.latex?%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D%20-%20%5Csigma_1z_%7B1-%5Cbeta%7D">. Now, we just need to evaluate <img src="https://latex.codecogs.com/png.latex?1%20-%20%5Cmathbf%7B%5CPhi%7D(%5Cmu_0%20+%20%5Csigma_0z_%7B1-%5Calpha%7D%20-%20%5Csigma_1z_%7B1-%5Cbeta%7D)">.</p>
@@ -1216,20 +1244,21 @@ font-style: inherit;">lower.tail =</span> F)</span></code></pre></div>
 
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-12-01-ron/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-12-01-ron/</guid>
   <pubDate>Fri, 01 Dec 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Estimating the Shifted Beta Geometric Model in Stan</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/</link>
   <description><![CDATA[ 
 
 
 
 
+
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -1429,7 +1458,7 @@ font-style: inherit;">1</span>:N_pred){</span>
 <h1>Fitting the Model</h1>
 <p>Fader and Hardie provide an example in their appendix for fitting the model. We’ll use that data to check our fit. Let’s take a look at that data now</p>
 <div class="cell" data-fig.asp="0.6">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -1608,12 +1637,16 @@ font-style: inherit;">element_line</span>())</span>
 <span id="cb6-27">surv_plot</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Now, let’s compare with the fit</p>
 <div class="cell" data-fig.asp="0.6">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">model <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -1649,7 +1682,7 @@ All 4 chains finished successfully.
 Mean chain execution time: 0.0 seconds.
 Total execution time: 0.5 seconds.</code></pre>
 </div>
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">pred_times <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -1737,7 +1770,11 @@ background-color: null;
 font-style: inherit;">0.5</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Nice, not a bad fit.</p>
@@ -1952,7 +1989,7 @@ font-style: inherit;">1</span>:n){</span>
 </div>
 </div>
 <div class="cell" data-fig.asp="0.6">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
@@ -2225,7 +2262,7 @@ All 4 chains finished successfully.
 Mean chain execution time: 0.2 seconds.
 Total execution time: 0.3 seconds.</code></pre>
 </div>
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">fit <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -2374,7 +2411,11 @@ background-color: null;
 font-style: inherit;">'Set1'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="768"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -2386,14 +2427,15 @@ font-style: inherit;">'Set1'</span>)</span></code></pre></div>
 </section>
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-11-02-shifted-beta-geometric/</guid>
   <pubDate>Mon, 20 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Regularization of Noisy Multinomial Counts</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-09-24-l1/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-09-24-l1/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -2428,7 +2470,7 @@ order by cast(A.CreationDate as date)
 <p></p>
 </details>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -2630,7 +2672,7 @@ font-style: inherit;">'striped'</span>)</span></code></pre></div>
 </div>
 </div>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">base_plot <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -2692,7 +2734,11 @@ font-style: inherit;">''</span>) </span>
 <span id="cb3-8">base_plot</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Obviously, the smaller number of posts about regularization leads to larger noise in the multinomial estimates. You can very easily see that in the plot; Monday is not special, its very likely noise.</p>
@@ -2920,12 +2966,16 @@ font-style: inherit;">''</span>)</span>
 <span id="cb4-31"></span>
 <span id="cb4-32">new_plot</span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>This might be easier to see if we follow Tufte and show small multiples. You can see as the penalty increases, the green dots (predicted) go from the blue dots (observed frequencies of regularization related posts) to the pink dots (the frequencies of all plots).</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">lam <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3092,7 +3142,11 @@ font-style: inherit;">'Sat'</span>)</span>
 <span id="cb5-21">      )</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Cool! Using <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> (here, the frequency of total posts on each day) as an offset acts as a sort of target towards which to regularize.</p>
@@ -3100,14 +3154,15 @@ font-style: inherit;">'Sat'</span>)</span>
 
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-09-24-l1/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-09-24-l1/</guid>
   <pubDate>Sun, 24 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Right In Ways You Don’t Care About</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-09-11-right/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-09-11-right/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -3122,14 +3177,15 @@ font-style: inherit;">'Sat'</span>)</span>
 
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-09-11-right/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-09-11-right/</guid>
   <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-09-03-did-in-ab/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -3154,7 +3210,7 @@ font-style: inherit;">'Sat'</span>)</span>
 <p>We’ll plot some treatment effect estimates and see what is happening when we choose to do DiD when the data suggest we do. Now importantly, I’m making very strong assumptions about the experiment being run. In particular, I’m making assumptions that all went well, there is no funny business with timing or randomization, etc. In terms of a medical trial, I got 34 people to all stand in a line, randomly gave each placebo or drug, watched them all take it at the same time, and recorded outcomes. The purpose of these simulation and blog post is to investigate statistical properties and not to wring about whatabouts.</p>
 <p>In the code cell below is the code to run these simulations</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">simulate_data <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3496,7 +3552,7 @@ font-style: inherit;">'sim'</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="case-1-uncorrelated-pre-and-post-observations">Case 1: Uncorrelated Pre and Post Observations</h2>
 <p>Shown below are the ATEs from each analysis when the pre and post are uncorrelated. Nothing too surprising here, the ATEs are unbiased (the histograms are centered at <img src="https://latex.codecogs.com/png.latex?%5Ctau=1">). It seems that the t-test has lower sampling variance/higher precision, which means lower MSE.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">plot <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3552,12 +3608,16 @@ background-color: null;
 font-style: inherit;">'histogram'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Let’s now plot the ATEs for each method against the pre-period differences. Because all observations are assumed independent, I’m going to expect that the ATEs for the t-test are uncorrelated with the pre-period difference. However, because the DiD uses pre-period information, I’m going to expect a correlation (I just don’t know how big).</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">plot <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3667,12 +3727,16 @@ font-style: inherit;">1</span>)</span>
 <span id="cb3-18">plot </span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Great, this makes sense. The ATE is for the t-test is uncorrelated with the pre-period difference, as expected. The ATE DiD is correlated with the pre-period difference, and that’s likely due to regression to the mean. Now, let’s stratify by cases when the pre-period difference is (erroneously) thought to be non-zero.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">plot <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -3683,14 +3747,18 @@ background-color: null;
 font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>It isn’t unsurprising that the tails of each of these blobs is cut off. After all, the pre-period difference needs to be extreme enough to reject the null. Let’s first talk about that bottom right cell – the t test when there is a detected pre-period difference. Because there is no correlation between pre-period difference and the ATE, the ATEs are still unbiased. That’s great. What about DiD (bottom middle cell)?</p>
 <p>Note that the correlation means that those blobs don’t have the same mean. In fact, if you run K-means on those blobs, you can very easily separate them and estimate the ATE and its very far from 1! Technically, this is unbiased because we have to average over each blob. So it isn’t that the estimates are biased from DiD, but they are <em>inaccurate</em>. Take a look at the MSE for each estimate (shown below). Using DiD when you detect a pre-treatment difference may be unbiased, but it has very high MSE as compared to the two other methods.</p>
 <p>While those estimates are unbiased, the low precision/high MSE is a good argument against checking for pre-treatment differences and then deciding on analysis style. This would be like saying “the river is a foot deep” when in reality the river is an inch deep in most places, and a mile deep in others. While the estimates are unbiased, any one particular estimate is fairly far from the true ATE.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">results <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -3811,7 +3879,11 @@ background-color: null;
 font-style: inherit;">''</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -3820,7 +3892,7 @@ font-style: inherit;">''</span>)</span></code></pre></div>
 <p>Let’s now let pre and post correlation be non-zero, but still moderate in size. We’ll let <img src="https://latex.codecogs.com/png.latex?%5Crho%20=%200.45"> which is still much smaller than most correlation coefficients I’ve seen in real AB tests at Zapier.</p>
 <p>Making the same plot as we did before, we see that DiD still suffers from poor accuracy as measured by MSE, bow now the T-test is starting to demonstrate some positive correlation between pre-period difference and ATE. Its worth mentioning again that we would not really do anything different with the information that there was a pre-period difference when using the t-test. The estimate of the ATE would still be unbiased and have low MSE.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">results <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3972,7 +4044,11 @@ background-color: null;
 font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -3981,7 +4057,7 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 <p>In AB testing, it isn’t uncommon to see <img src="https://latex.codecogs.com/png.latex?%5Crho%3E0.9"> between pre and post outcomes. When we run experiments and seek to have an effect on existing user’s monthly payments, many users won’t change at all meaning they are typically paying the same amount this month as they were last. That results in very high <img src="https://latex.codecogs.com/png.latex?%5Crho">.</p>
 <p>Let’s rerun the simulation, but this time specify that pre and post have a correlation of 0.95.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">results <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -4098,12 +4174,16 @@ background-color: null;
 font-style: inherit;">'histogram'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>I’m fairly surprised to see that the results almost completely switch. First, the DiD estimator becomes much more efficient (see the joint distribution of ATEs) which is cool. Second, now the estimates from DiD become unbiased <em>and</em> accurate which is a nice change. Ancova seems to do just as well as DiD in terms of precision and accuracy, which was not expected simply because I didn’t think DiD would work this well under these assumptions.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">results <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -4213,7 +4293,11 @@ background-color: null;
 font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -4232,14 +4316,15 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
   <category>AB Testing</category>
   <category>Statistics</category>
   <category>Causal Inference</category>
-  <guid>https://dpananos.github.io/posts/2023-09-03-did-in-ab/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-09-03-did-in-ab/</guid>
   <pubDate>Sun, 03 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Did You Do Your Homework?</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -4284,14 +4369,15 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 <li id="fn1"><p>I say “ostensibly” because I’m not sure what I did was “science” as much as it was survival.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/</guid>
   <pubDate>Mon, 26 Jun 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>A Practical A/B Testing Brain Dump</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -4354,16 +4440,16 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">Here is the template brief I created. Its simple, and has a lot more than what is shown here, including some steps to estimate sample size.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/https:/cdn.zappy.app/a6022ad19406dfa7531506824ad4b395.png" class="img-fluid figure-img"></p>
+<figcaption>Here is the template brief I created. Its simple, and has a lot more than what is shown here, including some steps to estimate sample size.</figcaption>
+<p><img src="https://cdn.zappy.app/a6022ad19406dfa7531506824ad4b395.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>It was a really simple document that tried to extract the most information with the least amount of pain. To my surprise, <em>people loved it</em>. I quickly saw teams adopt this template, and would even encourage other teams to use it too. This was the quickest way to improve the situation. It gave a small global process to think about what was important when planning an experiment. This helped pave the way to introducing more global processes and an eventual repository of experimentation information (more on that later maybe).</p>
 <p>Of course, nothing is perfect. I was hoping teams would be able to self serve sample size requests with just a few simple steps. Some of these questions are easy to answer (like baseline performance) but others created a lot of questions. What <em>should</em> our MDE be? what <em>should</em> our significance level be? This section is rarely filled out by stakeholders and left to data scientists, which is too bad because it really should be something a stakeholder can do. I’ll talk about how this was solved later.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">Sample size instructions</figcaption>
-<p><img src="https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/https:/cdn.zappy.app/e3e465a29c32f1b889d0691b12686782.png" class="img-fluid figure-img"></p>
+<figcaption>Sample size instructions</figcaption>
+<p><img src="https://cdn.zappy.app/e3e465a29c32f1b889d0691b12686782.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 <p>Additionally, the quality and depth of these briefs varied team to team. Some teams were very verbose, offering links and tons of details. Others would kind of slap something in there, maybe a few bullet points at the most. It isn’t my job to say what is good and what is bad, but certainly more info made it feel like the hypotheses were better researched and supported. No word yet on if more complete briefs yielded more successful experiments.</p>
@@ -4405,14 +4491,15 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </section></div> ]]></description>
   <category>AB Tests</category>
   <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-05-14-ab-brain-dump/</guid>
   <pubDate>Sun, 14 May 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Choosing the Optimal MDE for Experimentation</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-03-31-optimal-mde/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-03-31-optimal-mde/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -4434,7 +4521,7 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 </section>
 <section id="mathematical-details" class="level2">
 <h2 class="anchored" data-anchor-id="mathematical-details">Mathematical Details</h2>
-<p>Let <img src="https://latex.codecogs.com/png.latex?N_%7Buuid%7D"> be the number of unique subjects available for experimentation in a given time frame, let <img src="https://latex.codecogs.com/png.latex?%5Cdelta%20%5Cin%20%5Cmathbb%7BR%7D_+"> be an arbitrary MDE, and let <img src="https://latex.codecogs.com/png.latex?K"> be the maximum number of experiments for a given team. Let <img src="https://latex.codecogs.com/png.latex?n_%7Bss%7D:%20%5Cmathbb%7BR%7D_+%20%5Cto%20%5Cmathbb%7BN%7D"> be a function which maps MDEs to sample sizes for experiments. The number of experiments which can be run in a given time frame is <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D(%5Cdelta)%20=%20%5Cmin%5Cleft(K,%20%5Clfloor%5Cfrac%7BN_%7Buuid%7D%7D%7Bn_%7Bss%7D(%5Cdelta)%7D%20%5Crfloor%20%5Cright)">. Here, I have included an explicit dependency of <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D"> on <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> to remind us that the MDE implicitly determines the number of experiments. I’ve made the assumption that experiments can be run back to back.</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?N_%7Buuid%7D"> be the number of unique subjects available for experimentation in a given time frame, let <img src="https://latex.codecogs.com/png.latex?%5Cdelta%20%5Cin%20%5Cmathbb%7BR%7D_+"> be an arbitrary MDE, and let <img src="https://latex.codecogs.com/png.latex?K"> be the maximum number of experiments for a given team. Let <img src="https://latex.codecogs.com/png.latex?n_%7Bss%7D:%20%5Cmathbb%7BR%7D_+%20%5Cto%20%5Cmathbb%7BN%7D"> be a function which maps MDEs to sample sizes for experiments. The number of experiments which can be run in a given time frame is <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D(%5Cdelta)%20=%20%5Cmin%5Cleft(K,%20%20%5Clfloor%5Cfrac%7BN_%7Buuid%7D%7D%7Bn_%7Bss%7D(%5Cdelta)%7D%20%5Crfloor%20%5Cright)">. Here, I have included an explicit dependency of <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D"> on <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> to remind us that the MDE implicitly determines the number of experiments. I’ve made the assumption that experiments can be run back to back.</p>
 <p>Let <img src="https://latex.codecogs.com/png.latex?%5Ctheta_k"> be a latent effect from an intervention, and let <img src="https://latex.codecogs.com/png.latex?%5Cpsi(%5Ctheta_k;%20%5Cdelta)"> be the statistical power to detect an effect of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> when the experiment is designed with an MDE of <img src="https://latex.codecogs.com/png.latex?%5Cdelta">. I assume that: a) All interventions are independent of one another, and the effect of one intervention is not changed by the implementation of another, b) effects of interventions are additive (on the appropriate scale), and c) effects persist through time (there is now decay of an effect once implemented).</p>
 <p>The objective function we seek to optimize is the expected cumulative improvement to the metric we are opting to experiment on. We get <img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D"> draws from our population distribution of effects (because we are running that many experiments), and the expected cumulative improvement is the sum of the products of the effects and the probability we detect the effect</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20C(%5Cdelta)%20=%20%5Csum_%7Bk=1%7D%5E%7Bn_%7B%5Cexp%7D(%5Cdelta)%7D%20%5Ctheta_k%20%5Cpsi(%5Ctheta_k;%20%5Cdelta)%20%20"> Note here that the MDE <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> determines both the number of experiments run (<img src="https://latex.codecogs.com/png.latex?n_%7B%5Cexp%7D">) <em>and</em> the probability those experiments detect an effect. The optimal MDE is then</p>
@@ -4462,7 +4549,7 @@ font-style: inherit;">~</span> analysis)</span></code></pre></div>
 <p>Shown in the code cell below is simulation of the process for finding the optimal MDE under the assumptions listed above. Rather than simulate every experiment (e.g.&nbsp;by drawing random numbers and performing a statistical test), we can draw a binomial random variable with probability of success equal to the statistical power of detecting the latent lift with the indicated MDE and hence sample size.</p>
 <p>The optimal lift is somewhere between 5% and 6%. Explicit optimization methods could be used find the optima, but I think for the purposes of experimentation you just want to be in the right ballpark, so a plot is more than enough.</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">one_sided_power <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -4814,7 +4901,11 @@ background-color: null;
 font-style: inherit;">'The optimal MDE is not the expected lift the team generates'</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -4823,19 +4914,31 @@ font-style: inherit;">'The optimal MDE is not the expected lift the team generat
 <p>Changing the baseline of the metric moves the optima, with larger MDEs being considered optimal for smaller baselines.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>As the number of unique visitors to the website increases, the optimal MDE decreases, but only slightly.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>As the expectation of the latent lift increases, the optima does not move but the expected cumulative improvement to the metric increases. This is unsurprising.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
@@ -4851,14 +4954,15 @@ font-style: inherit;">'The optimal MDE is not the expected lift the team generat
 </section></div> ]]></description>
   <category>AB Tests</category>
   <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2023-03-31-optimal-mde/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-03-31-optimal-mde/</guid>
   <pubDate>Fri, 31 Mar 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Causal Risk Ratios in AB Tests with One Sided Non-Compliance</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</link>
+  <link>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -4868,7 +4972,7 @@ font-style: inherit;">'The optimal MDE is not the expected lift the team generat
 <p>In this post, I’m putting together some much appreciated advice from <a href="https://twitter.com/guilhermejd1/status/1624196853947416576"><span class="citation" data-cites="guilhermejd1">@guilhermejd1</span></a> and <a href="https://stats.stackexchange.com/a/605042/111259">dimitry on cross validated</a> on how to estimate a causal risk ratio in a randomized experiment with one sided non-compliance. I’ll first demonstrate how to do this with a simulation where we will actually have potential outcomes with which to compare. Then, I’ll apply this approach to a real experiment I helped run at Zapier.</p>
 <section id="simulation" class="level2">
 <h2 class="anchored" data-anchor-id="simulation">Simulation</h2>
-<p>Let <img src="https://latex.codecogs.com/png.latex?A"> be a binary indicator for assignment to treatment (1) or control (0). Let <img src="https://latex.codecogs.com/png.latex?d_j%5Ea"> be the potential outcome for engaging with the treatment under treatment <img src="https://latex.codecogs.com/png.latex?A=a"> for user <img src="https://latex.codecogs.com/png.latex?j">. Due to construction of the experiment, <img src="https://latex.codecogs.com/png.latex?d_j%5E0%20=%200%20%5Cforall%20j"> because users in control can not engage in the treatment by design. Dimitry writes</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?A"> be a binary indicator for assignment to treatment (1) or control (0). Let <img src="https://latex.codecogs.com/png.latex?d_j%5Ea"> be the potential outcome for engaging with the treatment under treatment <img src="https://latex.codecogs.com/png.latex?A=a"> for user <img src="https://latex.codecogs.com/png.latex?j">. Due to construction of the experiment, <img src="https://latex.codecogs.com/png.latex?d_j%5E0%20=%200%20%20%5Cforall%20j"> because users in control can not engage in the treatment by design. Dimitry writes</p>
 <blockquote class="blockquote">
 <p>“This is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group”.</p>
 </blockquote>
@@ -5105,7 +5209,6 @@ font-style: inherit;">cov</span>(d, A)</span></code></pre></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-
 <table class="table table-striped" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -5133,7 +5236,6 @@ IV Estimate of LATE
 </td>
 </tr>
 </tbody>
-
 </table>
 <p>True LATE, sample LATE, and estimated LATE. All 3 agree to within 3 decimal places and any differences are just sampling variability.</p>
 </div>
@@ -5195,7 +5297,6 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
 <p>We ran an experiment where users could optionally watch a video. The video was intended to drive some other metric <img src="https://latex.codecogs.com/png.latex?y">. Here are the results from the experiment.</p>
 <div class="cell">
 <div class="cell-output-display">
-
 <div id="zvewtafbqe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
@@ -5673,13 +5774,21 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
 <p>The only reason I bring this up is because it happens in this example. Let’s bootstrap the estimated causal risk ratio (what we call “lift”) and look at the distribuion of bootstrap replicates.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>LMAO look at that tail! The long tail us due to the problems I’ve highlighted. In fact, we can highlight the “Oh shit zone” on a plot of the bootstraps (below in the figure below). The red line is where the tail behavior comes from; if you have a bootstrap replicate on that line, you should be saying “oh shit”.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>In fact, there are some estimates from the bootstrap which yield <img src="https://latex.codecogs.com/png.latex?E%5By%5E0%5Cmid%20d%5E1%5D%3C0"> so… what was the point if this?</p>
@@ -5697,14 +5806,15 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
   <category>AB Tests</category>
   <category>Statistics</category>
   <category>Causal Inference</category>
-  <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</guid>
   <pubDate>Sat, 11 Feb 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Journeyman Statistics</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-12-06-journeyman/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-12-06-journeyman/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -5755,14 +5865,15 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
 </section>
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2022-12-06-journeyman/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-12-06-journeyman/</guid>
   <pubDate>Sat, 31 Dec 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Way Too Many Taylor Series</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-11-25-taylor-series/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -5811,14 +5922,15 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
  ]]></description>
   <category>Statistics</category>
   <category>AB Testing</category>
-  <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/</guid>
   <pubDate>Fri, 25 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Bootstrapping in SQL</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -5871,10 +5983,14 @@ font-style: inherit;">bootstraps</span>(cars)</span></code></pre></div>
 <p>So, let’s do that. I’m going to use duckdb because its SQL-like and has some stats functions (whereas SQLite does not).</p>
 <p>Let’s sample some pairs <img src="https://latex.codecogs.com/png.latex?(x_i,%20y_i)"> from the relationship <img src="https://latex.codecogs.com/png.latex?y_i%20=%202x_i%20+%201%20+%20%5Cvarepsilon_i">, where the <img src="https://latex.codecogs.com/png.latex?%5Cvarepsilon"> are iid draws from a standard Gaussian Let’s stick that in a dataframe along with a row number column into our database. The data are shown in Table&nbsp;1.</p>
 <div class="cell">
+<div id="tbl-original-data" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-original-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: My Data
+</figcaption>
+<div aria-describedby="tbl-original-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-original-data" class="anchored">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<caption>Table&nbsp;1: My Data</caption>
+<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">original_rownum</th>
@@ -5915,9 +6031,11 @@ font-style: inherit;">bootstraps</span>(cars)</span></code></pre></div>
 </tr>
 </tbody>
 </table>
+
+
 </div>
-
-
+</div>
+</figure>
 </div>
 </div>
 <p>To bootstrap in SQL, we need to emulate what the unnested results of <code>rsample::bootstraps</code> would look like. We need rows of (<code>strap_id</code>, <code>original_data_rownum</code>, and <code>bootstrap_rownum</code>). Let’s discuss the interpretation and purpose of each column.</p>
@@ -5968,10 +6086,14 @@ background-color: null;
 font-style: inherit;">1</span>);</span></code></pre></div>
 </div>
 <div class="cell">
+<div id="tbl-strap-ids" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-strap-ids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Contents of <code>strap_ids</code>. These play the role of <code>id</code> in the rsample output.
+</figcaption>
+<div aria-describedby="tbl-strap-ids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-strap-ids" class="anchored">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<caption>Table&nbsp;2: Contents of <code>strap_ids</code>. These play the role of <code>id</code> in the rsample output.</caption>
+<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">strap_id</th>
@@ -5995,9 +6117,11 @@ font-style: inherit;">1</span>);</span></code></pre></div>
 </tr>
 </tbody>
 </table>
+
+
 </div>
-
-
+</div>
+</figure>
 </div>
 </div>
 </section>
@@ -6046,10 +6170,14 @@ background-color: null;
 font-style: inherit;">1</span>);</span></code></pre></div>
 </div>
 <div class="cell">
+<div id="tbl-original-data-rownum" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-original-data-rownum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Contents of <code>original_data_rownum</code>. These play the role of <code>id</code> in the rsample output.
+</figcaption>
+<div aria-describedby="tbl-original-data-rownum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-original-data-rownum" class="anchored">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<caption>Table&nbsp;3: Contents of <code>original_data_rownum</code>. These play the role of <code>id</code> in the rsample output.</caption>
+<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">original_rownum</th>
@@ -6073,9 +6201,11 @@ font-style: inherit;">1</span>);</span></code></pre></div>
 </tr>
 </tbody>
 </table>
+
+
 </div>
-
-
+</div>
+</figure>
 </div>
 </div>
 <p>Ok, now we have the two tables <code>strap_ids</code> and <code>original_data_rownum</code>. All we need to do now is cross join then, and do the random number magic. That’s shown below in table Table&nbsp;4.</p>
@@ -6131,10 +6261,14 @@ font-style: inherit;">join</span> </span>
 <span id="cb5-10">  original_data_rownum;</span></code></pre></div>
 </div>
 <div class="cell">
+<div id="tbl-resample-template" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-resample-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: A sample from the table <code>resampel_template</code>.
+</figcaption>
+<div aria-describedby="tbl-resample-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
-<div id="tbl-resample-template" class="anchored">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<caption>Table&nbsp;4: A sample from the table <code>resampel_template</code>.</caption>
+<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
 <th style="text-align: center;" data-quarto-table-cell-role="th">strap_id</th>
@@ -6170,9 +6304,11 @@ font-style: inherit;">join</span> </span>
 </tr>
 </tbody>
 </table>
+
+
 </div>
-
-
+</div>
+</figure>
 </div>
 </div>
 </section>
@@ -6289,7 +6425,11 @@ font-style: inherit;">1</span>;</span></code></pre></div>
 <p>Yes…I think. The averages for <img src="https://latex.codecogs.com/png.latex?x"> and <img src="https://latex.codecogs.com/png.latex?y"> look really good, but the SQL bootstrap tails for the regression coefficient are a little thin.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="960"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -6302,14 +6442,15 @@ font-style: inherit;">1</span>;</span></code></pre></div>
 
  ]]></description>
   <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/</guid>
   <pubDate>Wed, 16 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>PCA on The Tags for Cross Validated</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-08-16-pca/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-08-16-pca/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -6513,25 +6654,40 @@ font-style: inherit;">"coef"</span>)</span></code></pre></div>
 <p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
 <div class="cell" data-layout-row="3" data-fig.dpi="240">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-2.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats. I’m not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the top of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
 <p>Plotting PC1 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
-<div class="cell quarto-layout-panel" data-fig.dpi="240">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div>
+
+</div>
+<div class="cell quarto-layout-panel" data-fig.dpi="240" data-layout-nrow="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
 <p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
 <p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
@@ -6553,14 +6709,15 @@ font-style: inherit;">"coef"</span>)</span></code></pre></div>
 </ol>
 </section></div> ]]></description>
   <category>Machine Learning</category>
-  <guid>https://dpananos.github.io/posts/2022-08-16-pca/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-08-16-pca/</guid>
   <pubDate>Tue, 16 Aug 2022 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Interim Analysis &amp; Group Sequential Designs Pt 2</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -6595,10 +6752,14 @@ font-style: inherit;">"coef"</span>)</span></code></pre></div>
 <p>Two popular <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions are the Pockock Spending function and the O’Brien Flemming spending function, shown in Figure&nbsp;1. The equations don’t matter, what matters is the qualitative behavior.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-spending-function" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;1: Pocock and O’Brien <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions</figcaption>
-<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/fig-spending-function-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-spending-function" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-spending-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Pocock and O’Brien <img src="https://latex.codecogs.com/png.latex?%5Calpha">-spending functions
+</figcaption>
+<div aria-describedby="fig-spending-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/fig-spending-function-1.png" class="img-fluid figure-img" width="672">
+</div>
 </figure>
 </div>
 </div>
@@ -6609,7 +6770,7 @@ font-style: inherit;">"coef"</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="plotting-the-rejection-regions">Plotting the Rejection Regions</h2>
 <p>In my <a href="https://dpananos.github.io/posts/2022-07-06-gsd/">last post</a>, the rejection region was plotted on the joint distribution of the <img src="https://latex.codecogs.com/png.latex?Z%5E%7B(1)%7D"> and <img src="https://latex.codecogs.com/png.latex?Z%5E%7B(2)%7D">. That is easy for two dimensions, doable for 3, and impossible for us to comprehend beyond that. Luckily, there is a simpler way of visualizing these rejection regions. We can simply plot the rejection regions <img src="https://latex.codecogs.com/png.latex?u_k"> as a function of the information rate <img src="https://latex.codecogs.com/png.latex?t_k">. Let’s plot the rejection regions for the Pocock and O’Brien Flemming spending functions now. But, I’m not going to label them just yet. I want you to think about which one might be which and why (knowing what we know about spending functions and the qualitative behaviour we saw above).</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">extract_lims <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -6810,9 +6971,13 @@ background-color: null;
 font-style: inherit;">expression</span>(u[k]))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<details>
+</div>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6832,7 +6997,11 @@ Click to see which is which
 <p>
 </p><div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p></p>
@@ -7099,7 +7268,7 @@ font-style: inherit;">&amp;</span>X4)</span>
 </div>
 <p>Now, we just take the cumulative sum of <code>my_spend</code> to determine how much alpha we spend up to the <code>ith</code> stage</p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -7123,7 +7292,11 @@ background-color: null;
 font-style: inherit;">1</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Oh MAN does that feel good! We spend very nearly the projected alpha at each stage. THAT is alpha spending in action!</p>
@@ -7140,15 +7313,16 @@ font-style: inherit;">1</span>)</span></code></pre></div>
 </section></div> ]]></description>
   <category>Statistics</category>
   <category>AB Testing</category>
-  <guid>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/</guid>
   <pubDate>Sat, 30 Jul 2022 04:00:00 GMT</pubDate>
   <media:content url="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/spending.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Forecasting Experimental Lift Using Hierarchical Bayesian Modelling</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -7310,10 +7484,14 @@ font-style: inherit;">1</span>)</span></code></pre></div>
 <p>Shown in Figure&nbsp;1 is the forecasted lift as compared to baseline after the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> month Good job, if you keep doing things as you’re doing, you’re going to probably increase conversion rate by a little more than 50% (a little less than the 80% but still nothing to sneeze at). The shaded blue regions indicate the uncertainty in that estimate. Note that although your forecasted lift seems to always be increasing, that isn’t necessarily the case. You could implement a change which hurts our conversion because of chance, so if you were to plot simulated trajectories you might see some decreases in the metric.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-forecast" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;1: Forecasted lift after the 12 months. Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-forecast-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-forecast" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Forecasted lift after the 12 months. Shown in blue are credible interval estimates. The conditional distirbution is log-normal since the forecasted lift is the sum of normals on the log scale.
+</figcaption>
+<div aria-describedby="fig-forecast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-forecast-1.png" class="img-fluid figure-img" width="672">
+</div>
 </figure>
 </div>
 </div>
@@ -7327,7 +7505,7 @@ Click to see individual trajectories
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">The red lines are draws where you would have implemented a change to hurt the conversion rate. See how sometimes those lines actually decrease? Such is life, can’t win em all!</figcaption>
+<figcaption>The red lines are draws where you would have implemented a change to hurt the conversion rate. See how sometimes those lines actually decrease? Such is life, can’t win em all!</figcaption>
 <p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -7338,10 +7516,14 @@ Click to see individual trajectories
 <p>Now, what about that goal of increasing conversion by 2x? Well, it isn’t looking good. Looks like there is only a 12% chance you meet or exceed the 2x goal. Could it be your performance last year was just extreme? The distribution of forecasted lifts <em>is</em> long tailed. Maybe you’re just going to regress to the mean. Sounds like a good time to push back on your boss and come prepared with data.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-conditional" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;2: Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year. Indicated point/interval is mean and 95% credible interval.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-conditional-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-conditional" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-conditional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Conditional posterior distirbution of forecasted lifts after completing the 12 experiments you had planned this year. Indicated point/interval is mean and 95% credible interval.
+</figcaption>
+<div aria-describedby="fig-conditional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/fig-conditional-1.png" class="img-fluid figure-img" width="672">
+</div>
 </figure>
 </div>
 </div>
@@ -7357,7 +7539,11 @@ Click to see individual trajectories
 <p>Ok, breaking away from the narrative for a moment…this is a continuous approximation to a discrete process. We should simulate this to see how real experiments would stack up against my forecast. I’ve gone ahead and actually simulated running the 12 tests and computed the lift after the 12 tests. Shown below is the forecasted lift versus relative error as compared to simulation. I’ll let you come to your own conclusion about the quality of the approximation.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
@@ -7376,15 +7562,16 @@ Click to see individual trajectories
   <category>Statistics</category>
   <category>AB Testing</category>
   <category>Bayes</category>
-  <guid>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-07-20-pooling-experiments/</guid>
   <pubDate>Wed, 20 Jul 2022 04:00:00 GMT</pubDate>
   <media:content url="https://dpananos.github.io/posts/2022-07-20-pooling-experiments/forecast.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Interim Analysis &amp; Group Sequential Designs Pt 1</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-07-06-gsd/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -7412,9 +7599,9 @@ Click to see individual trajectories
 <p>The “<em>G</em>” in GSD means that the hypothesis test is performed on groups of observations. Given a maximum number of groups <img src="https://latex.codecogs.com/png.latex?K">, the sample size of <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> each group is <img src="https://latex.codecogs.com/png.latex?n_k">.</p>
 <p>The “<em>S</em>” in GSD means the test is performed sequentially. If after observing the <img src="https://latex.codecogs.com/png.latex?k%5E%7Bth%7D"> group the test statistic (computed using all the data observed up to that point) is beyond some threshold, then the null is rejected and the experiment is finished. If not, the next group of observations is made and added to the existing data, wherein the process continues until the final group has been observed. If after observing the final group the test statistic does not exceed the threshold, then we fail to reject the null. The process for <img src="https://latex.codecogs.com/png.latex?K=2"> is illustrated in Figure&nbsp;1.</p>
 <div class="cell fig-cap-location-top" data-layout-align="center">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1">flowchart TD</span>
+<div class="sourceCode cell-code" id="cb1" data-cap-location="top" style="background: #f1f3f5;"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1">flowchart TD</span>
 <span id="cb1-2">  A[Observe Group k=1] --&gt; B[Perform Test]</span>
 <span id="cb1-3">  B --&gt; C{Data From k=1 \n Significant?}</span>
 <span id="cb1-4">  C -- Yes --&gt; D[Reject Null]</span>
@@ -7424,9 +7611,12 @@ Click to see individual trajectories
 <span id="cb1-8">  G -- No --&gt; H[Fail To Reject Null]</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-gsd" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;1: A GSD for <img src="https://latex.codecogs.com/png.latex?K=2"></figcaption>
+<div id="fig-gsd" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-gsd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: A GSD for <img src="https://latex.codecogs.com/png.latex?K=2">
+</figcaption>
+<div aria-describedby="fig-gsd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div>
 <pre class="mermaid mermaid-js" data-label="fig-gsd">flowchart TD
   A[Observe Group k=1] --&gt; B[Perform Test]
@@ -7437,6 +7627,7 @@ Click to see individual trajectories
   G -- Yes --&gt; D
   G -- No --&gt; H[Fail To Reject Null]
 </pre>
+</div>
 </div>
 </figure>
 </div>
@@ -7661,7 +7852,7 @@ font-style: inherit;">pull</span>(fpr)</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Cbar%7BX%7D%5E%7B(1)%7D%20%5Csim%20%5Coperatorname%7BNormal%7D%5Cleft(p,%20%5Cdfrac%7Bp(1-p)%7D%7Bn%7D%5Cright)%20%20"></p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Cbar%7BX%7D%5E%7B(2)%7D%5Csim%20%5Coperatorname%7BNormal%7D%5Cleft(%20p,%20%5Cdfrac%7Bp(1-p)%7D%7B2%20n%7D%20%5Cright)%20%20"></p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">my_blue <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -7785,7 +7976,7 @@ font-style: inherit;">^</span>(k)))</span></code></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption class="figure-caption">10,000 simulations of a <img src="https://latex.codecogs.com/png.latex?K=2"> GSD. Each group has 250 observations. Note that <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(2)%7D"> has smaller standard error due to the fact that 500 (250 + 250) observations are used in the computation. Sampling distributions show in blue.</figcaption>
+<figcaption>10,000 simulations of a <img src="https://latex.codecogs.com/png.latex?K=2"> GSD. Each group has 250 observations. Note that <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BX%7D%5E%7B(2)%7D"> has smaller standard error due to the fact that 500 (250 + 250) observations are used in the computation. Sampling distributions show in blue.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/marginal-density-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -7796,7 +7987,7 @@ font-style: inherit;">^</span>(k)))</span></code></pre></div>
 <p>with mean <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bp%7D%20=%20(p,p)"> and covariance<sup>1</sup></p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5CSigma=%20p(1-p)%5Cbegin%7Bbmatrix%7D%0A%5Cdfrac%7B1%7D%7Bn_1%7D%20&amp;%20%20%5Cdfrac%7B1%7D%7Bn_1%20+%20n_2%7D%20%5C%5C%0A%5Cdfrac%7B1%7D%7Bn_1%20+%20n_2%7D%20&amp;%20%5Cdfrac%7B1%7D%7Bn_1%20+%20n_2%7D%0A%5Cend%7Bbmatrix%7D%0A"></p>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">sigma_1 <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -8168,10 +8359,14 @@ background-color: null;
 font-style: inherit;">2</span>)))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-level-curves" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;2: 1000 samples from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-level-curves-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-level-curves" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-level-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 1000 samples from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Dashed line indicates where region of 95% probability, solid line indicates region of 99% probability.
+</figcaption>
+<div aria-describedby="fig-level-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-level-curves-1.png" class="img-fluid figure-img" width="672">
+</div>
 </figure>
 </div>
 </div>
@@ -8262,7 +8457,7 @@ font-style: inherit;">|</span>z2)</span></code></pre></div>
 <p>The shaded region depends on critical values we use for each test in the sequence. If we naively use <img src="https://latex.codecogs.com/png.latex?Z_%7B1-%5Calpha/2%7D"> as the critical value for each group as in “peeking” conditions, then the shaded region is too big!</p>
 </blockquote>
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">sims <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -8685,10 +8880,14 @@ background-color: null;
 font-style: inherit;">3</span>))</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-regions" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<figcaption class="figure-caption">Figure&nbsp;3: Standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672"></p>
+<div id="fig-regions" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-regions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Standardized draws from the density of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Shaded regions indicate where the null hypothesis would be rejected under “peeking” conditions. The shaded region has approximately 8.5% probability mass and represents the false positive rate. We need to select a different region so that the shaded region has probability mass closer to 5%.
+</figcaption>
+<div aria-describedby="fig-regions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-07-06-gsd/index_files/figure-html/fig-regions-1.png" class="img-fluid figure-img" width="672">
+</div>
 </figure>
 </div>
 </div>
@@ -8725,15 +8924,16 @@ font-style: inherit;">3</span>))</span></code></pre></div>
 </section></div> ]]></description>
   <category>Statistics</category>
   <category>AB Testing</category>
-  <guid>https://dpananos.github.io/posts/2022-07-06-gsd/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-07-06-gsd/</guid>
   <pubDate>Wed, 06 Jul 2022 04:00:00 GMT</pubDate>
   <media:content url="https://dpananos.github.io/posts/2022-07-06-gsd/joint_dist.png" medium="image" type="image/png" height="144" width="144"/>
 </item>
 <item>
   <title>This Is A Quarto Blog</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</link>
+  <link>https://dpananos.github.io/posts/2022-06-22-new-blog/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -8785,10 +8985,14 @@ font-style: inherit;">'red'</span>)</span>
 background-color: null;
 font-style: inherit;">"Here is a plot"</span>)</span></code></pre></div>
 <div class="cell-output-display">
-<div id="fig-trig-py" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png" class="img-fluid figure-img" width="480"></p>
-<figcaption class="figure-caption">Figure&nbsp;1: Whoa, check it out!</figcaption>
+<div id="fig-trig-py" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-trig-py-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png" class="img-fluid figure-img" width="480">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trig-py-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Whoa, check it out!
+</figcaption>
 </figure>
 </div>
 </div>
@@ -8850,10 +9054,14 @@ font-style: inherit;">col=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'red'</span>)</span></code></pre></div>
 <div class="cell-output-display">
-<div id="fig-trig-r" class="quarto-figure quarto-figure-center anchored">
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-r-3.png" class="img-fluid figure-img" width="480"></p>
-<figcaption class="figure-caption">Figure&nbsp;2: Whoa, check it out again!</figcaption>
+<div id="fig-trig-r" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-trig-r-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-r-3.png" class="img-fluid figure-img" width="480">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trig-r-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Whoa, check it out again!
+</figcaption>
 </figure>
 </div>
 </div>
@@ -8864,7 +9072,7 @@ font-style: inherit;">'red'</span>)</span></code></pre></div>
 
  ]]></description>
   <category>News</category>
-  <guid>https://dpananos.github.io/posts/2022-06-22-new-blog/index.html</guid>
+  <guid>https://dpananos.github.io/posts/2022-06-22-new-blog/</guid>
   <pubDate>Wed, 22 Jun 2022 04:00:00 GMT</pubDate>
 </item>
 </channel>
