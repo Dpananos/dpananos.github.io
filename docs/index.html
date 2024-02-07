@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.549">
+<meta name="generator" content="quarto-1.3.450">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -47,13 +47,7 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
+  "limit": 20,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -62,7 +56,6 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -102,48 +95,27 @@ ul.task-list li input[type="checkbox"] {
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
 <link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="Demetri Pananos Ph.D" href="index.xml" data-external="1"><meta property="og:title" content="Demetri Pananos Ph.D - Numbers, Letters, Sometimes Both">
-<meta property="og:site_name" content="Demetri Pananos Ph.D">
+<link rel="alternate" type="application/rss+xml" title="Demetri Pananos Ph.D" href="index.xml"><meta property="og:title" content="Demetri Pananos Ph.D - Numbers, Letters, Sometimes Both">
+<meta property="og:image" content="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/spending.png">
+<meta property="og:site-name" content="Demetri Pananos Ph.D">
+<meta property="og:image:height" content="1199">
+<meta property="og:image:width" content="1679">
 <meta name="twitter:title" content="Demetri Pananos Ph.D - Numbers, Letters, Sometimes Both">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2022-07-31-gsd-pt-2/spending.png">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="1199">
+<meta name="twitter:image-width" content="1679">
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
+      <div class="navbar-brand-container">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Demetri Pananos Ph.D</span>
     </a>
@@ -155,27 +127,27 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
-<span class="menu-text">About</span></a>
+    <a class="nav-link" href="./about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./consulting/index.html"> 
-<span class="menu-text">Consulting</span></a>
+    <a class="nav-link" href="./consulting/index.html" rel="" target="">
+ <span class="menu-text">Consulting</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/Dpananos"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/Dpananos" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
-<span class="menu-text"></span></a>
+ <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/PhDemetri"> <i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/PhDemetri" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
-<span class="menu-text"></span></a>
+ <span class="menu-text"></span></a>
   </li>  
 </ul>
-          </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -188,7 +160,7 @@ window.Quarto = {
   </div>
     
   
-  <div class="quarto-title-meta column-page-left">
+  <div class="quarto-title-meta">
 
       
     
@@ -212,56 +184,65 @@ window.Quarto = {
 
 
 
-
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1706233899649" data-listing-reading-time-sort="1" data-listing-word-count-sort="61">
+<div class="quarto-post image-right" data-index="0" data-categories="" data-listing-date-sort="1707195600000" data-listing-file-modified-sort="1707280539439" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3">
 <div class="thumbnail">
-<p><a href="./posts/2024-01-31-test-dash/index.html" class="no-external"></a></p><a href="./posts/2024-01-31-test-dash/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2024-01-31-test-dash/index.html" class="no-external"></a></p>
+<p><a href="./posts/2024-02-06-logit/index.html"> <p class="card-img-top"><img src="posts/2024-02-06-logit/index_files/figure-html/cell-2-output-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2024-02-06-logit/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2024-01-31-test-dash/index.html" class="no-external">Development Indicators by Continent</a>
+You Just Said Something Wrong About Logistic Regression
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2024-01-31-test-dash/index.html" class="no-external"></a>
+
 </div>
+</a>
+<div class="listing-categories">
+
+</div>
+<a href="./posts/2024-02-06-logit/index.html">
 <div class="listing-description">
-<a href="./posts/2024-01-31-test-dash/index.html" class="no-external"></a>
+C…
 </div>
+</a>
 </div>
 <div class="metadata">
-<p><a href="./posts/2024-01-31-test-dash/index.html" class="no-external"></a></p><a href="./posts/2024-01-31-test-dash/index.html" class="no-external">
+<a href="./posts/2024-02-06-logit/index.html">
+<div class="listing-date">
+Feb 6, 2024
+</div>
 <div class="listing-author">
-Demetri Pananos, Gapminder Analytics Group
+Demetri Pananos
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="" data-listing-date-sort="1705726800000" data-listing-file-modified-sort="1706022154901" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="377">
+<div class="quarto-post image-right" data-index="1" data-categories="" data-listing-date-sort="1705726800000" data-listing-file-modified-sort="1706286978620" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
 <div class="thumbnail">
-<p><a href="./posts/2024-01-22-curse/index.html" class="no-external"></a></p><a href="./posts/2024-01-22-curse/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2024-01-22-curse/index.html" class="no-external"></a></p>
+<p><a href="./posts/2024-01-22-curse/index.html"> <p class="card-img-top"><img src="posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2024-01-22-curse/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2024-01-22-curse/index.html" class="no-external">The Winner’s Curse Is Easy To Understand From This Picture</a>
+The Winner’s Curse Is Easy To Understand From This Picture
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2024-01-22-curse/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2024-01-22-curse/index.html">
 <div class="listing-description">
-<a href="./posts/2024-01-22-curse/index.html" class="no-external">Take a look at the photo below, and it i should be easy to understand why The Winner’s Curse (the general tendency for detected effects to be an over estimate of the truth)…</a>
+Take a…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2024-01-22-curse/index.html" class="no-external">
+<a href="./posts/2024-01-22-curse/index.html">
 <div class="listing-date">
 Jan 20, 2024
 </div>
@@ -271,28 +252,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="" data-listing-date-sort="1705726800000" data-listing-file-modified-sort="1705942089614" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="960">
+<div class="quarto-post image-right" data-index="2" data-categories="" data-listing-date-sort="1705726800000" data-listing-file-modified-sort="1705775380703" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
 <div class="thumbnail">
-<p><a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external"></a></p><a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external"></a></p>
+<p><a href="./posts/2024-01-20-logistic-survival/index.html"> <p class="card-img-top"><img src="posts/2024-01-20-logistic-survival/index_files/figure-html/unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2024-01-20-logistic-survival/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external">Survival Analysis With Logistic Regression</a>
+Survival Analysis With Logistic Regression
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2024-01-20-logistic-survival/index.html">
 <div class="listing-description">
-<a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external">This question came up on cross validated. In the course of responding to my answer, OP asks “why can’t I adjust for exposure length in a logistic regression” which kind of…<em></em></a>
+This question came up on cross…<em></em>
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2024-01-20-logistic-survival/index.html" class="no-external">
+<a href="./posts/2024-01-20-logistic-survival/index.html">
 <div class="listing-date">
 Jan 20, 2024
 </div>
@@ -302,28 +285,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="" data-listing-date-sort="1701493200000" data-listing-file-modified-sort="1704989708313" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1338">
+<div class="quarto-post image-right" data-index="3" data-categories="" data-listing-date-sort="1701493200000" data-listing-file-modified-sort="1702241754875" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
 <div class="thumbnail">
-<p><a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external"></a></p><a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-12-02-gen-gamma/index.html"> <p class="card-img-top"><img src="posts/2023-12-02-gen-gamma/index_files/figure-html/unnamed-chunk-1-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-12-02-gen-gamma/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external">The Generalized Gamma Distribution For Parametric Survival</a>
+The Generalized Gamma Distribution For Parametric Survival
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-12-02-gen-gamma/index.html">
 <div class="listing-description">
-<a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external">A couple weeks back, I posted a little something something on the Shifted Beta Geometric distribution. That distribution is used in estimating churn in contractual settings…</a>
+A couple weeks back, I posted a little something something on the Shifted Beta Geometric distribution. That distribution is used in estimating churn in contractual settings (think Netflix, or any other service whereby you renew…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-12-02-gen-gamma/index.html" class="no-external">
+<a href="./posts/2023-12-02-gen-gamma/index.html">
 <div class="listing-date">
 Dec 2, 2023
 </div>
@@ -333,28 +318,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="" data-listing-date-sort="1701406800000" data-listing-file-modified-sort="1704989708306" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="395">
+<div class="quarto-post image-right" data-index="4" data-categories="" data-listing-date-sort="1701406800000" data-listing-file-modified-sort="1701546230744" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
 <div class="thumbnail">
-<p><a href="./posts/2023-12-01-ron/index.html" class="no-external"></a></p><a href="./posts/2023-12-01-ron/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-12-01-ron/linkedin.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-12-01-ron/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-12-01-ron/index.html"> <p class="card-img-top"><img src="posts/2023-12-01-ron/linkedin.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-12-01-ron/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-12-01-ron/index.html" class="no-external">Brain Teaser About Frequentist Statistics</a>
+Brain Teaser About Frequentist Statistics
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-12-01-ron/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-12-01-ron/index.html">
 <div class="listing-description">
-<a href="./posts/2023-12-01-ron/index.html" class="no-external">Ron Kohavi is somewhat of a prominent figure in the A/B testing community. Armed with having coauthored “Trustworthy Online Controlled Experiments”, experience at places…</a>
+Ron Kohavi is somewhat of a prominent figure in the A/B testing community. Armed with having coauthored “Trustworthy Online Controlled…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-12-01-ron/index.html" class="no-external">
+<a href="./posts/2023-12-01-ron/index.html">
 <div class="listing-date">
 Dec 1, 2023
 </div>
@@ -364,28 +351,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="" data-listing-date-sort="1700456400000" data-listing-file-modified-sort="1704989708297" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1138">
+<div class="quarto-post image-right" data-index="5" data-categories="" data-listing-date-sort="1700456400000" data-listing-file-modified-sort="1700542099671" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
 <div class="thumbnail">
-<p><a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external"></a></p><a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-11-02-shifted-beta-geometric/index.html"> <p class="card-img-top"><img src="posts/2023-11-02-shifted-beta-geometric/index_files/figure-html/unnamed-chunk-6-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-11-02-shifted-beta-geometric/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external">Estimating the Shifted Beta Geometric Model in Stan</a>
+Estimating the Shifted Beta Geometric Model in Stan
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-11-02-shifted-beta-geometric/index.html">
 <div class="listing-description">
-<a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external">The shifted beta geometric model (sBG) is a model that is used to forecast retention/survival of users in contractual settings (think netflix, disney plus, tinder gold…</a>
+The shifted beta geometric model…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-11-02-shifted-beta-geometric/index.html" class="no-external">
+<a href="./posts/2023-11-02-shifted-beta-geometric/index.html">
 <div class="listing-date">
 Nov 20, 2023
 </div>
@@ -395,28 +384,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="" data-listing-date-sort="1695528000000" data-listing-file-modified-sort="1704989708297" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1181">
+<div class="quarto-post image-right" data-index="6" data-categories="" data-listing-date-sort="1695528000000" data-listing-file-modified-sort="1697910144009" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
 <div class="thumbnail">
-<p><a href="./posts/2023-09-24-l1/index.html" class="no-external"></a></p><a href="./posts/2023-09-24-l1/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-09-24-l1/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-09-24-l1/index.html"> <p class="card-img-top"><img src="posts/2023-09-24-l1/index_files/figure-html/unnamed-chunk-2-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-09-24-l1/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-09-24-l1/index.html" class="no-external">Regularization of Noisy Multinomial Counts</a>
+Regularization of Noisy Multinomial Counts
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-09-24-l1/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-09-24-l1/index.html">
 <div class="listing-description">
-<a href="./posts/2023-09-24-l1/index.html" class="no-external">I’m reading <em>Statistical Learning with Sparsity</em>. Its like Elements of Statistical Learning, but just for the LASSO. In chapter 3, there is this interesting example of using…</a>
+I’m reading <em>Statistical Learning with Sparsity</em>. Its like Elements of Statistical Learning, but just for the LASSO. In chapter 3…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-09-24-l1/index.html" class="no-external">
+<a href="./posts/2023-09-24-l1/index.html">
 <div class="listing-date">
 Sep 24, 2023
 </div>
@@ -426,28 +417,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="" data-listing-date-sort="1694404800000" data-listing-file-modified-sort="1704989708297" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="240">
+<div class="quarto-post image-right" data-index="7" data-categories="" data-listing-date-sort="1694404800000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
 <div class="thumbnail">
-<p><a href="./posts/2023-09-11-right/index.html" class="no-external"></a></p><a href="./posts/2023-09-11-right/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2023-09-11-right/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-09-11-right/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-09-11-right/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-09-11-right/index.html" class="no-external">Right In Ways You Don’t Care About</a>
+Right In Ways You Don’t Care About
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-09-11-right/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-09-11-right/index.html">
 <div class="listing-description">
-<a href="./posts/2023-09-11-right/index.html" class="no-external">I’ve typically been long on the value of data scientists but I think I’m starting to lose my optimism.</a>
+I’ve typically been long on the value of data scientists but I think I’m starting to lose my optimism.
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-09-11-right/index.html" class="no-external">
+<a href="./posts/2023-09-11-right/index.html">
 <div class="listing-date">
 Sep 11, 2023
 </div>
@@ -457,19 +450,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="AB Testing,Statistics,Causal Inference" data-listing-date-sort="1693713600000" data-listing-file-modified-sort="1704989708296" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2337">
+<div class="quarto-post image-right" data-index="8" data-categories="AB Testing,Statistics,Causal Inference" data-listing-date-sort="1693713600000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
 <div class="thumbnail">
-<p><a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external"></a></p><a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-09-03-did-in-ab/index.html"> <p class="card-img-top"><img src="posts/2023-09-03-did-in-ab/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-09-03-did-in-ab/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external">Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments</a>
+Difference in Difference Estimates Can Be Inaccurate When Adjusting For Detected Pre-Treatment Differences in Randomized Experiments
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('AB Testing'); return false;">
 AB Testing
@@ -481,12 +474,14 @@ Statistics
 Causal Inference
 </div>
 </div>
+<a href="./posts/2023-09-03-did-in-ab/index.html">
 <div class="listing-description">
-<a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external">Edits:</a>
+Edits:
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-09-03-did-in-ab/index.html" class="no-external">
+<a href="./posts/2023-09-03-did-in-ab/index.html">
 <div class="listing-date">
 Sep 3, 2023
 </div>
@@ -496,28 +491,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="" data-listing-date-sort="1687752000000" data-listing-file-modified-sort="1704989708296" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1197">
+<div class="quarto-post image-right" data-index="9" data-categories="" data-listing-date-sort="1687752000000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
 <div class="thumbnail">
-<p><a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external"></a></p><a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-06-26-did-you-do-your-homework/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-06-26-did-you-do-your-homework/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external">Did You Do Your Homework?</a>
+Did You Do Your Homework?
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2023-06-26-did-you-do-your-homework/index.html">
 <div class="listing-description">
-<a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external">This tweet made its way to my corner of the Bird Site. I’m a glutton for math homework punishment so I attempted it (and failed) but do not confuse my interest as…</a>
+This tweet made its…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-06-26-did-you-do-your-homework/index.html" class="no-external">
+<a href="./posts/2023-06-26-did-you-do-your-homework/index.html">
 <div class="listing-date">
 Jun 26, 2023
 </div>
@@ -527,19 +524,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="AB Tests,Statistics" data-listing-date-sort="1684036800000" data-listing-file-modified-sort="1704989708296" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2391">
+<div class="quarto-post image-right" data-index="10" data-categories="AB Tests,Statistics" data-listing-date-sort="1684036800000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
 <div class="thumbnail">
-<p><a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external"></a></p><a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-05-14-ab-brain-dump/index.html"> <p class="card-img-top"><img src="https://cdn.zappy.app/a6022ad19406dfa7531506824ad4b395.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-05-14-ab-brain-dump/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external">A Practical A/B Testing Brain Dump</a>
+A Practical A/B Testing Brain Dump
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('AB Tests'); return false;">
 AB Tests
@@ -548,12 +545,14 @@ AB Tests
 Statistics
 </div>
 </div>
+<a href="./posts/2023-05-14-ab-brain-dump/index.html">
 <div class="listing-description">
-<a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external">Over the past year or so, I’ve helped move Zapier towards doing better experiments and more of them. I wanted to document some of this for posterity; what I did, what…</a>
+Over the past year or so, I’ve helped move Zapier towards doing better experiments and more of them. I wanted to document…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-05-14-ab-brain-dump/index.html" class="no-external">
+<a href="./posts/2023-05-14-ab-brain-dump/index.html">
 <div class="listing-date">
 May 14, 2023
 </div>
@@ -563,19 +562,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="AB Tests,Statistics" data-listing-date-sort="1680235200000" data-listing-file-modified-sort="1704989708295" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2416">
+<div class="quarto-post image-right" data-index="11" data-categories="AB Tests,Statistics" data-listing-date-sort="1680235200000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13">
 <div class="thumbnail">
-<p><a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external"></a></p><a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-03-31-optimal-mde/index.html"> <p class="card-img-top"><img src="posts/2023-03-31-optimal-mde/index_files/figure-html/unnamed-chunk-3-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-03-31-optimal-mde/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external">Choosing the Optimal MDE for Experimentation</a>
+Choosing the Optimal MDE for Experimentation
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('AB Tests'); return false;">
 AB Tests
@@ -584,12 +583,14 @@ AB Tests
 Statistics
 </div>
 </div>
+<a href="./posts/2023-03-31-optimal-mde/index.html">
 <div class="listing-description">
-<a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external">Planning experiments means deciding how long to run the experiment (by doing a sample size calculation). A big factor in this decision is agreeing on a minimal detectable…<sup></sup></a>
+Planning experiments means deciding how long to run the experiment (by doing a sample size calculation). A big factor in this decision is agreeing on a minimal detectable…<sup></sup>
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-03-31-optimal-mde/index.html" class="no-external">
+<a href="./posts/2023-03-31-optimal-mde/index.html">
 <div class="listing-date">
 Mar 31, 2023
 </div>
@@ -599,19 +600,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="AB Tests,Statistics,Causal Inference" data-listing-date-sort="1676091600000" data-listing-file-modified-sort="1704989708295" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1356">
+<div class="quarto-post image-right" data-index="12" data-categories="AB Tests,Statistics,Causal Inference" data-listing-date-sort="1676091600000" data-listing-file-modified-sort="1697910144008" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
 <div class="thumbnail">
-<p><a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external"></a></p><a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external"></a></p>
+<p><a href="./posts/2023-02-11-iv-risk-ratio/index.html"> <p class="card-img-top"><img src="posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2023-02-11-iv-risk-ratio/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external">Causal Risk Ratios in AB Tests with One Sided Non-Compliance</a>
+Causal Risk Ratios in AB Tests with One Sided Non-Compliance
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('AB Tests'); return false;">
 AB Tests
@@ -623,12 +624,14 @@ Statistics
 Causal Inference
 </div>
 </div>
+<a href="./posts/2023-02-11-iv-risk-ratio/index.html">
 <div class="listing-description">
-<a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external">Sometimes we run AB tests where engaging with the treatment (and hence being treated) is optional. Since assignment to treatment is random, we can use the randomization as…</a>
+Sometimes we run AB tests where engaging with the treatment (and hence being treated) is optional. Since assignment to treatment is random, we can use the randomization as…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-02-11-iv-risk-ratio/index.html" class="no-external">
+<a href="./posts/2023-02-11-iv-risk-ratio/index.html">
 <div class="listing-date">
 Feb 11, 2023
 </div>
@@ -638,28 +641,30 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-categories="" data-listing-date-sort="1672462800000" data-listing-file-modified-sort="1704989708295" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1310">
+<div class="quarto-post image-right" data-index="13" data-categories="" data-listing-date-sort="1672462800000" data-listing-file-modified-sort="1697910144007" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
 <div class="thumbnail">
-<p><a href="./posts/2022-12-06-journeyman/index.html" class="no-external"></a></p><a href="./posts/2022-12-06-journeyman/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2022-12-06-journeyman/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-12-06-journeyman/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-12-06-journeyman/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-12-06-journeyman/index.html" class="no-external">Journeyman Statistics</a>
+Journeyman Statistics
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-12-06-journeyman/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 
 </div>
+<a href="./posts/2022-12-06-journeyman/index.html">
 <div class="listing-description">
-<a href="./posts/2022-12-06-journeyman/index.html" class="no-external">A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not…<code></code><code></code><code></code></a>
+A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not…<code></code><code></code><code></code>
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-12-06-journeyman/index.html" class="no-external">
+<a href="./posts/2022-12-06-journeyman/index.html">
 <div class="listing-date">
 Dec 31, 2022
 </div>
@@ -669,19 +674,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-categories="Statistics,AB Testing" data-listing-date-sort="1669352400000" data-listing-file-modified-sort="1704989708294" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="802">
+<div class="quarto-post image-right" data-index="14" data-categories="Statistics,AB Testing" data-listing-date-sort="1669352400000" data-listing-file-modified-sort="1697910144007" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
 <div class="thumbnail">
-<p><a href="./posts/2022-11-25-taylor-series/index.html" class="no-external"></a></p><a href="./posts/2022-11-25-taylor-series/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2022-11-25-taylor-series/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-11-25-taylor-series/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-11-25-taylor-series/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-11-25-taylor-series/index.html" class="no-external">Way Too Many Taylor Series</a>
+Way Too Many Taylor Series
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-11-25-taylor-series/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
@@ -690,12 +695,14 @@ Statistics
 AB Testing
 </div>
 </div>
+<a href="./posts/2022-11-25-taylor-series/index.html">
 <div class="listing-description">
-<a href="./posts/2022-11-25-taylor-series/index.html" class="no-external">Let <span class="math inline">\(Y(a)\)</span> be a potential outcome for a continuous measure under treatment status <span class="math inline">\(A=a\)</span>, which for the purpose of this blog post can be considered a binary treatment.…</a>
+Let <span class="math inline">\(Y(a)\)</span> be a potential outcome for a continuous measure under treatment status <span class="math inline">\(A=a\)</span>…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-11-25-taylor-series/index.html" class="no-external">
+<a href="./posts/2022-11-25-taylor-series/index.html">
 <div class="listing-date">
 Nov 25, 2022
 </div>
@@ -705,30 +712,32 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-categories="Statistics" data-listing-date-sort="1668574800000" data-listing-file-modified-sort="1704989708293" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1432">
+<div class="quarto-post image-right" data-index="15" data-categories="Statistics" data-listing-date-sort="1668574800000" data-listing-file-modified-sort="1697910144007" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
 <div class="thumbnail">
-<p><a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external"></a></p><a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2022-11-16-bootstrapping-in-sql/index_files/figure-html/unnamed-chunk-16-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-11-16-bootstrapping-in-sql/index.html"> <p class="card-img-top"><img src="posts/2022-11-16-bootstrapping-in-sql/index_files/figure-html/unnamed-chunk-16-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external">Bootstrapping in SQL</a>
+Bootstrapping in SQL
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
 </div>
 </div>
+<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html">
 <div class="listing-description">
-<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external">Remember the “Double Down” from KFC? It was bacon and cheese sandwiched between two deep fried pieces of chicken. I’m willing to bet we all conceived of it independently (as…</a>
+Remember the “Double Down” from KFC? It was bacon and cheese sandwiched between two deep fried pieces of chicken. I’m willing to bet we all conceived of it…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html" class="no-external">
+<a href="./posts/2022-11-16-bootstrapping-in-sql/index.html">
 <div class="listing-date">
 Nov 16, 2022
 </div>
@@ -738,30 +747,32 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-categories="Machine Learning" data-listing-date-sort="1660622400000" data-listing-file-modified-sort="1704989708293" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1555">
+<div class="quarto-post image-right" data-index="16" data-categories="Machine Learning" data-listing-date-sort="1660622400000" data-listing-file-modified-sort="1697910144007" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
 <div class="thumbnail">
-<p><a href="./posts/2022-08-16-pca/index.html" class="no-external"></a></p><a href="./posts/2022-08-16-pca/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2022-08-16-pca/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-08-16-pca/index.html"> <p class="card-img-top"><img src="posts/2022-08-16-pca/index_files/figure-html/prin-comp-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-08-16-pca/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-08-16-pca/index.html" class="no-external">PCA on The Tags for Cross Validated</a>
+PCA on The Tags for Cross Validated
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-08-16-pca/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Machine Learning'); return false;">
 Machine Learning
 </div>
 </div>
+<a href="./posts/2022-08-16-pca/index.html">
 <div class="listing-description">
-<a href="./posts/2022-08-16-pca/index.html" class="no-external">Julia Silge gave a really good talk in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack…</a>
+Julia Silge gave a really good talk in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-08-16-pca/index.html" class="no-external">
+<a href="./posts/2022-08-16-pca/index.html">
 <div class="listing-date">
 Aug 16, 2022
 </div>
@@ -771,19 +782,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-categories="Statistics,AB Testing" data-listing-date-sort="1659153600000" data-listing-file-modified-sort="1704989708292" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2566">
+<div class="quarto-post image-right" data-index="17" data-categories="Statistics,AB Testing" data-listing-date-sort="1659153600000" data-listing-file-modified-sort="1697910144003" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13">
 <div class="thumbnail">
-<p><a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external"></a></p><a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external">
-<p><img src="./posts/2022-07-31-gsd-pt-2/spending.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-07-31-gsd-pt-2/index.html"> <img src="./posts/2022-07-31-gsd-pt-2/spending.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-07-31-gsd-pt-2/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external">Interim Analysis &amp; Group Sequential Designs Pt 2</a>
+Interim Analysis &amp; Group Sequential Designs Pt 2
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
@@ -792,12 +803,14 @@ Statistics
 AB Testing
 </div>
 </div>
+<a href="./posts/2022-07-31-gsd-pt-2/index.html">
 <div class="listing-description">
-<a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external">This is part 2 of an ongoing series on group sequential designs for AB testing. Previous parts are shown below</a>
+This is part 2 of an ongoing series on group sequential designs for AB testing. Previous parts are shown below
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-07-31-gsd-pt-2/index.html" class="no-external">
+<a href="./posts/2022-07-31-gsd-pt-2/index.html">
 <div class="listing-date">
 Jul 30, 2022
 </div>
@@ -807,19 +820,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-categories="Statistics,AB Testing,Bayes" data-listing-date-sort="1658289600000" data-listing-file-modified-sort="1704989708288" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2091">
+<div class="quarto-post image-right" data-index="18" data-categories="Statistics,AB Testing,Bayes" data-listing-date-sort="1658289600000" data-listing-file-modified-sort="1697910143997" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
 <div class="thumbnail">
-<p><a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external"></a></p><a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external">
-<p><img src="./posts/2022-07-20-pooling-experiments/forecast.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-07-20-pooling-experiments/index.html"> <img src="./posts/2022-07-20-pooling-experiments/forecast.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-07-20-pooling-experiments/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external">Forecasting Experimental Lift Using Hierarchical Bayesian Modelling</a>
+Forecasting Experimental Lift Using Hierarchical Bayesian Modelling
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
@@ -831,12 +844,14 @@ AB Testing
 Bayes
 </div>
 </div>
+<a href="./posts/2022-07-20-pooling-experiments/index.html">
 <div class="listing-description">
-<a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external">You’re part of a team at a company who is tasked with improving conversion on some web page. You’ve run a few experiments already with mixed results and now it is time to…</a>
+You’re part of a team at a company who is…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-07-20-pooling-experiments/index.html" class="no-external">
+<a href="./posts/2022-07-20-pooling-experiments/index.html">
 <div class="listing-date">
 Jul 20, 2022
 </div>
@@ -846,19 +861,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="19" data-categories="Statistics,AB Testing" data-listing-date-sort="1657080000000" data-listing-file-modified-sort="1704989708287" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2635">
+<div class="quarto-post image-right" data-index="19" data-categories="Statistics,AB Testing" data-listing-date-sort="1657080000000" data-listing-file-modified-sort="1697910143995" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14">
 <div class="thumbnail">
-<p><a href="./posts/2022-07-06-gsd/index.html" class="no-external"></a></p><a href="./posts/2022-07-06-gsd/index.html" class="no-external">
-<p><img src="./posts/2022-07-06-gsd/joint_dist.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2022-07-06-gsd/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-07-06-gsd/index.html"> <img src="./posts/2022-07-06-gsd/joint_dist.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-07-06-gsd/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-07-06-gsd/index.html" class="no-external">Interim Analysis &amp; Group Sequential Designs Pt 1</a>
+Interim Analysis &amp; Group Sequential Designs Pt 1
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-07-06-gsd/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
@@ -867,12 +882,14 @@ Statistics
 AB Testing
 </div>
 </div>
+<a href="./posts/2022-07-06-gsd/index.html">
 <div class="listing-description">
-<a href="./posts/2022-07-06-gsd/index.html" class="no-external">Special thanks to Jacob Fiksel for writing a great blog post which inspired me to write my own.</a>
+Special thanks to Jacob Fiksel for writing a great blog post which inspired me to write my own.
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-07-06-gsd/index.html" class="no-external">
+<a href="./posts/2022-07-06-gsd/index.html">
 <div class="listing-date">
 Jul 6, 2022
 </div>
@@ -882,30 +899,32 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="20" data-categories="News" data-listing-date-sort="1655870400000" data-listing-file-modified-sort="1704989708287" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="207">
+<div class="quarto-post image-right" data-index="20" data-categories="News" data-listing-date-sort="1655870400000" data-listing-file-modified-sort="1697910143995" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
 <div class="thumbnail">
-<p><a href="./posts/2022-06-22-new-blog/index.html" class="no-external"></a></p><a href="./posts/2022-06-22-new-blog/index.html" class="no-external">
-<p class="card-img-top"><img src="posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/2022-06-22-new-blog/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-06-22-new-blog/index.html"> <p class="card-img-top"><img src="posts/2022-06-22-new-blog/index_files/figure-html/fig-trig-py-1.png"  class="thumbnail-image card-img"/></p> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-06-22-new-blog/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-06-22-new-blog/index.html" class="no-external">This Is A Quarto Blog</a>
+This Is A Quarto Blog
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-06-22-new-blog/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('News'); return false;">
 News
 </div>
 </div>
+<a href="./posts/2022-06-22-new-blog/index.html">
 <div class="listing-description">
-<a href="./posts/2022-06-22-new-blog/index.html" class="no-external">This is a quarto blog.</a>
+This is a quarto blog.
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-06-22-new-blog/index.html" class="no-external">
+<a href="./posts/2022-06-22-new-blog/index.html">
 <div class="listing-date">
 Jun 22, 2022
 </div>
@@ -915,19 +934,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="21" data-categories="Bayes,Stan,Python" data-listing-date-sort="1651896000000" data-listing-file-modified-sort="1704989708284" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2450">
+<div class="quarto-post image-right" data-index="21" data-categories="Bayes,Stan,Python" data-listing-date-sort="1651896000000" data-listing-file-modified-sort="1697910143988" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13">
 <div class="thumbnail">
-<p><a href="./posts/2022-05-07-flippin/index.html" class="no-external"></a></p><a href="./posts/2022-05-07-flippin/index.html" class="no-external">
-<p><img src="./posts/2022-05-07-flippin/posterior.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2022-05-07-flippin/index.html" class="no-external"></a></p>
+<p><a href="./posts/2022-05-07-flippin/index.html"> <img src="./posts/2022-05-07-flippin/posterior.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2022-05-07-flippin/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2022-05-07-flippin/index.html" class="no-external">Flippin’ Fun!</a>
+Flippin’ Fun!
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2022-05-07-flippin/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Bayes'); return false;">
 Bayes
@@ -939,12 +958,14 @@ Stan
 Python
 </div>
 </div>
+<a href="./posts/2022-05-07-flippin/index.html">
 <div class="listing-description">
-<a href="./posts/2022-05-07-flippin/index.html" class="no-external">I wrote an answer to a question about sequences of coin flips a couple days back that I was quite chuffed with. In short, the question asked for statistical ways to…</a>
+I wrote an answer to a question about sequences of coin flips a couple days back that I was quite chuffed with. In short, the question asked for…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-05-07-flippin/index.html" class="no-external">
+<a href="./posts/2022-05-07-flippin/index.html">
 <div class="listing-date">
 May 7, 2022
 </div>
@@ -954,19 +975,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="22" data-categories="Statistics,Machine Learning,Python,Scikit-Learn" data-listing-date-sort="1637643600000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="841">
+<div class="quarto-post image-right" data-index="22" data-categories="Statistics,Machine Learning,Python,Scikit-Learn" data-listing-date-sort="1637643600000" data-listing-file-modified-sort="1697910143988" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
 <div class="thumbnail">
-<p><a href="./posts/2021-11-23-bootstrap/index.html" class="no-external"></a></p><a href="./posts/2021-11-23-bootstrap/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2021-11-23-bootstrap/index.html" class="no-external"></a></p>
+<p><a href="./posts/2021-11-23-bootstrap/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2021-11-23-bootstrap/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2021-11-23-bootstrap/index.html" class="no-external">Hacking Sklearn To Do The Optimism Corrected Bootstrap</a>
+Hacking Sklearn To Do The Optimism Corrected Bootstrap
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2021-11-23-bootstrap/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
@@ -981,12 +1002,14 @@ Python
 Scikit-Learn
 </div>
 </div>
+<a href="./posts/2021-11-23-bootstrap/index.html">
 <div class="listing-description">
-<a href="./posts/2021-11-23-bootstrap/index.html" class="no-external">Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.</a>
+Its late, I can’t sleep, so I’m writing a blog post about the optimism corrected bootstrap.
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-11-23-bootstrap/index.html" class="no-external">
+<a href="./posts/2021-11-23-bootstrap/index.html">
 <div class="listing-date">
 Nov 23, 2021
 </div>
@@ -996,30 +1019,32 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="23" data-categories="Statistics" data-listing-date-sort="1617422400000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1819">
+<div class="quarto-post image-right" data-index="23" data-categories="Statistics" data-listing-date-sort="1617422400000" data-listing-file-modified-sort="1697910143988" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10">
 <div class="thumbnail">
-<p><a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external"></a></p><a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external"></a></p>
+<p><a href="./posts/2021-04-03-confidence-intervals/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2021-04-03-confidence-intervals/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external">On Interpretations of Confidence Intervals</a>
+On Interpretations of Confidence Intervals
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Statistics'); return false;">
 Statistics
 </div>
 </div>
+<a href="./posts/2021-04-03-confidence-intervals/index.html">
 <div class="listing-description">
-<a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external">The 95% in 95% confidence interval refers not to the probability that any one interval contains the estimand, but rather to the long term relative frequency of the estimator…</a>
+The 95% in 95% confidence interval refers not to the probability that any one interval…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-04-03-confidence-intervals/index.html" class="no-external">
+<a href="./posts/2021-04-03-confidence-intervals/index.html">
 <div class="listing-date">
 Apr 3, 2021
 </div>
@@ -1029,19 +1054,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="24" data-categories="R,Statistics" data-listing-date-sort="1601956800000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="243">
+<div class="quarto-post image-right" data-index="24" data-categories="R,Statistics" data-listing-date-sort="1601956800000" data-listing-file-modified-sort="1697910143988" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
 <div class="thumbnail">
-<p><a href="./posts/2020-10-06-links/index.html" class="no-external"></a></p><a href="./posts/2020-10-06-links/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2020-10-06-links/index.html" class="no-external"></a></p>
+<p><a href="./posts/2020-10-06-links/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2020-10-06-links/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2020-10-06-links/index.html" class="no-external">Log Link vs.&nbsp;Log(y)</a>
+Log Link vs.&nbsp;Log(y)
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2020-10-06-links/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('R'); return false;">
 R
@@ -1050,12 +1075,14 @@ R
 Statistics
 </div>
 </div>
+<a href="./posts/2020-10-06-links/index.html">
 <div class="listing-description">
-<a href="./posts/2020-10-06-links/index.html" class="no-external">You wanna see a little gotcha in statistics? Take the following data</a>
+You wanna see a little gotcha in statistics? Take the following data
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-10-06-links/index.html" class="no-external">
+<a href="./posts/2020-10-06-links/index.html">
 <div class="listing-date">
 Oct 6, 2020
 </div>
@@ -1065,19 +1092,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="25" data-categories="Python,Machine Learning,Statistics" data-listing-date-sort="1558411200000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1209">
+<div class="quarto-post image-right" data-index="25" data-categories="Python,Machine Learning,Statistics" data-listing-date-sort="1558411200000" data-listing-file-modified-sort="1697910143987" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
 <div class="thumbnail">
-<p><a href="./posts/2019-05-21-odes/index.html" class="no-external"></a></p><a href="./posts/2019-05-21-odes/index.html" class="no-external">
-<p><img data-src="./posts/2019-05-21-odes/sir_curves.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2019-05-21-odes/index.html" class="no-external"></a></p>
+<p><a href="./posts/2019-05-21-odes/index.html"> <img data-src="./posts/2019-05-21-odes/sir_curves.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2019-05-21-odes/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2019-05-21-odes/index.html" class="no-external">Gradient Descent with ODEs</a>
+Gradient Descent with ODEs
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2019-05-21-odes/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Python'); return false;">
 Python
@@ -1089,12 +1116,14 @@ Machine Learning
 Statistics
 </div>
 </div>
+<a href="./posts/2019-05-21-odes/index.html">
 <div class="listing-description">
-<a href="./posts/2019-05-21-odes/index.html" class="no-external">Gradient descent usually isn’t used to fit Ordinary Differential Equations (ODEs) to data (at least, that isn’t how the Applied Mathematics departments to which I have been…</a>
+Gradient descent usually isn’t used to fit Ordinary Differential Equations (ODEs) to data (at least, that isn’t how the Applied Mathematics departments to which I have been…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2019-05-21-odes/index.html" class="no-external">
+<a href="./posts/2019-05-21-odes/index.html">
 <div class="listing-date">
 May 21, 2019
 </div>
@@ -1104,19 +1133,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="26" data-categories="Python,Probability" data-listing-date-sort="1535688000000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="446">
+<div class="quarto-post image-right" data-index="26" data-categories="Python,Probability" data-listing-date-sort="1535688000000" data-listing-file-modified-sort="1697910143987" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3">
 <div class="thumbnail">
-<p><a href="./posts/2018-08-31-combinatorics/index.html" class="no-external"></a></p><a href="./posts/2018-08-31-combinatorics/index.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/2018-08-31-combinatorics/index.html" class="no-external"></a></p>
+<p><a href="./posts/2018-08-31-combinatorics/index.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2018-08-31-combinatorics/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2018-08-31-combinatorics/index.html" class="no-external">Neat Litle Combinatorics Problem</a>
+Neat Litle Combinatorics Problem
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2018-08-31-combinatorics/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Python'); return false;">
 Python
@@ -1125,12 +1154,14 @@ Python
 Probability
 </div>
 </div>
+<a href="./posts/2018-08-31-combinatorics/index.html">
 <div class="listing-description">
-<a href="./posts/2018-08-31-combinatorics/index.html" class="no-external">I’ll cut right to it. Consider the set <span class="math inline">\(S = (49, 8, 48, 15, 47, 4, 16, 23, 43, 44, 42, 45, 46 )\)</span>. What is the expected value for the minimum of 6 samples from this set?</a>
+I’ll cut right to it. Consider the set <span class="math inline">\(S = (49, 8, 48, 15, 47, 4, 16, 23, 43, 44, 42, 45, 46 )\)</span>. What is the expected value for the minimum of 6 samples from this set?
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2018-08-31-combinatorics/index.html" class="no-external">
+<a href="./posts/2018-08-31-combinatorics/index.html">
 <div class="listing-date">
 Aug 31, 2018
 </div>
@@ -1140,19 +1171,19 @@ Demetri Pananos
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="27" data-categories="Python,Riddler" data-listing-date-sort="1514523600000" data-listing-file-modified-sort="1704989708283" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="721">
+<div class="quarto-post image-right" data-index="27" data-categories="Python,Riddler" data-listing-date-sort="1514523600000" data-listing-file-modified-sort="1697910143987" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
 <div class="thumbnail">
-<p><a href="./posts/2017-12-29-coins/index.html" class="no-external"></a></p><a href="./posts/2017-12-29-coins/index.html" class="no-external">
-<p><img data-src="./posts/2017-12-29-coins/coins.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/2017-12-29-coins/index.html" class="no-external"></a></p>
+<p><a href="./posts/2017-12-29-coins/index.html"> <img data-src="./posts/2017-12-29-coins/coins.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
+<a href="./posts/2017-12-29-coins/index.html">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2017-12-29-coins/index.html" class="no-external">Coins and Factors</a>
+Coins and Factors
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/2017-12-29-coins/index.html" class="no-external"></a>
+
 </div>
+</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Python'); return false;">
 Python
@@ -1161,12 +1192,14 @@ Python
 Riddler
 </div>
 </div>
+<a href="./posts/2017-12-29-coins/index.html">
 <div class="listing-description">
-<a href="./posts/2017-12-29-coins/index.html" class="no-external">I love Fivethirtyeight’s Riddler column. Usually, I can solve the problem with computation, but on some rare occasions I can do some interesting math to get the solution…</a>
+I love…
 </div>
+</a>
 </div>
 <div class="metadata">
-<a href="./posts/2017-12-29-coins/index.html" class="no-external">
+<a href="./posts/2017-12-29-coins/index.html">
 <div class="listing-date">
 Dec 29, 2017
 </div>
@@ -1263,9 +1296,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+  function tippyHover(el, contentFn) {
     const config = {
       allowHTML: true,
+      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1275,17 +1309,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start',
+      placement: 'bottom-start'
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1298,125 +1323,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
-          }
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
-        }
-        return container.innerHTML
-      } else {
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
-      }
-    }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
-          }
-        } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
-            if (note !== null) {
-              const html = processXRef(id, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
-        }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1460,7 +1366,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
-            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1486,32 +1391,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1575,5 +1454,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></div></div></footer></body></html>
