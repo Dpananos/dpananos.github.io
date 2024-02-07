@@ -70,9 +70,10 @@ ax.set_ylabel('Odds Ratio')
 
 # Add zoom inset region axis on the bottom center
 axins = ax.inset_axes(
-    [0.6, 0.1, 0.47*0.8, 0.47*0.8],  # Adjusted position
-    xlim=(1, 1.5), ylim=(1, 1.5), xticklabels=[1, 1.25, 1.5], yticklabels=[1,'', 1.25,'', 1.5])
-
+    [0.6, 0.1, 0.47*0.75, 0.47*0.75],  # Adjusted position
+    xlim=(1, 1.5), ylim=(1, 1.5), xticks=[1, 1.25, 1.5], yticks=[1, 1.25, 1.5])
+    
+axins.plot([0, 5], [0, 5], 'k--')
 axins.set_facecolor('#f0f0f0')
 axins.grid(color='white', linestyle='-', linewidth=0.5)
 
