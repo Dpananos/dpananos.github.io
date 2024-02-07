@@ -27,7 +27,8 @@ Now, it is actually fine to make this mistake under a few conditions.  Namely, w
 
 
 ```{python}
-#| fig-cap: How the relative risk and odds ratio differ for various baseline risks.  For each basline risk, we can compute the associated probabiltity given the relative risk.  Given that probability, we can also compute the odds ratio.  
+#| fig-cap: How the relative risk and odds ratio differ for various baseline risks.  For each basline risk, we can compute the associated probabiltity given the relative risk.  Given that probability, we can also compute the odds ratio. 
+ 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -70,7 +71,7 @@ ax.set_ylabel('Odds Ratio')
 # Add zoom inset region axis on the bottom center
 axins = ax.inset_axes(
     [0.6, 0.1, 0.47*0.8, 0.47*0.8],  # Adjusted position
-    xlim=(1, 1.5), ylim=(1, 1.5), xticklabels=[1, 1.25, 1.5], yticklabels=[1, 1.25, 1.5])
+    xlim=(1, 1.5), ylim=(1, 1.5), xticklabels=[1, 1.25, 1.5], yticklabels=[1,'', 1.25,'', 1.5])
 
 axins.set_facecolor('#f0f0f0')
 axins.grid(color='white', linestyle='-', linewidth=0.5)
