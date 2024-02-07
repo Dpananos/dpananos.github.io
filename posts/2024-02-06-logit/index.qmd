@@ -5,7 +5,7 @@ code-fold: true
 echo: true
 fig-cap-location: top
 categories: []
-number-sections: false
+number-sections: true
 draft: false
 ---
 
@@ -14,7 +14,7 @@ Congratulations, you just said something wrong about logistic regression.  That'
 
 This is a living blog post intended to address some common misconceptions or flat out wrong statements I've seen people make about logistic regression.
 
-## 1.  The Coefficients of Logistic Regression are Interpreted as "You're X Times More Likely to See Y Given Factor Z".  
+##  The Coefficients of Logistic Regression are Interpreted as "You're X Times More Likely to See Y Given Factor Z".  
 
 Wrong!  The (exponentiated) coefficients of logistic regression are interpreted as "the odds you see Y given Factor Z are X times larger".
 
@@ -35,7 +35,7 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 p1 = np.array([0.01, 0.05, 0.1, 0.15, 0.20])
 
-rr = np.linspace(1, 5, 500)
+rr = np.linspace(1, 4.9, 500)
 
 fig, ax = plt.subplots(dpi=120)
 ax.set_aspect('equal')
@@ -63,13 +63,14 @@ ax.legend(title="Baseline risk", loc='center left', bbox_to_anchor=(1, 0.5))
 
 # Set y ticks to [1, 2, 3, 4, 5]
 ax.set_yticks([1, 2, 3, 4, 5])
+ax.set_xticks([1, 2, 3, 4, 5])
 ax.set_xlabel('Relative Risk')
 ax.set_ylabel('Odds Ratio')
 
 # Add zoom inset region axis on the bottom center
 axins = ax.inset_axes(
     [0.6, 0.1, 0.47*0.8, 0.47*0.8],  # Adjusted position
-    xlim=(1, 1.5), ylim=(1, 1.5), xticklabels=[], yticklabels=[])
+    xlim=(1, 1.5), ylim=(1, 1.5), xticklabels=[1, 1.25, 1.5], yticklabels=[1, 1.25, 1.5])
 
 axins.set_facecolor('#f0f0f0')
 axins.grid(color='white', linestyle='-', linewidth=0.5)

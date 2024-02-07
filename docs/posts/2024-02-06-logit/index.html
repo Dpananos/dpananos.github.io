@@ -192,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Sections</h2>
    
   <ul>
-  <li><a href="#the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." id="toc-the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." class="nav-link active" data-scroll-target="#the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z.">1. The Coefficients of Logistic Regression are Interpreted as “You’re X Times More Likely to See Y Given Factor Z”.</a></li>
+  <li><a href="#the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." id="toc-the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." class="nav-link active" data-scroll-target="#the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z."><span class="header-section-number">1</span> The Coefficients of Logistic Regression are Interpreted as “You’re X Times More Likely to See Y Given Factor Z”.</a></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2024-02-06-logit/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -204,8 +204,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Congratulations, you just said something wrong about logistic regression. That’s OK, logistic regression is hard and we all have to learn/re-learn some things from time to time.</p>
 <p>This is a living blog post intended to address some common misconceptions or flat out wrong statements I’ve seen people make about logistic regression.</p>
-<section id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." class="level2">
-<h2 class="anchored" data-anchor-id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z.">1. The Coefficients of Logistic Regression are Interpreted as “You’re X Times More Likely to See Y Given Factor Z”.</h2>
+<section id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z."><span class="header-section-number">1</span> The Coefficients of Logistic Regression are Interpreted as “You’re X Times More Likely to See Y Given Factor Z”.</h2>
 <p>Wrong! The (exponentiated) coefficients of logistic regression are interpreted as “the odds you see Y given Factor Z are X times larger”.</p>
 <p>Phrases like “X times <em>more likely</em>” allude to the the probability of the event. If the probability of getting some event is 10%, and the probability of getting some other event is 20%, then you are 2 times more likely to get the latter event than the former.</p>
 <p>This kind of comparison between two probabilities is called “the relative risk” (or risk ratio, or lift, it really depends on where you work). The coefficients of a logistic regression are <em>not</em> risk ratios, nor are they log risk ratios; they are log odds ratios.</p>
@@ -220,7 +220,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> np.array([<span class="fl">0.01</span>, <span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.15</span>, <span class="fl">0.20</span>])</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>rr <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">500</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>rr <span class="op">=</span> np.linspace(<span class="dv">1</span>, <span class="fl">4.9</span>, <span class="dv">500</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(dpi<span class="op">=</span><span class="dv">120</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">'equal'</span>)</span>
@@ -248,26 +248,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Set y ticks to [1, 2, 3, 4, 5]</span></span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>])</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Relative Risk'</span>)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Odds Ratio'</span>)</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Add zoom inset region axis on the bottom center</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>axins <span class="op">=</span> ax.inset_axes(</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">0.6</span>, <span class="fl">0.1</span>, <span class="fl">0.47</span><span class="op">*</span><span class="fl">0.8</span>, <span class="fl">0.47</span><span class="op">*</span><span class="fl">0.8</span>],  <span class="co"># Adjusted position</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">1</span>, <span class="fl">1.5</span>), ylim<span class="op">=</span>(<span class="dv">1</span>, <span class="fl">1.5</span>), xticklabels<span class="op">=</span>[], yticklabels<span class="op">=</span>[])</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>axins.set_facecolor(<span class="st">'#f0f0f0'</span>)</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>axins.grid(color<span class="op">=</span><span class="st">'white'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, p <span class="kw">in</span> <span class="bu">enumerate</span>(p1):</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">=</span> rr <span class="op">*</span> p</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    odr <span class="op">=</span> p2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p) <span class="op">/</span> ((<span class="dv">1</span> <span class="op">-</span> p2) <span class="op">*</span> p)</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    axins.plot(rr, odr, label<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>p<span class="sc">:.2f}</span><span class="ss">"</span>, color<span class="op">=</span>colors[i])</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Use ax.indicate_inset_zoom to draw a rectangle around the zoomed-in region</span></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>ax.indicate_inset_zoom(axins, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>])</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Relative Risk'</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Odds Ratio'</span>)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Add zoom inset region axis on the bottom center</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>axins <span class="op">=</span> ax.inset_axes(</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">0.6</span>, <span class="fl">0.1</span>, <span class="fl">0.47</span><span class="op">*</span><span class="fl">0.8</span>, <span class="fl">0.47</span><span class="op">*</span><span class="fl">0.8</span>],  <span class="co"># Adjusted position</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    xlim<span class="op">=</span>(<span class="dv">1</span>, <span class="fl">1.5</span>), ylim<span class="op">=</span>(<span class="dv">1</span>, <span class="fl">1.5</span>), xticklabels<span class="op">=</span>[<span class="dv">1</span>, <span class="fl">1.25</span>, <span class="fl">1.5</span>], yticklabels<span class="op">=</span>[<span class="dv">1</span>, <span class="fl">1.25</span>, <span class="fl">1.5</span>])</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>axins.set_facecolor(<span class="st">'#f0f0f0'</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>axins.grid(color<span class="op">=</span><span class="st">'white'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, p <span class="kw">in</span> <span class="bu">enumerate</span>(p1):</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">=</span> rr <span class="op">*</span> p</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    odr <span class="op">=</span> p2 <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p) <span class="op">/</span> ((<span class="dv">1</span> <span class="op">-</span> p2) <span class="op">*</span> p)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    axins.plot(rr, odr, label<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>p<span class="sc">:.2f}</span><span class="ss">"</span>, color<span class="op">=</span>colors[i])</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Use ax.indicate_inset_zoom to draw a rectangle around the zoomed-in region</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>ax.indicate_inset_zoom(axins, edgecolor<span class="op">=</span><span class="st">"black"</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
