@@ -38,7 +38,7 @@ p1 = np.array([0.01, 0.05, 0.1, 0.15, 0.20])
 
 rr = np.linspace(1, 4.9, 500)
 
-fig, ax = plt.subplots(dpi=120)
+fig, ax = plt.subplots(dpi=240)
 ax.set_aspect('equal')
 ax.set_xlim(1, 5)
 ax.set_ylim(1, 5)
