@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2022-08-16">
+<meta name="dcterms.date" content="2024-02-08">
 
-<title>Demetri Pananos Ph.D - PCA on The Tags for Cross Validated</title>
+<title>Demetri Pananos Ph.D - Peeking Sets You Up For Dissapointment</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -102,15 +102,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta property="og:title" content="Demetri Pananos Ph.D - Peeking Sets You Up For Dissapointment">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Peeking Sets You Up For Dissapointment">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
@@ -162,11 +160,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">PCA on The Tags for Cross Validated</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">Machine Learning</div>
-              </div>
-                  </div>
+      <h1 class="title">Peeking Sets You Up For Dissapointment</h1>
+                      </div>
   </div>
     
   
@@ -182,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 16, 2022</p>
+        <p class="date">February 8, 2024</p>
       </div>
     </div>
     
@@ -194,15 +189,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Sections</h2>
-   
-  <ul>
-  <li><a href="#data-modelling" id="toc-data-modelling" class="nav-link active" data-scroll-target="#data-modelling">Data &amp; Modelling</a></li>
-  <li><a href="#principal-components" id="toc-principal-components" class="nav-link" data-scroll-target="#principal-components">Principal Components</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -211,207 +198,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>Julia Silge gave a <a href="https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/">really good talk</a> in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc). These principal components were able to shed some light on what drove the variation in questions asked.</p>
-<p>I love this talk, and I crib it all the time. As of late, I’ve not been doing much SQL, so I figured I would recreate Julia’s analysis using data from <a href="https://stats.stackexchange.com/">cross validated</a>. But this time, with a twist!</p>
-<p>What if instead of understanding the drivers of variance in questions asked, we analyze the kinds of questions users answer. This could give us insight into the type of analysts we have on cross validated. The site is intended to be for statistical analysis, but it has a mix of prediction questions, machine learning questions, econometrics questions, and much more. Hang around there long enough and you will see some familiar faces (mine included) and you get a pretty good sense of who answers what kinds of questions.</p>
-<p>I’m going to use data available from the stack exchange data explorer available <a href="https://data.stackexchange.com/">here</a>. I’ve included a code box in this post with the query I’ve used. I’ve sliced out the top 250 users as ranked by reputation and the top 100 tags as calculated by prevalence. We can use <code>{tidymodels}</code> to do a lot of the heay lifting. Let’s get to it.</p>
-<details>
-<summary>
-Click to see SQL Query
-</summary>
-<p>
-</p><pre><code>with QA_Tags as (
-select
-
-A.Id as QuestionId,
-A.Title as QuestionTitle,
-A.Body as QuestionBody,
-
-B.Id as AnswerId,
-B.OwnerUserId,
-B.Body as AnswerBody,
-
-C.iD as UserId,
-C.DisplayName,
-dense_rank() over (order by C.Reputation desc) as rnk,
-
-D.TagId,
-E.TagName
-
-from
---Extract Answers from Posts Table
-(select * from Posts where PostTypeId = 2)  as B
---Extract Questions from Posts Table
-left join (select * from Posts where PostTypeId = 1)  as A
-on  A.Id = B.ParentId
-left join Users as C
-on B.OwnerUserId = C.Id
-left join PostTags as D
-on A.Id = D.PostId
-left join (select top 100 * from Tags where TagName is not NULL order by Count desc) as E
-on D.TagId = E.Id)
-
-select
-rnk,
-UserId, 
-DisplayName, 
-TagName,
-count(distinct QuestionId) as N
-from QA_tags
-where rnk&lt;=250
-group by rnk, UserId, DisplayName, TagName
-order by rnk</code></pre>
-<p></p>
+<p>Peeking (looking for significance in an AB test before the experiment has enough samples to reach desired power) is a “no no”. Rationales for not peeking typically mention inflated type 1 error rate.</p>
+<p>Unless you’re just randomizing into two groups and not changing anything, the null is unlikely to be true. So inflated type one error rate is really not the primary concern. Rather, if we peek then we are setting ourselves up for disappointment. Detected effects from peeking will typically not generalize, and we will be overstating out impact. The reason why is <a href="https://dpananos.github.io/posts/2024-01-22-curse/">fairly clear when considering the Winner’s Curse</a>.</p>
+<p>The long and the short of it is as follows:</p>
+<ul>
+<li>When you peak, your tests are under powered.</li>
+<li>Statistically significant results from under powered tests generally over estimate the truth (see my post on the Winner’s curse for why).</li>
+<li>So when you detect an effect from peeking, you are very likely over estimating your impact. When you roll out the change globally, you’re probably not going to see the impact you expected. This can lead to disappointment (and a lot of questions from everyone when they don’t see changes to the numbers on a dashboard).</li>
+</ul>
+<p>As a concrete example, say you design an experiment to detect a 3% lift in a binary outcome, and say your intervention truly does improve the outcome by 3%. The baseline is 10%, and you design your experiment to have 80% power with a 5% false positive rate. You’re going to need a total of 318,132 users in your experiment…which sounds like a lot. What if we instead checked for statistical significance each time the groups hit a multiple of 20, 000. Depending on how fast we can accrue users into the experiment, this could save time…right?</p>
+<p>Shown below is a line plot of the relative error between what you would expect to detect at each peek and the true lift. The plot speaks for itself; conditional on finding an effect early, you’re likely over estimating the truth.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">seq</span>(<span class="dv">20000</span>, <span class="dv">2</span><span class="sc">*</span>N, <span class="dv">20000</span>), <span class="dv">2</span><span class="sc">*</span>N)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>log_rr_mean <span class="ot">&lt;-</span>  <span class="fu">log</span>(pt) <span class="sc">-</span> <span class="fu">log</span>(pc)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>log_rr_var <span class="ot">&lt;-</span>  (<span class="dv">1</span><span class="sc">-</span>pt)<span class="sc">/</span>(pt<span class="sc">*</span>n) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>pc)<span class="sc">/</span>(pc<span class="sc">*</span>n)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>log_rr_sd <span class="ot">&lt;-</span>  <span class="fu">sqrt</span>(log_rr_var)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> log_rr_mean <span class="sc">-</span> log_rr_sd <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="fl">0.8</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>trunc <span class="ot">&lt;-</span> log_rr_mean <span class="sc">+</span> log_rr_sd <span class="sc">*</span> <span class="fu">dnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting with formatted axes ticks</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(n, <span class="fu">abs</span>( log_rr_mean<span class="sc">-</span>trunc)<span class="sc">/</span>log_rr_mean, <span class="at">type=</span><span class="st">'l'</span>, <span class="at">xlab=</span><span class="st">'Sample Size'</span>, <span class="at">ylab=</span><span class="st">'Relative Error'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(n, <span class="fu">abs</span>(log_rr_mean<span class="sc">-</span>trunc)<span class="sc">/</span>log_rr_mean, <span class="at">pch=</span><span class="dv">19</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<section id="data-modelling" class="level2">
-<h2 class="anchored" data-anchor-id="data-modelling">Data &amp; Modelling</h2>
-<p>Let’s Take a peek at the data, using me as an example. Below are my top 10 tags as a percent of my total answers. Looks like I like to answer questions about regression, hypothesis testing, and R most frequently. Each of the top 250 users has data similar to this in my dataset. I need to pivot it so that tags become features. Then, I can normalize the data and perform PCA.</p>
-<div class="cell">
 <div class="cell-output-display">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Name</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Tag</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Percent</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Regression</td>
-<td style="text-align: left;">11.40%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Hypothesis-Testing</td>
-<td style="text-align: left;">6.01%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">R</td>
-<td style="text-align: left;">5.90%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Machine-Learning</td>
-<td style="text-align: left;">5.45%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Logistic</td>
-<td style="text-align: left;">4.85%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Bayesian</td>
-<td style="text-align: left;">3.58%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Statistical-Significance</td>
-<td style="text-align: left;">3.42%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Confidence-Interval</td>
-<td style="text-align: left;">2.75%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">T-Test</td>
-<td style="text-align: left;">2.64%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Probability</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Generalized-Linear-Model</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-<p>Checkout how dummy easy the analysis is with tidymodels. I think I spent more time cleaning the data than I did modelling it.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(rnk <span class="sc">+</span> UserId <span class="sc">+</span> DisplayName <span class="sc">~</span> ., <span class="at">data =</span> d) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_pca</span>(<span class="fu">all_numeric_predictors</span>(), <span class="at">num_comp =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">prep</span>()</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>prin_comps <span class="ot">&lt;-</span> <span class="fu">bake</span>(rec, <span class="at">new_data =</span> d) </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>weights <span class="ot">&lt;-</span> rec <span class="sc">%&gt;%</span> </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">tidy</span>(<span class="at">number =</span> <span class="dv">2</span>, <span class="at">type =</span> <span class="st">"coef"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>The last two lines extract both the principal components and the weights for each tag on each component. Now. we’re ready to make some plots.</p>
-</section>
-<section id="principal-components" class="level2">
-<h2 class="anchored" data-anchor-id="principal-components">Principal Components</h2>
-<p>The results for the first 3 principal componensts are shown below. I’ve shown the 20 most extreme components for clarity.</p>
-<p>The first principal compnent has tags like “Anova”, “T-Test” and “SPSS” as heavily weighted positive, while “Machine Learning”, “Mathematical Statistics” and “Probability” are all weighted heavily negative (the direction of the weights doesn’t matter, it isn’t like one direction is better or worse). To me, I read this as “Beginner” vs “Advanced” answers. Questions with the former tags are usually from users who are maybe taking a stats class for the first time and are learning about the t test or Anova. The dead give away for this is the “SPSS” tag being weighted so heavily<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Looking at more weights verifies this, with the negative weights being associated with topics like “Neural Nets”, and “Maximum Likelihod” while the positive weights have tags like “Statistical Significance” and “Interpretation”.</p>
-<p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
-<div class="cell" data-layout-row="3" data-fig.dpi="240">
-<div class="cell-output-display">
-<div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-3.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Relative error in estimating the true impact as a function of the total sample size. Detecting a statistically significant difference early may save you time, but it comes at the expense of over estimating the true impact you have made by nearly 35%. Since we don’t know the true impact of our interventions, it is difficult to know if we are over estimating on any one experiment. However, peeking as a practice will almost surely result in inflated expectations and great dissapointments.</figcaption>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats. I’m not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the top of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
-<p>Plotting PC1 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
-<div>
-
-</div>
-<div class="cell quarto-layout-panel" data-fig.dpi="240" data-layout-nrow="2">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-2.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-</div>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>There appear to be at least three dimensions about which analysts on cross validated can be placed. Analysts can either opt to answer easy or difficult questions, which lean classical statistics or machine learning, with additional focus on forecasting on non-forecasting problems. That’s a fairly useful interpretation of the first three principal components!</p>
-<p>It could be fun to think about how best to use this information. Now that we know these three kinds of subgroups, could we use it to recommend users questions to answer? Its been the case that <a href="https://stats.meta.stackexchange.com/questions/5325/we-have-a-very-large-widening-gap-between-questions-and-answers-how-do-we-fix">there is a large gap between questions and answers</a>, so maybe this could be useful but also maybe not.</p>
+<p>Now, keep in mind that a 35% relative error means you would estimate the lift to be 4% instead of 3%. Maybe that doesn’t sound so bad, and for a single experiment it isn’t. But <em>habitual</em> peeking means this error compounds experiment over experiment. Maybe something to talk to your PMs about.</p>
 
 
-</section>
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Because once you’ve taken a few stats courses, you know bette than to use SPSS.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -804,4 +631,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2024-02-08-peek/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

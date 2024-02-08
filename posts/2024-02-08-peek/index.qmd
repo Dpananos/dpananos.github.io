@@ -1,0 +1,67 @@
+---
+title: Peeking Sets You Up For Dissapointment
+date: "2024-02-08"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: true
+---
+
+
+Peeking (looking for significance in an AB test before the experiment has enough samples to reach desired power) is a "no no".  Rationales for not peeking typically mention inflated type 1 error rate.
+
+Unless you're just randomizing into two groups and not changing anything, the null is unlikely to be true.  So inflated type one error rate is really not the primary concern.  Rather, if we peek then we are setting ourselves up for disappointment.  Detected effects from peeking will typically not generalize, and we will be overstating out impact.  The reason why is [fairly clear when considering the Winner's Curse](https://dpananos.github.io/posts/2024-01-22-curse/). 
+
+
+The long and the short of it is as follows:
+
+* When you peak, your tests are under powered.
+* Statistically significant results from under powered tests generally over estimate the truth (see my post on the Winner's curse for why).
+* So when you detect an effect from peeking, you are very likely over estimating your impact.  When you roll out the change globally, you're probably not going to see the impact you expected.  This can lead to disappointment (and a lot of questions from everyone when they don't see changes to the numbers on a dashboard).
+
+
+
+```{r}
+#| echo: false
+library(tidyverse)
+
+set.seed(2)
+pc <- 0.1
+lift <-1.03
+pt <- pc * lift
+power <- 0.8
+sig_level <- 0.05
+
+
+pwr_calc <- power.prop.test(p1=pc, p2=pt, power=power, sig.level = sig_level)
+N <- ceiling(pwr_calc$n)
+```
+
+As a concrete example, say you design an experiment to detect a 3% lift in a binary outcome, and say your intervention truly does improve the outcome by 3%.  The baseline is 10%, and you design your experiment to have 80% power with a 5% false positive rate.  You're going to need a total of `r scales::comma(2*N)` users in your experiment...which sounds like a lot.  What if we instead checked for statistical significance each time the groups hit a multiple of 20, 000. Depending on how fast we can accrue users into the experiment, this could save time...right?
+
+Shown below is a line plot of the relative error between what you would expect to detect at each peek and the true lift. The plot speaks for itself; conditional on finding an effect early, you're likely over estimating the truth. 
+
+```{r}
+#| fig-cap: Relative error in estimating the true impact as a function of the total sample size.  Detecting a statistically significant difference early may save you time, but it comes at the expense of over estimating the true impact you have made by nearly 35\%.  Since we don't know the true impact of our interventions, it is difficult to know if we are over estimating on any one experiment.  However, peeking as a practice will almost surely result in inflated expectations and great dissapointments.
+#| fig-width: 8
+#| fig-height: 5
+
+n <- c(seq(20000, 2*N, 20000), 2*N)
+log_rr_mean <-  log(pt) - log(pc)
+log_rr_var <-  (1-pt)/(pt*n) + (1-pc)/(pc*n)
+log_rr_sd <-  sqrt(log_rr_var)
+
+z <- log_rr_mean - log_rr_sd * qnorm(0.8)
+trunc <- log_rr_mean + log_rr_sd * dnorm((z - log_rr_mean)/ log_rr_sd) / (1 - pnorm((z - log_rr_mean)/ log_rr_sd))
+
+# Plotting with formatted axes ticks
+plot(n, abs( log_rr_mean-trunc)/log_rr_mean, type='l', xlab='Sample Size', ylab='Relative Error')
+
+
+points(n, abs(log_rr_mean-trunc)/log_rr_mean, pch=19)
+
+```
+
+
+Now, keep in mind that a 35% relative error means you would estimate the lift to be 4% instead of 3%.  Maybe that doesn't sound so bad, and for a single experiment it isn't.  But _habitual_ peeking means this error compounds experiment over experiment.  Maybe something to talk to your PMs about.
