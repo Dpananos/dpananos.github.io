@@ -211,30 +211,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">seq</span>(<span class="dv">20000</span>, <span class="dv">2</span><span class="sc">*</span>N, <span class="dv">20000</span>), <span class="dv">2</span><span class="sc">*</span>N)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>log_rr_mean <span class="ot">&lt;-</span>  <span class="fu">log</span>(pt) <span class="sc">-</span> <span class="fu">log</span>(pc)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>log_rr_var <span class="ot">&lt;-</span>  (<span class="dv">1</span><span class="sc">-</span>pt)<span class="sc">/</span>(pt<span class="sc">*</span>n) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>pc)<span class="sc">/</span>(pc<span class="sc">*</span>n)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>log_rr_sd <span class="ot">&lt;-</span>  <span class="fu">sqrt</span>(log_rr_var)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> log_rr_mean <span class="sc">-</span> log_rr_sd <span class="sc">*</span> <span class="fu">qnorm</span>(<span class="fl">0.8</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>trunc <span class="ot">&lt;-</span> log_rr_mean <span class="sc">+</span> log_rr_sd <span class="sc">*</span> <span class="fu">dnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd))</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">seq</span>(<span class="dv">20000</span>, N, <span class="dv">20000</span>), N)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pwr <span class="ot">&lt;-</span> <span class="fu">sapply</span>(n, \(x) <span class="fu">power.prop.test</span>(<span class="at">n=</span>x, <span class="at">p1=</span>pc, <span class="at">p2=</span>pt, <span class="at">sig.level =</span> <span class="fl">0.05</span>)<span class="sc">$</span>power)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>log_rr_mean <span class="ot">&lt;-</span> <span class="fu">log</span>(pt) <span class="sc">-</span> <span class="fu">log</span>(pc)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>log_rr_var <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">-</span>pt)<span class="sc">/</span>(pt<span class="sc">*</span>n) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">-</span>pc)<span class="sc">/</span>(pc<span class="sc">*</span>n)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>log_rr_sd <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(log_rr_var)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>z <span class="ot">=</span> log_rr_mean <span class="sc">-</span> log_rr_sd <span class="sc">*</span> <span class="fu">qnorm</span>(pwr)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotting with formatted axes ticks</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(n, <span class="fu">abs</span>( log_rr_mean<span class="sc">-</span>trunc)<span class="sc">/</span>log_rr_mean, <span class="at">type=</span><span class="st">'l'</span>, <span class="at">xlab=</span><span class="st">'Sample Size'</span>, <span class="at">ylab=</span><span class="st">'Relative Error'</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(n, <span class="fu">abs</span>(log_rr_mean<span class="sc">-</span>trunc)<span class="sc">/</span>log_rr_mean, <span class="at">pch=</span><span class="dv">19</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># expectation from truncated normal</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>trunc <span class="ot">=</span> log_rr_mean <span class="sc">+</span> log_rr_sd <span class="sc">*</span> <span class="fu">dnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>((z <span class="sc">-</span> log_rr_mean)<span class="sc">/</span> log_rr_sd))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>err <span class="ot">&lt;-</span> <span class="dv">100</span> <span class="sc">*</span> <span class="fu">abs</span>( log_rr_mean<span class="sc">-</span>trunc)<span class="sc">/</span>log_rr_mean</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="fu">sapply</span>(n, \(nn) {</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  r <span class="ot">&lt;-</span><span class="fu">replicate</span>(<span class="dv">10000</span>, {</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">1</span>, nn, pc)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="dv">1</span>, nn, pt)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> <span class="fu">prop.test</span>(<span class="fu">c</span>(y, x), <span class="fu">c</span>(nn, nn))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ifelse</span>(test<span class="sc">$</span>p.value <span class="sc">&lt;</span> <span class="fl">0.05</span>, <span class="fu">log</span>(y) <span class="sc">-</span> <span class="fu">log</span>(x), <span class="cn">NA</span>)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  (<span class="fu">mean</span>(r, <span class="at">na.rm=</span>T) <span class="sc">-</span> log_rr_mean) <span class="sc">/</span> log_rr_mean</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<div class="cell">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<figcaption>Relative error in estimating the true impact as a function of the total sample size. Detecting a statistically significant difference early may save you time, but it comes at the expense of over estimating the true impact you have made by nearly 35%. Since we don’t know the true impact of our interventions, it is difficult to know if we are over estimating on any one experiment. However, peeking as a practice will almost surely result in inflated expectations and great dissapointments.</figcaption>
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Now, keep in mind that a 35% relative error means you would estimate the lift to be 4% instead of 3%. Maybe that doesn’t sound so bad, and for a single experiment it isn’t. But <em>habitual</em> peeking means this error compounds experiment over experiment. Maybe something to talk to your PMs about.</p>
+<p>In the best case scenario, where you end the experiment on the first peek, you’re going to vastly over estimate the impact you had (almost by a factor of 2.3x!). The worst part is that these errors compound, so if you peek on every experiment you’re going to <em>grossly</em> over estimate the total impact you had. Maybe something to talk to your PMs about.</p>
 
 
 

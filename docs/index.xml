@@ -42,29 +42,40 @@ font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">20000</span>, <span class="dv" style="color: #AD0000;
+font-style: inherit;">20000</span>, N, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+font-style: inherit;">20000</span>), N)</span>
+<span id="cb1-2">pwr <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">*</span>N, <span class="dv" style="color: #AD0000;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">20000</span>), <span class="dv" style="color: #AD0000;
+font-style: inherit;">sapply</span>(n, \(x) <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+font-style: inherit;">power.prop.test</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">*</span>N)</span>
-<span id="cb1-2">log_rr_mean <span class="ot" style="color: #003B4F;
+font-style: inherit;">n=</span>x, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">&lt;-</span>  <span class="fu" style="color: #4758AB;
+font-style: inherit;">p1=</span>pc, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p2=</span>pt, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sig.level =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>power)</span>
+<span id="cb1-3">log_rr_mean <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">log</span>(pt) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">log</span>(pc)</span>
-<span id="cb1-3">log_rr_var <span class="ot" style="color: #003B4F;
+<span id="cb1-4">log_rr_var <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">&lt;-</span>  (<span class="dv" style="color: #AD0000;
+font-style: inherit;">&lt;-</span> (<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -83,26 +94,31 @@ background-color: null;
 font-style: inherit;">/</span>(pc<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>n)</span>
-<span id="cb1-4">log_rr_sd <span class="ot" style="color: #003B4F;
+<span id="cb1-5">log_rr_sd <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">&lt;-</span>  <span class="fu" style="color: #4758AB;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">sqrt</span>(log_rr_var)</span>
-<span id="cb1-5"></span>
-<span id="cb1-6">z <span class="ot" style="color: #003B4F;
+<span id="cb1-6"></span>
+<span id="cb1-7">z <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">&lt;-</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">=</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span> log_rr_sd <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">qnorm</span>(<span class="fl" style="color: #AD0000;
+font-style: inherit;">qnorm</span>(pwr)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9"></span>
+<span id="cb1-10"></span>
+<span id="cb1-11"></span>
+<span id="cb1-12"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">0.8</span>)</span>
-<span id="cb1-7">trunc <span class="ot" style="color: #003B4F;
+font-style: inherit;"># expectation from truncated normal</span></span>
+<span id="cb1-13">trunc <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">&lt;-</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">=</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> log_rr_sd <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -125,57 +141,103 @@ background-color: null;
 font-style: inherit;">-</span> log_rr_mean)<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">/</span> log_rr_sd))</span>
-<span id="cb1-8"></span>
-<span id="cb1-9"><span class="co" style="color: #5E5E5E;
+<span id="cb1-14">err <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;"># Plotting with formatted axes ticks</span></span>
-<span id="cb1-10"><span class="fu" style="color: #4758AB;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">plot</span>(n, <span class="fu" style="color: #4758AB;
+font-style: inherit;">100</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">abs</span>( log_rr_mean<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>trunc)<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span>log_rr_mean, <span class="at" style="color: #657422;
+font-style: inherit;">/</span>log_rr_mean</span>
+<span id="cb1-15"></span>
+<span id="cb1-16">sims <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
+font-style: inherit;">sapply</span>(n, \(nn) {</span>
+<span id="cb1-17">  </span>
+<span id="cb1-18">  </span>
+<span id="cb1-19">  r <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">xlab=</span><span class="st" style="color: #20794D;
+font-style: inherit;">&lt;-</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">'Sample Size'</span>, <span class="at" style="color: #657422;
+font-style: inherit;">replicate</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">ylab=</span><span class="st" style="color: #20794D;
+font-style: inherit;">10000</span>, {</span>
+<span id="cb1-20">    </span>
+<span id="cb1-21">  x <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">'Relative Error'</span>)</span>
-<span id="cb1-11"></span>
-<span id="cb1-12"></span>
-<span id="cb1-13"><span class="fu" style="color: #4758AB;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">points</span>(n, <span class="fu" style="color: #4758AB;
+font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">abs</span>(log_rr_mean<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">1</span>, nn, pc)</span>
+<span id="cb1-22">  y <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">-</span>trunc)<span class="sc" style="color: #5E5E5E;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">/</span>log_rr_mean, <span class="at" style="color: #657422;
+font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">pch=</span><span class="dv" style="color: #AD0000;
+font-style: inherit;">1</span>, nn, pt)</span>
+<span id="cb1-23">  </span>
+<span id="cb1-24">  test <span class="ot" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">19</span>)</span></code></pre></div>
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">prop.test</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(y, x), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(nn, nn))</span>
+<span id="cb1-25">  </span>
+<span id="cb1-26">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ifelse</span>(test<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>p.value <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">log</span>(y) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">log</span>(x), <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NA</span>)</span>
+<span id="cb1-27">  })</span>
+<span id="cb1-28">  </span>
+<span id="cb1-29">  (<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(r, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm=</span>T) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> log_rr_mean) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> log_rr_mean</span>
+<span id="cb1-30">  </span>
+<span id="cb1-31">  </span>
+<span id="cb1-32">})</span></code></pre></div>
 </details>
+</div>
+<div class="cell">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
+<div>
 <figure class="figure">
-<figcaption>Relative error in estimating the true impact as a function of the total sample size. Detecting a statistically significant difference early may save you time, but it comes at the expense of over estimating the true impact you have made by nearly 35%. Since we don’t know the true impact of our interventions, it is difficult to know if we are over estimating on any one experiment. However, peeking as a practice will almost surely result in inflated expectations and great dissapointments.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2024-02-08-peek/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="768"></p>
+<p><img src="https://dpananos.github.io/posts/2024-02-08-peek/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Now, keep in mind that a 35% relative error means you would estimate the lift to be 4% instead of 3%. Maybe that doesn’t sound so bad, and for a single experiment it isn’t. But <em>habitual</em> peeking means this error compounds experiment over experiment. Maybe something to talk to your PMs about.</p>
+<p>In the best case scenario, where you end the experiment on the first peek, you’re going to vastly over estimate the impact you had (almost by a factor of 2.3x!). The worst part is that these errors compound, so if you peek on every experiment you’re going to <em>grossly</em> over estimate the total impact you had. Maybe something to talk to your PMs about.</p>
 
 
 
@@ -7238,7 +7300,7 @@ font-style: inherit;">"coef"</span>)</span></code></pre></div>
 <div>
 
 </div>
-<div class="cell quarto-layout-panel" data-fig.dpi="240" data-layout-nrow="2">
+<div class="cell quarto-layout-panel" data-layout-nrow="2" data-fig.dpi="240">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
 <p><img src="https://dpananos.github.io/posts/2022-08-16-pca/index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
