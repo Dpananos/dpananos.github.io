@@ -55,28 +55,23 @@ log_rr_sd <- sqrt(log_rr_var)
 
 z = log_rr_mean - log_rr_sd * qnorm(pwr)
 
-
-
-
 # expectation from truncated normal
 trunc = log_rr_mean + log_rr_sd * dnorm((z - log_rr_mean)/ log_rr_sd) / (1 - pnorm((z - log_rr_mean)/ log_rr_sd))
-err <- 100 * abs( log_rr_mean-trunc)/log_rr_mean
+err <- abs( log_rr_mean-trunc)/log_rr_mean
 
 sims <- sapply(n, \(nn) {
   
-  
   r <-replicate(10000, {
     
-  x <- rbinom(1, nn, pc)
-  y <- rbinom(1, nn, pt)
+    x <- rbinom(1, nn, pc)
+    y <- rbinom(1, nn, pt)
   
-  test <- prop.test(c(y, x), c(nn, nn))
+    test <- prop.test(c(y, x), c(nn, nn))
   
-  ifelse(test$p.value < 0.05, log(y) - log(x), NA)
+    ifelse(test$p.value < 0.05, log(y) - log(x), NA)
   })
   
   (mean(r, na.rm=T) - log_rr_mean) / log_rr_mean
-  
   
 })
 ```
@@ -84,11 +79,11 @@ sims <- sapply(n, \(nn) {
 
 ```{r}
 #| echo: false
-plot(n, err, type='l', xlab='Sample Size', ylab='Relative Error')
+plot(2*n, err, type='l', xlab='Total Sample Size', ylab='Relative Error')
 
-points(n, err, pch=19)
+points(2*n, err, pch=19)
 
-lines(n, 100*sims, col='red')
+lines(2*n, sims, col='red')
 
 legend("topright", legend=c('Exact', 'Simulation'), col=c("black", "red"), lty=1)
 
@@ -96,4 +91,4 @@ legend("topright", legend=c('Exact', 'Simulation'), col=c("black", "red"), lty=1
 ```
 
 
-In the best case scenario, where you end the experiment on the first peek, you're going to vastly over estimate the impact you had (almost by a factor of 2.3x!).  The worst part is that these errors compound, so if you peek on every experiment you're going to _grossly_ over estimate the total impact you had.  Maybe something to talk to your PMs about.
+In the best case scenario, where you end the experiment on the first peek, you're going to vastly over estimate the impact you had.  The worst part is that these errors compound, so if you peek on every experiment you're going to _grossly_ over estimate the total impact you had.  Maybe something to talk to your PMs about.
