@@ -35,7 +35,7 @@ and so
 
 $$ \Pr(B \gt A) = Pr(D \gt 0) = 1 - \Phi(Z(n)) \>.$$
 
-I'm not sure what the interviewer expectedf, but we can see that the probability approaches 1/2 as $n \to \infty$.
+I'm not sure what the interviewer expected, but we can see that the probability approaches 1/2 as $n \to \infty$.
 
 
 Now, this might be a "good 'nuff" answer, but it relies on an approximation that breaks down for small $n$.  What is the REAL answer?
@@ -62,20 +62,24 @@ def f(k:int, n:int):
     density = binom(n=n+1, p=0.5).pmf(i)*binom(n=n, p=0.5).pmf(i-k)
     return density.sum()
 
-def approx_f(n):
+def approx_f(n:int):
     z = -1 / np.sqrt(2*n+1) 
     return 1 - norm.cdf(z)
 
 max_coins = 1000
 coins = np.arange(1, max_coins+1, 5)
 probs = np.zeros(coins.size)
-probs
+
 for i, n in enumerate(coins):
 
     outcomes = np.arange(1, n+2)
-    proba = f(outcomes, n)
-    probs[i] = proba
+    probs[i] = f(outcomes, n)
 
+```
+
+```{python}
+#| code-fold: false
+#| echo: false
 fig, ax = plt.subplots(dpi = 120)
 ax.plot(np.log10(coins), probs, label = 'Exact Distribution', color='C0')
 ax.plot(np.log10(coins), approx_f(coins), label = 'Normal Approximation', color = 'C0', linestyle='dashed')
@@ -98,7 +102,7 @@ ax.legend()
 
 In fact, it looks like the probability is _always_ 0.5, which is interesting.  Let's see why.
 
-Credit to Misha Lavrov for showing me this very simple and elegant solution.  Again, let $D - B-A$, but now instead focus on $D+n = B + (n-A)$ which is the number of heads from $B$ plus the number of tails from $A$.  Since the coins are fair, this is the sum of two binomials with $2n+1$ trials.  Hence, the probability mass function is 
+Credit to Misha Lavrov for showing me this very simple and elegant solution.  Again, let $D = B-A$, but now instead focus on $D+n = B + (n-A)$ which is the number of heads from $B$ plus the number of tails from $A$.  Since the coins are fair, this is the sum of two binomials with $2n+1$ trials.  Hence, the probability mass function is 
 
 $$ \Pr(D+n = n+k) = {2n+1 \choose n+k} 2^{-2n-1} \>, k \in \left[ -n \>, \cdots \>, n+1\right] $$
 

@@ -253,13 +253,13 @@ window.Quarto = {
 <p><span class="math display">\[ Z = \dfrac{0-\frac{1}{2}}{\sqrt{\frac{2n+1}{4}}} = \dfrac{-1}{\sqrt{2n+1}} \]</span></p>
 <p>and so</p>
 <p><span class="math display">\[ \Pr(B \gt A) = Pr(D \gt 0) = 1 - \Phi(Z(n)) \&gt;.\]</span></p>
-<p>I’m not sure what the interviewer expectedf, but we can see that the probability approaches 1/2 as <span class="math inline">\(n \to \infty\)</span>.</p>
+<p>I’m not sure what the interviewer expected, but we can see that the probability approaches 1/2 as <span class="math inline">\(n \to \infty\)</span>.</p>
 <p>Now, this might be a “good ’nuff” answer, but it relies on an approximation that breaks down for small <span class="math inline">\(n\)</span>. What is the REAL answer?</p>
 <p>For that, we need to use convolution. If <span class="math inline">\(D=B-A\)</span> then <span class="math inline">\(D\)</span> can take on integer values between <span class="math inline">\(-n\)</span> (where B flips 0 heads and A flips <span class="math inline">\(n\)</span>) and <span class="math inline">\(n+1\)</span> (where B flips <span class="math inline">\(n+1\)</span> heads and A flips 0).</p>
 <p>The convolution is then the following sum</p>
 <p><span class="math display">\[\Pr(D = k) = \sum_{i=1}^{n+1} \Pr(B=i) \Pr(A = i-k)\]</span></p>
 <p>with the added stipulation that <span class="math inline">\(\Pr(A&gt;n) = 0\)</span>. Ok, not a fun sum to do by hand, let’s cook up a numpy function</p>
-<div id="65464634" class="cell" data-execution_count="1">
+<div id="3ffbd261" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> binom, norm</span>
@@ -272,48 +272,30 @@ window.Quarto = {
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    density <span class="op">=</span> binom(n<span class="op">=</span>n<span class="op">+</span><span class="dv">1</span>, p<span class="op">=</span><span class="fl">0.5</span>).pmf(i)<span class="op">*</span>binom(n<span class="op">=</span>n, p<span class="op">=</span><span class="fl">0.5</span>).pmf(i<span class="op">-</span>k)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> density.<span class="bu">sum</span>()</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> approx_f(n):</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> approx_f(n:<span class="bu">int</span>):</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> <span class="op">-</span><span class="dv">1</span> <span class="op">/</span> np.sqrt(<span class="dv">2</span><span class="op">*</span>n<span class="op">+</span><span class="dv">1</span>) </span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> norm.cdf(z)</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>max_coins <span class="op">=</span> <span class="dv">1000</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>coins <span class="op">=</span> np.arange(<span class="dv">1</span>, max_coins<span class="op">+</span><span class="dv">1</span>, <span class="dv">5</span>)</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>probs <span class="op">=</span> np.zeros(coins.size)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>probs</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, n <span class="kw">in</span> <span class="bu">enumerate</span>(coins):</span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    outcomes <span class="op">=</span> np.arange(<span class="dv">1</span>, n<span class="op">+</span><span class="dv">2</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    proba <span class="op">=</span> f(outcomes, n)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    probs[i] <span class="op">=</span> proba</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(dpi <span class="op">=</span> <span class="dv">120</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>ax.plot(np.log10(coins), probs, label <span class="op">=</span> <span class="st">'Exact Distribution'</span>, color<span class="op">=</span><span class="st">'C0'</span>)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>ax.plot(np.log10(coins), approx_f(coins), label <span class="op">=</span> <span class="st">'Normal Approximation'</span>, color <span class="op">=</span> <span class="st">'C0'</span>, linestyle<span class="op">=</span><span class="st">'dashed'</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, color<span class="op">=</span><span class="st">'lightgray'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>ax.yaxis.set_major_formatter(plt.FuncFormatter(<span class="kw">lambda</span> x, _: <span class="ss">f'</span><span class="sc">{</span>x<span class="op">*</span><span class="dv">100</span><span class="sc">:.0f}</span><span class="ss">%'</span>))</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([<span class="dv">0</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="dv">1</span>])</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">'Coins Held By A'</span>)</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">'Probability B Has More Heads'</span>)</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Set x-ticks to be 10^x</span></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_format(x, pos):</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f'$10^</span><span class="ch">{{</span><span class="sc">{</span><span class="bu">int</span>(x)<span class="sc">}</span><span class="ch">}}</span><span class="ss">$'</span></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>])</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>ax.xaxis.set_major_formatter(plt.FuncFormatter(log_format))</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>ax.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    probs[i] <span class="op">=</span> f(outcomes, n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="76be825d" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="index_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>In fact, it looks like the probability is <em>always</em> 0.5, which is interesting. Let’s see why.</p>
-<p>Credit to Misha Lavrov for showing me this very simple and elegant solution. Again, let <span class="math inline">\(D - B-A\)</span>, but now instead focus on <span class="math inline">\(D+n = B + (n-A)\)</span> which is the number of heads from <span class="math inline">\(B\)</span> plus the number of tails from <span class="math inline">\(A\)</span>. Since the coins are fair, this is the sum of two binomials with <span class="math inline">\(2n+1\)</span> trials. Hence, the probability mass function is</p>
+<p>Credit to Misha Lavrov for showing me this very simple and elegant solution. Again, let <span class="math inline">\(D = B-A\)</span>, but now instead focus on <span class="math inline">\(D+n = B + (n-A)\)</span> which is the number of heads from <span class="math inline">\(B\)</span> plus the number of tails from <span class="math inline">\(A\)</span>. Since the coins are fair, this is the sum of two binomials with <span class="math inline">\(2n+1\)</span> trials. Hence, the probability mass function is</p>
 <p><span class="math display">\[ \Pr(D+n = n+k) = {2n+1 \choose n+k} 2^{-2n-1} \&gt;, k \in \left[ -n \&gt;, \cdots \&gt;, n+1\right] \]</span></p>
 <p>This means <span class="math inline">\(\Pr(D+n)\)</span> is symmetric about <span class="math inline">\(n+0.5\)</span> implying that <span class="math inline">\(\Pr(D\leq 0) = \Pr(D\gt 0) = 0.5\)</span> as desired.</p>
 
