@@ -1,0 +1,105 @@
+---
+title: Interesting Interview Questions
+date: "2024-05-21"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: [Probability]
+number-sections: false
+---
+
+
+I'm about to do some interviews this week which got me reflecting on some of my favorite questions I've been asked.  Usually, these are little toy problems you'd find in an intro to probability textbook, but they can be pretty fun and rewarding to solve.
+
+## Question 1
+
+Person A has $n$ fair coins, and person B has $n+1$ fair coins.  They each can flip all their coins simultaneously.  What is the probability that person B gets more heads? Provide your answer as a function of $n$.
+
+## Answer
+
+I actually took the liberty of editing this question (the function of $n$ was not included).  Anyway, this is pretty simple.  Suppose $n$ is large enough to justify using a normal approximation.  Then
+
+$$ A \sim \operatorname{normal}\left( \dfrac{n}{2}, \dfrac{n}{4} \right) \>,$$
+
+$$ B \sim \operatorname{normal}\left( \dfrac{n}{2}, \dfrac{n}{4} \right) \>.$$
+
+We're interested in $\Pr(B \gt A) = \Pr(B - A \gt 0)$.  So let $D=B-A$.  Then $D$ has the following distribution
+
+$$ D \sim \operatorname{normal}\left( \dfrac{1}{2}, \dfrac{2n+1}{4} \right) \>.$$
+
+Now, we just need to make a standardized normal random variable and pass it through the CDF of a gaussian.  That turns out to be
+
+$$ Z = \dfrac{0-\frac{1}{2}}{\sqrt{\frac{2n+1}{4}}} = \dfrac{-1}{\sqrt{2n+1}} $$
+
+and so
+
+$$ \Pr(B \gt A) = Pr(D \gt 0) = 1 - \Phi(Z(n)) \>.$$
+
+I'm not sure what the interviewer expectedf, but we can see that the probability approaches 1/2 as $n \to \infty$.
+
+
+Now, this might be a "good 'nuff" answer, but it relies on an approximation that breaks down for small $n$.  What is the REAL answer?
+
+For that, we need to use convolution.  If $D=B-A$ then $D$ can take on integer values between $-n$ (where B flips 0 heads and A flips $n$) and $n+1$ (where B flips $n+1$ heads and A flips 0).
+
+The convolution is then the following sum 
+
+$$\Pr(D = k) = \sum_{i=1}^{n+1} \Pr(B=i) \Pr(A = i-k)$$
+
+with the added stipulation that $\Pr(A>n) = 0$.  Ok, not a fun sum to do by hand, let's cook up a numpy function
+
+```{python}
+#| code-fold: false
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import binom, norm
+import matplotlib.patches as patches
+import pandas as pd
+import itertools
+
+def f(k:int, n:int):
+    i = np.arange(1, n+2).reshape(-1, 1)
+    density = binom(n=n+1, p=0.5).pmf(i)*binom(n=n, p=0.5).pmf(i-k)
+    return density.sum()
+
+def approx_f(n):
+    z = -1 / np.sqrt(2*n+1) 
+    return 1 - norm.cdf(z)
+
+max_coins = 1000
+coins = np.arange(1, max_coins+1, 5)
+probs = np.zeros(coins.size)
+probs
+for i, n in enumerate(coins):
+
+    outcomes = np.arange(1, n+2)
+    proba = f(outcomes, n)
+    probs[i] = proba
+
+fig, ax = plt.subplots(dpi = 120)
+ax.plot(np.log10(coins), probs, label = 'Exact Distribution', color='C0')
+ax.plot(np.log10(coins), approx_f(coins), label = 'Normal Approximation', color = 'C0', linestyle='dashed')
+ax.set_ylim(0, 1)
+ax.grid(True, color='lightgray', linestyle='-', linewidth=0.5)
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x*100:.0f}%'))
+ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
+ax.set_xlabel('Coins Held By A')
+ax.set_ylabel('Probability B Has More Heads')
+
+# Set x-ticks to be 10^x
+def log_format(x, pos):
+    return f'$10^{{{int(x)}}}$'
+
+ax.set_xticks([0, 1, 2, 3])
+ax.xaxis.set_major_formatter(plt.FuncFormatter(log_format))
+
+ax.legend()
+```
+
+In fact, it looks like the probability is _always_ 0.5, which is interesting.  Let's see why.
+
+Credit to Misha Lavrov for showing me this very simple and elegant solution.  Again, let $D - B-A$, but now instead focus on $D+n = B + (n-A)$ which is the number of heads from $B$ plus the number of tails from $A$.  Since the coins are fair, this is the sum of two binomials with $2n+1$ trials.  Hence, the probability mass function is 
+
+$$ \Pr(D+n = n+k) = {2n+1 \choose n+k} 2^{-2n-1} \>, k \in \left[ -n \>, \cdots \>, n+1\right] $$
+
+This means $\Pr(D+n)$ is symmetric about $n+0.5$ implying that $\Pr(D\leq 0) = \Pr(D\gt 0) = 0.5$ as desired.
