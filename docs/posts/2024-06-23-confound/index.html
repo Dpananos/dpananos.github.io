@@ -224,9 +224,10 @@ window.Quarto = {
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
   <li><a href="#an-example" id="toc-an-example" class="nav-link" data-scroll-target="#an-example">An Example</a></li>
-  <li><a href="#the-right-way" id="toc-the-right-way" class="nav-link" data-scroll-target="#the-right-way">The Right Way</a></li>
-  <li><a href="#the-wrong-way" id="toc-the-wrong-way" class="nav-link" data-scroll-target="#the-wrong-way">The Wrong Way</a></li>
+  <li><a href="#the-right-way" id="toc-the-right-way" class="nav-link" data-scroll-target="#the-right-way">The “Right Way”</a></li>
+  <li><a href="#the-wrong-way" id="toc-the-wrong-way" class="nav-link" data-scroll-target="#the-wrong-way">The “Wrong Way”</a></li>
   <li><a href="#more-wrong" id="toc-more-wrong" class="nav-link" data-scroll-target="#more-wrong">More Wrong</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2024-06-23-confound/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -239,7 +240,7 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Thinking back to my Introduction to Epidemiology class, confounding was one of the topics of central interest. However, it took the remainder of my PhD (and then some) to really get <em>what confounding was</em>. Confounding was introduced as exposure and outcome having common cause (you have to have seen this before)</p>
+<p>Thinking back to my <em>Introduction to Epidemiology</em> class, confounding was one of the topics of central interest. However, it took the remainder of my PhD (and then some) to really get <em>what confounding was</em>. Confounding was introduced as exposure and outcome having common cause. You’ve probably seen the idea motivated with the following DAG:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -249,18 +250,18 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>So yes, the effect of <span class="math inline">\(x\)</span> on <span class="math inline">\(y\)</span> is confounded. But like…why? DAG’s aside, what is happening here? That much isn’t answered in introductory classes, and I think it would behoove most people to learn the answer. As a digression, I know the simple difference in means can be decomposed into ATE + Selection Bias + Heterogeneous treatment effect, but I don’t think that really anwers what I want since that decomposition is in terms of potential outcomes. I want answers which, in part, depend on the data and how we choose to summarize it.</p>
-<p>Granted, we need a little but of math, but <em>only</em> a little. If you understand the law of total expectation, and can handle conditional distributions, you’re going to be fine. Let’s look at what really happens in this DAG using an example.</p>
+<p>Here, S is a common cause of <span class="math inline">\(D\)</span> and <span class="math inline">\(Y\)</span>, and we’re typically interested in estimating the effect of <span class="math inline">\(D\)</span> on <span class="math inline">\(Y\)</span>. Granted, the effect of <span class="math inline">\(D\)</span> on <span class="math inline">\(Y\)</span> is confounded. But like…why? DAG’s aside, what is happening here? That much isn’t answered in introductory classes, and I think it would behoove most people to learn the answer. As a digression, I know the simple difference in means can be decomposed into ATE + Selection Bias + Heterogeneous treatment effect, but I don’t think that really anwers what I want since that decomposition is in terms of potential outcomes and I want an answer which involves the data we have in hand and how we choose to summarize it.</p>
+<p>To provide such an answer we need a little but of math, but <em>only</em> a little. In particular, we need the <em>The Law of Total Expectation</em>, which writes an expected value, <span class="math inline">\(E[X]\)</span>, as a weighted average of conditional expectations, namely</p>
+<p><span class="math display">\[ E[X] = \sum_a E[X \mid A=a] P(A=a) \&gt;. \]</span> In what follows, I motivate confounding with a fairly typical example involving how a binary exposure affects risk of a binary outcome. We’ll discuss the “Right Way” to estimate the effect of the exposure as well as “The Wrong Way”. We’ll find that the confounding of the relationship between exposure and outcome comes down to a single fact: <em>the wrong weights are applied to the right estimates</em>.</p>
 </section>
 <section id="an-example" class="level2">
 <h2 class="anchored" data-anchor-id="an-example">An Example</h2>
-<p>Suppose a new drug <span class="math inline">\(D\)</span> is introduced to prevent death. In truth, the drug decreases the risk of death in both men and women, but men are more likely to take the drug and men are more likely to die. Hence, the effect of the drug is confounded by sex.</p>
-<p>I’m going to simulate this data using the following data generating process</p>
-<p><span class="math display">\[ S \sim \operatorname{Bern}(0.5) \]</span> <span class="math display">\[ D \mid S \sim \operatorname{Bern}(0.6 + 0.3S) \]</span></p>
-<p><span class="math display">\[ Y \mid D, S \sim \operatorname{Bern}(0.4 - 0.1D + 0.4S) \]</span></p>
+<p>Suppose a new drug <span class="math inline">\(D\)</span> is introduced to prevent death. In truth, the drug decreases the risk of death in both men and women by 10 percentage points, but men are more likely to take the drug and men are more likely to die. Hence, the effect of the drug is confounded by sex. Let <span class="math inline">\(D=1\)</span> be exposure to the drug, <span class="math inline">\(S=1\)</span> indicate males, and <span class="math inline">\(Y=1\)</span> indicate death. I’m going to simulate this scenario using the following data generating process</p>
+<p><span class="math display">\[ S \sim \operatorname{Bernoulli}(0.5) \&gt;, \]</span> <span class="math display">\[ D \mid S \sim \operatorname{Bernoulli}(0.6 + 0.3S) \&gt;,\]</span></p>
+<p><span class="math display">\[ Y \mid D, S \sim \operatorname{Bernoulli}(0.4 - 0.1D + 0.4S) \&gt;.\]</span></p>
 <p>I’ll simulate a million observations so that our precision is big enough to not worry about sampling variability. In R, that can be done with</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">n=</span><span class="dv">1000</span>){</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">x=</span><span class="dv">0</span>, <span class="at">n=</span><span class="fl">1e6</span>){</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  withr<span class="sc">::</span><span class="fu">with_seed</span>(x, {</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    s <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    d <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.6</span> <span class="sc">+</span> <span class="fl">0.3</span><span class="sc">*</span>s)</span>
@@ -269,19 +270,39 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(s, d, y)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>We’ll use this data to explore the “Right Way” and teh “Wrong Way” of analyzing the causal effect of <span class="math inline">\(D\)</span> on <span class="math inline">\(Y\)</span>.</p>
 </section>
 <section id="the-right-way" class="level2">
-<h2 class="anchored" data-anchor-id="the-right-way">The Right Way</h2>
-<p>Open up a book like <a href="https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/">“<em>What If</em>”</a> and you’ll find that the way to correctly estimate the effect of <span class="math inline">\(D\)</span> on <span class="math inline">\(Y\)</span> would be to first estimate the risk of death within strata defined by sex and then weight the stratified estimates by the prevalence of the strata. This can be done using <code>{marginaleffects}</code> pretty easily</p>
+<h2 class="anchored" data-anchor-id="the-right-way">The “Right Way”</h2>
+<p>Open up a book like <a href="https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/">“<em>What If</em>”</a> and you’ll find that the way to correctly estimate the effect of <span class="math inline">\(D\)</span> on <span class="math inline">\(Y\)</span> would be to first estimate the risk of death within strata defined by sex and then weight the stratified estimates by the prevalence of the strata. This can be done in the following way</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">glm</span>(y<span class="sc">~</span>d<span class="sc">*</span>s, <span class="at">data=</span><span class="fu">sim_data</span>(<span class="dv">0</span>, <span class="fl">1e6</span>), <span class="at">family =</span> <span class="fu">binomial</span>())</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">glm</span>(y<span class="sc">~</span>d<span class="sc">*</span>s, <span class="at">data=</span><span class="fu">sim_data</span>(), <span class="at">family =</span> <span class="fu">binomial</span>())</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If I didn't know P(S) maybe I wouldn't use datagrid in this way</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">datagrid</span>(<span class="at">model =</span> model, <span class="at">d=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">s=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">avg_comparisons</span>(model, <span class="at">variables =</span> <span class="st">'d'</span>, <span class="at">newdata =</span> nd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">crossing</span>(<span class="at">d=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">s=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  modelr<span class="sc">::</span><span class="fu">add_predictions</span>(model, <span class="at">type=</span><span class="st">'response'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pred =</span> <span class="fu">mean</span>(pred), <span class="at">.by =</span> d) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(pred) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  diff</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.09910701</code></pre>
+</div>
+</div>
+<p>or, perhaps more elegantly, using <code>{marginaleffects}</code></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(marginaleffects)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># If I didn't know P(S) maybe I wouldn't use datagrid in this way</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">datagrid</span>(<span class="at">model =</span> model, <span class="at">d=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>, <span class="at">s=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">avg_comparisons</span>(model, <span class="at">variables =</span> <span class="st">'d'</span>, <span class="at">newdata =</span> nd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  Term Contrast Estimate Std. Error     z Pr(&gt;|z|)   S  2.5 %  97.5 %
@@ -291,20 +312,21 @@ Columns: term, contrast, estimate, std.error, statistic, p.value, s.value, conf.
 Type:  response </code></pre>
 </div>
 </div>
-<p>The estimate is very close to the actual effect of the drug; a reduction in risk of death of 10 percentage points. Why exactly this procedure works relies on the ignorability assumption and the law of total expectation. Briefly, if we have ignorability then <span class="math inline">\(E[Y(d) \mid S=s] = E[Y\mid D=d, S=s]\)</span>, and by the law of total expectation</p>
-<p><span class="math display">\[ E[Y(d)] = \sum_{s} E[Y(d) \mid S=s] P(S=s) =\sum_{s} E[Y \mid D=d, S=s] P(S=s) \]</span> which is a weighted average of within strata estimates. Now, let’s take an extended look at the wrong way of doing things.</p>
+<p>Regardless of approach, the estimate is very close to the actual effect of the drug; a reduction in risk of death of 10 percentage points. Why exactly this procedure works relies on the consistency and ignorability assumptions, and the law of total expectation.</p>
+<p>Briefly, if we have consistency and ignorability then <span class="math inline">\(E[Y(d) \mid S=s] = E[Y\mid D=d, S=s]\)</span>, and by the law of total expectation</p>
+<p><span class="math display">\[ E[Y(d)] = \sum_{s} E[Y(d) \mid S=s] P(S=s) =\sum_{s} E[Y \mid D=d, S=s] P(S=s) \]</span> which is a weighted average of within strata estimates. ’Nuff said, let’s take an extended look at the wrong way of doing things.</p>
 </section>
 <section id="the-wrong-way" class="level2">
-<h2 class="anchored" data-anchor-id="the-wrong-way">The Wrong Way</h2>
-<p>So we know the right uses the law of total expectation to get the right weights for the within strata estimates. What does the wrong way estimate then? First, let’s see what the wrong way would estimate for this data generating process.</p>
+<h2 class="anchored" data-anchor-id="the-wrong-way">The “Wrong Way”</h2>
+<p>So we know the “Right Way” uses the law of total expectation to get the right weights for the within strata estimates. What does the “Wrong Way” estimate then if not the true causal contrast? Let’s use <code>avg_comparisons</code> to see</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">glm</span>(y<span class="sc">~</span>d, <span class="at">data=</span><span class="fu">sim_data</span>(<span class="dv">0</span>, <span class="fl">1e6</span>), <span class="at">family =</span> <span class="fu">binomial</span>())</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">datagrid</span>(<span class="at">model =</span> model, <span class="at">d=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">avg_comparisons</span>(model, <span class="at">variables =</span> <span class="st">'d'</span>, <span class="at">newdata =</span> nd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">glm</span>(y<span class="sc">~</span>d, <span class="at">data=</span><span class="fu">sim_data</span>(), <span class="at">family =</span> <span class="fu">binomial</span>())</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>nd <span class="ot">&lt;-</span> <span class="fu">datagrid</span>(<span class="at">model =</span> model, <span class="at">d=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">1</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">avg_comparisons</span>(model, <span class="at">variables =</span> <span class="st">'d'</span>, <span class="at">newdata =</span> nd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -315,42 +337,45 @@ Columns: term, contrast, estimate, std.error, statistic, p.value, s.value, conf.
 Type:  response </code></pre>
 </div>
 </div>
-<p>Interesting, the wrong answer is <em>really wrong</em>. Without adjusting for sex, we would conclude that the drug increases risk of death by near 6%. Of course, this is a result of the fact that men are more likely to take the drug and more likely to die.</p>
-<p>The wrong analysis simply estimates the within exposure estimates and contrasts them. Now, because we are marginalizing over <span class="math inline">\(S\)</span> to do this, it would behoove us to appeal to the law of total expectation since we know this is the key to getting the right answer.</p>
-<p>In the wrong approach, we compute</p>
+<p>Interesting, the wrong answer is <em>really wrong</em>. Without adjusting for sex, we would conclude that the drug increases risk of death by 6%. Of course, this is a result of the fact that men are more likely to take the drug and more likely to die.</p>
+<p>The “Wrong Way” is a simple difference in means between exposure groups. In doing so, we marginalize over the distribution of <span class="math inline">\(S\)</span> conditional on <span class="math inline">\(D\)</span>. Since the law of total expectation is used to obtain the right answer, it might be beneficial to use it here as well. In the “Wrong Way” we compute</p>
 <p><span class="math display">\[ E[Y \mid D=d] \&gt;. \]</span></p>
-<p>Let’s write out how <span class="math inline">\(S\)</span> plays a part in this computation. Again, <span class="math inline">\(E[Y \mid D=d]\)</span> is a weighted average of within strata estimates</p>
+<p>which can be re-written using the law of total expectation as</p>
 <p><span class="math display">\[ E[Y \mid D=d] = \sum_{s} E[Y \mid D=d, S=s] P(S=s\mid D=d) \]</span></p>
-<p>Aha! Our first clue into what confounding <em>really is</em>. We see that <span class="math inline">\(E[Y \mid D=d, S=s]\)</span> appears in our weighted average, but the weights are wrong! They should be <span class="math inline">\(P(S=s)\)</span> and instead they are <span class="math inline">\(P(S=s\mid D=d)\)</span>! Confounding is (partially) an improper weighting of expected values.</p>
-<p>We can actually compute what the wrong approach would produce in the limit of infinite data if we just leverage Bayes rule to rewrite <span class="math inline">\(P(S=s\mid D=d)\)</span> as</p>
-<p><span class="math display">\[P(S=s\mid D=d) = \dfrac{P(D=d \mid S=s) P(S=s)}{P(D=d)} \]</span></p>
+<p>Aha! Now we see what confounding <em>really is</em>. Note that <span class="math inline">\(E[Y \mid D=d, S=s]\)</span> appears in both the “Right Way” and the “Wrong Way”, but in the “Wrong Way” the weights are wrong! They should be <span class="math inline">\(P(S=s)\)</span> but instead they are <span class="math inline">\(P(S=s\mid D=d)\)</span>! Confounding is (partially) an improper weighting of the correct estimates!</p>
+<p>As an interesting digression, we can actually compute what the wrong approach would produce in the limit of infinite data if we just leverage Bayes rule to rewrite <span class="math inline">\(P(S=s\mid D=d)\)</span> as</p>
+<p><span class="math display">\[P(S=s\mid D=d) = \dfrac{P(D=d \mid S=s) P(S=s)}{P(D=d)} \&gt;. \]</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Ey <span class="ot">&lt;-</span> <span class="cf">function</span>(d, s){</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.4</span> <span class="sc">-</span> <span class="fl">0.1</span><span class="sc">*</span>d <span class="sc">+</span> <span class="fl">0.4</span><span class="sc">*</span>s</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>Ed <span class="ot">&lt;-</span> <span class="cf">function</span>(s){</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.6</span> <span class="sc">+</span> <span class="fl">0.3</span><span class="sc">*</span>s  </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>Pd1 <span class="ot">&lt;-</span> <span class="fu">Ed</span>(<span class="dv">1</span>)<span class="sc">*</span><span class="fl">0.5</span> <span class="sc">+</span> <span class="fu">Ed</span>(<span class="dv">0</span>)<span class="sc">*</span><span class="fl">0.5</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>Eyd1 <span class="ot">&lt;-</span> <span class="fu">Ey</span>(<span class="dv">1</span>, <span class="dv">1</span>)<span class="sc">*</span><span class="fu">Ed</span>(<span class="dv">1</span>)<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>Pd1 <span class="sc">+</span> <span class="fu">Ey</span>(<span class="dv">1</span>, <span class="dv">0</span>)<span class="sc">*</span><span class="fu">Ed</span>(<span class="dv">0</span>)<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>Pd1</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>Eyd0 <span class="ot">&lt;-</span> <span class="fu">Ey</span>(<span class="dv">0</span>, <span class="dv">1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">Ed</span>(<span class="dv">1</span>))<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>Pd1) <span class="sc">+</span> <span class="fu">Ey</span>(<span class="dv">0</span>, <span class="dv">0</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">Ed</span>(<span class="dv">0</span>))<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>Pd1)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>wrong_answer <span class="ot">&lt;-</span> Eyd1 <span class="sc">-</span> Eyd0</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#0.06</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Ey <span class="ot">&lt;-</span> <span class="cf">function</span>(d, s){</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.4</span> <span class="sc">-</span> <span class="fl">0.1</span><span class="sc">*</span>d <span class="sc">+</span> <span class="fl">0.4</span><span class="sc">*</span>s</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>Ed <span class="ot">&lt;-</span> <span class="cf">function</span>(s){</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fl">0.6</span> <span class="sc">+</span> <span class="fl">0.3</span><span class="sc">*</span>s  </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>Pd1 <span class="ot">&lt;-</span> <span class="fu">Ed</span>(<span class="dv">1</span>)<span class="sc">*</span><span class="fl">0.5</span> <span class="sc">+</span> <span class="fu">Ed</span>(<span class="dv">0</span>)<span class="sc">*</span><span class="fl">0.5</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>Eyd1 <span class="ot">&lt;-</span> <span class="fu">Ey</span>(<span class="dv">1</span>, <span class="dv">1</span>)<span class="sc">*</span><span class="fu">Ed</span>(<span class="dv">1</span>)<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>Pd1 <span class="sc">+</span> <span class="fu">Ey</span>(<span class="dv">1</span>, <span class="dv">0</span>)<span class="sc">*</span><span class="fu">Ed</span>(<span class="dv">0</span>)<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>Pd1</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>Eyd0 <span class="ot">&lt;-</span> <span class="fu">Ey</span>(<span class="dv">0</span>, <span class="dv">1</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">Ed</span>(<span class="dv">1</span>))<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>Pd1) <span class="sc">+</span> <span class="fu">Ey</span>(<span class="dv">0</span>, <span class="dv">0</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">Ed</span>(<span class="dv">0</span>))<span class="sc">*</span><span class="fl">0.5</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">-</span>Pd1)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>wrong_answer <span class="ot">&lt;-</span> Eyd1 <span class="sc">-</span> Eyd0</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#0.06</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This really drives the point home that confounding is not a matter of more data, rather its a matter of the right data.</p>
 </section>
 <section id="more-wrong" class="level2">
 <h2 class="anchored" data-anchor-id="more-wrong">More Wrong</h2>
-<p>So confounding is partially the wrong weights applied to the right estimates. Earlier, I mentioned that the simple difference in means can be decomposed into selection bias and heteogrenous treatment effects. Now, I’ve designed this example to have a homoegenous treatment effect, so we know that the error comes from selection bias. Let’s determine exactly selection bias lives in the wrong weights applied to the right estimates, <span class="math inline">\(P(S=s\mid D=d)\)</span>.</p>
+<p>So confounding is partially the wrong weights applied to the right estimates. Earlier, I mentioned that the simple difference in means can be decomposed into selection bias and heterogeneous treatment effects. Now, I’ve designed this example to have a homogeneous treatment effect, so we know that the error comes from selection bias. Let’s determine where exactly selection bias lives in the wrong weights applied to the right estimates, <span class="math inline">\(P(S=s\mid D=d)\)</span>.</p>
 <p>According to <a href="https://mixtape.scunning.com/04-potential_outcomes#simple-difference-in-means-decomposition">Causal Inference: The Mixed Tape</a>, the selection bias in the simple difference in means is</p>
 <p><span class="math display">\[ E[Y(0) \mid D=1] - E[Y(0) \mid D=0] \&gt;. \]</span></p>
-<p>Let’s use the law of total expectation to re-write <span class="math inline">\(E[Y(d^\prime) \mid D=d]\)</span> as a marginalization over <span class="math inline">\(S\)</span>.</p>
+<p>Again, let’s use the law of total expectation to re-write <span class="math inline">\(E[Y(d^\prime) \mid D=d]\)</span> as a marginalization over <span class="math inline">\(S\)</span>.</p>
 <p><span class="math display">\[ \begin{align*}E[Y(d^\prime) \mid D=d] &amp;= \sum_{s} E[Y(d^\prime) \mid D=d, S=s]P(S=s\mid D=d) \\ &amp;= \sum_{s}E[Y(d^\prime) \mid D=d, S=s]\frac{P(D=d \mid S=s) P(S=s)}{P(D=d)} \end{align*}\]</span></p>
-<p>Its easier to spot where the bias comes from (mathematically) if you consider what the implication would be were exposure to be independent of sex. If exposure were independent of sex, as would be the case in a randomized experiment, then <span class="math inline">\(P(D=d \mid S=s) = P(D=d)\)</span>. The weight in this sum then collapses to <span class="math inline">\(P(S=s)\)</span>. However, in this example, <span class="math inline">\(D\)</span> is not independent of <span class="math inline">\(S\)</span> and so <span class="math inline">\(P(D=d \mid S=s) \neq P(D=d)\)</span>! This probability has a name, its called <em>the propensity score</em>, and that this is not the same between strata defined by sex is the reason that the selection bias is non zero in our example. If the propensity score was the same within strata, then strata defined by <span class="math inline">\(D\)</span> would be exchangeable and <span class="math inline">\(E[Y(d^\prime) \mid D=d] = E[Y(d^\prime)]\)</span>.</p>
+<p>Its easier to spot where the bias comes from (mathematically) if you consider what the implication would be were exposure to be independent of sex. If exposure were independent of sex, as would be the case in a randomized experiment, then <span class="math inline">\(P(D=d \mid S=s) = P(D=d)\)</span>. The weight in this sum then collapses to <span class="math inline">\(P(S=s)\)</span>, which is the right weight. However, in this example, <span class="math inline">\(D\)</span> is not independent of <span class="math inline">\(S\)</span> and so <span class="math inline">\(P(D=d \mid S=s) \neq P(D=d)\)</span>! This probability has a name, <em>the propensity score</em>, and that it is not the same between strata defined by sex is the reason that the selection bias is non zero in our example. If the propensity score was the same within strata, then strata defined by <span class="math inline">\(D\)</span> would be exchangeable and <span class="math inline">\(E[Y(d^\prime) \mid D=d] = E[Y(d^\prime)]\)</span>.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Confounding, at least exemplified by the DAG at the top of this post, can be seen as the improper weighting of the right estimates. When viewed through this lens, approaches like re-weighting (via inverse propensity scores or some other mechanism) make a lot more intuitive sense as possible remidies.</p>
 
 
 </section>

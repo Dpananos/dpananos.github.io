@@ -23,7 +23,7 @@
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Thinking back to my Introduction to Epidemiology class, confounding was one of the topics of central interest. However, it took the remainder of my PhD (and then some) to really get <em>what confounding was</em>. Confounding was introduced as exposure and outcome having common cause (you have to have seen this before)</p>
+<p>Thinking back to my <em>Introduction to Epidemiology</em> class, confounding was one of the topics of central interest. However, it took the remainder of my PhD (and then some) to really get <em>what confounding was</em>. Confounding was introduced as exposure and outcome having common cause. You’ve probably seen the idea motivated with the following DAG:</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -33,26 +33,30 @@
 </div>
 </div>
 </div>
-<p>So yes, the effect of <img src="https://latex.codecogs.com/png.latex?x"> on <img src="https://latex.codecogs.com/png.latex?y"> is confounded. But like…why? DAG’s aside, what is happening here? That much isn’t answered in introductory classes, and I think it would behoove most people to learn the answer. As a digression, I know the simple difference in means can be decomposed into ATE + Selection Bias + Heterogeneous treatment effect, but I don’t think that really anwers what I want since that decomposition is in terms of potential outcomes. I want answers which, in part, depend on the data and how we choose to summarize it.</p>
-<p>Granted, we need a little but of math, but <em>only</em> a little. If you understand the law of total expectation, and can handle conditional distributions, you’re going to be fine. Let’s look at what really happens in this DAG using an example.</p>
+<p>Here, S is a common cause of <img src="https://latex.codecogs.com/png.latex?D"> and <img src="https://latex.codecogs.com/png.latex?Y">, and we’re typically interested in estimating the effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y">. Granted, the effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y"> is confounded. But like…why? DAG’s aside, what is happening here? That much isn’t answered in introductory classes, and I think it would behoove most people to learn the answer. As a digression, I know the simple difference in means can be decomposed into ATE + Selection Bias + Heterogeneous treatment effect, but I don’t think that really anwers what I want since that decomposition is in terms of potential outcomes and I want an answer which involves the data we have in hand and how we choose to summarize it.</p>
+<p>To provide such an answer we need a little but of math, but <em>only</em> a little. In particular, we need the <em>The Law of Total Expectation</em>, which writes an expected value, <img src="https://latex.codecogs.com/png.latex?E%5BX%5D">, as a weighted average of conditional expectations, namely</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20E%5BX%5D%20=%20%5Csum_a%20E%5BX%20%5Cmid%20A=a%5D%20P(A=a)%20%5C%3E.%20"> In what follows, I motivate confounding with a fairly typical example involving how a binary exposure affects risk of a binary outcome. We’ll discuss the “Right Way” to estimate the effect of the exposure as well as “The Wrong Way”. We’ll find that the confounding of the relationship between exposure and outcome comes down to a single fact: <em>the wrong weights are applied to the right estimates</em>.</p>
 </section>
 <section id="an-example" class="level2">
 <h2 class="anchored" data-anchor-id="an-example">An Example</h2>
-<p>Suppose a new drug <img src="https://latex.codecogs.com/png.latex?D"> is introduced to prevent death. In truth, the drug decreases the risk of death in both men and women, but men are more likely to take the drug and men are more likely to die. Hence, the effect of the drug is confounded by sex.</p>
-<p>I’m going to simulate this data using the following data generating process</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20S%20%5Csim%20%5Coperatorname%7BBern%7D(0.5)%20"> <img src="https://latex.codecogs.com/png.latex?%20D%20%5Cmid%20S%20%5Csim%20%5Coperatorname%7BBern%7D(0.6%20+%200.3S)%20"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20Y%20%5Cmid%20D,%20S%20%5Csim%20%5Coperatorname%7BBern%7D(0.4%20-%200.1D%20+%200.4S)%20"></p>
+<p>Suppose a new drug <img src="https://latex.codecogs.com/png.latex?D"> is introduced to prevent death. In truth, the drug decreases the risk of death in both men and women by 10 percentage points, but men are more likely to take the drug and men are more likely to die. Hence, the effect of the drug is confounded by sex. Let <img src="https://latex.codecogs.com/png.latex?D=1"> be exposure to the drug, <img src="https://latex.codecogs.com/png.latex?S=1"> indicate males, and <img src="https://latex.codecogs.com/png.latex?Y=1"> indicate death. I’m going to simulate this scenario using the following data generating process</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20S%20%5Csim%20%5Coperatorname%7BBernoulli%7D(0.5)%20%5C%3E,%20"> <img src="https://latex.codecogs.com/png.latex?%20D%20%5Cmid%20S%20%5Csim%20%5Coperatorname%7BBernoulli%7D(0.6%20+%200.3S)%20%5C%3E,"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20Y%20%5Cmid%20D,%20S%20%5Csim%20%5Coperatorname%7BBernoulli%7D(0.4%20-%200.1D%20+%200.4S)%20%5C%3E."></p>
 <p>I’ll simulate a million observations so that our precision is big enough to not worry about sampling variability. In R, that can be done with</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">sim_data <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">function</span>(x, <span class="at" style="color: #657422;
+font-style: inherit;">function</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">n=</span><span class="dv" style="color: #AD0000;
+font-style: inherit;">x=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1000</span>){</span>
+font-style: inherit;">0</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e6</span>){</span>
 <span id="cb1-2">  withr<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
@@ -109,11 +113,14 @@ background-color: null;
 font-style: inherit;">data.frame</span>(s, d, y)</span>
 <span id="cb1-8">}</span></code></pre></div>
 </div>
+<p>We’ll use this data to explore the “Right Way” and teh “Wrong Way” of analyzing the causal effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y">.</p>
 </section>
 <section id="the-right-way" class="level2">
-<h2 class="anchored" data-anchor-id="the-right-way">The Right Way</h2>
-<p>Open up a book like <a href="https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/">“<em>What If</em>”</a> and you’ll find that the way to correctly estimate the effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y"> would be to first estimate the risk of death within strata defined by sex and then weight the stratified estimates by the prevalence of the strata. This can be done using <code>{marginaleffects}</code> pretty easily</p>
+<h2 class="anchored" data-anchor-id="the-right-way">The “Right Way”</h2>
+<p>Open up a book like <a href="https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/">“<em>What If</em>”</a> and you’ll find that the way to correctly estimate the effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y"> would be to first estimate the risk of death within strata defined by sex and then weight the stratified estimates by the prevalence of the strata. This can be done in the following way</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(marginaleffects)</span>
@@ -130,20 +137,78 @@ font-style: inherit;">*</span>s, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">data=</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">sim_data</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1e6</span>), <span class="at" style="color: #657422;
+font-style: inherit;">sim_data</span>(), <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">family =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">binomial</span>())</span>
 <span id="cb2-4"></span>
-<span id="cb2-5"><span class="co" style="color: #5E5E5E;
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">crossing</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">d=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">s=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-6">  modelr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">add_predictions</span>(model, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">type=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'response'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pred =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(pred), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.by =</span> d) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-8">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pull</span>(pred) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb2-9">  diff</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.09910701</code></pre>
+</div>
+</div>
+<p>or, perhaps more elegantly, using <code>{marginaleffects}</code></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(marginaleffects)</span>
+<span id="cb4-2"></span>
+<span id="cb4-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># If I didn't know P(S) maybe I wouldn't use datagrid in this way</span></span>
-<span id="cb2-6">nd <span class="ot" style="color: #003B4F;
+<span id="cb4-4">nd <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -166,8 +231,8 @@ background-color: null;
 font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
-<span id="cb2-7"></span>
-<span id="cb2-8"><span class="fu" style="color: #4758AB;
+<span id="cb4-5"></span>
+<span id="cb4-6"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">avg_comparisons</span>(model, <span class="at" style="color: #657422;
 background-color: null;
@@ -176,6 +241,7 @@ background-color: null;
 font-style: inherit;">'d'</span>, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">newdata =</span> nd)</span></code></pre></div>
+</details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
  Term Contrast Estimate Std. Error     z Pr(&gt;|z|)   S  2.5 %  97.5 %
@@ -185,16 +251,17 @@ Columns: term, contrast, estimate, std.error, statistic, p.value, s.value, conf.
 Type:  response </code></pre>
 </div>
 </div>
-<p>The estimate is very close to the actual effect of the drug; a reduction in risk of death of 10 percentage points. Why exactly this procedure works relies on the ignorability assumption and the law of total expectation. Briefly, if we have ignorability then <img src="https://latex.codecogs.com/png.latex?E%5BY(d)%20%5Cmid%20S=s%5D%20=%20E%5BY%5Cmid%20D=d,%20S=s%5D">, and by the law of total expectation</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20E%5BY(d)%5D%20=%20%5Csum_%7Bs%7D%20E%5BY(d)%20%5Cmid%20S=s%5D%20P(S=s)%20=%5Csum_%7Bs%7D%20E%5BY%20%5Cmid%20D=d,%20S=s%5D%20P(S=s)%20"> which is a weighted average of within strata estimates. Now, let’s take an extended look at the wrong way of doing things.</p>
+<p>Regardless of approach, the estimate is very close to the actual effect of the drug; a reduction in risk of death of 10 percentage points. Why exactly this procedure works relies on the consistency and ignorability assumptions, and the law of total expectation.</p>
+<p>Briefly, if we have consistency and ignorability then <img src="https://latex.codecogs.com/png.latex?E%5BY(d)%20%5Cmid%20S=s%5D%20=%20E%5BY%5Cmid%20D=d,%20S=s%5D">, and by the law of total expectation</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20E%5BY(d)%5D%20=%20%5Csum_%7Bs%7D%20E%5BY(d)%20%5Cmid%20S=s%5D%20P(S=s)%20=%5Csum_%7Bs%7D%20E%5BY%20%5Cmid%20D=d,%20S=s%5D%20P(S=s)%20"> which is a weighted average of within strata estimates. ’Nuff said, let’s take an extended look at the wrong way of doing things.</p>
 </section>
 <section id="the-wrong-way" class="level2">
-<h2 class="anchored" data-anchor-id="the-wrong-way">The Wrong Way</h2>
-<p>So we know the right uses the law of total expectation to get the right weights for the within strata estimates. What does the wrong way estimate then? First, let’s see what the wrong way would estimate for this data generating process.</p>
+<h2 class="anchored" data-anchor-id="the-wrong-way">The “Wrong Way”</h2>
+<p>So we know the “Right Way” uses the law of total expectation to get the right weights for the within strata estimates. What does the “Wrong Way” estimate then if not the true causal contrast? Let’s use <code>avg_comparisons</code> to see</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">model <span class="ot" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -204,17 +271,13 @@ font-style: inherit;">~</span>d, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">data=</span><span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">sim_data</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1e6</span>), <span class="at" style="color: #657422;
+font-style: inherit;">sim_data</span>(), <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">family =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">binomial</span>())</span>
-<span id="cb4-2"></span>
-<span id="cb4-3">nd <span class="ot" style="color: #003B4F;
+<span id="cb6-2"></span>
+<span id="cb6-3">nd <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -229,8 +292,8 @@ background-color: null;
 font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
-<span id="cb4-4"></span>
-<span id="cb4-5"><span class="fu" style="color: #4758AB;
+<span id="cb6-4"></span>
+<span id="cb6-5"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">avg_comparisons</span>(model, <span class="at" style="color: #657422;
 background-color: null;
@@ -249,22 +312,21 @@ Columns: term, contrast, estimate, std.error, statistic, p.value, s.value, conf.
 Type:  response </code></pre>
 </div>
 </div>
-<p>Interesting, the wrong answer is <em>really wrong</em>. Without adjusting for sex, we would conclude that the drug increases risk of death by near 6%. Of course, this is a result of the fact that men are more likely to take the drug and more likely to die.</p>
-<p>The wrong analysis simply estimates the within exposure estimates and contrasts them. Now, because we are marginalizing over <img src="https://latex.codecogs.com/png.latex?S"> to do this, it would behoove us to appeal to the law of total expectation since we know this is the key to getting the right answer.</p>
-<p>In the wrong approach, we compute</p>
+<p>Interesting, the wrong answer is <em>really wrong</em>. Without adjusting for sex, we would conclude that the drug increases risk of death by 6%. Of course, this is a result of the fact that men are more likely to take the drug and more likely to die.</p>
+<p>The “Wrong Way” is a simple difference in means between exposure groups. In doing so, we marginalize over the distribution of <img src="https://latex.codecogs.com/png.latex?S"> conditional on <img src="https://latex.codecogs.com/png.latex?D">. Since the law of total expectation is used to obtain the right answer, it might be beneficial to use it here as well. In the “Wrong Way” we compute</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20E%5BY%20%5Cmid%20D=d%5D%20%5C%3E.%20"></p>
-<p>Let’s write out how <img src="https://latex.codecogs.com/png.latex?S"> plays a part in this computation. Again, <img src="https://latex.codecogs.com/png.latex?E%5BY%20%5Cmid%20D=d%5D"> is a weighted average of within strata estimates</p>
+<p>which can be re-written using the law of total expectation as</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20E%5BY%20%5Cmid%20D=d%5D%20=%20%5Csum_%7Bs%7D%20E%5BY%20%5Cmid%20D=d,%20S=s%5D%20P(S=s%5Cmid%20D=d)%20"></p>
-<p>Aha! Our first clue into what confounding <em>really is</em>. We see that <img src="https://latex.codecogs.com/png.latex?E%5BY%20%5Cmid%20D=d,%20S=s%5D"> appears in our weighted average, but the weights are wrong! They should be <img src="https://latex.codecogs.com/png.latex?P(S=s)"> and instead they are <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)">! Confounding is (partially) an improper weighting of expected values.</p>
-<p>We can actually compute what the wrong approach would produce in the limit of infinite data if we just leverage Bayes rule to rewrite <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)"> as</p>
-<p><img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)%20=%20%5Cdfrac%7BP(D=d%20%5Cmid%20S=s)%20P(S=s)%7D%7BP(D=d)%7D%20"></p>
+<p>Aha! Now we see what confounding <em>really is</em>. Note that <img src="https://latex.codecogs.com/png.latex?E%5BY%20%5Cmid%20D=d,%20S=s%5D"> appears in both the “Right Way” and the “Wrong Way”, but in the “Wrong Way” the weights are wrong! They should be <img src="https://latex.codecogs.com/png.latex?P(S=s)"> but instead they are <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)">! Confounding is (partially) an improper weighting of the correct estimates!</p>
+<p>As an interesting digression, we can actually compute what the wrong approach would produce in the limit of infinite data if we just leverage Bayes rule to rewrite <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)"> as</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)%20=%20%5Cdfrac%7BP(D=d%20%5Cmid%20S=s)%20P(S=s)%7D%7BP(D=d)%7D%20%5C%3E.%20"></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">Ey <span class="ot" style="color: #003B4F;
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">Ey <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">function</span>(d, s){</span>
-<span id="cb6-2">  <span class="fl" style="color: #AD0000;
+<span id="cb8-2">  <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.4</span> <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -279,14 +341,14 @@ background-color: null;
 font-style: inherit;">0.4</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>s</span>
-<span id="cb6-3">}</span>
-<span id="cb6-4"></span>
-<span id="cb6-5">Ed <span class="ot" style="color: #003B4F;
+<span id="cb8-3">}</span>
+<span id="cb8-4"></span>
+<span id="cb8-5">Ed <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">function</span>(s){</span>
-<span id="cb6-6">  <span class="fl" style="color: #AD0000;
+<span id="cb8-6">  <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.6</span> <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -295,9 +357,9 @@ background-color: null;
 font-style: inherit;">0.3</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span>s  </span>
-<span id="cb6-7">}</span>
-<span id="cb6-8"></span>
-<span id="cb6-9">Pd1 <span class="ot" style="color: #003B4F;
+<span id="cb8-7">}</span>
+<span id="cb8-8"></span>
+<span id="cb8-9">Pd1 <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -318,8 +380,8 @@ background-color: null;
 font-style: inherit;">*</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.5</span></span>
-<span id="cb6-10"></span>
-<span id="cb6-11">Eyd1 <span class="ot" style="color: #003B4F;
+<span id="cb8-10"></span>
+<span id="cb8-11">Eyd1 <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -360,7 +422,7 @@ background-color: null;
 font-style: inherit;">0.5</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">/</span>Pd1</span>
-<span id="cb6-12">Eyd0 <span class="ot" style="color: #003B4F;
+<span id="cb8-12">Eyd0 <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -417,13 +479,13 @@ background-color: null;
 font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>Pd1)</span>
-<span id="cb6-13"></span>
-<span id="cb6-14">wrong_answer <span class="ot" style="color: #003B4F;
+<span id="cb8-13"></span>
+<span id="cb8-14">wrong_answer <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> Eyd1 <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span> Eyd0</span>
-<span id="cb6-15"><span class="co" style="color: #5E5E5E;
+<span id="cb8-15"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#0.06</span></span></code></pre></div>
 </div>
@@ -431,12 +493,16 @@ font-style: inherit;">#0.06</span></span></code></pre></div>
 </section>
 <section id="more-wrong" class="level2">
 <h2 class="anchored" data-anchor-id="more-wrong">More Wrong</h2>
-<p>So confounding is partially the wrong weights applied to the right estimates. Earlier, I mentioned that the simple difference in means can be decomposed into selection bias and heteogrenous treatment effects. Now, I’ve designed this example to have a homoegenous treatment effect, so we know that the error comes from selection bias. Let’s determine exactly selection bias lives in the wrong weights applied to the right estimates, <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)">.</p>
+<p>So confounding is partially the wrong weights applied to the right estimates. Earlier, I mentioned that the simple difference in means can be decomposed into selection bias and heterogeneous treatment effects. Now, I’ve designed this example to have a homogeneous treatment effect, so we know that the error comes from selection bias. Let’s determine where exactly selection bias lives in the wrong weights applied to the right estimates, <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)">.</p>
 <p>According to <a href="https://mixtape.scunning.com/04-potential_outcomes#simple-difference-in-means-decomposition">Causal Inference: The Mixed Tape</a>, the selection bias in the simple difference in means is</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20E%5BY(0)%20%5Cmid%20D=1%5D%20-%20E%5BY(0)%20%5Cmid%20D=0%5D%20%5C%3E.%20"></p>
-<p>Let’s use the law of total expectation to re-write <img src="https://latex.codecogs.com/png.latex?E%5BY(d%5E%5Cprime)%20%5Cmid%20D=d%5D"> as a marginalization over <img src="https://latex.codecogs.com/png.latex?S">.</p>
+<p>Again, let’s use the law of total expectation to re-write <img src="https://latex.codecogs.com/png.latex?E%5BY(d%5E%5Cprime)%20%5Cmid%20D=d%5D"> as a marginalization over <img src="https://latex.codecogs.com/png.latex?S">.</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign*%7DE%5BY(d%5E%5Cprime)%20%5Cmid%20D=d%5D%20&amp;=%20%5Csum_%7Bs%7D%20E%5BY(d%5E%5Cprime)%20%5Cmid%20D=d,%20S=s%5DP(S=s%5Cmid%20D=d)%20%5C%5C%20&amp;=%20%5Csum_%7Bs%7DE%5BY(d%5E%5Cprime)%20%5Cmid%20D=d,%20S=s%5D%5Cfrac%7BP(D=d%20%5Cmid%20S=s)%20P(S=s)%7D%7BP(D=d)%7D%20%5Cend%7Balign*%7D"></p>
-<p>Its easier to spot where the bias comes from (mathematically) if you consider what the implication would be were exposure to be independent of sex. If exposure were independent of sex, as would be the case in a randomized experiment, then <img src="https://latex.codecogs.com/png.latex?P(D=d%20%5Cmid%20S=s)%20=%20P(D=d)">. The weight in this sum then collapses to <img src="https://latex.codecogs.com/png.latex?P(S=s)">. However, in this example, <img src="https://latex.codecogs.com/png.latex?D"> is not independent of <img src="https://latex.codecogs.com/png.latex?S"> and so <img src="https://latex.codecogs.com/png.latex?P(D=d%20%5Cmid%20S=s)%20%5Cneq%20P(D=d)">! This probability has a name, its called <em>the propensity score</em>, and that this is not the same between strata defined by sex is the reason that the selection bias is non zero in our example. If the propensity score was the same within strata, then strata defined by <img src="https://latex.codecogs.com/png.latex?D"> would be exchangeable and <img src="https://latex.codecogs.com/png.latex?E%5BY(d%5E%5Cprime)%20%5Cmid%20D=d%5D%20=%20E%5BY(d%5E%5Cprime)%5D">.</p>
+<p>Its easier to spot where the bias comes from (mathematically) if you consider what the implication would be were exposure to be independent of sex. If exposure were independent of sex, as would be the case in a randomized experiment, then <img src="https://latex.codecogs.com/png.latex?P(D=d%20%5Cmid%20S=s)%20=%20P(D=d)">. The weight in this sum then collapses to <img src="https://latex.codecogs.com/png.latex?P(S=s)">, which is the right weight. However, in this example, <img src="https://latex.codecogs.com/png.latex?D"> is not independent of <img src="https://latex.codecogs.com/png.latex?S"> and so <img src="https://latex.codecogs.com/png.latex?P(D=d%20%5Cmid%20S=s)%20%5Cneq%20P(D=d)">! This probability has a name, <em>the propensity score</em>, and that it is not the same between strata defined by sex is the reason that the selection bias is non zero in our example. If the propensity score was the same within strata, then strata defined by <img src="https://latex.codecogs.com/png.latex?D"> would be exchangeable and <img src="https://latex.codecogs.com/png.latex?E%5BY(d%5E%5Cprime)%20%5Cmid%20D=d%5D%20=%20E%5BY(d%5E%5Cprime)%5D">.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Confounding, at least exemplified by the DAG at the top of this post, can be seen as the improper weighting of the right estimates. When viewed through this lens, approaches like re-weighting (via inverse propensity scores or some other mechanism) make a lot more intuitive sense as possible remidies.</p>
 
 
 </section>
