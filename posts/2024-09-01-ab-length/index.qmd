@@ -1,5 +1,5 @@
 ---
-title: How Long to Run a Bayesian AB Test
+title: Calibration of Mind Changing for Bayesian AB Tests
 date: "2024-09-01"
 code-fold: true
 echo: true
@@ -74,7 +74,7 @@ where $\tilde{D}$ is the optimal decision from the new data. Of course, we can't
 
 $$ E[\mathcal{L}](\tilde{D})= \int_{\theta_a} \int_{\theta_b}\underset{{x \in \{A, B\}}}{\operatorname{min}}  \int_{\tilde{\theta}_A} \int_{\tilde{\theta}_{B}} \mathcal{L}(\tilde{\theta}_A, \tilde{\theta}_B, x) p(\tilde{\theta}_A, \tilde{\theta}_{B} \mid y_A + \tilde{y}_A, y_B + \tilde{y}_B) p(\tilde{y}_A, \tilde{y}_B \mid \theta_A, \theta_B ) p(\theta_A, \theta_B \mid y_A, y_B) \, d\tilde{\theta}_B \, d\tilde{\theta}_A  \, d\theta_B \, d\theta_A $$
 
-Now, this looks like a right harry integral.  However, its straightforward to understand.  Consider the following process:
+Now, this looks like a right hairy integral.  However, its straightforward to understand.  Consider the following process:
 
 * Use the posterior predictive ($p(\tilde{y}_A, \tilde{y}_B \mid \theta_A, \theta_B ) p(\theta_A, \theta_B \mid y_A, y_B)$) to sample data you would have seen were you to continue the experiment.
 * Act as if that data was the true data and condition your model on it to obtain your future updated posterior ($p(\tilde{\theta}_A, \tilde{\theta}_{B} \mid y_A + \tilde{y}_A, y_B + \tilde{y}_B)$)
