@@ -1,0 +1,187 @@
+---
+title: RMSt
+date: "2024-10-01"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: true
+---
+
+```{r}
+
+library(tidyverse)
+library(survival)
+library(duckdb)
+
+set.seed(9)
+
+users_per_hour <- 97
+experiment_days <- 30
+start_time <- ymd_hms('2024-10-01 00:00:00')
+end_time <- start_time + days(experiment_days)
+
+# simulate observations of entry into an experiment
+dttm_rng <- seq(start_time, end_time - days(1), by = 'hour')
+
+experiment_data <- map_dfr(dttm_rng, ~{
+  
+  n_exposed <- rpois(1, users_per_hour)
+  treatment <- rbinom(n_exposed, 1, 0.5)
+  exposure_time <- .x + runif(n=n_exposed, min=0, max=60*60*24)
+  rt = exp(-0.1*treatment)/(60*60*24*180)
+  latent_event_time <- rexp(n_exposed, rate = rt) + exposure_time
+  observed_time <- if_else(latent_event_time>end_time, NA, latent_event_time)
+  
+  tibble(
+    treatment, exposure_time, observed_time, latent_event_time
+  )
+  
+  
+}) %>% 
+  mutate(userid = seq_along(treatment),
+         treatment = if_else(treatment == 1, "Treatment","Control"))
+
+
+con <- DBI::dbConnect(duckdb(), ':memory:')
+
+dbWriteTable(con, 'experiment_000', experiment_data)
+
+```
+
+```{sql, connection=con, output.var = 'dd'}
+SET VARIABLE EXPERIMENT_START_DATE = TIMESTAMP '2024-10-01 00:00:00';
+SET VARIABLE EXPERIMENT_END_DATE = TIMESTAMP '2024-10-31 00:00:00';
+
+
+with prep_cleaned_exposures as (
+  select distinct
+    userid, 
+    treatment,
+    min(exposure_time) over (partition by userid) as exposure_time,
+    (min(treatment) over (partition by userid)) <> (max(treatment) over (partition by userid)) as multiple_exposures
+  from experiment_000
+  where 
+    (
+    exposure_time <= getvariable('EXPERIMENT_END_DATE')
+    and
+    exposure_time >= getvariable('EXPERIMENT_START_DATE')
+    )
+  order by treatment, userid
+  
+)
+
+, cleaned_exposures as (select * from prep_cleaned_exposures where not multiple_exposures  )
+
+, exposure_balance as (select treatment, count(distinct userid) n_exposed from cleaned_exposures group by 1)
+
+, prep_experiment_outcomes as (
+  select 
+    a.userid, 
+    a.treatment, 
+    a.exposure_time, 
+    b.observed_time as event_time, 
+    c.n_exposed as at_risk
+  from cleaned_exposures as a
+  left join experiment_000 as b 
+    on a.userid = b.userid and a.exposure_time <  coalesce(b.observed_time, getvariable('EXPERIMENT_END_DATE'))
+  left join exposure_balance c on a.treatment = c.treatment
+)
+
+, cleaned_experiment_outcomes as (
+  select
+    userid, 
+    treatment, 
+    exposure_time, 
+    event_time is not NULL as is_observed, 
+    at_risk,
+    coalesce(event_time, getvariable('EXPERIMENT_END_DATE') ) as observed_time,
+    datediff('seconds', exposure_time, coalesce(event_time, getvariable('EXPERIMENT_END_DATE') )) * 1.0 / (86400) as event_time_days,
+  from prep_experiment_outcomes
+  order by treatment, userid
+)
+
+, prep_lifetable_1 as (
+
+select
+  
+  treatment, 
+  case when not is_observed then floor(event_time_days) else floor(event_time_days) + 0.5 end as event_time,
+  coalesce(count(distinct case when  is_observed then userid end), 0) as n_event,
+  coalesce(count(distinct case when not is_observed then userid end), 0) as n_censor,
+  at_risk as n_exposed
+  
+from cleaned_experiment_outcomes
+group by 1, 2, 5
+order by 1, 2
+
+)
+
+, life_table as (
+
+select 
+*, 
+coalesce(lag(at_risk1, 1) over (partition by treatment order by event_time), n_exposed) as at_risk,
+n_event::float / at_risk::float as hazard
+from(
+  select 
+    *, 
+    n_exposed - (sum(n_event + n_censor) over (partition by treatment order by event_time rows between unbounded preceding and current row)) as at_risk1
+  from prep_lifetable_1
+  order by 1, 2
+)
+
+)
+
+select 
+  *, 
+  exp(sum(ln(1-hazard)) over (partition by treatment order by event_time rows between unbounded preceding and current row)) as survival_probability
+from life_table
+order by 1, 2
+
+```
+
+
+```{r}
+experiment_data %>% 
+  filter(
+    exposure_time>=start_time, 
+    exposure_time <=end_time
+  ) %>% 
+  transmute(
+    treatment = treatment, 
+    event = if_else(is.na(observed_time), 0, 3),
+    time = floor(interval(exposure_time, coalesce(observed_time, end_time))/days(1)),
+    time2 = ceiling(interval(exposure_time, observed_time)/days(1))
+  ) -> d
+
+
+# Interval censoring.
+survfit(Surv(time=time, time2=time2, event=event, type='interval') ~ strata(treatment), data=d) -> f
+
+
+broom::tidy(f) %>% 
+  ggplot(aes(time, estimate, color=strata)) + 
+  geom_step() 
+```
+```{r}
+
+dd  %>% 
+  ggplot(aes(event_time, survival_probability, color=factor(treatment))) + 
+  geom_step() + 
+  geom_point(data=broom::tidy(f), aes(time, estimate, color=strata))
+```
+
+```{r}
+dd %>% 
+  group_by(treatment) %>% 
+  arrange(treatment, event_time) %>% 
+  summarise(
+    rmst = pracma::trapz(event_time, survival_probability)
+  ) %>% 
+  pivot_wider(values_from = rmst, names_from = treatment) %>% 
+  mutate(Treatment / Control - 1)
+```
+
