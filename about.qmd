@@ -16,7 +16,7 @@ about:
 
 ---
 
-I'm a senior data scientist at [Recast Labs](https://getrecast.com).  Previously, I was a staff data scientist at Zapier.  While there, I lead experimentation and consultied or analyzed on 50+ experiments.
+I'm a Senior Statistics Engineer [Eppo](https://www.geteppo.com/).  Previously, I was a staff data scientist at Zapier.  While there, I lead experimentation and consulted or analyzed on 50+ experiments.
 
 As of late, my professional work has leaned more towards causal inference and experimentation than machine learning.
 
