@@ -1,17 +1,33 @@
 ---
-title: RMSt
+title: Survival Analysis in SQL (No, Really)
 date: "2024-10-01"
 code-fold: true
 echo: true
 fig-cap-location: top
 categories: []
 number-sections: false
-draft: false
+draft: true
 cache: true
 ---
 
-```{r}
+Remember [Bootstrapping in SQL](https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/)?  That was fun.  Maybe we should do more statistics stuff in SQL.  God knows tech people are doing it:
 
+* [Here is Evan Miller talking about how Eppo estimates design matrices for regression in SQL](https://www.youtube.com/watch?v=iyH8GPXzBpk)
+* [Here is a paper in which data scientists from some experimentation heavy orgs describe how to estimate fixed effects models in SQL](https://arxiv.org/abs/2410.09952)
+
+I've been on a survival analysis kick, so let's estimate the Kaplan Meir estimator in SQL.  
+
+
+## Simulate Some Data
+
+To start, we need some data.  Most experiments run in tech can measure the timing of events very accurately, but I imagine that most KPIs really care about changes on the level of days.  It doesn't matter if your users pay you 12 minutes sooner (except maybe in edge cases), but if they pay you 2 days sooner than they would otherwise then that is great news. As a consequence, I think it makes sense to use interval censoring on the day level.  
+
+Here is some code to simulate some timestamps for an experiment.  In short, an experiment is run for 30 days.  Every hour, some number of users enter the experiment and are randomly assigned to either treatment or control.  The users are then monitored over time -- some for more time, some for less time -- and all users who do not get the outcome under study are administratively censored 30 days after the experiment.  This means that if I entered the experiment on day 29, I would only really be observed for 24 hours.  Where as if I entered on day 2 of the experiment then I would be observed for 28 days.  The survival approach means that we can properly account for the censoring as opposed to extending the experiment 30 additional days so as to give everyone the same length of time at risk.
+
+Here is the code.
+
+```{r}
+#| code-fold: true
 library(tidyverse)
 library(survival)
 library(duckdb)
@@ -28,9 +44,14 @@ dttm_rng <- seq(start_time, end_time - days(1), by = 'hour')
 
 experiment_data <- map_dfr(dttm_rng, ~{
   
+  # Simulate how many users enter the experiment
   n_exposed <- rpois(1, users_per_hour)
+  # Assign them to treatment or control randomly
   treatment <- rbinom(n_exposed, 1, 0.5)
-  exposure_time <- .x + runif(n=n_exposed, min=0, max=60*60*24)
+  # Simulate their exposure time.  They enter the experiment uniformly
+  # between midnight and 11:59:59 pm the same day
+  exposure_time <- .x + runif(n=n_exposed, min=0, max=60*60*24-1)
+  # Simulate their event time.
   rt = exp(-0.1*treatment)/(60*60*24*180)
   latent_event_time <- rexp(n_exposed, rate = rt) + exposure_time
   observed_time <- if_else(latent_event_time>end_time, NA, latent_event_time)
@@ -44,12 +65,19 @@ experiment_data <- map_dfr(dttm_rng, ~{
   mutate(userid = seq_along(treatment),
          treatment = if_else(treatment == 1, "Treatment","Control"))
 
+```
 
+I'm going to write these data to duckdb where I can write the necessary SQL.
+
+```{r}
+#| code-fold: true
 con <- DBI::dbConnect(duckdb(), ':memory:')
-
 dbWriteTable(con, 'experiment_000', experiment_data)
 
 ```
+
+
+## Survival Analysis in SQL
 
 ```{sql, connection=con, output.var = 'dd'}
 SET VARIABLE EXPERIMENT_START_DATE = TIMESTAMP '2024-10-01 00:00:00';
@@ -76,6 +104,7 @@ with prep_cleaned_exposures as (
 , cleaned_exposures as (select * from prep_cleaned_exposures where not multiple_exposures  )
 
 , exposure_balance as (select treatment, count(distinct userid) n_exposed from cleaned_exposures group by 1)
+
 
 , prep_experiment_outcomes as (
   select 
@@ -173,15 +202,3 @@ dd  %>%
   geom_step() + 
   geom_point(data=broom::tidy(f), aes(time, estimate, color=strata))
 ```
-
-```{r}
-dd %>% 
-  group_by(treatment) %>% 
-  arrange(treatment, event_time) %>% 
-  summarise(
-    rmst = pracma::trapz(event_time, survival_probability)
-  ) %>% 
-  pivot_wider(values_from = rmst, names_from = treatment) %>% 
-  mutate(Treatment / Control - 1)
-```
-
