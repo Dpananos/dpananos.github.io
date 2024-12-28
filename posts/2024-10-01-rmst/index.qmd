@@ -24,14 +24,14 @@ To start, we need some data.  Most experiments run in tech can measure the timin
 
 Here is some code to simulate some timestamps for an experiment.  In short, an experiment is run for 30 days.  Every hour, some number of users enter the experiment and are randomly assigned to either treatment or control.  The users are then monitored over time -- some for more time, some for less time -- and all users who do not get the outcome under study are administratively censored 30 days after the experiment.  This means that if I entered the experiment on day 29, I would only really be observed for 24 hours.  Where as if I entered on day 2 of the experiment then I would be observed for 28 days.  The survival approach means that we can properly account for the censoring as opposed to extending the experiment 30 additional days so as to give everyone the same length of time at risk.
 
-Here is the code.
+Here is the code and the resulting data is shown below. Now, because these are simulated data, I know that the "latent event time" would be, but we typically wouldn't have this column.  But the other columns look very reasonable.  There is an id for each participant, a treatment status, the time the participant entered the experiment, and an observed time for the event of NA meaning the event was not yet observed.  When the experiment "ends", we can use the ending date as the censoring time and label the censored participants accordingly.
 
 ```{r}
 #| code-fold: true
 library(tidyverse)
 library(survival)
 library(duckdb)
-
+library(kableExtra)
 set.seed(9)
 
 users_per_hour <- 97
@@ -67,59 +67,94 @@ experiment_data <- map_dfr(dttm_rng, ~{
 
 ```
 
+```{r}
+#| code-fold: false
+#| echo: false
+experiment_data %>% 
+  head() %>% 
+  kbl() %>% 
+  kable_styling()
+```
+
+
 I'm going to write these data to duckdb where I can write the necessary SQL.
 
 ```{r}
-#| code-fold: true
+#| code-fold: false
+#| echo: false
 con <- DBI::dbConnect(duckdb(), ':memory:')
 dbWriteTable(con, 'experiment_000', experiment_data)
 
 ```
 
 
-## Survival Analysis in SQL
+## Kaplan Meier in SQL
 
-```{sql, connection=con, output.var = 'dd'}
+### Step 1: Get Assignmnt Time and Remove Multiple Exposures
+
+My data is simulated, but real data can get real messy.  Just as an anecdote, Split.io would put users into a "control" bucket when either exposure would fail for some reason, so even if you didn't have a "control" group in name, sometimes "control" exposures would show up.  This was a royal pain in my ass.
+
+Anyway, its good practice to clean up the assignments.  We'll define the experiment start and end dates, and then filter out any participants which had an exposure outside those dates.  Then we'll remove any users who were assigned multiple variants, and finally count how many participats were in treatment and control (this will be useful later because it will serve as our "at risk" number).  I'll store the cleaned data in `prep_experiment_outcomes`.  The query is below.
+
+```{sql, connection=con}
+
 SET VARIABLE EXPERIMENT_START_DATE = TIMESTAMP '2024-10-01 00:00:00';
 SET VARIABLE EXPERIMENT_END_DATE = TIMESTAMP '2024-10-31 00:00:00';
 
+drop table if exists prep_experiment_outcomes;
 
-with prep_cleaned_exposures as (
-  select distinct
-    userid, 
-    treatment,
-    min(exposure_time) over (partition by userid) as exposure_time,
-    (min(treatment) over (partition by userid)) <> (max(treatment) over (partition by userid)) as multiple_exposures
-  from experiment_000
-  where 
-    (
-    exposure_time <= getvariable('EXPERIMENT_END_DATE')
-    and
-    exposure_time >= getvariable('EXPERIMENT_START_DATE')
-    )
-  order by treatment, userid
+create table prep_experiment_outcomes as
+
+  with prep_cleaned_exposures as (
+    select distinct
+      userid, 
+      treatment,
+      min(exposure_time) over (partition by userid) as exposure_time,
+      (min(treatment) over (partition by userid)) <> (max(treatment) over (partition by userid)) as multiple_exposures
+    from experiment_000
+    where 
+      (
+      exposure_time <= getvariable('EXPERIMENT_END_DATE')
+      and
+      exposure_time >= getvariable('EXPERIMENT_START_DATE')
+      )
+    order by treatment, userid
+  )
   
-)
+  , cleaned_exposures as (select * from prep_cleaned_exposures where not multiple_exposures  )
+  
+  , exposure_balance as (select treatment, count(distinct userid) n_exposed from cleaned_exposures group by 1)
+  
+  
+  
+    select 
+      a.userid, 
+      a.treatment, 
+      a.exposure_time, 
+      b.observed_time as event_time, 
+      c.n_exposed as at_risk
+    from cleaned_exposures as a
+    left join experiment_000 as b 
+      on a.userid = b.userid and a.exposure_time <  coalesce(b.observed_time, getvariable('EXPERIMENT_END_DATE'))
+    left join exposure_balance c on a.treatment = c.treatment
+  ;
 
-, cleaned_exposures as (select * from prep_cleaned_exposures where not multiple_exposures  )
 
-, exposure_balance as (select treatment, count(distinct userid) n_exposed from cleaned_exposures group by 1)
+select * from prep_experiment_outcomes
+
+```
+
+```{sql, connection=con}
+
+select * from prep_experiment_outcomes
 
 
-, prep_experiment_outcomes as (
-  select 
-    a.userid, 
-    a.treatment, 
-    a.exposure_time, 
-    b.observed_time as event_time, 
-    c.n_exposed as at_risk
-  from cleaned_exposures as a
-  left join experiment_000 as b 
-    on a.userid = b.userid and a.exposure_time <  coalesce(b.observed_time, getvariable('EXPERIMENT_END_DATE'))
-  left join exposure_balance c on a.treatment = c.treatment
-)
+```
 
-, cleaned_experiment_outcomes as (
+
+```{sql, connection=con, output.var = 'dd'}
+
+with cleaned_experiment_outcomes as (
   select
     userid, 
     treatment, 

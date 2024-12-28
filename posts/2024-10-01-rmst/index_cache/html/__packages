@@ -11,3 +11,4 @@ lubridate
 survival
 DBI
 duckdb
+kableExtra

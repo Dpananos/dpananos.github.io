@@ -102,6 +102,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -194,7 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#simulate-some-data" id="toc-simulate-some-data" class="nav-link active" data-scroll-target="#simulate-some-data">Simulate Some Data</a></li>
-  <li><a href="#survival-analysis-in-sql" id="toc-survival-analysis-in-sql" class="nav-link" data-scroll-target="#survival-analysis-in-sql">Survival Analysis in SQL</a></li>
+  <li><a href="#kaplan-meier-in-sql" id="toc-kaplan-meier-in-sql" class="nav-link" data-scroll-target="#kaplan-meier-in-sql">Kaplan Meier in SQL</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2024-10-01-rmst/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -215,14 +217,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="simulate-some-data">Simulate Some Data</h2>
 <p>To start, we need some data. Most experiments run in tech can measure the timing of events very accurately, but I imagine that most KPIs really care about changes on the level of days. It doesn’t matter if your users pay you 12 minutes sooner (except maybe in edge cases), but if they pay you 2 days sooner than they would otherwise then that is great news. As a consequence, I think it makes sense to use interval censoring on the day level.</p>
 <p>Here is some code to simulate some timestamps for an experiment. In short, an experiment is run for 30 days. Every hour, some number of users enter the experiment and are randomly assigned to either treatment or control. The users are then monitored over time – some for more time, some for less time – and all users who do not get the outcome under study are administratively censored 30 days after the experiment. This means that if I entered the experiment on day 29, I would only really be observed for 24 hours. Where as if I entered on day 2 of the experiment then I would be observed for 28 days. The survival approach means that we can properly account for the censoring as opposed to extending the experiment 30 additional days so as to give everyone the same length of time at risk.</p>
-<p>Here is the code.</p>
+<p>Here is the code and the resulting data is shown below. Now, because these are simulated data, I know that the “latent event time” would be, but we typically wouldn’t have this column. But the other columns look very reasonable. There is an id for each participant, a treatment status, the time the participant entered the experiment, and an observed time for the event of NA meaning the event was not yet observed. When the experiment “ends”, we can use the ending date as the censoring time and label the censored participants accordingly.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(duckdb)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>users_per_hour <span class="ot">&lt;-</span> <span class="dv">97</span></span>
@@ -257,139 +259,201 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>         <span class="at">treatment =</span> <span class="fu">if_else</span>(treatment <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"Treatment"</span>,<span class="st">"Control"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>I’m going to write these data to duckdb where I can write the necessary SQL.</p>
 <div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="st">':memory:'</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="st">'experiment_000'</span>, experiment_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">treatment</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">exposure_time</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">observed_time</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">latent_event_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">userid</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Control</td>
+<td style="text-align: left;">2024-10-01 03:49:43</td>
+<td style="text-align: left;">2024-10-08 06:39:35</td>
+<td style="text-align: left;">2024-10-08 06:39:35</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Control</td>
+<td style="text-align: left;">2024-10-01 23:02:34</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2025-06-30 03:27:49</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Control</td>
+<td style="text-align: left;">2024-10-01 02:17:47</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2024-11-11 08:39:47</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Control</td>
+<td style="text-align: left;">2024-10-01 17:27:39</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2025-09-06 23:05:46</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Control</td>
+<td style="text-align: left;">2024-10-01 03:49:13</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2025-05-23 00:41:59</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Treatment</td>
+<td style="text-align: left;">2024-10-01 13:14:03</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2025-04-13 18:54:33</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
+
+
 </div>
+</div>
+<p>I’m going to write these data to duckdb where I can write the necessary SQL.</p>
 </section>
-<section id="survival-analysis-in-sql" class="level2">
-<h2 class="anchored" data-anchor-id="survival-analysis-in-sql">Survival Analysis in SQL</h2>
+<section id="kaplan-meier-in-sql" class="level2">
+<h2 class="anchored" data-anchor-id="kaplan-meier-in-sql">Kaplan Meier in SQL</h2>
+<p>In order to use the Kaplan Meier estimator, we need four columns:</p>
+<ul>
+<li>Treatment indicator</li>
+<li>Time</li>
+<li>Number of events</li>
+<li>Number at risk</li>
+</ul>
+<p>Given the simulated data above, I can get this farily easily.</p>
 <div class="cell" data-output.var="dd">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> VARIABLE EXPERIMENT_START_DATE <span class="op">=</span> <span class="dt">TIMESTAMP</span> <span class="st">'2024-10-01 00:00:00'</span>;</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> VARIABLE EXPERIMENT_END_DATE <span class="op">=</span> <span class="dt">TIMESTAMP</span> <span class="st">'2024-10-31 00:00:00'</span>;</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">with</span> prep_cleaned_exposures <span class="kw">as</span> (</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> <span class="kw">distinct</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    userid, </span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    treatment,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">min</span>(exposure_time) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid) <span class="kw">as</span> exposure_time,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">min</span>(treatment) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid)) <span class="op">&lt;&gt;</span> (<span class="fu">max</span>(treatment) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid)) <span class="kw">as</span> multiple_exposures</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> experiment_000</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span> </span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    (</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="op">&lt;=</span> getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">and</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="op">&gt;=</span> getvariable(<span class="st">'EXPERIMENT_START_DATE'</span>)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> treatment, userid</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>, cleaned_exposures <span class="kw">as</span> (<span class="kw">select</span> <span class="op">*</span> <span class="kw">from</span> prep_cleaned_exposures <span class="kw">where</span> <span class="kw">not</span> multiple_exposures  )</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>, exposure_balance <span class="kw">as</span> (<span class="kw">select</span> treatment, <span class="fu">count</span>(<span class="kw">distinct</span> userid) n_exposed <span class="kw">from</span> cleaned_exposures <span class="kw">group</span> <span class="kw">by</span> <span class="dv">1</span>)</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>, prep_experiment_outcomes <span class="kw">as</span> (</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> </span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    a.userid, </span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    a.treatment, </span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    a.exposure_time, </span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    b.observed_time <span class="kw">as</span> event_time, </span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    c.n_exposed <span class="kw">as</span> at_risk</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> cleaned_exposures <span class="kw">as</span> a</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">left</span> <span class="kw">join</span> experiment_000 <span class="kw">as</span> b </span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">on</span> a.userid <span class="op">=</span> b.userid <span class="kw">and</span> a.exposure_time <span class="op">&lt;</span>  <span class="fu">coalesce</span>(b.observed_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>))</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">left</span> <span class="kw">join</span> exposure_balance c <span class="kw">on</span> a.treatment <span class="op">=</span> c.treatment</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>, cleaned_experiment_outcomes <span class="kw">as</span> (</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>    userid, </span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    treatment, </span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    exposure_time, </span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>    event_time <span class="kw">is</span> <span class="kw">not</span> <span class="kw">NULL</span> <span class="kw">as</span> is_observed, </span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>    at_risk,</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coalesce</span>(event_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>) ) <span class="kw">as</span> observed_time,</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    datediff(<span class="st">'seconds'</span>, exposure_time, <span class="fu">coalesce</span>(event_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>) )) <span class="op">*</span> <span class="fl">1.0</span> <span class="op">/</span> (<span class="dv">86400</span>) <span class="kw">as</span> event_time_days,</span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> prep_experiment_outcomes</span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> treatment, userid</span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>, prep_lifetable_1 <span class="kw">as</span> (</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>  treatment, </span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="cf">when</span> <span class="kw">not</span> is_observed <span class="cf">then</span> <span class="fu">floor</span>(event_time_days) <span class="cf">else</span> <span class="fu">floor</span>(event_time_days) <span class="op">+</span> <span class="fl">0.5</span> <span class="cf">end</span> <span class="kw">as</span> event_time,</span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coalesce</span>(<span class="fu">count</span>(<span class="kw">distinct</span> <span class="cf">case</span> <span class="cf">when</span>  is_observed <span class="cf">then</span> userid <span class="cf">end</span>), <span class="dv">0</span>) <span class="kw">as</span> n_event,</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coalesce</span>(<span class="fu">count</span>(<span class="kw">distinct</span> <span class="cf">case</span> <span class="cf">when</span> <span class="kw">not</span> is_observed <span class="cf">then</span> userid <span class="cf">end</span>), <span class="dv">0</span>) <span class="kw">as</span> n_censor,</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  at_risk <span class="kw">as</span> n_exposed</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span> cleaned_experiment_outcomes</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="kw">group</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>, life_table <span class="kw">as</span> (</span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span> </span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>, </span>
-<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="fu">coalesce</span>(<span class="fu">lag</span>(at_risk1, <span class="dv">1</span>) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time), n_exposed) <span class="kw">as</span> at_risk,</span>
-<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a>n_event:<span class="ch">:float</span> <span class="op">/</span> at_risk:<span class="ch">:float</span> <span class="kw">as</span> hazard</span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span>(</span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> </span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, </span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a>    n_exposed <span class="op">-</span> (<span class="fu">sum</span>(n_event <span class="op">+</span> n_censor) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time <span class="kw">rows</span> <span class="kw">between</span> <span class="kw">unbounded</span> <span class="kw">preceding</span> <span class="kw">and</span> <span class="kw">current</span> <span class="kw">row</span>)) <span class="kw">as</span> at_risk1</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> prep_lifetable_1</span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span> </span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>, </span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp</span>(<span class="fu">sum</span>(<span class="fu">ln</span>(<span class="dv">1</span><span class="op">-</span>hazard)) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time <span class="kw">rows</span> <span class="kw">between</span> <span class="kw">unbounded</span> <span class="kw">preceding</span> <span class="kw">and</span> <span class="kw">current</span> <span class="kw">row</span>)) <span class="kw">as</span> survival_probability</span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span> life_table</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> VARIABLE EXPERIMENT_START_DATE <span class="op">=</span> <span class="dt">TIMESTAMP</span> <span class="st">'2024-10-01 00:00:00'</span>;</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SET</span> VARIABLE EXPERIMENT_END_DATE <span class="op">=</span> <span class="dt">TIMESTAMP</span> <span class="st">'2024-10-31 00:00:00'</span>;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">with</span> prep_cleaned_exposures <span class="kw">as</span> (</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> <span class="kw">distinct</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    userid, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    treatment,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">min</span>(exposure_time) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid) <span class="kw">as</span> exposure_time,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    (<span class="fu">min</span>(treatment) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid)) <span class="op">&lt;&gt;</span> (<span class="fu">max</span>(treatment) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> userid)) <span class="kw">as</span> multiple_exposures</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> experiment_000</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="op">&lt;=</span> getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">and</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="op">&gt;=</span> getvariable(<span class="st">'EXPERIMENT_START_DATE'</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> treatment, userid</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>, cleaned_exposures <span class="kw">as</span> (<span class="kw">select</span> <span class="op">*</span> <span class="kw">from</span> prep_cleaned_exposures <span class="kw">where</span> <span class="kw">not</span> multiple_exposures  )</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>, exposure_balance <span class="kw">as</span> (<span class="kw">select</span> treatment, <span class="fu">count</span>(<span class="kw">distinct</span> userid) n_exposed <span class="kw">from</span> cleaned_exposures <span class="kw">group</span> <span class="kw">by</span> <span class="dv">1</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>, prep_experiment_outcomes <span class="kw">as</span> (</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    a.userid, </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    a.treatment, </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    a.exposure_time, </span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    b.observed_time <span class="kw">as</span> event_time, </span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    c.n_exposed <span class="kw">as</span> at_risk</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> cleaned_exposures <span class="kw">as</span> a</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">left</span> <span class="kw">join</span> experiment_000 <span class="kw">as</span> b </span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">on</span> a.userid <span class="op">=</span> b.userid <span class="kw">and</span> a.exposure_time <span class="op">&lt;</span>  <span class="fu">coalesce</span>(b.observed_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>))</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="kw">left</span> <span class="kw">join</span> exposure_balance c <span class="kw">on</span> a.treatment <span class="op">=</span> c.treatment</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>, cleaned_experiment_outcomes <span class="kw">as</span> (</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    userid, </span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    treatment, </span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    exposure_time, </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    event_time <span class="kw">is</span> <span class="kw">not</span> <span class="kw">NULL</span> <span class="kw">as</span> is_observed, </span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    at_risk,</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coalesce</span>(event_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>) ) <span class="kw">as</span> observed_time,</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    datediff(<span class="st">'seconds'</span>, exposure_time, <span class="fu">coalesce</span>(event_time, getvariable(<span class="st">'EXPERIMENT_END_DATE'</span>) )) <span class="op">*</span> <span class="fl">1.0</span> <span class="op">/</span> (<span class="dv">86400</span>) <span class="kw">as</span> event_time_days,</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> prep_experiment_outcomes</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> treatment, userid</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>, prep_lifetable_1 <span class="kw">as</span> (</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  treatment, </span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="cf">when</span> <span class="kw">not</span> is_observed <span class="cf">then</span> <span class="fu">floor</span>(event_time_days) <span class="cf">else</span> <span class="fu">floor</span>(event_time_days) <span class="op">+</span> <span class="fl">0.5</span> <span class="cf">end</span> <span class="kw">as</span> event_time,</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coalesce</span>(<span class="fu">count</span>(<span class="kw">distinct</span> <span class="cf">case</span> <span class="cf">when</span>  is_observed <span class="cf">then</span> userid <span class="cf">end</span>), <span class="dv">0</span>) <span class="kw">as</span> n_event,</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coalesce</span>(<span class="fu">count</span>(<span class="kw">distinct</span> <span class="cf">case</span> <span class="cf">when</span> <span class="kw">not</span> is_observed <span class="cf">then</span> userid <span class="cf">end</span>), <span class="dv">0</span>) <span class="kw">as</span> n_censor,</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>  at_risk <span class="kw">as</span> n_exposed</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span> cleaned_experiment_outcomes</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="kw">group</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>, life_table <span class="kw">as</span> (</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span> </span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>, </span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a><span class="fu">coalesce</span>(<span class="fu">lag</span>(at_risk1, <span class="dv">1</span>) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time), n_exposed) <span class="kw">as</span> at_risk,</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>n_event:<span class="ch">:float</span> <span class="op">/</span> at_risk:<span class="ch">:float</span> <span class="kw">as</span> hazard</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span>(</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>  <span class="kw">select</span> </span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>, </span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    n_exposed <span class="op">-</span> (<span class="fu">sum</span>(n_event <span class="op">+</span> n_censor) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time <span class="kw">rows</span> <span class="kw">between</span> <span class="kw">unbounded</span> <span class="kw">preceding</span> <span class="kw">and</span> <span class="kw">current</span> <span class="kw">row</span>)) <span class="kw">as</span> at_risk1</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>  <span class="kw">from</span> prep_lifetable_1</span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>  <span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="kw">select</span> </span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>  <span class="op">*</span>, </span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp</span>(<span class="fu">sum</span>(<span class="fu">ln</span>(<span class="dv">1</span><span class="op">-</span>hazard)) <span class="kw">over</span> (<span class="kw">partition</span> <span class="kw">by</span> treatment <span class="kw">order</span> <span class="kw">by</span> event_time <span class="kw">rows</span> <span class="kw">between</span> <span class="kw">unbounded</span> <span class="kw">preceding</span> <span class="kw">and</span> <span class="kw">current</span> <span class="kw">row</span>)) <span class="kw">as</span> survival_probability</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="kw">from</span> life_table</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="kw">order</span> <span class="kw">by</span> <span class="dv">1</span>, <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>experiment_data <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    exposure_time<span class="sc">&gt;=</span>start_time, </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="sc">&lt;=</span>end_time</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment =</span> treatment, </span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">event =</span> <span class="fu">if_else</span>(<span class="fu">is.na</span>(observed_time), <span class="dv">0</span>, <span class="dv">3</span>),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="fu">floor</span>(<span class="fu">interval</span>(exposure_time, <span class="fu">coalesce</span>(observed_time, end_time))<span class="sc">/</span><span class="fu">days</span>(<span class="dv">1</span>)),</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">time2 =</span> <span class="fu">ceiling</span>(<span class="fu">interval</span>(exposure_time, observed_time)<span class="sc">/</span><span class="fu">days</span>(<span class="dv">1</span>))</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="ot">-&gt;</span> d</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Interval censoring.</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">survfit</span>(<span class="fu">Surv</span>(<span class="at">time=</span>time, <span class="at">time2=</span>time2, <span class="at">event=</span>event, <span class="at">type=</span><span class="st">'interval'</span>) <span class="sc">~</span> <span class="fu">strata</span>(treatment), <span class="at">data=</span>d) <span class="ot">-&gt;</span> f</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(f) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(time, estimate, <span class="at">color=</span>strata)) <span class="sc">+</span> </span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>experiment_data <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    exposure_time<span class="sc">&gt;=</span>start_time, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    exposure_time <span class="sc">&lt;=</span>end_time</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment =</span> treatment, </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">event =</span> <span class="fu">if_else</span>(<span class="fu">is.na</span>(observed_time), <span class="dv">0</span>, <span class="dv">3</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">time =</span> <span class="fu">floor</span>(<span class="fu">interval</span>(exposure_time, <span class="fu">coalesce</span>(observed_time, end_time))<span class="sc">/</span><span class="fu">days</span>(<span class="dv">1</span>)),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">time2 =</span> <span class="fu">ceiling</span>(<span class="fu">interval</span>(exposure_time, observed_time)<span class="sc">/</span><span class="fu">days</span>(<span class="dv">1</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="ot">-&gt;</span> d</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Interval censoring.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="fu">survfit</span>(<span class="fu">Surv</span>(<span class="at">time=</span>time, <span class="at">time2=</span>time2, <span class="at">event=</span>event, <span class="at">type=</span><span class="st">'interval'</span>) <span class="sc">~</span> <span class="fu">strata</span>(treatment), <span class="at">data=</span>d) <span class="ot">-&gt;</span> f</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(f) <span class="sc">%&gt;%</span> </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(time, estimate, <span class="at">color=</span>strata)) <span class="sc">+</span> </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>() </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -397,15 +461,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dd  <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(event_time, survival_probability, <span class="at">color=</span><span class="fu">factor</span>(treatment))) <span class="sc">+</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>() <span class="sc">+</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(f), <span class="fu">aes</span>(time, estimate, <span class="at">color=</span>strata))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dd  <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(event_time, survival_probability, <span class="at">color=</span><span class="fu">factor</span>(treatment))) <span class="sc">+</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_step</span>() <span class="sc">+</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>broom<span class="sc">::</span><span class="fu">tidy</span>(f), <span class="fu">aes</span>(time, estimate, <span class="at">color=</span>strata))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
