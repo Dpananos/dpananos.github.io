@@ -21,7 +21,7 @@ I actually took the liberty of editing this question (the function of $n$ was no
 
 $$ A \sim \operatorname{normal}\left( \dfrac{n}{2}, \dfrac{n}{4} \right) \>,$$
 
-$$ B \sim \operatorname{normal}\left( \dfrac{n}{2}, \dfrac{n}{4} \right) \>.$$
+$$ B \sim \operatorname{normal}\left( \dfrac{n-1}{2}, \dfrac{n-1}{4} \right) \>.$$
 
 We're interested in $\Pr(B \gt A) = \Pr(B - A \gt 0)$.  So let $D=B-A$.  Then $D$ has the following distribution
 
