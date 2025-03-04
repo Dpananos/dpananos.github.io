@@ -10,7 +10,241 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Sun, 01 Sep 2024 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 03 Mar 2025 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>A Brief Tour of CUPED and Related Methods (Pt. 1)</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2025-03-03-cuped/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Randomized experiments have a rich history, almost none of which is the concern of this post. Rather, I focus on a tiny slice of randomized experiment literature: CUPED (Controlled-experiment Using Pre-Experiment Data). The technique has been impactful in the online randomized experiment (a.k.a. A/B Testing) community, with many vendors – Eppo included – offering the technique. Despite the popularity and impact, customers and data scientists still seem to misunderstand why CUPED works, why different implementations of the procedure (a la regression adjustment) still provide the same benefit, why different implementations are asymptotically equivalent, and under what conditions one should or should not use CUPED.</p>
+<p>This sequence of posts seeks to answer popular questions regarding the CUPED, and in particular frames the technique as a regression procedure first as opposed to a “new” or different technique. I discuss papers that pre-date the CUPED as well as discuss how the literature has evolved since the publication of CUPED. This is not a systematic review, nor a scoping review; this is a story of regression erasure (I kid).</p>
+</section>
+<section id="set-up" class="level1">
+<h1>Set Up</h1>
+<p>Most of this blog post concerns online randomized experiments or “A/B tests” as they are known in industry. Generally, subjects will be exposed to treatment or control at some known probability (usually 50/50 since this is the most efficient design). Some outcome, <img src="https://latex.codecogs.com/png.latex?Y">, is then recorded and groups are compared statistically. Various estimands are used in industry, but for simplicity we will use the average treatment effect as our estimand of choice.</p>
+</section>
+<section id="cuped-for-those-who-dont-know" class="level1">
+<h1>CUPED: For Those Who Don’t Know</h1>
+<p>Deng and colleagus published CUPED in their 2013 paper <a href="https://exp-platform.com/Documents/2013-02-CUPED-ImprovingSensitivityOfControlledExperiments.pdf">“Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data”</a>. The main motivation for the paper is increasing sensitivity of experiments to detect smaller, detect effects faster, or both. Deng et. al motivate their approach through “control variates”. Briefly – and aside from experimentation for a moment – given pairs of random variables <img src="https://latex.codecogs.com/png.latex?(Y_i,%20X_i)"> in which <img src="https://latex.codecogs.com/png.latex?E%5BX%5D"> is known, define</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D=%5Cbar%7BY%7D-%5Ctheta%20%5Cbar%7BX%7D+%5Ctheta%20E%5BX%5D"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is an arbitrary constant. It can be shown that <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D"> is an unbiased estimator of <img src="https://latex.codecogs.com/png.latex?E%5BY%5D">. Because <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is arbitrary, we can choose a <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> so that the variance of the estimator is minimized. The variance of <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D"> is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign%7D%0A%5Coperatorname%7BVar%7D(%5Cwidehat%7BY%7D_%7Bc%20v%7D)%20&amp;=%20%5Coperatorname%7BVar%7D(%5Cbar%7BY%7D-%5Ctheta%20%5Cbar%7BX%7D+%5Ctheta%20E%5BX%5D)%5C%5C%0A&amp;=%5Cdfrac%7B1%7D%7Bn%7D%20%5Cleft(%20%5Coperatorname%7BVar%7D(Y)%20+%20%5Ctheta%5E2%20%5Coperatorname%7BVar%7D(X)%20-%202%5Ctheta%5Coperatorname%7BCov%7D(X,Y)%20%5Cright)%0A%5Cend%7Balign%7D"></p>
+<p>and is notably quadratic in <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Application of elementary calculus shows that the variance is then minimized when</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta%20=%20%5Cdfrac%7B%5Coperatorname%7BCov%7D(Y,%20X)%7D%7B%5Coperatorname%7BVar%7D(X)%7D%20"> and further algebriac manipulation shows</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Coperatorname%7Bvar%7D%5Cleft(%5Cwidehat%7BY%7D_%7Bc%20v%7D%5Cright)=%5Coperatorname%7Bvar%7D(%5Cbar%7BY%7D)%5Cleft(1-%5Crho%5E2%5Cright)%20"> where <img src="https://latex.codecogs.com/png.latex?%5Crho%20=%20%5Coperatorname%7BCor%7D(Y,%20X)">.</p>
+<p>In short, the standard error of the mean can be reduced so long as there is some other variable, <img src="https://latex.codecogs.com/png.latex?X">, correlated with <img src="https://latex.codecogs.com/png.latex?Y">, where larger correlations lead to more variance reduction.</p>
+<p>Back to experimentation, the insight in the CUPED paper was that while finding an <img src="https://latex.codecogs.com/png.latex?X"> with known expectation is hard, the <em>difference</em> in expectations for any random variable in the pre-treatment period is 0. Deng et. al then estimate the difference in means between treatment in control by computing the control variate versions of outcomes in each group and then estimating the difference in means using <sup>1</sup></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5CDelta_%7Bc%20v%7D=%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(t)%7D-%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(c)%7D%20%5C%3E.%20"></p>
+<p>In the remainder of the paper, Deng et. al provide some recommendations on choosing <img src="https://latex.codecogs.com/png.latex?X">, landing on the recommendation to “[…]to use the same variable from the pre-experiment period as the covariate” – i.e.&nbsp;to use the pre-experiment outcome as the control variable. Deng et. al write</p>
+<blockquote class="blockquote">
+<p>It is interesting to point out the connection with linear regression. The optimal <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> tunrs out to be the ordinary least squares (OLS) solution regressing (centered) <img src="https://latex.codecogs.com/png.latex?Y"> on (centered) <img src="https://latex.codecogs.com/png.latex?X"></p>
+</blockquote>
+<p>so the connection to regression was clearly known. As we will see, the method is formally equivalent to regression, but in order to see this more clearly we will need the Frisch Waugh Lovell theorem.</p>
+</section>
+<section id="frisch-waugh-lovell-theorem-for-those-who-dont-know" class="level1">
+<h1>Frisch Waugh Lovell Theorem: For Those Who Don’t Know</h1>
+<p>Econometricians will know the Frisch Waugh Lovell (FWL) theorem well. Borrowing from wikipedia, the theorem states that the esitmate for <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2"> in the model (henceforth full model)</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20Y%20=%20X_1%20%5Cbeta_1%20+%20X_2%20%5Cbeta_2%20+u%20"> will be the same as the estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2"> in the model (henceforth FWL model)</p>
+<p><img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D%20Y=M_%7BX_1%7D%20X_2%20%5Cbeta_2+M_%7BX_1%7D%20u"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D%20=%20I-X_1(X%5ET_1X_1)%5E%7B-1%7DX_1%5ET">. Squint hard enough and you will see that the projection, or hat, matrix appears in <img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D">. The FWL theorem then says, more or less,</p>
+<blockquote class="blockquote">
+<p>First regress <img src="https://latex.codecogs.com/png.latex?Y"> onto <img src="https://latex.codecogs.com/png.latex?X_1"> and compute the residuals. Then, regress <img src="https://latex.codecogs.com/png.latex?X_2"> onto <img src="https://latex.codecogs.com/png.latex?X_1"> and compute the residuals. The regression of the result from the first operation onto the result from the second operation will yield the same estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2">.</p>
+</blockquote>
+<p>The proof can (probably) be found in most econometrics textbooks, but for now we will suffice for an example in R.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">fit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(am <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> vs <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> mpg, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>mtcars)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">(ols_estimate <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coef</span>(fit)[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'vs'</span>])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        vs 
+-0.4072501 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">r1 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">resid</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(am <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> mpg, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>mtcars))</span>
+<span id="cb3-2">r2 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">resid</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(vs <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> mpg, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data=</span>mtcars))</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">fwl_fit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(r1<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>r2)</span>
+<span id="cb3-5"></span>
+<span id="cb3-6">(fwl_estimate <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coef</span>(fwl_fit)[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'r2'</span>])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        r2 
+-0.4072501 </code></pre>
+</div>
+</div>
+<p>The procedure described above is sometimes called “partialling out” or “residualization”. Point estimates and standard errors should be the same from both procedures (note that you have to adjust the partialled out estimate of the standard error so that it has the same degrees of freedom as the full estimate, see code below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">(se_vs_full <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(fit)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>coefficients[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"vs"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Std. Error"</span>])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1816192</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">se_vs_fwl_raw <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(fwl_fit)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>coefficients[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"r2"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Std. Error"</span>]</span>
+<span id="cb7-2"></span>
+<span id="cb7-3">n <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nrow</span>(mtcars)</span>
+<span id="cb7-4">p_full <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coef</span>(fit))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Number of parameters in full model</span></span>
+<span id="cb7-5">p_fwl <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">coef</span>(fwl_fit))  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Number of parameters in FWL regression</span></span>
+<span id="cb7-6"></span>
+<span id="cb7-7">sigma2_full <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">residuals</span>(fit)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (n <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> p_full)</span>
+<span id="cb7-8">sigma2_fwl <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sum</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">residuals</span>(fwl_fit)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (n <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> p_fwl)</span>
+<span id="cb7-9"></span>
+<span id="cb7-10">(se_vs_fwl_corrected <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> se_vs_fwl_raw <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(sigma2_full <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1816192</code></pre>
+</div>
+</div>
+<p>Note also that the standard error from either the FWL model or the full model is smaller than it would be had <img src="https://latex.codecogs.com/png.latex?X_2"> (or <code>vs</code> in my example) been the only variable in the regression. While I omit a proof of this claim, the intuition is straight forward. When including <img src="https://latex.codecogs.com/png.latex?X_1"> in the regression (either in the full or FWL model), some of the variation in <img src="https://latex.codecogs.com/png.latex?Y"> will be explained by variation in <img src="https://latex.codecogs.com/png.latex?X_1">. This leads to smaller residual variation, which in turn shrinks the sampling variability of the coefficient for <img src="https://latex.codecogs.com/png.latex?X_2">. Hence <em>variance is reduced by including <img src="https://latex.codecogs.com/png.latex?X_1"></em> in the regression. Furthermore, there is little risk of inflated standard errors due to collinearity since <img src="https://latex.codecogs.com/png.latex?X_2"> is independent of <img src="https://latex.codecogs.com/png.latex?X_1"> and hence uncorrelated in expectation. Hence, variance should only decrease when adjusting for pre-treatment variables correlated with <img src="https://latex.codecogs.com/png.latex?Y">.</p>
+</section>
+<section id="why-you-cant-spell-cuped-without-fwl" class="level1">
+<h1>Why You Can’t Spell CUPED without FWL</h1>
+<p>Note that CUPED does a sort of “partialling out”. The control variable above looks similar to <code>outcome - regression_coefficient x regressor</code>. That we can estimate the difference in means more efficiently using this procedure (and its optimal choice of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">) is a consequence of the FWL theorem (which provides the validity of paritialling out) and basic regression analysis (which explains why the partialling out reduces variance). Through this lends, there is no need to use any other name than “regression”. However, statistics, machine learning, and online experimentation are just different dialects of the same language. It can be useful to be profficient in all dialects because that means we can borrow ideas from one to apply to the other without the need to re-invent the wheel. This post is not intended to deride Deng and the CUPED authors – I’m not saying they over stated their contribution or something of that nature – , just to draw connections between seemingly different topics which are, in fact, not so different.</p>
+<p>I want to bring special attention to a quote from the CUPED paper regarding the choice of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">.</p>
+<blockquote class="blockquote">
+<p>There is a slight subtlety that’s worth pointing out. The pair <img src="https://latex.codecogs.com/png.latex?(Y,%20X)"> may have different distributions in treatment and control when there is an experiment effect. For <img src="https://latex.codecogs.com/png.latex?%5CDelta_%7Bcv%7D"> to be unbiased, the same <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> has to be used for both control and treatment. The simplest way to estimate it is from the pooled population of control and treatment. The impact on variance reduction will likely be negligible.</p>
+</blockquote>
+<p>In the next post in this series, we’ll examine this statement more closely along with earler criticisms of the use of OLS for estimating the average treatment effect in randomized experiments.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The algebraic details are as follows. Let <img src="https://latex.codecogs.com/png.latex?Y_i%5E%7B(t)%7D"> be an outcome in the treatment group and let <img src="https://latex.codecogs.com/png.latex?Y_i%5E%7B(c)%7D"> be an outcome in the control group. Then <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%20%5CDelta_%7Bc%20v%7D&amp;=%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(t)%7D-%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(c)%7D%5C%5C%0A&amp;=%20%5Cbar%7BY%7D%5E%7B(t)%7D-%5Ctheta%20%5Cbar%7BX%7D%5E%7B(t)%7D+%5Ctheta%20E%5BX%5E%7B(t)%7D%5D%20-%20(%5Cbar%7BY%7D%5E%7B(c)%7D-%5Ctheta%20%5Cbar%7BX%7D%5E%7B(c)%7D+%5Ctheta%20E%5BX%5E%7B(c)%7D%5D%20)%0A%5Cend%7Balign%7D"> Note that prior to the treatment <img src="https://latex.codecogs.com/png.latex?E%5BX%5E%7B(t)%7D%5D%20=%20E%5BX%5E%7B(c)%7D%5D">. Deng et. al also recommend using the same <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> for both treatment and control groups, which we will see in a future post can be improved upon.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2025-03-03-cuped/</guid>
+  <pubDate>Mon, 03 Mar 2025 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>How Long to Run a Bayesian AB Test</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -7843,526 +8077,6 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
   <category>AB Testing</category>
   <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/</guid>
   <pubDate>Fri, 25 Nov 2022 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Bootstrapping in SQL</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Remember the <a href="https://en.wikipedia.org/wiki/Double_Down_(sandwich)">“Double Down”</a> from KFC? It was bacon and cheese sandwiched between two deep fried pieces of chicken. I’m willing to bet we all conceived of it independently (as in “LOL wouldn’t it be crazy if…”), realistically could have made it ourselves, but were smart enough not to because “sure we could but… why?”.</p>
-<p>This blog post is the Double Down of Statistics.</p>
-</section>
-<section id="bootstrapping-in-sql.-no-really." class="level2">
-<h2 class="anchored" data-anchor-id="bootstrapping-in-sql.-no-really.">Bootstrapping in SQL. No, Really.</h2>
-<p>Two things which have made my stats like easier:</p>
-<ul>
-<li>Bootstrapping, and</li>
-<li>Tidy data</li>
-</ul>
-<p>R’s <code>rsample::bootstraps</code> seems to do one in terms of the other. Take a look at the output of that function. We have, in essence, one bootstrapped dataset per row.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(rsample )</span>
-<span id="cb1-3"></span>
-<span id="cb1-4">rsample<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">bootstraps</span>(cars)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># Bootstrap sampling 
-# A tibble: 25 × 2
-   splits          id         
-   &lt;list&gt;          &lt;chr&gt;      
- 1 &lt;split [50/18]&gt; Bootstrap01
- 2 &lt;split [50/16]&gt; Bootstrap02
- 3 &lt;split [50/16]&gt; Bootstrap03
- 4 &lt;split [50/18]&gt; Bootstrap04
- 5 &lt;split [50/21]&gt; Bootstrap05
- 6 &lt;split [50/19]&gt; Bootstrap06
- 7 &lt;split [50/20]&gt; Bootstrap07
- 8 &lt;split [50/18]&gt; Bootstrap08
- 9 &lt;split [50/20]&gt; Bootstrap09
-10 &lt;split [50/19]&gt; Bootstrap10
-# … with 15 more rows</code></pre>
-</div>
-</div>
-<p>In theory, I could unnest this and have one observation from each bootstrap per row, with <code>id</code> serving as an indicator to tell me to which resample the observation belongs to. Which means…I could theoretically bootstrap in SQL.</p>
-<p>So, let’s do that. I’m going to use duckdb because its SQL-like and has some stats functions (whereas SQLite does not).</p>
-<p>Let’s sample some pairs <img src="https://latex.codecogs.com/png.latex?(x_i,%20y_i)"> from the relationship <img src="https://latex.codecogs.com/png.latex?y_i%20=%202x_i%20+%201%20+%20%5Cvarepsilon_i">, where the <img src="https://latex.codecogs.com/png.latex?%5Cvarepsilon"> are iid draws from a standard Gaussian Let’s stick that in a dataframe along with a row number column into our database. The data are shown in Table&nbsp;1.</p>
-<div class="cell">
-<div id="tbl-original-data" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-original-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: My Data
-</figcaption>
-<div aria-describedby="tbl-original-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">original_rownum</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">x</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">y</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">1</td>
-<td style="text-align: center;">2.09</td>
-<td style="text-align: center;">5.73</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0.97</td>
-<td style="text-align: center;">3.58</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">0.70</td>
-<td style="text-align: center;">1.37</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">4</td>
-<td style="text-align: center;">1.44</td>
-<td style="text-align: center;">4.84</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">2.07</td>
-<td style="text-align: center;">4.14</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">6</td>
-<td style="text-align: center;">1.67</td>
-<td style="text-align: center;">3.09</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-</div>
-</div>
-<p>To bootstrap in SQL, we need to emulate what the unnested results of <code>rsample::bootstraps</code> would look like. We need rows of (<code>strap_id</code>, <code>original_data_rownum</code>, and <code>bootstrap_rownum</code>). Let’s discuss the interpretation and purpose of each column.</p>
-<ul>
-<li><p><code>strap_id</code> plays the part of <code>id</code> in <code>rsample::bootstraps</code>. We’re just going to group by this column and aggregate the resampled data later.</p></li>
-<li><p><code>original_data_rownum</code> doesn’t really serve a purpose. It contains integers 1 through <img src="https://latex.codecogs.com/png.latex?N"> (where <img src="https://latex.codecogs.com/png.latex?N"> is our original sample size). We can do a cross join to get pairs (<code>strap_id</code>, <code>original_data_rownum</code>). This means there will be <img src="https://latex.codecogs.com/png.latex?N"> copies of <code>strap_id</code>, meaning we can get <img src="https://latex.codecogs.com/png.latex?N"> resamples of our data for each <code>strap_id</code>.</p></li>
-<li><p><code>bootstrap_rownum</code> is a random integer between 1 and <img src="https://latex.codecogs.com/png.latex?N">. This column DOES serve a purpose, its basically the sampling with replacement bit for the bootstrap. Now, duckdb doesn’t have a function to sample random integers. To do this, I basically sample random numbers on the unit interval do some arithmetic to turn those into integers.</p></li>
-</ul>
-<p>Let’s set that up now. The hardest part really is creating a sequence of numbers, but duckdb makes that pretty easy.</p>
-<section id="query-to-make-strap_id" class="level3">
-<h3 class="anchored" data-anchor-id="query-to-make-strap_id">Query To Make <code>strap_id</code></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Set up strap_ids in a table</span></span>
-<span id="cb3-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">CREATE</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">OR</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">REPLACE</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">TABLE</span> strap_ids(strap_id <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">INTEGER</span>);</span>
-<span id="cb3-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Do 1000 bootstraps</span></span>
-<span id="cb3-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">INSERT</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">INTO</span> strap_ids(strap_id) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">select</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">from</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1001</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>);</span></code></pre></div>
-</div>
-<div class="cell">
-<div id="tbl-strap-ids" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-strap-ids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: Contents of <code>strap_ids</code>. These play the role of <code>id</code> in the rsample output.
-</figcaption>
-<div aria-describedby="tbl-strap-ids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">strap_id</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">5</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-</div>
-</div>
-</section>
-<section id="query-to-make-original_data_rownum" class="level3">
-<h3 class="anchored" data-anchor-id="query-to-make-original_data_rownum">Query To Make <code>original_data_rownum</code></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Set up original_data_rownum in a table</span></span>
-<span id="cb4-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">CREATE</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">OR</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">REPLACE</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">TABLE</span> original_data_rownum(original_rownum <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">INTEGER</span>);</span>
-<span id="cb4-3"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- I have 2500 observations in my data</span></span>
-<span id="cb4-4"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">INSERT</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">INTO</span> original_data_rownum(original_rownum) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">select</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">from</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2500</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>);</span></code></pre></div>
-</div>
-<div class="cell">
-<div id="tbl-original-data-rownum" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-original-data-rownum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;3: Contents of <code>original_data_rownum</code>. These play the role of <code>id</code> in the rsample output.
-</figcaption>
-<div aria-describedby="tbl-original-data-rownum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">original_rownum</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">3</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">5</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-</div>
-</div>
-<p>Ok, now we have the two tables <code>strap_ids</code> and <code>original_data_rownum</code>. All we need to do now is cross join then, and do the random number magic. That’s shown below in table Table&nbsp;4.</p>
-</section>
-<section id="query-to-make-bootstrap_rownum" class="level3">
-<h3 class="anchored" data-anchor-id="query-to-make-bootstrap_rownum">Query To Make <code>bootstrap_rownum</code></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">create</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">or</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">replace</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">table</span> resample_template <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> </span>
-<span id="cb5-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">select</span></span>
-<span id="cb5-3">  strap_ids.strap_id,</span>
-<span id="cb5-4">  original_data_rownum.original_rownum,</span>
-<span id="cb5-5">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- I have 2500 observations in my data</span></span>
-<span id="cb5-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">round</span>( <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2501</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">random</span>()) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> bootstrap_rownum,</span>
-<span id="cb5-7"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">from</span></span>
-<span id="cb5-8">  strap_ids</span>
-<span id="cb5-9"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">cross</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">join</span> </span>
-<span id="cb5-10">  original_data_rownum;</span></code></pre></div>
-</div>
-<div class="cell">
-<div id="tbl-resample-template" class="cell quarto-float anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-resample-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4: A sample from the table <code>resampel_template</code>.
-</figcaption>
-<div aria-describedby="tbl-resample-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="table table-striped do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: center;" data-quarto-table-cell-role="th">strap_id</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">original_rownum</th>
-<th style="text-align: center;" data-quarto-table-cell-role="th">bootstrap_rownum</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">573</td>
-<td style="text-align: center;">2216</td>
-<td style="text-align: center;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">312</td>
-<td style="text-align: center;">2227</td>
-<td style="text-align: center;">1792</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">554</td>
-<td style="text-align: center;">1577</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">440</td>
-<td style="text-align: center;">381</td>
-<td style="text-align: center;">688</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">969</td>
-<td style="text-align: center;">1352</td>
-<td style="text-align: center;">1840</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-</div>
-</div>
-</section>
-</section>
-<section id="actually-doing-the-bootstrapping-its-just-a-left-join" class="level2">
-<h2 class="anchored" data-anchor-id="actually-doing-the-bootstrapping-its-just-a-left-join">Actually Doing The Bootstrapping: Its Just A Left Join!</h2>
-<p>Now all we have to do is join the original data onto <code>resample_template</code>. The join is going to happen <code>on original_data.original_rownum = resample_template.bootstrap_rownum</code>.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">create</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">or</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">replace</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">table</span> resampled_data <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span></span>
-<span id="cb6-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">select</span></span>
-<span id="cb6-3">  resample_template.strap_id,</span>
-<span id="cb6-4">  resample_template.bootstrap_rownum,</span>
-<span id="cb6-5">  original_data.x,</span>
-<span id="cb6-6">  original_data.y</span>
-<span id="cb6-7"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">from</span> </span>
-<span id="cb6-8">  resample_template</span>
-<span id="cb6-9"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">left</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">join</span> </span>
-<span id="cb6-10">  original_data <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">on</span> original_data.original_rownum <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resample_template.bootstrap_rownum;</span></code></pre></div>
-</div>
-<p>And congratulations, you have what is in essence an unnested <code>rsample::bootstraps</code> output. This happens shockingly fast in duckdb (actually, a bit faster than <code>rsample</code> does it, but that is anecdote I didn’t actually time them). The hard part now is the aggregation function. Obviously, you can’t do very complex statsitical aggregations in duckdb (or any other SQL dialect), but there are a few you can do. For example, let’s bootstrap the mean of <img src="https://latex.codecogs.com/png.latex?x"> and <img src="https://latex.codecogs.com/png.latex?y">, as well as the estimated regression coefficient.</p>
-<div class="cell" data-output.var="bsr">
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">select</span></span>
-<span id="cb7-2">  <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Bootstrap'</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">||</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lpad</span>(strap_id,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">id</span>,</span>
-<span id="cb7-3">  <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'SQL'</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">method</span>,</span>
-<span id="cb7-4">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">avg</span>(x) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> mean_x,</span>
-<span id="cb7-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">avg</span>(y) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> mean_y,</span>
-<span id="cb7-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">corr</span>(y, x) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stddev</span>(y) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stddev</span>(x) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">as</span> beta</span>
-<span id="cb7-7"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">from</span> resampled_data</span>
-<span id="cb7-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">group</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">by</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span>
-<span id="cb7-9"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">order</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">by</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>;</span></code></pre></div>
-</div>
-<p>We can easily compare the distributions obtained via the SQL bootstrap with distributions obtained from <code>rsample::bootstrap</code></p>
-</section>
-<section id="but-does-it-work" class="level2">
-<h2 class="anchored" data-anchor-id="but-does-it-work">But Does It Work</h2>
-<p>Yes…I think. The averages for <img src="https://latex.codecogs.com/png.latex?x"> and <img src="https://latex.codecogs.com/png.latex?y"> look really good, but the SQL bootstrap tails for the regression coefficient are a little thin.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>This is pretty silly, and probably inefficient. I’m no data engineer, I’m just a guy with a Ph.D in stats and a lot of time on the weekend. I should get a hobby or something.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <guid>https://dpananos.github.io/posts/2022-11-16-bootstrapping-in-sql/</guid>
-  <pubDate>Wed, 16 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

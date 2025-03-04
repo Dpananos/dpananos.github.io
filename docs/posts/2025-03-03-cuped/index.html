@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2025-03-03">
+
+<title>Demetri Pananos Ph.D - A Brief Tour of CUPED and Related Methods (Pt. 1)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - A Brief Tour of CUPED and Related Methods (Pt. 1)">
+<meta property="og:description" content="">
+<meta property="og:site_name" content="Demetri Pananos Ph.D">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - A Brief Tour of CUPED and Related Methods (Pt. 1)">
+<meta name="twitter:description" content="">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html"> 
+<span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">A Brief Tour of CUPED and Related Methods (Pt. 1)</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 3, 2025</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#set-up" id="toc-set-up" class="nav-link" data-scroll-target="#set-up">Set Up</a></li>
+  <li><a href="#cuped-for-those-who-dont-know" id="toc-cuped-for-those-who-dont-know" class="nav-link" data-scroll-target="#cuped-for-those-who-dont-know">CUPED: For Those Who Don’t Know</a></li>
+  <li><a href="#frisch-waugh-lovell-theorem-for-those-who-dont-know" id="toc-frisch-waugh-lovell-theorem-for-those-who-dont-know" class="nav-link" data-scroll-target="#frisch-waugh-lovell-theorem-for-those-who-dont-know">Frisch Waugh Lovell Theorem: For Those Who Don’t Know</a></li>
+  <li><a href="#why-you-cant-spell-cuped-without-fwl" id="toc-why-you-cant-spell-cuped-without-fwl" class="nav-link" data-scroll-target="#why-you-cant-spell-cuped-without-fwl">Why You Can’t Spell CUPED without FWL</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-03-03-cuped/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Randomized experiments have a rich history, almost none of which is the concern of this post. Rather, I focus on a tiny slice of randomized experiment literature: CUPED (Controlled-experiment Using Pre-Experiment Data). The technique has been impactful in the online randomized experiment (a.k.a. A/B Testing) community, with many vendors – Eppo included – offering the technique. Despite the popularity and impact, customers and data scientists still seem to misunderstand why CUPED works, why different implementations of the procedure (a la regression adjustment) still provide the same benefit, why different implementations are asymptotically equivalent, and under what conditions one should or should not use CUPED.</p>
+<p>This sequence of posts seeks to answer popular questions regarding the CUPED, and in particular frames the technique as a regression procedure first as opposed to a “new” or different technique. I discuss papers that pre-date the CUPED as well as discuss how the literature has evolved since the publication of CUPED. This is not a systematic review, nor a scoping review; this is a story of regression erasure (I kid).</p>
+</section>
+<section id="set-up" class="level1">
+<h1>Set Up</h1>
+<p>Most of this blog post concerns online randomized experiments or “A/B tests” as they are known in industry. Generally, subjects will be exposed to treatment or control at some known probability (usually 50/50 since this is the most efficient design). Some outcome, <span class="math inline">\(Y\)</span>, is then recorded and groups are compared statistically. Various estimands are used in industry, but for simplicity we will use the average treatment effect as our estimand of choice.</p>
+</section>
+<section id="cuped-for-those-who-dont-know" class="level1">
+<h1>CUPED: For Those Who Don’t Know</h1>
+<p>Deng and colleagus published CUPED in their 2013 paper <a href="https://exp-platform.com/Documents/2013-02-CUPED-ImprovingSensitivityOfControlledExperiments.pdf">“Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data”</a>. The main motivation for the paper is increasing sensitivity of experiments to detect smaller, detect effects faster, or both. Deng et. al motivate their approach through “control variates”. Briefly – and aside from experimentation for a moment – given pairs of random variables <span class="math inline">\((Y_i, X_i)\)</span> in which <span class="math inline">\(E[X]\)</span> is known, define</p>
+<p><span class="math display">\[\widehat{Y}_{c v}=\bar{Y}-\theta \bar{X}+\theta E[X]\]</span></p>
+<p>where <span class="math inline">\(\theta\)</span> is an arbitrary constant. It can be shown that <span class="math inline">\(\widehat{Y}_{c v}\)</span> is an unbiased estimator of <span class="math inline">\(E[Y]\)</span>. Because <span class="math inline">\(\theta\)</span> is arbitrary, we can choose a <span class="math inline">\(\theta\)</span> so that the variance of the estimator is minimized. The variance of <span class="math inline">\(\widehat{Y}_{c v}\)</span> is</p>
+<p><span class="math display">\[ \begin{align}
+\operatorname{Var}(\widehat{Y}_{c v}) &amp;= \operatorname{Var}(\bar{Y}-\theta \bar{X}+\theta E[X])\\
+&amp;=\dfrac{1}{n} \left( \operatorname{Var}(Y) + \theta^2 \operatorname{Var}(X) - 2\theta\operatorname{Cov}(X,Y) \right)
+\end{align}\]</span></p>
+<p>and is notably quadratic in <span class="math inline">\(\theta\)</span>. Application of elementary calculus shows that the variance is then minimized when</p>
+<p><span class="math display">\[ \theta = \dfrac{\operatorname{Cov}(Y, X)}{\operatorname{Var}(X)} \]</span> and further algebriac manipulation shows</p>
+<p><span class="math display">\[ \operatorname{var}\left(\widehat{Y}_{c v}\right)=\operatorname{var}(\bar{Y})\left(1-\rho^2\right) \]</span> where <span class="math inline">\(\rho = \operatorname{Cor}(Y, X)\)</span>.</p>
+<p>In short, the standard error of the mean can be reduced so long as there is some other variable, <span class="math inline">\(X\)</span>, correlated with <span class="math inline">\(Y\)</span>, where larger correlations lead to more variance reduction.</p>
+<p>Back to experimentation, the insight in the CUPED paper was that while finding an <span class="math inline">\(X\)</span> with known expectation is hard, the <em>difference</em> in expectations for any random variable in the pre-treatment period is 0. Deng et. al then estimate the difference in means between treatment in control by computing the control variate versions of outcomes in each group and then estimating the difference in means using <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p><span class="math display">\[ \Delta_{c v}=\widehat{Y}_{c v}^{(t)}-\widehat{Y}_{c v}^{(c)} \&gt;. \]</span></p>
+<p>In the remainder of the paper, Deng et. al provide some recommendations on choosing <span class="math inline">\(X\)</span>, landing on the recommendation to “[…]to use the same variable from the pre-experiment period as the covariate” – i.e.&nbsp;to use the pre-experiment outcome as the control variable. Deng et. al write</p>
+<blockquote class="blockquote">
+<p>It is interesting to point out the connection with linear regression. The optimal <span class="math inline">\(\theta\)</span> tunrs out to be the ordinary least squares (OLS) solution regressing (centered) <span class="math inline">\(Y\)</span> on (centered) <span class="math inline">\(X\)</span></p>
+</blockquote>
+<p>so the connection to regression was clearly known. As we will see, the method is formally equivalent to regression, but in order to see this more clearly we will need the Frisch Waugh Lovell theorem.</p>
+</section>
+<section id="frisch-waugh-lovell-theorem-for-those-who-dont-know" class="level1">
+<h1>Frisch Waugh Lovell Theorem: For Those Who Don’t Know</h1>
+<p>Econometricians will know the Frisch Waugh Lovell (FWL) theorem well. Borrowing from wikipedia, the theorem states that the esitmate for <span class="math inline">\(\beta_2\)</span> in the model (henceforth full model)</p>
+<p><span class="math display">\[ Y = X_1 \beta_1 + X_2 \beta_2 +u \]</span> will be the same as the estimate of <span class="math inline">\(\beta_2\)</span> in the model (henceforth FWL model)</p>
+<p><span class="math display">\[M_{X_1} Y=M_{X_1} X_2 \beta_2+M_{X_1} u\]</span></p>
+<p>where <span class="math inline">\(M_{X_1} = I-X_1(X^T_1X_1)^{-1}X_1^T\)</span>. Squint hard enough and you will see that the projection, or hat, matrix appears in <span class="math inline">\(M_{X_1}\)</span>. The FWL theorem then says, more or less,</p>
+<blockquote class="blockquote">
+<p>First regress <span class="math inline">\(Y\)</span> onto <span class="math inline">\(X_1\)</span> and compute the residuals. Then, regress <span class="math inline">\(X_2\)</span> onto <span class="math inline">\(X_1\)</span> and compute the residuals. The regression of the result from the first operation onto the result from the second operation will yield the same estimate of <span class="math inline">\(\beta_2\)</span>.</p>
+</blockquote>
+<p>The proof can (probably) be found in most econometrics textbooks, but for now we will suffice for an example in R.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(am <span class="sc">~</span> vs <span class="sc">+</span> mpg, <span class="at">data=</span>mtcars)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>(ols_estimate <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit)[<span class="st">'vs'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        vs 
+-0.4072501 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">resid</span>(<span class="fu">lm</span>(am <span class="sc">~</span> mpg, <span class="at">data=</span>mtcars))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>r2 <span class="ot">&lt;-</span> <span class="fu">resid</span>(<span class="fu">lm</span>(vs <span class="sc">~</span> mpg, <span class="at">data=</span>mtcars))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>fwl_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(r1<span class="sc">~</span>r2)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>(fwl_estimate <span class="ot">&lt;-</span> <span class="fu">coef</span>(fwl_fit)[<span class="st">'r2'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        r2 
+-0.4072501 </code></pre>
+</div>
+</div>
+<p>The procedure described above is sometimes called “partialling out” or “residualization”. Point estimates and standard errors should be the same from both procedures (note that you have to adjust the partialled out estimate of the standard error so that it has the same degrees of freedom as the full estimate, see code below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(se_vs_full <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit)<span class="sc">$</span>coefficients[<span class="st">"vs"</span>, <span class="st">"Std. Error"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1816192</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>se_vs_fwl_raw <span class="ot">&lt;-</span> <span class="fu">summary</span>(fwl_fit)<span class="sc">$</span>coefficients[<span class="st">"r2"</span>, <span class="st">"Std. Error"</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">nrow</span>(mtcars)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>p_full <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fit))  <span class="co"># Number of parameters in full model</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>p_fwl <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">coef</span>(fwl_fit))  <span class="co"># Number of parameters in FWL regression</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>sigma2_full <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">residuals</span>(fit)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> (n <span class="sc">-</span> p_full)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>sigma2_fwl <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">residuals</span>(fwl_fit)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> (n <span class="sc">-</span> p_fwl)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>(se_vs_fwl_corrected <span class="ot">&lt;-</span> se_vs_fwl_raw <span class="sc">*</span> <span class="fu">sqrt</span>(sigma2_full <span class="sc">/</span> sigma2_fwl))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1816192</code></pre>
+</div>
+</div>
+<p>Note also that the standard error from either the FWL model or the full model is smaller than it would be had <span class="math inline">\(X_2\)</span> (or <code>vs</code> in my example) been the only variable in the regression. While I omit a proof of this claim, the intuition is straight forward. When including <span class="math inline">\(X_1\)</span> in the regression (either in the full or FWL model), some of the variation in <span class="math inline">\(Y\)</span> will be explained by variation in <span class="math inline">\(X_1\)</span>. This leads to smaller residual variation, which in turn shrinks the sampling variability of the coefficient for <span class="math inline">\(X_2\)</span>. Hence <em>variance is reduced by including <span class="math inline">\(X_1\)</span></em> in the regression. Furthermore, there is little risk of inflated standard errors due to collinearity since <span class="math inline">\(X_2\)</span> is independent of <span class="math inline">\(X_1\)</span> and hence uncorrelated in expectation. Hence, variance should only decrease when adjusting for pre-treatment variables correlated with <span class="math inline">\(Y\)</span>.</p>
+</section>
+<section id="why-you-cant-spell-cuped-without-fwl" class="level1">
+<h1>Why You Can’t Spell CUPED without FWL</h1>
+<p>Note that CUPED does a sort of “partialling out”. The control variable above looks similar to <code>outcome - regression_coefficient x regressor</code>. That we can estimate the difference in means more efficiently using this procedure (and its optimal choice of <span class="math inline">\(\theta\)</span>) is a consequence of the FWL theorem (which provides the validity of paritialling out) and basic regression analysis (which explains why the partialling out reduces variance). Through this lends, there is no need to use any other name than “regression”. However, statistics, machine learning, and online experimentation are just different dialects of the same language. It can be useful to be profficient in all dialects because that means we can borrow ideas from one to apply to the other without the need to re-invent the wheel. This post is not intended to deride Deng and the CUPED authors – I’m not saying they over stated their contribution or something of that nature – , just to draw connections between seemingly different topics which are, in fact, not so different.</p>
+<p>I want to bring special attention to a quote from the CUPED paper regarding the choice of <span class="math inline">\(\theta\)</span>.</p>
+<blockquote class="blockquote">
+<p>There is a slight subtlety that’s worth pointing out. The pair <span class="math inline">\((Y, X)\)</span> may have different distributions in treatment and control when there is an experiment effect. For <span class="math inline">\(\Delta_{cv}\)</span> to be unbiased, the same <span class="math inline">\(\theta\)</span> has to be used for both control and treatment. The simplest way to estimate it is from the pooled population of control and treatment. The impact on variance reduction will likely be negligible.</p>
+</blockquote>
+<p>In the next post in this series, we’ll examine this statement more closely along with earler criticisms of the use of OLS for estimating the average treatment effect in randomized experiments.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The algebraic details are as follows. Let <span class="math inline">\(Y_i^{(t)}\)</span> be an outcome in the treatment group and let <span class="math inline">\(Y_i^{(c)}\)</span> be an outcome in the control group. Then <span class="math display">\[\begin{align} \Delta_{c v}&amp;=\widehat{Y}_{c v}^{(t)}-\widehat{Y}_{c v}^{(c)}\\
+&amp;= \bar{Y}^{(t)}-\theta \bar{X}^{(t)}+\theta E[X^{(t)}] - (\bar{Y}^{(c)}-\theta \bar{X}^{(c)}+\theta E[X^{(c)}] )
+\end{align}\]</span> Note that prior to the treatment <span class="math inline">\(E[X^{(t)}] = E[X^{(c)}]\)</span>. Deng et. al also recommend using the same <span class="math inline">\(\theta\)</span> for both treatment and control groups, which we will see in a future post can be improved upon.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-03-03-cuped/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
