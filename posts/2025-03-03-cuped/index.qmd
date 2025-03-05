@@ -124,7 +124,7 @@ Let's bring this all together.[^2]  I'm going to start with a regression model a
 
 
 
-Let $(Y, X, D)$ be a triple of random variables sich that
+Let $(Y, X, D)$ be a triple of random variables such that
 
 1. $E[Y] = E[X] = E[D] = 0$
 2. $D$ is a randomly assigned binary treatment indicator and takes on values $\{-0.5, 0.5\}$. This is mostly for convenience. 
@@ -142,12 +142,12 @@ Second, partial out the effect of $X$ on $D$ by computing
 
 $$r_2 = D-\hat{\beta} X $$
 
-Since $D$ is assumed independent of $X$, then $\beta=0$ and therefore $r_2=D$.
+Since $D$ is assumed independent of $X$, then $\hat{beta}=0$ and therefore $r_2=D$.
 
-By the FWL theorem, the coefficeint $\Delta$ an be estimated using the following regression
+By the FWL theorem, the coefficeint $\Delta$ can be estimated using the following regression
 
 $$ r_1 = \Delta r_2 + \varepsilon = \Delta D + \varepsilon $$
-Since $D$ is binary, this model estimates the difference in means between the two groups.  The difference in means is
+Since $D$ is binary and treatment corresponds to a unit change in $D$, this model estimates the difference in means between the two groups.  The difference in means is
 
 $$ \Delta = E[Y - \hat{\theta} X \mid D=0.5] - E[Y - \hat{\theta} X \mid D=-0.5]$$
 
