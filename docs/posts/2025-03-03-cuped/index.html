@@ -322,7 +322,7 @@ window.Quarto = {
 <section id="why-you-cant-spell-cuped-without-fwl" class="level1">
 <h1>Why You Can’t Spell CUPED without FWL</h1>
 <p>Let’s bring this all together.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> I’m going to start with a regression model and apply the FWL theorem in order to prove that CUPED is equivalent to regression.</p>
-<p>Let <span class="math inline">\((Y, X, D)\)</span> be a triple of random variables sich that</p>
+<p>Let <span class="math inline">\((Y, X, D)\)</span> be a triple of random variables such that</p>
 <ol type="1">
 <li><span class="math inline">\(E[Y] = E[X] = E[D] = 0\)</span></li>
 <li><span class="math inline">\(D\)</span> is a randomly assigned binary treatment indicator and takes on values <span class="math inline">\(\{-0.5, 0.5\}\)</span>. This is mostly for convenience.</li>
@@ -335,9 +335,9 @@ window.Quarto = {
 <p>with <span class="math inline">\(\hat{\theta} = \operatorname{Cov}(Y, X) / \operatorname{Var}(X)\)</span>. Note that this choice of <span class="math inline">\(\theta\)</span> minimizes the variance of <span class="math inline">\(r_1\)</span>.</p>
 <p>Second, partial out the effect of <span class="math inline">\(X\)</span> on <span class="math inline">\(D\)</span> by computing</p>
 <p><span class="math display">\[r_2 = D-\hat{\beta} X \]</span></p>
-<p>Since <span class="math inline">\(D\)</span> is assumed independent of <span class="math inline">\(X\)</span>, then <span class="math inline">\(\beta=0\)</span> and therefore <span class="math inline">\(r_2=D\)</span>.</p>
-<p>By the FWL theorem, the coefficeint <span class="math inline">\(\Delta\)</span> an be estimated using the following regression</p>
-<p><span class="math display">\[ r_1 = \Delta r_2 + \varepsilon = \Delta D + \varepsilon \]</span> Since <span class="math inline">\(D\)</span> is binary, this model estimates the difference in means between the two groups. The difference in means is</p>
+<p>Since <span class="math inline">\(D\)</span> is assumed independent of <span class="math inline">\(X\)</span>, then <span class="math inline">\(\hat{beta}=0\)</span> and therefore <span class="math inline">\(r_2=D\)</span>.</p>
+<p>By the FWL theorem, the coefficeint <span class="math inline">\(\Delta\)</span> can be estimated using the following regression</p>
+<p><span class="math display">\[ r_1 = \Delta r_2 + \varepsilon = \Delta D + \varepsilon \]</span> Since <span class="math inline">\(D\)</span> is binary and treatment corresponds to a unit change in <span class="math inline">\(D\)</span>, this model estimates the difference in means between the two groups. The difference in means is</p>
 <p><span class="math display">\[ \Delta = E[Y - \hat{\theta} X \mid D=0.5] - E[Y - \hat{\theta} X \mid D=-0.5]\]</span></p>
 <p>which is equivalent to the CUPED estimator.</p>
 <p>Statistics, machine learning, and online experimentation are just different dialects of the same language. It can be useful to be proficient in all dialects because that means we can borrow ideas from one to apply to the other without the need to re-invent the wheel. Now that we know CUPED is just regression, we can just skip right to fitting a linear model and interpreting the coefficient knowing that we benefit from the variance reduction CUPED promises us.</p>

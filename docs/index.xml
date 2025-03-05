@@ -227,7 +227,7 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
 <section id="why-you-cant-spell-cuped-without-fwl" class="level1">
 <h1>Why You Can’t Spell CUPED without FWL</h1>
 <p>Let’s bring this all together.<sup>2</sup> I’m going to start with a regression model and apply the FWL theorem in order to prove that CUPED is equivalent to regression.</p>
-<p>Let <img src="https://latex.codecogs.com/png.latex?(Y,%20X,%20D)"> be a triple of random variables sich that</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?(Y,%20X,%20D)"> be a triple of random variables such that</p>
 <ol type="1">
 <li><img src="https://latex.codecogs.com/png.latex?E%5BY%5D%20=%20E%5BX%5D%20=%20E%5BD%5D%20=%200"></li>
 <li><img src="https://latex.codecogs.com/png.latex?D"> is a randomly assigned binary treatment indicator and takes on values <img src="https://latex.codecogs.com/png.latex?%5C%7B-0.5,%200.5%5C%7D">. This is mostly for convenience.</li>
@@ -240,9 +240,9 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
 <p>with <img src="https://latex.codecogs.com/png.latex?%5Chat%7B%5Ctheta%7D%20=%20%5Coperatorname%7BCov%7D(Y,%20X)%20/%20%5Coperatorname%7BVar%7D(X)">. Note that this choice of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> minimizes the variance of <img src="https://latex.codecogs.com/png.latex?r_1">.</p>
 <p>Second, partial out the effect of <img src="https://latex.codecogs.com/png.latex?X"> on <img src="https://latex.codecogs.com/png.latex?D"> by computing</p>
 <p><img src="https://latex.codecogs.com/png.latex?r_2%20=%20D-%5Chat%7B%5Cbeta%7D%20X%20"></p>
-<p>Since <img src="https://latex.codecogs.com/png.latex?D"> is assumed independent of <img src="https://latex.codecogs.com/png.latex?X">, then <img src="https://latex.codecogs.com/png.latex?%5Cbeta=0"> and therefore <img src="https://latex.codecogs.com/png.latex?r_2=D">.</p>
-<p>By the FWL theorem, the coefficeint <img src="https://latex.codecogs.com/png.latex?%5CDelta"> an be estimated using the following regression</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20r_1%20=%20%5CDelta%20r_2%20+%20%5Cvarepsilon%20=%20%5CDelta%20D%20+%20%5Cvarepsilon%20"> Since <img src="https://latex.codecogs.com/png.latex?D"> is binary, this model estimates the difference in means between the two groups. The difference in means is</p>
+<p>Since <img src="https://latex.codecogs.com/png.latex?D"> is assumed independent of <img src="https://latex.codecogs.com/png.latex?X">, then <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bbeta%7D=0"> and therefore <img src="https://latex.codecogs.com/png.latex?r_2=D">.</p>
+<p>By the FWL theorem, the coefficeint <img src="https://latex.codecogs.com/png.latex?%5CDelta"> can be estimated using the following regression</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20r_1%20=%20%5CDelta%20r_2%20+%20%5Cvarepsilon%20=%20%5CDelta%20D%20+%20%5Cvarepsilon%20"> Since <img src="https://latex.codecogs.com/png.latex?D"> is binary and treatment corresponds to a unit change in <img src="https://latex.codecogs.com/png.latex?D">, this model estimates the difference in means between the two groups. The difference in means is</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5CDelta%20=%20E%5BY%20-%20%5Chat%7B%5Ctheta%7D%20X%20%5Cmid%20D=0.5%5D%20-%20E%5BY%20-%20%5Chat%7B%5Ctheta%7D%20X%20%5Cmid%20D=-0.5%5D"></p>
 <p>which is equivalent to the CUPED estimator.</p>
 <p>Statistics, machine learning, and online experimentation are just different dialects of the same language. It can be useful to be proficient in all dialects because that means we can borrow ideas from one to apply to the other without the need to re-invent the wheel. Now that we know CUPED is just regression, we can just skip right to fitting a linear model and interpreting the coefficient knowing that we benefit from the variance reduction CUPED promises us.</p>
