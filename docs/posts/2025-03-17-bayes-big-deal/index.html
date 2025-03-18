@@ -103,6 +103,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Demetri Pananos Ph.D - More on Bayesian Statistics">
@@ -330,6 +359,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>So, let’s take stock. From this little simulation – which adheres the best I can to what I know about A/B testing, and is still imperfect – we have seen:</p>
+<ul>
+<li>It is true that uninformative priors will give you equivalent estimates to Frequentist approaches (at least in terms of RMSE).</li>
+<li>You probably don’t want to be similar to Frequentist results if you can help it, because you can do better (again in terms of RMSE) by applying a little prior information.</li>
+<li>You don’t even need to be that accurate with your priors. Any reduction in RMSE is good, you don’t need to find the optimal prior to reduce the RMSE. In this case, anywhere between <span class="math inline">\(\beta = 0.05\)</span> and <span class="math inline">\(\beta = 3\)</span> is probably sufficient to reduce RMSE.</li>
+<li>Setting a good prior (in this case) isn’t even that hard. Think about how variable individual experiments vary in results. You aren’t likely to see many experiments 1 lift unit away from the mean. You know, intuitively, that lift estimates are probably somewhere between -10% and 10% on a good day. Even if you were REALLY uncertain and said -50% to 50% for any given experiment, that is still a standard deviation of ~25% and hence well within the range of reducing RMSE (again, in this example. I can’t say if this applies generally).</li>
+</ul>
+<p>Listen, Bayesian or Frequentist, I don’t care. However, it is absolutely clear that, when you pay careful attention to the nuance, the difference between Bayes and Frequentism is a big deal despite what some will say.</p>
 
 
 </section>

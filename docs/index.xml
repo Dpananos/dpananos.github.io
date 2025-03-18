@@ -465,6 +465,14 @@ font-style: inherit;">1.01</span>))</span></code></pre></div>
 </div>
 </div>
 </div>
+<p>So, let’s take stock. From this little simulation – which adheres the best I can to what I know about A/B testing, and is still imperfect – we have seen:</p>
+<ul>
+<li>It is true that uninformative priors will give you equivalent estimates to Frequentist approaches (at least in terms of RMSE).</li>
+<li>You probably don’t want to be similar to Frequentist results if you can help it, because you can do better (again in terms of RMSE) by applying a little prior information.</li>
+<li>You don’t even need to be that accurate with your priors. Any reduction in RMSE is good, you don’t need to find the optimal prior to reduce the RMSE. In this case, anywhere between <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%200.05"> and <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%203"> is probably sufficient to reduce RMSE.</li>
+<li>Setting a good prior (in this case) isn’t even that hard. Think about how variable individual experiments vary in results. You aren’t likely to see many experiments 1 lift unit away from the mean. You know, intuitively, that lift estimates are probably somewhere between -10% and 10% on a good day. Even if you were REALLY uncertain and said -50% to 50% for any given experiment, that is still a standard deviation of ~25% and hence well within the range of reducing RMSE (again, in this example. I can’t say if this applies generally).</li>
+</ul>
+<p>Listen, Bayesian or Frequentist, I don’t care. However, it is absolutely clear that, when you pay careful attention to the nuance, the difference between Bayes and Frequentism is a big deal despite what some will say.</p>
 
 
 </section>
