@@ -150,7 +150,7 @@ sims %>%
   geom_line(color='red', size=1) + 
   scale_x_log10(labels = scales::label_parse(), breaks=10^seq(-3, 4)) + 
   labs(
-    x = expression(beta),
+    x = expression(beta ~ "[Parameter Controlling Prior Variance]"),
     y = 'Relative RMSE',
     title = 'RMSE of Bayesian Estimates Relative to Frequentist Estimates'
   )
