@@ -139,7 +139,7 @@ stopifnot(all(sims$divs==0))
 stopifnot(all(sims$max_rhat<1.01))
 ```
 
-Below is a plot of the relative RMSE of the estimates from the Bayesian model.  I've rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates.  As you can see, more informative priors do result in better RMSE -- to a point.  When the prior becomes too informative, then the RMSE increases.  This is due to pooling all estimates to the grand mean.  Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e. implausible if they are noisy a la Gelman).
+Below is a plot of the relative RMSE of the estimates from the Bayesian model.  I've rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates.  As you can see, more informative priors do result in better RMSE -- **to a point**.  When the prior becomes too informative, then the RMSE increases.  This is due to pooling all estimates to the grand mean.  Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e. implausible if they are noisy a la Gelman).
 
 ```{r}
 #| code-fold: false

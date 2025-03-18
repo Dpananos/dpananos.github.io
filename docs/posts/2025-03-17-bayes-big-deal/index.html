@@ -320,7 +320,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(sims<span class="sc">$</span>max_rhat<span class="sc">&lt;</span><span class="fl">1.01</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Below is a plot of the relative RMSE of the estimates from the Bayesian model. I’ve rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates. As you can see, more informative priors do result in better RMSE – to a point. When the prior becomes too informative, then the RMSE increases. This is due to pooling all estimates to the grand mean. Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e.&nbsp;implausible if they are noisy a la Gelman).</p>
+<p>Below is a plot of the relative RMSE of the estimates from the Bayesian model. I’ve rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates. As you can see, more informative priors do result in better RMSE – <strong>to a point</strong>. When the prior becomes too informative, then the RMSE increases. This is due to pooling all estimates to the grand mean. Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e.&nbsp;implausible if they are noisy a la Gelman).</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
