@@ -3,3 +3,4 @@
 *.ipynb_checkpoints
 .Rproj.user
 data/
+.venv/

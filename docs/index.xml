@@ -10,7 +10,496 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Mon, 03 Mar 2025 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 18 Mar 2025 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>More on Bayesian Statistics</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>I recently wrote a <a href="https://www.geteppo.com/blog/bayes-vs-frequentism-can-be-a-big-deal">blog post</a> for my employer in which I made some claims regarding Bayesian statistics.</p>
+<section id="claim-1-flat-priors-in-heirarchal-models-can-lead-to-pulling-apart-and-implausible-estimates" class="level1">
+<h1>Claim 1: Flat Priors in Heirarchal Models Can Lead to Pulling Apart and Implausible Estimates</h1>
+<p>On flat priors in hierarchical models, Gelman says</p>
+<blockquote class="blockquote">
+<p>A noninformative uniform prior on the coefficients is equivalent to a hierarchical N(0,tau^2) model with tau set to a very large value. This is a very strong prior distribution pulling the estimates apart, and the resulting estimates of individual coefficients are implausible.</p>
+</blockquote>
+<p>By “pulling the estimates apart” I assume Gelman means “not pooling/regularizing estimates” as opposed to literally pulling the estimates apart. As for the line about “implausibility” of individual coefficients, that requires some unpacking.</p>
+<p>Gelman is known for picking out poor methodological papers and commenting on them. Consider <a href="https://sites.stat.columbia.edu/gelman/research/unpublished/prior_context_2.pdf">“The prior can often only be understood in the context of the likelihood”</a> in which Gelman and authors discuss a study which ostensibly demonstrated that “beautiful” are more likely to have a daughter.</p>
+<p>You’re free to read what Gelman and authors wrote, I won’t summarize it here, but in short the authors to which Gelman refers report an unusually high differential in the probability of giving birth to a girl. Given what we know about the sex ratio of births and how they vary across the globe, this seems fairly extreme. Reading between the lines, I would go so far as to say Gelman would consider this estimate as “implausible”. Hence, I interpret “implausible” to mean “no different than Frequentist estimates”. That is not to say that all frequentist estimates are implausible, just that when certain estimates should be shrunk/regularized, a hierarchical model with a flat prior would fail to do so.</p>
+<p>This is fairly easily demonstrated. I’m going to simulate 16 A/B tests. Each test is powered to detect a lift of 5%. However, each of the lifts from the 16 tests is drawn from a normal distribution with mean 1 and standard deviation 0.02. This means that, while not impossible to see a 5% lift, it is highly improbable and often our tests are underpowered for the true effect. This, as I understand it, is the prevailing attitude in A/B testing.</p>
+<p>Each A/B test will be fed to a hierarchical model (shown below in Stan). I place a flat prior on the population mean and parameterize the prior on the population variance so that I can study how estimates change when the prior is less/more variable.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">data</span>{</span>
+<span id="cb1-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> n;</span>
+<span id="cb1-4">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] log_rr;</span>
+<span id="cb1-5">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] stderr;</span>
+<span id="cb1-6">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> beta;</span>
+<span id="cb1-7">}</span>
+<span id="cb1-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">parameters</span>{</span>
+<span id="cb1-9">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu;</span>
+<span id="cb1-10">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; tau;</span>
+<span id="cb1-11">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] z;</span>
+<span id="cb1-12">}</span>
+<span id="cb1-13"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">transformed parameters</span> {</span>
+<span id="cb1-14">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] theta = mu + tau * z;</span>
+<span id="cb1-15">}</span>
+<span id="cb1-16"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">model</span> {</span>
+<span id="cb1-17">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// No mu in the model block means a uniform prior over the domain.</span></span>
+<span id="cb1-18">  tau ~ inv_gamma(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, beta);</span>
+<span id="cb1-19">  z ~ std_normal();</span>
+<span id="cb1-20">  log_rr ~ normal(theta, stderr);</span>
+<span id="cb1-21">}</span></code></pre></div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cmdstanr)</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidybayes)</span>
+<span id="cb2-4"></span>
+<span id="cb2-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb2-6"></span>
+<span id="cb2-7">control_conversion <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span></span>
+<span id="cb2-8">target_lift <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.05</span></span>
+<span id="cb2-9">target_conversion <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> control_conversion <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> target_lift</span>
+<span id="cb2-10">design <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">power.prop.test</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p1 =</span> control_conversion, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p2 =</span> target_conversion, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">power =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.8</span>)</span>
+<span id="cb2-11">n_per_group <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ceiling</span>(design<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>n)</span>
+<span id="cb2-12">n_experiments <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span></span>
+<span id="cb2-13"></span>
+<span id="cb2-14">results <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">replicate</span>(n_experiments, {</span>
+<span id="cb2-15">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># In reality, we generate smaller effects than we wish we did</span></span>
+<span id="cb2-16">  actual_lift <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.02</span>)</span>
+<span id="cb2-17">  actual_log_rr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">log</span>(actual_lift)</span>
+<span id="cb2-18">  </span>
+<span id="cb2-19">  control <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n_per_group, control_conversion)</span>
+<span id="cb2-20">  treatment <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, n_per_group, control_conversion <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> actual_lift)</span>
+<span id="cb2-21">  </span>
+<span id="cb2-22">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Since the groups are the same size the two factors of log(n_per_group) cancel</span></span>
+<span id="cb2-23">  observed_log_rr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">log</span>(treatment) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">log</span>(control)</span>
+<span id="cb2-24">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># A Standard result from the Delta method.</span></span>
+<span id="cb2-25">  sampling_var <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> treatment <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> control <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> n_per_group</span>
+<span id="cb2-26">  stderr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(sampling_var)</span>
+<span id="cb2-27">  </span>
+<span id="cb2-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(observed_log_rr, stderr, actual_log_rr)</span>
+<span id="cb2-29">  </span>
+<span id="cb2-30">})</span>
+<span id="cb2-31"></span>
+<span id="cb2-32">log_rr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, ]</span>
+<span id="cb2-33">stderr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, ]</span>
+<span id="cb2-34">actual_log_rr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, ]</span>
+<span id="cb2-35"></span>
+<span id="cb2-36"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Keep track of the RMSE from our frequentist estimates.</span></span>
+<span id="cb2-37"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Hopefully, the Hierarchical model will do better than this.</span></span>
+<span id="cb2-38">observed_rmse <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>((log_rr <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> actual_log_rr) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span>
+<span id="cb2-39"></span>
+<span id="cb2-40">model <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cmdstan_model</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'model.stan'</span>)</span>
+<span id="cb2-41"></span>
+<span id="cb2-42">beta <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb2-43">sims <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(beta, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> {</span>
+<span id="cb2-44">  stan_data <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(</span>
+<span id="cb2-45">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> n_experiments,</span>
+<span id="cb2-46">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">log_rr =</span> log_rr,</span>
+<span id="cb2-47">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">stderr =</span> stderr,</span>
+<span id="cb2-48">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">beta =</span> .x</span>
+<span id="cb2-49">  )</span>
+<span id="cb2-50">  </span>
+<span id="cb2-51">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">capture.output</span>(</span>
+<span id="cb2-52">  fit <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> model<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample</span>(</span>
+<span id="cb2-53">    stan_data,</span>
+<span id="cb2-54">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">parallel_chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>,</span>
+<span id="cb2-55">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">adapt_delta =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.99</span>,</span>
+<span id="cb2-56">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>,</span>
+<span id="cb2-57">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, </span>
+<span id="cb2-58">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">seed=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb2-59">  )</span>
+<span id="cb2-60">  )</span>
+<span id="cb2-61">  </span>
+<span id="cb2-62">  </span>
+<span id="cb2-63">  estimated <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'theta'</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>mean</span>
+<span id="cb2-64">  error <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> actual_log_rr <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> estimated</span>
+<span id="cb2-65">  rmse <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(error <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span>
+<span id="cb2-66">  max_rhat <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">max</span>(posterior<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise_draws</span>(fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">draws</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'theta'</span>), <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'rhat'</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>rhat)</span>
+<span id="cb2-67">  divs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sum</span>(fit<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">diagnostic_summary</span>()<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>num_divergent)</span>
+<span id="cb2-68">  </span>
+<span id="cb2-69">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(rmse, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">beta =</span> .x, max_rhat, divs)</span>
+<span id="cb2-70">  </span>
+<span id="cb2-71">})</span>
+<span id="cb2-72"></span>
+<span id="cb2-73"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stopifnot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">all</span>(sims<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>divs<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb2-74"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stopifnot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">all</span>(sims<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>max_rhat<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.01</span>))</span></code></pre></div>
+</details>
+</div>
+<p>Below is a plot of the relative RMSE of the estimates from the Bayesian model. I’ve rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates. As you can see, more informative priors do result in better RMSE – to a point. When the prior becomes too informative, then the RMSE increases. This is due to pooling all estimates to the grand mean. Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e.&nbsp;implausible if they are noisy a la Gelman).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</guid>
+  <pubDate>Tue, 18 Mar 2025 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>A Brief Tour of CUPED and Related Methods (Pt. 2)</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2025-03-10-cuped-2/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p><a href="https://dpananos.github.io/posts/2025-03-03-cuped/">In a previous post</a>, I demonstrated that Deng et. al’s CUPED is formally equivalent to regression adjustment as justified through the Frisch Waugh Lovell theorem. As a consequence, analysts can feel justified fitting a regression model as opposed to performing the calculations outlined in Deng 2013.</p>
+<p>Deng et. al recommend estimating <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> – the coefficient for the control variate, or equivalently a regression coefficient – from the pooled population of treatment and control, writing “The impact on variance reduction will likely be negligible”. This recommendation is akin to recommending the following model be estimated</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20Y%20=%20%5Cbeta_0%20+%20%5Cbeta_1%20X%20+%20%5CDelta%20D%20+%20%5Cepsilon%20"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?D"> is a randomly assigned treatment indicator. Most statisticians will recognize this as an ANCOVA model (though the names are moot here, its all regression). In this post, we discuss potential biases problems with the model above when <img src="https://latex.codecogs.com/png.latex?D"> is randomly assigned, as well as how the model can be improved, and how this all relates to CUPED (which again, is just regression).</p>
+<section id="freedman-2008" class="level2">
+<h2 class="anchored" data-anchor-id="freedman-2008">Freedman 2008</h2>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2025-03-10-cuped-2/</guid>
+  <pubDate>Mon, 10 Mar 2025 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>A Brief Tour of CUPED and Related Methods (Pt. 1)</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -7982,122 +8471,6 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
   <category>Causal Inference</category>
   <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</guid>
   <pubDate>Sat, 11 Feb 2023 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Journeyman Statistics</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-12-06-journeyman/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not theoretical enough. Some too focused on pen and paper calculation, others provide code that was very likely written decades ago and do not use modern packages or tidy principles (e.g they begin their analysis with <code>rm(list=ls()</code> or use <code>attach</code> and <code>detatch</code>). I can’t recommend my own path to learning statistics either, mostly because I did a Ph.D in statistics and had the benefit of a Masters in Applied Mathematics.</p>
-<p>I want to write a book for people who are not statisticians but need to make use of statistics anyway. The medical residents who need to do logistic regression for a research project, the social science grad student (save econometricians, I’d say we could learn something from them but we probably know all the same things by different names) who is more interested in their research than their statistical models, the business intelligence analyst who has to to analyze a (poorly planned) A/B test and would love nothing than to improve the experiment the next time around.</p>
-<p>This sequence of blog posts is going to be a sort of first go at that book. Not even an alpha or a rough draft, but rather somewhere to put some thoughts that might eventually make it into the book. This first post is about the motivation for the book, which I am tentatively calling “Journeyman Statistics”.</p>
-<section id="what-is-journeyman-statistics" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-journeyman-statistics">What is Journeyman Statistics?</h2>
-<p>A journeyperson/woman/man is</p>
-<blockquote class="blockquote">
-<p>“a worker, skilled in a given building trade or craft, who has successfully completed an official apprenticeship qualification. Journeymen are considered competent and authorized to work in that field as a fully qualified employee. They earn their license by education, supervised experience and examination. Although journeymen have completed a trade certificate and are allowed to work as employees, they may not yet work as self-employed master craftsmen.</p>
-</blockquote>
-<p>What do I mean then by “journeyman statistics” and who are “journeyman statisticians”? Borrowing heavily from the definition above, journeyman statisticians are people who are trained in some field and are currently doing statistics in service of someone or something else. Journeyman statistics are then the statistical analyses performed by these people. I don’t think its tough to pick our journeyman statisticians; they are to a first approximation those who perform statistical analysis but are not statisticians first and foremost. They are biologists, medical residents, sociologists, analysts of several varietys, etc. To them, statistics is <em>the means</em> whereas statistics are <em>the end</em> to research (perhaps “pure”) statisticians.</p>
-<p>Its important to further distinguish journeyman statisticians from applied statisticians. Applied statisticians can, as Tukey once said, “play in everyone’s backyard”. They possess the necessary mathematical maturity and statistical expertise to move from field to field. A journeyman statistician, though they may be well versed in statistics, would likely stay in their own backyard (to continue the metaphor) in order to tackle problems there.</p>
-<p>Of course, I don’t mean to place people in boxes. You don’t need to subscribe to my taxonomy of statisticians (in fact, outside of this book I don’t think its a particularly useful taxonomy), and I think there are edge cases which threaten the taxonomy as a whole. The taxonomy is simply a model, and this model is useful for one thing: understanding motivations for learning statistics, and designing a path through statistical literature so as to serve those motivations.</p>
-</section>
-<section id="why-do-we-need-a-book-on-journeyman-statistics" class="level2">
-<h2 class="anchored" data-anchor-id="why-do-we-need-a-book-on-journeyman-statistics">Why Do We Need a Book on Journeyman Statistics?</h2>
-<p>The taxonomy allows us to understand who journeyman statisticians are, what their intentions are, what they may lack in terms of statistical understanding, what is enough to satiate their desire to learn statistics, and what details contribute “noise” rather than “signal”. As an example, I don’t think biology grad students need to know what <img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7Bplim%7D"> means, or any of the other topics adjacent to mathematical analysis in Casella and Berger’s <em>Statistical Inference</em>. They do need to go slightly beyond their sophmore classes which tell them they can use the t-test when <img src="https://latex.codecogs.com/png.latex?N%3E30">. Likewise, medical residents need to go beyond Martin Bland’s <em>An Introduction to Medical Statistics</em> and need to be able to confidently say “we shouldn’t do that” when their supervisors or superiors insist on a clearly flawed mode of analysis. However, they may get bogged down by the integrals in Frank Harrell’s <em>Regression Modelling Strategies</em> (as well as the sea of references to methodological papers). There are few books for people like that. I find that books are typically for sophmore students learning statistics for the first time, or applied statisticians. Journeyman statisticians need something in the middle. I hope this book is that something.</p>
-</section>
-<section id="what-will-this-book-contain" class="level2">
-<h2 class="anchored" data-anchor-id="what-will-this-book-contain">What Will This Book Contain?</h2>
-<p>Statisticians like to joke “its all regression”. There is truth in that phrase, and so this book will take the perspective that regression is the primary means of estimation. We’ll cover all the typical analyses as regression methods. This includes estimation of the mean, its just a one parameter regression. I want to get to GLM’s as quickly as possible while not getting bogged down by mathematical details, like whatever “mild regularity conditions” means. GLMs are the workhorse of applied statistics, and I see no point in leaving GLMs to later chapters. One thing that will be absent from the book is p values. The book will take an estimation approach and report only confidence intervals.</p>
-<p>The book will also contain code in both python and R, though I encourage readers to use R rather than python. Python’s statistical tools have a distinct econometrics flavor.</p>
-</section>
-<section id="what-benefit-is-there-to-reading-this-book" class="level2">
-<h2 class="anchored" data-anchor-id="what-benefit-is-there-to-reading-this-book">What Benefit is There to Reading This Book?</h2>
-<p>Before discussing why you should read this book, I want to discuss what I call “The Precision-Usefulness Tradeoff”, as I anticipate I will refer to this many times. In short, the tradeoff states</p>
-<blockquote class="blockquote">
-<p>Perfectly precise statements are completely useless. In order to become useful, the statement must be made less precise. The less precise, the more useful.</p>
-</blockquote>
-<p>Again, this is a model rather than a law. As an example, consider the definition for a 95% confidence interval.</p>
-<blockquote class="blockquote">
-<p>A 95% confidence interval is an interval estimate which, upon repeated construction under identical and ideal conditions, contains the estimand 95% of the time.</p>
-</blockquote>
-<p>I can make this statement more precise by writing it down mathematically</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P%20%5Cleft(%20%5Cbar%7Bx%7D%20-%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cleq%20%5Cmu%20%5Cleq%20%5Cbar%7Bx%7D%20+%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cright)%20=%200.95%20"></p>
-<p>but it loses usefulness. This doesn’t really tell me what a confidence interval is, when to use one, or how to interpret one. However, the definition I initially presented perhaps permits some pathological cases. We can make the definition more useful by removing precision further</p>
-<blockquote class="blockquote">
-<p>A 95% confidence interval contains parameters consistent with the data.</p>
-</blockquote>
-<p>Now, we have a better idea how to interpret the interval, but the 95% is opaque to us.</p>
-<p>The reason I bring up this trade off is because the book is intended to give journeyman statisticians the tools required to move in Precision-Usefulness space. My hope is that when the time comes, you will be able to artfully trade precision for usefulness (e.g.&nbsp;to be pedantic when it is necessary, or to break the rules precisely because you know how and when they can be broken safely). This is the primary benefit of the book. Obviously, I can’t tell people <em>when</em> or <em>where</em> to move within that space. I will have to leave that to their best judgement.</p>
-<p>The second benefit is to solve the problem we began with; to answer “how to I go about learning statistics” in a satisfactory way.</p>
-
-
-</section>
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2022-12-06-journeyman/</guid>
-  <pubDate>Sat, 31 Dec 2022 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Way Too Many Taylor Series</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-11-25-taylor-series/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="introduction" class="level2">
-<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Let <img src="https://latex.codecogs.com/png.latex?Y(a)"> be a potential outcome for a continuous measure under treatment status <img src="https://latex.codecogs.com/png.latex?A=a">, which for the purpose of this blog post can be considered a binary treatment. When is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%20%5Cdelta%20=%20%5Cdfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D%20"> well approximated by <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cdelta%5E%5Cstar)"> where</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%5E%5Cstar%20=%20E%20%5Cleft%5B%20%5Cln%20%5Cleft(%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright)%20%5Cright%5D%20=%20E%5B%5Cln(Y(1)%5D%20%20-%20E%5B%5Cln(Y(0)%5D%20%5C%3E."></p>
-<p>It seems to be a <a href="https://stats.stackexchange.com/questions/163518/interpreting-test-results-on-log-transformed-data">fairly well accepted proposition</a> that the difference in means on the log scale can be interpreted as a relative change in means on the natural scale, but upon closer inspection they aren’t equivalent. Firstly, Jensen’s inequality prevents interchanging the expectation operator and the logarithm and second <img src="https://latex.codecogs.com/png.latex?E%5BX/Y%5D%20%5Cneq%20E%5BX%5D/E%5BY%5D"> since expectation is a linear operation. I think a more nuanced discussion is needed as to if and when we can interpret <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cdelta%5E%5Cstar)"> as <img src="https://latex.codecogs.com/png.latex?%5Cdelta">.</p>
-<p>To be clear, I’m sure this holds fairly readily. I don’t want to overstate the importance of this blog post, but I don’t want to understate it either. This question came up when considering how AB tests should measure changes in continuous metrics, like revenue. Log-transforming revenue to reign in tails is common advice – and I think that’s fine, especially when it makes the sampling distribution of the sample mean more normal looking. Additionally, talking about changes in a relative sense (i.e.&nbsp;“lift” in the metric) is something that comes natural to a lot of companies. But if we’re going to use <img src="https://latex.codecogs.com/png.latex?%5Cdelta%5E%5Cstar"> as the metric for our experiment, then I personally would like to understand under what conditions this is a good approximation. What assumptions am I implicitly making? I don’t think curiosity in that sense is a bad thing, or a waste of time.</p>
-</section>
-<section id="taylor-series-for-random-variables" class="level2">
-<h2 class="anchored" data-anchor-id="taylor-series-for-random-variables">Taylor Series for Random Variables</h2>
-<p>Before getting into the meat of the blog post, it might be worthwhile to revisit Taylor series for random variables (which we will make heavy use of in this post). Recall that a Taylor series for a continuously differentiable function <img src="https://latex.codecogs.com/png.latex?f"> is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20f(x)%20=%20%5Csum_%7Bk=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bf%5E%7B(k)%7D(x_0)%7D%7Bk!%7D%20(x%20-%20x_0)%5Ek%20%5C%3E,%20%20%5Cquad%20%5Cmid%20x%20-%20x_0%20%5Cmid%20%5Clt%20d"></p>
-<p>and that the error made in approximating <img src="https://latex.codecogs.com/png.latex?f"> with first <img src="https://latex.codecogs.com/png.latex?n+1"> terms of this sum, <img src="https://latex.codecogs.com/png.latex?R_n(x)">, can be bounded by</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cmid%20R_n(x)%20%5Cmid%20%5Cleq%20%5Cdfrac%7BM%7D%7B(n+1)!%7D(x%20-%20x_0)%5E%7Bn+1%7D%20%5C%3E,%20%5Cquad%20%5Cmid%20x%20-%20x_0%20%5Cmid%20%5Clt%20d%20%5C%3E."> We can also expand a function of a random variable, <img src="https://latex.codecogs.com/png.latex?X">, in a Taylor series by considering the variation of <img src="https://latex.codecogs.com/png.latex?X-%5Cmu"> about <img src="https://latex.codecogs.com/png.latex?%5Cmu"></p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0Af(X)%20&amp;=%20f((X-%5Cmu)%20+%20%5Cmu)%20%5C%3E,%20%5C%5C%0A%20%20%20%20%20&amp;=%20f(%5Cmu)%20+%20f%5E%7B%5Cprime%7D(%5Cmu)(X-%5Cmu)%20+%20%5Cdfrac%7Bf%5E%7B%5Cprime%5Cprime%7D(%5Cmu)%7D%7B2%7D(X-%5Cmu)%5E2%20+%20%5Cmathcal%7BO%7D%5Cleft(%20(X-%5Cmu)%5E3%20%5Cright)%20%5C%3E.%0A%5Cend%7Balign%7D">
-<p>From here, we can take expectations and leverage the linearity of <img src="https://latex.codecogs.com/png.latex?E"> to get a nice second order approximation of <img src="https://latex.codecogs.com/png.latex?E(f(X))"></p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0AE%5Bf(X)%5D%20&amp;%5Capprox%20%20E%5Bf(%5Cmu)%5D%20+%20f%5E%7B%5Cprime%7D(%5Cmu)E%5B(X-%5Cmu)%5D%20+%20%5Cdfrac%7Bf%5E%7B%5Cprime%5Cprime%7D(%5Cmu)%7D%7B2%7DE%5B(X-%5Cmu)%5E2%5D%20%5C%3E,%20%5C%5C%0A%20%20%20%20%20%20%20%20&amp;%5Capprox%20%20f(%5Cmu)%20+%20%5Cdfrac%7Bf%5E%7B%5Cprime%5Cprime%7D(%5Cmu)%7D%7B2%7D%5Csigma%5E2%20%5C%3E.%0A%5Cend%7Balign%7D">
-</section>
-<section id="applying-taylor-series-to-our-problem" class="level2">
-<h2 class="anchored" data-anchor-id="applying-taylor-series-to-our-problem">Applying Taylor Series To Our Problem</h2>
-<p>The quantity <img src="https://latex.codecogs.com/png.latex?%5Cexp(%5Cdelta%5E%5Cstar)"> could be approximately be <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> under the right circumstances. Let’s expand <img src="https://latex.codecogs.com/png.latex?%5Cln(Y(1)/Y(0))"> in a Taylor series centered around <img src="https://latex.codecogs.com/png.latex?Y(1)/Y(0)%20=%201">. We’re going to be doing quite a few Taylor expansions, so I’m going to color code some of them in order to keep track of which terms belong to which expansion.</p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0AE%5Cleft%5B%5Cln%20%5Cleft(%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright)%5Cright%5D%20&amp;%5Capprox%20E%20%5Cleft%20%5B%20%5Ctextcolor%7B#1f77b4%7D%7B%5Cleft(%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20-1%20%5Cright)%20+%20%5Cdfrac%7B1%7D%7B2%7D%20%5Cleft(%20%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20-1%20%5Cright)%5E2%7D%20%5Cright%5D%20%5C%3E,%5C%5C%0A&amp;%5Capprox%20%5Ctextcolor%7B#ff7f0e%7D%7BE%20%5Cleft%5B%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright%5D%7D%20%20%5Ctextcolor%7B#1f77b4%7D%7B-%201%20+%20%5Cdfrac%7B1%7D%7B2%7D%20E%20%5Cleft%5B%5Cleft(%20%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20-1%20%5Cright)%5E2%20%20%5Cright%5D%7D%20%5C%3E.%0A%5Cend%7Balign%7D">
-<p>This approximation is only valid when <img src="https://latex.codecogs.com/png.latex?0%20%5Clt%20Y(1)/Y(0)%20%5Cleq%202">, and the error in this approximation is bounded by <img src="https://latex.codecogs.com/png.latex?E%5Cleft%5B%5Cleft(%5Cfrac%7BY(1)%7D%7BY(0)%7D%20-1%5Cright)%5E3%5Cright%5D">. Note that we almost have <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> in our Taylor series expansion, but not quite. We can apply yet another Taylor series expansion on the part in orange to yield</p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Ctextcolor%7B#ff7f0e%7D%7BE%5Cleft%5B%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright%5D%20%5Capprox%20%5Cdfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D%20-%5Cfrac%7B%5Coperatorname%7Bcov%7D%5BY(1),%20Y(0)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E2%7D+%5Cfrac%7B%5Cmathrm%7BE%7D%5BY(1)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E3%7D%20%5Coperatorname%7Bvar%7D%5BY(0)%5D%7D%20%5C%3E.%0A%5Cend%7Balign%7D">
-<p>Let’s assemble this all together now. Our approximation is now</p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0AE%5Cleft%5B%5Cln%20%5Cleft(%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright)%5Cright%5D%20%20&amp;%5Capprox%20%5Ctextcolor%7B#ff7f0e%7D%7B%20%5Cdfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D%20-%5Cfrac%7B%5Coperatorname%7Bcov%7D%5BY(1),%20Y(0)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E2%7D+%5Cfrac%7B%5Cmathrm%7BE%7D%5BY(1)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E3%7D%20%5Coperatorname%7Bvar%7D%5BY(0)%5D%7D%20%20%5Ctextcolor%7B#1f77b4%7D%7B-%201%20+%20%5Cdfrac%7B1%7D%7B2%7D%20E%20%5Cleft%5B%5Cleft(%20%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20-1%20%5Cright)%5E2%20%20%5Cright%5D%7D%20%5C%3E,%20%5C%5C%0A&amp;%5Capprox%20%5Cdfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D%20-%201%20%5Ctextcolor%7B#ff7f0e%7D%7B-%5Cfrac%7B%5Coperatorname%7Bcov%7D%5BY(1),%20Y(0)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E2%7D+%5Cfrac%7B%5Cmathrm%7BE%7D%5BY(1)%5D%7D%7B%5Cmathrm%7BE%7D%5BY(0)%5D%5E3%7D%20%5Coperatorname%7Bvar%7D%5BY(0)%5D%7D%20%5Ctextcolor%7B#1f77b4%7D%7B%20+%20%5Cdfrac%7B1%7D%7B2%7D%20E%20%5Cleft%5B%5Cleft(%20%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20-1%20%5Cright)%5E2%20%20%5Cright%5D%7D%20%5C%3E.%0A%5Cend%7Balign%7D">
-<p>Finally <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> appears in our long and tedious approximation of <img src="https://latex.codecogs.com/png.latex?%5Cdelta%5E%5Cstar">. Let’s ignore the terms colored in blue and orange for a moment and come back to them later.</p>
-<p>Our approximation is now</p>
-<p><img src="https://latex.codecogs.com/png.latex?E%5Cleft%5B%5Cln%20%5Cleft(%20%5Cdfrac%7BY(1)%7D%7BY(0)%7D%20%5Cright)%5Cright%5D%20%5Capprox%20%5Cdfrac%7BE%5BY(1)%5D%7D%7BE%5BY(0)%5D%7D%20-%201"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta%5E%5Cstar%20%5Capprox%20%5Cdelta%20-1%20%20"></p>
-<p>Exponentiating both sides</p>
-<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%0A%5Cexp(%5Cdelta%5E%5Cstar)%20&amp;%5Capprox%20%5Cexp(%5Cdelta-1)%20%5C%5C%0A&amp;%20%5Capprox%201%20+%20%5Cdelta%20-1%20+%20%20%5Cmathcal%7BO%7D((%5Cdelta-1)%5E2)%5C%5C%0A&amp;%20%5Capprox%20%5Cdelta%0A%5Cend%7Balign%7D">
-</section>
-<section id="we-did-itnow-what" class="level2">
-<h2 class="anchored" data-anchor-id="we-did-itnow-what">We Did It…Now What?</h2>
-<p>Now that we’ve written down all the necessary approximations and assumptions, let’s go back and determine under what circumstances this is a valid approximation. Can we break this approximation? Can we break it really badly?</p>
-<p>Let’s leave that for the next blog post. I’m tired from doing all this algebra.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <category>AB Testing</category>
-  <guid>https://dpananos.github.io/posts/2022-11-25-taylor-series/</guid>
-  <pubDate>Fri, 25 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

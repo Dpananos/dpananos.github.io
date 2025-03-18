@@ -1,0 +1,23 @@
+---
+title: A Brief Tour of CUPED and Related Methods (Pt. 2)
+date: "2025-03-10"
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+# Introduction
+
+[In a previous post](https://dpananos.github.io/posts/2025-03-03-cuped/), I demonstrated that Deng et. al's CUPED is formally equivalent to regression adjustment as justified through the Frisch Waugh Lovell theorem. As a consequence, analysts can feel justified fitting a regression model as opposed to performing the calculations outlined in Deng 2013.  
+
+Deng et. al recommend estimating $\theta$ -- the coefficient for the control variate, or equivalently a regression coefficient -- from the pooled population of treatment and control, writing "The impact on variance reduction will likely be negligible".  This recommendation is akin to recommending the following model be estimated
+
+$$ Y = \beta_0 + \beta_1 X + \Delta D + \epsilon $$
+
+where $D$ is a randomly assigned treatment indicator.  Most statisticians will recognize this as an ANCOVA model (though the names are moot here, its all regression).  In this post, we discuss potential biases problems with the model above when $D$ is randomly assigned, as well as how the model can be improved, and how this all relates to CUPED (which again, is just regression).
+
+## Freedman 2008
