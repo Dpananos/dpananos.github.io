@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2023-02-08">
+<meta name="dcterms.date" content="2025-07-19">
 
-<title>Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue</title>
+<title>Demetri Pananos Ph.D - IRLS Estimation in Compute Constrained Environments</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -100,10 +134,10 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue">
+<meta property="og:title" content="Demetri Pananos Ph.D - IRLS Estimation in Compute Constrained Environments">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - IRLS Estimation in Compute Constrained Environments">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
@@ -159,13 +193,8 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Bayesian Decision Making for AB Tests on Revenue</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">AB Tests</div>
-                <div class="quarto-category">Statistics</div>
-                <div class="quarto-category">Bayes</div>
-              </div>
-                  </div>
+      <h1 class="title">IRLS Estimation in Compute Constrained Environments</h1>
+                      </div>
   </div>
     
   
@@ -181,7 +210,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">February 8, 2023</p>
+        <p class="date">July 19, 2025</p>
       </div>
     </div>
     
@@ -197,10 +226,10 @@ window.Quarto = {
     <h2 id="toc-title">Sections</h2>
    
   <ul>
-  <li><a href="#revenue-in-terms-of-conversions" id="toc-revenue-in-terms-of-conversions" class="nav-link active" data-scroll-target="#revenue-in-terms-of-conversions">Revenue In Terms of Conversions</a></li>
-  <li><a href="#a-possible-model" id="toc-a-possible-model" class="nav-link" data-scroll-target="#a-possible-model">A Possible Model</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#an-example" id="toc-an-example" class="nav-link" data-scroll-target="#an-example">An Example</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-02-08-bayes-decisions/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-07-19-ols/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -209,41 +238,148 @@ window.Quarto = {
 
 
 
-<p>A lot of companies operate on a subscription service. Every month, you give them money and they allow you to use a service. The quality of extent of that service depends on how much money you give them. For example, Netflix allows you to pay more for higher definition content, Calendly includes some automation with their higher tiered plans, Apple provides you with more iCloud storage, and its all for a cost.</p>
-<p>These companies make more money if you choose the higher priced plan (duh), but they have to show you the value so that you <em>want</em> the higher priced plan. Sometimes, this comes in the form of a free trial for a limited time; no additional cost to the consumer, but hopefully you like it enough to shell out some cash.</p>
-<p>There is a trade off to be made here. Try a <em>too</em> premium plan and you might get hit by sticker shock and fail to convert. Not premium enough, and the trial fails to convert users who would have found value in the more premium plans.</p>
-<p>Deciding on which plan to roll out as the default trial is a question for another post. Assuming there is an existing decision I’m here to answer</p>
-<blockquote class="blockquote">
-<p>How do we analyze experiments where we have to balance both conversion from the trial and revenue from users who find value in more premium plans?</p>
-</blockquote>
-<p>Seemingly easy, just do a t-test on log revenue or something. Not so fast. Consider the following:</p>
-<ul>
-<li><p>Not every randomized user converts, meaning there are many censored revenue observations. Filling them in with 0 prevents using the log to reign in possible long tails, and <span class="math inline">\(\log(1+x)\)</span> has been shown to yield arbitrarily small/large ATEs.</p></li>
-<li><p>If you’re conversion rate is small enough, maybe getting enough users to power your experiment would take months and months and months. Maybe you have the stomach for that, maybe you don’t. Its certainly my experience that the shorter the experiment can run, the faster we can improve.</p></li>
-</ul>
-<p>In this post, I’ll present a (pretty niche, honestly) Bayesian model of the process. I’ll then demonstrate how to use the model to compute expected loss in revenue. The “winner” of the AB test is then the variant which produces smallest expected loss.</p>
-<section id="revenue-in-terms-of-conversions" class="level2">
-<h2 class="anchored" data-anchor-id="revenue-in-terms-of-conversions">Revenue In Terms of Conversions</h2>
-<p>Let’s say you have <span class="math inline">\(j=1, \cdots, J\)</span> plan levels. Let’s assume</p>
-<ul>
-<li>The probability a user converts (chooses to pay you, <span class="math inline">\(C\)</span>) is <span class="math inline">\(P(C)\)</span>.</li>
-<li>Once the user converts, the probability the user chooses plan <span class="math inline">\(j\)</span> is <span class="math inline">\(P(T=j\mid C)\)</span>.</li>
-<li>Finally, each plan produces some amount of expected revenue <span class="math inline">\(E[R \mid T=j]\)</span>.</li>
-</ul>
-<p>Using the law of total expectation, the expected revenue from a given free trail plan should be</p>
-<p><span class="math display">\[ E[R] = \sum_j E[R \vert T=j] \cdot P(T=j \mid C) \cdot P(C) \&gt;. \]</span></p>
-<p>If we could jointly estimate these quantities, then we could integrate over the uncertainty in each of them and compute <span class="math inline">\(E[R]\)</span>. If we could compute <span class="math inline">\(E[R]\)</span> for two groups (say test and control), we could do Bayesain decision making.</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Variance reduction is table stakes for online experimentation. Variance reduction improves sensitivity of experiments, meaning you can achieve the same statistical power with fewer experimental subjects, meaning experiments run faster.</p>
+<p>Depending on the scale of your data, and the number of adjustment variables you want in your regression, it may not be feasible to extract all the data into a R or Python process and run the regression. Evan Miller, former Eppo Statisitcs Engineer, has spoken about just this kind of problem <a href="https://www.infoq.com/presentations/eppo-warehouse/">here</a>. I highly recommend watching that video in its entirety, but the gist is Eppo used to run CUPED by sucking data into a python process wherein it would estimate the required regression using statsmodels’ implementation of OLS. However, this caused a scaling issue at Eppo.</p>
+<p>The solution was to create the requisite the required matrices, <span class="math inline">\(X^TX\)</span> and <span class="math inline">\(X^Ty\)</span>, in SQL! Then, pull those matrices from out of the warehouse, and estimate the coefficients of the regression in typescript. Pretty impressive stuff.</p>
+<p>But, why stop at linear regression? Why not implement IRLS so that other regressions can be estimated? Why not implement robust standard errors too! In this blog post, I extend some of Evan’s thinking (marginally) so as to implement Poisson regression and robust covariance estimation. Why those two things? Poisson regression’s coefficients estimate what we would call “the lift” (a multiplicative effect). However, the variance structure of Poisson regression is too restrictive, and would give inappropriate coverage if we used the standard errors from the model as fit. We’ll need robust covariance estimation so as to have better standard errors.</p>
 </section>
-<section id="a-possible-model" class="level2">
-<h2 class="anchored" data-anchor-id="a-possible-model">A Possible Model</h2>
-<p>Let’s make some simplifying assumptions.</p>
+<section id="an-example" class="level1">
+<h1>An Example</h1>
+<p>I’ve got a duckdb database that has so much data, it would not fit on a <a href="https://aws.amazon.com/ec2/instance-types/">t3.micro</a> instance on AWS. That is one of the cheaper instances, so we could either spend more money or use Evan’s appraoch. I’ve set up a docker container to mimic the contraints of the t3.micro. Let’s try running this simple python script in that container with the large dataset I’ve created.</p>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> duckdb</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pyfixest <span class="im">import</span> feols</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main():</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    conn <span class="op">=</span> duckdb.<span class="ex">connect</span>(<span class="st">'your_cloud_warehouse.db'</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> conn.execute(<span class="st">"SELECT * FROM regression_data"</span>).fetch_df()</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> feols(<span class="st">'y ~ trt + x2 + x3 + x4_A + x4_B + x4_C + x4_D + x4_E'</span>, data<span class="op">=</span>df)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(model.summary())</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    main()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load .dockerignore
+#1 transferring context: 2B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.46kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.3s
+
+#4 [ 1/11] FROM docker.io/library/python:3.12-slim@sha256:4600f71648e110b005bf7bca92dbb335e549e6b27f2e83fceee5e11b3e1a4d01
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 325B done
+#5 DONE 0.0s
+
+#6 [ 9/11] RUN chmod 666 your_cloud_warehouse.db
+#6 CACHED
+
+#7 [10/11] RUN echo "ulimit -v 1048576" &gt;&gt; /etc/profile
+#7 CACHED
+
+#8 [ 2/11] RUN echo 'ulimit -v 1048576' &gt;&gt; /etc/bash.bashrc
+#8 CACHED
+
+#9 [ 3/11] WORKDIR /app
+#9 CACHED
+
+#10 [ 8/11] COPY your_cloud_warehouse.db .
+#10 CACHED
+
+#11 [ 7/11] COPY pythonscripts/perform_python_regression.py ./pythonscripts/
+#11 CACHED
+
+#12 [ 6/11] RUN uv pip install --system -e .
+#12 CACHED
+
+#13 [ 4/11] COPY pyproject.toml .
+#13 CACHED
+
+#14 [ 5/11] RUN pip install uv
+#14 CACHED
+
+#15 [11/11] RUN echo '#!/bin/bash\nset -e\necho "Starting with memory limit of 1GB (t3.micro equivalent)"\nulimit -v 1048576\nulimit -m 1048576\necho "Memory limits set:"\nulimit -a | grep -E "(virtual memory|resident set size)"\necho "Starting Python regression..."\nexec python pythonscripts/perform_python_regression.py\n' &gt; /app/run.sh &amp;&amp; chmod +x /app/run.sh
+#15 CACHED
+
+#16 exporting to image
+#16 exporting layers done
+#16 writing image sha256:96d846f2cfa5ecf8ac67ab6f4e7cd4013c4efb21fa4dc27c7e5061628be62dce done
+#16 naming to docker.io/library/ols-regression done
+#16 DONE 0.0s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/p9agvxyulg4be27oawiupxjyu
+
+What's Next?
+  1. Sign in to your Docker account → docker login
+  2. View a summary of image vulnerabilities and recommendations → docker scout quickview</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">--rm</span> <span class="at">--memory</span><span class="op">=</span>1g <span class="at">--memory-swap</span><span class="op">=</span>1g ols-regression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Starting with memory limit of 1GB (t3.micro equivalent)
+Memory limits set:
+virtual memory              (kbytes, -v) 1048576
+Starting Python regression...
+Database connection established successfully
+Attempting to load data into memory...
+
+============================================================
+🚨 MEMORY ERROR DETECTED 🚨
+============================================================
+The container has run out of memory as expected!
+This demonstrates the memory constraints of a t3.micro instance.
+Error details: cannot allocate memory for array
+Container is exiting gracefully...
+============================================================</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Deleted Images:
+untagged: ols-regression:latest
+deleted: sha256:1b62be1380ba5c91c8cf864a47bef05b31403b37a5c22a068a2b7ff290739a50
+
+Deleted build cache objects:
+bu9wd0rlrf84jt8puaudhqrfm
+vqo7ndvv94d4x3dmq9fez3ttx
+slkh4uzqz0c79j8xpthc3aerr
+6p0wdfp3n20ng7wxsrhtcfvws
+naekdlkl2pweahw876aa5htbp
+netrc36fshjbjrq7f59c0o0mo
+ayh6j5ng349i6mqbjuoxpal6d
+s0f9vy75gzwfbjplu0fzlcl6w
+eq70rganzm3ik8dm066vr87k7
+sotxalxytujir3zpyribl7y6x
+yc8jqovd2dnksg892ck7q2xri
+m03vsiktatfcwhz9ekjaiqgjt
+fzpl7fuhptclw4nz5ksen1szo
+gchjwhmpn4l29r8fcfu01xn58
+4sik8vwfr32kyjmbjy7165d7g
+ica6wo2wf2mt1hdvdz6dsckv5
+hbstr0nty4grkefss3519wim2
+
+Total reclaimed space: 17.14GB</code></pre>
 </div>
 </div>
 
@@ -643,4 +779,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-02-08-bayes-decisions/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-07-19-ols/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

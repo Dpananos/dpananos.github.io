@@ -17,6 +17,8 @@ website:
         file: about.qmd
       - text: Consulting
         file: consulting/index.qmd
+      - text: AI
+        file: ai/index.qmd
       - icon: github
         href: https://github.com/Dpananos
       - icon: twitter

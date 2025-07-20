@@ -1,0 +1,8 @@
+[project]
+name = "2025-07-19-ols"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.3.2",
+    "jupyter>=1.1.1",
+]

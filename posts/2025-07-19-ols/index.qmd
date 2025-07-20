@@ -1,0 +1,171 @@
+---
+title: IRLS Estimation in Compute Constrained Environments
+date: 2025-07-19
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+cache: true
+---
+
+```{r}
+library(duckdb)
+library(qatarcars)
+library(tidyverse)
+library(fixest)
+con <- dbConnect(duckdb(':memory:'))
+
+dbWriteTable(con, 'qatarcars', qatarcars)
+```
+
+```{r}
+fit <- lm(price ~ performance + seating, data=qatarcars::qatarcars)
+fit2 <- feols(price ~ performance + seating | make, data=qatarcars::qatarcars, cluster = ~origin)
+```
+
+
+
+
+```{sql, connection=con}
+ALTER TABLE qatarcars ADD COLUMN intercept DOUBLE;
+ALTER TABLE qatarcars ADD COLUMN beta_seating DOUBLE;
+ALTER TABLE qatarcars ADD COLUMN beta_performance DOUBLE;
+ALTER TABLE qatarcars ADD COLUMN prediction DOUBLE;
+ALTER TABLE qatarcars ADD COLUMN residual DOUBLE;
+```
+
+
+```{sql, connection=con}
+DROP TABLE IF EXISTS XTX;
+DROP TABLE IF EXISTS XTY;
+
+CREATE TABLE XTX AS 
+SELECT
+  SUM(1) as one_x_one,
+  SUM(performance) as one_x_performance, 
+  SUM(seating) as one_x_seating, 
+  
+  SUM(performance * performance) as performance_x_performance,
+  SUM(performance * seating) as performance_x_seating,
+  
+  SUM(seating * seating) as seating_x_seating
+FROM qatarcars;
+
+CREATE TABLE XTY AS 
+SELECT
+  SUM(1*price) as one_x_price,
+  SUM(performance*price) as performance_x_price,
+  SUM(seating*price) as seating_x_price
+FROM qatarcars;
+```
+
+
+```{r}
+vals <- as.numeric(dbGetQuery(con, 'select * from XTX'))
+XTY <- as.numeric(dbGetQuery(con, 'select * from XTY'))
+
+p <- length(XTY)
+XTX <- matrix(0, p, p)
+XTX[lower.tri(XTX, diag = T)] <- vals
+XTX <- XTX + t(XTX) - diag(diag(XTX))
+
+beta <- solve(XTX, XTY)
+names(beta) <- c('intercept','performance','seating')
+
+dbExecute(con, glue::glue("
+UPDATE qatarcars
+SET
+  intercept = {beta['intercept']},
+  beta_performance = {beta['performance']},
+  beta_seating = {beta['seating']};"))
+
+dbExecute(con, "
+UPDATE qatarcars
+SET
+  prediction = intercept + beta_performance * performance + beta_seating * seating,
+  residual = price - (intercept + beta_performance * performance + beta_seating * seating);")
+
+n <- as.numeric(dbGetQuery(con, "SELECT count(*) FROM qatarcars"))
+sigma <- as.numeric(dbGetQuery(con, "SELECT sqrt(1.0/(COUNT(*) -3) * SUM(residual * residual)) FROM qatarcars"))
+
+standard_errors <- sqrt(diag(sigma^2 * solve(XTX)))
+
+```
+
+
+```{r}
+feols(price ~ performance + seating | make, data=qatarcars)
+```
+
+
+```{sql, connection=con}
+DROP TABLE IF EXISTS XTX;
+DROP TABLE IF EXISTS XTY;
+DROP TABLE IF EXISTS centered_qatarcars;
+
+CREATE TABLE centered_qatarcars as 
+SELECT
+ price - avg_price as centered_price, 
+ performance - avg_performance as centered_performance, 
+ seating - avg_seating as centered_seating
+FROM qatarcars a 
+LEFT JOIN (
+  SELECT
+  make, 
+  avg(price) as avg_price,
+  avg(seating) as avg_seating,
+  avg(performance) as avg_performance
+  FROM qatarcars
+  group by 1
+) b on a.make = b.make;
+
+CREATE TABLE XTX AS 
+SELECT
+  SUM(centered_performance * centered_performance) as performance_x_performance,
+  SUM(centered_performance * centered_seating) as performance_x_seating,
+  
+  SUM(centered_seating * centered_seating) as seating_x_seating
+FROM centered_qatarcars;
+
+CREATE TABLE XTY AS 
+SELECT
+  SUM(centered_performance*centered_price) as performance_x_price,
+  SUM(centered_seating*centered_price) as seating_x_price
+FROM centered_qatarcars;
+```
+
+```{r}
+vals <- as.numeric(dbGetQuery(con, 'select * from XTX'))
+XTY <- as.numeric(dbGetQuery(con, 'select * from XTY'))
+
+p <- length(XTY)
+XTX <- matrix(0, p, p)
+XTX[lower.tri(XTX, diag = T)] <- vals
+XTX <- XTX + t(XTX) - diag(diag(XTX))
+
+(beta <- solve(XTX, XTY))
+
+```
+
+
+```{r}
+d <- qatarcars %>% 
+  select(make, price, performance, seating) %>% 
+  group_by(make) %>% 
+  mutate(avg_price = mean(price)) %>% 
+  mutate_at(vars(price:seating), \(x) x - mean(x))
+
+d
+
+X <- model.matrix(~performance + seating-1, data=d)
+y <- d$price
+beta <- solve(t(X) %*% X, t(X) %*% y)
+d$pred_centered <- X %*% beta
+
+d %>% 
+  mutate(pred = avg_price + pred_centered) %>% 
+  modelr::add_predictions(fit2, var = 'pp')
+```
+

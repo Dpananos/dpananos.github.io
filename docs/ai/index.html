@@ -6,10 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2023-02-08">
 
-<title>Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue</title>
+<title>Demetri Pananos Ph.D - How I Use AI</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -25,22 +23,21 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -69,54 +66,25 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue">
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - How I Use AI">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - Bayesian Decision Making for AB Tests on Revenue">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - How I Use AI">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Demetri Pananos Ph.D</span>
     </a>
   </div>
@@ -127,15 +95,15 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html"> 
+    <a class="nav-link" href="../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../consulting/index.html"> 
+    <a class="nav-link" href="../consulting/index.html"> 
 <span class="menu-text">Consulting</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../ai/index.html"> 
+    <a class="nav-link active" href="../ai/index.html" aria-current="page"> 
 <span class="menu-text">AI</span></a>
   </li>  
   <li class="nav-item compact">
@@ -156,101 +124,59 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">Bayesian Decision Making for AB Tests on Revenue</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">AB Tests</div>
-                <div class="quarto-category">Statistics</div>
-                <div class="quarto-category">Bayes</div>
-              </div>
-                  </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Demetri Pananos </p>
-            </div>
-    </div>
-      
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">February 8, 2023</p>
-      </div>
-    </div>
-    
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Sections</h2>
-   
-  <ul>
-  <li><a href="#revenue-in-terms-of-conversions" id="toc-revenue-in-terms-of-conversions" class="nav-link active" data-scroll-target="#revenue-in-terms-of-conversions">Revenue In Terms of Conversions</a></li>
-  <li><a href="#a-possible-model" id="toc-a-possible-model" class="nav-link" data-scroll-target="#a-possible-model">A Possible Model</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-02-08-bayes-decisions/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
-    </div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
-
-
-
-
-
-<p>A lot of companies operate on a subscription service. Every month, you give them money and they allow you to use a service. The quality of extent of that service depends on how much money you give them. For example, Netflix allows you to pay more for higher definition content, Calendly includes some automation with their higher tiered plans, Apple provides you with more iCloud storage, and its all for a cost.</p>
-<p>These companies make more money if you choose the higher priced plan (duh), but they have to show you the value so that you <em>want</em> the higher priced plan. Sometimes, this comes in the form of a free trial for a limited time; no additional cost to the consumer, but hopefully you like it enough to shell out some cash.</p>
-<p>There is a trade off to be made here. Try a <em>too</em> premium plan and you might get hit by sticker shock and fail to convert. Not premium enough, and the trial fails to convert users who would have found value in the more premium plans.</p>
-<p>Deciding on which plan to roll out as the default trial is a question for another post. Assuming there is an existing decision I’m here to answer</p>
-<blockquote class="blockquote">
-<p>How do we analyze experiments where we have to balance both conversion from the trial and revenue from users who find value in more premium plans?</p>
-</blockquote>
-<p>Seemingly easy, just do a t-test on log revenue or something. Not so fast. Consider the following:</p>
-<ul>
-<li><p>Not every randomized user converts, meaning there are many censored revenue observations. Filling them in with 0 prevents using the log to reign in possible long tails, and <span class="math inline">\(\log(1+x)\)</span> has been shown to yield arbitrarily small/large ATEs.</p></li>
-<li><p>If you’re conversion rate is small enough, maybe getting enough users to power your experiment would take months and months and months. Maybe you have the stomach for that, maybe you don’t. Its certainly my experience that the shorter the experiment can run, the faster we can improve.</p></li>
-</ul>
-<p>In this post, I’ll present a (pretty niche, honestly) Bayesian model of the process. I’ll then demonstrate how to use the model to compute expected loss in revenue. The “winner” of the AB test is then the variant which produces smallest expected loss.</p>
-<section id="revenue-in-terms-of-conversions" class="level2">
-<h2 class="anchored" data-anchor-id="revenue-in-terms-of-conversions">Revenue In Terms of Conversions</h2>
-<p>Let’s say you have <span class="math inline">\(j=1, \cdots, J\)</span> plan levels. Let’s assume</p>
-<ul>
-<li>The probability a user converts (chooses to pay you, <span class="math inline">\(C\)</span>) is <span class="math inline">\(P(C)\)</span>.</li>
-<li>Once the user converts, the probability the user chooses plan <span class="math inline">\(j\)</span> is <span class="math inline">\(P(T=j\mid C)\)</span>.</li>
-<li>Finally, each plan produces some amount of expected revenue <span class="math inline">\(E[R \mid T=j]\)</span>.</li>
-</ul>
-<p>Using the law of total expectation, the expected revenue from a given free trail plan should be</p>
-<p><span class="math display">\[ E[R] = \sum_j E[R \vert T=j] \cdot P(T=j \mid C) \cdot P(C) \&gt;. \]</span></p>
-<p>If we could jointly estimate these quantities, then we could integrate over the uncertainty in each of them and compute <span class="math inline">\(E[R]\)</span>. If we could compute <span class="math inline">\(E[R]\)</span> for two groups (say test and control), we could do Bayesain decision making.</p>
+<div class="quarto-about-jolla content">
+ <header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">How I Use AI</h1>
+</div>
+<div class="quarto-title-meta">
+  </div>
+</header><main class="content" id="quarto-document-content">
+<section id="text" class="level3">
+<h3 data-anchor-id="text">Text</h3>
+<p>LLMs play the role of interlocutor and editor in my writing. I may ask LLMs to read my arguments and act as though they are someone with opposing perspectives in order to consider how best to respond to possible objections. Additionally, I may ask LLMs to edit chunks of text to make them more concise (mostly because I have a tendency to be verbose).</p>
+<p>All text on this blog, and in publications in which I am listed as an author, is written by me. While I use LLMs in the ways mentioned above, I will never copy-and-paste from an LLM, nor will I ask an LLM to write a blog post, section of a paper, or email for me.</p>
 </section>
-<section id="a-possible-model" class="level2">
-<h2 class="anchored" data-anchor-id="a-possible-model">A Possible Model</h2>
-<p>Let’s make some simplifying assumptions.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
+<section id="images" class="level3">
+<h3 data-anchor-id="images">Images</h3>
+<p>I will not use LLMs to generate images in my blog or any publications. I may use AI to help me construct code for visualizations (see the Code section below).</p>
+</section>
+<section id="code" class="level3">
+<h3 data-anchor-id="code">Code</h3>
+<p>I will absolutely use LLMs to write code. My philosophy is that LLMs are another tool to improve code quality (such as an IDE, a linter, or intellisense). I personally have had much success using LLMs to contribute to codebases written in languages in which I am not proficient (e.g.&nbsp;Go and Typescript). That being said, I take the time to review the code myself and take full responsibility for what is written. I personally am not a fan of vibe coding as I like to have a high level understanding of what each part of the code is doing. Additionally, the automcomplete functionality gets in the way when I know the language very well, and at times I may turn that off in order to focus on doing what needs to be done.</p>
+<p>As an example, I may write functionality in python or pseudocode and ask LLMs to translate into Go. Where I don’t understand syntax, I may ask LLMs to explain (e.g.&nbsp;by using analogies to python). Cursor is particularly good at this with the CMD+K and Option+Return for asking quick questions.</p>
+<p>I also use LLMs to write code for which I find consider there is low benefit to memorizing (e.g.&nbsp;how to write a Dockerfile, or docker CLI commands). Docker is an especially good example. Since my role does not concern creating or managing infrastructure, I find learning more than what I already know about docker to be a low return on investment. As such, most Dockerfiles that I use in personal projects are written by LLMs. Another example is very extensive APIs, such as matplotlib. My approach to using LLMs here is to create a very basic version of the plot I’d like to share, and then use LLMs to add certain features which would require more time than I would like to spend reading documentation. Consider the plot in <a href="https://dpananos.github.io/posts/2024-02-06-logit/">this post</a>. I used ChatGPT to help me make the embedded plot and move the legend outside of the plotting region. While I could have read matplotlib’s documentation on how to do this, it was much more efficient (for my purposes) to ask an LLM to accomplish this and move on with writing my post.</p>
+</section>
+<section id="research" class="level3">
+<h3 data-anchor-id="research">Research</h3>
+<p>I may use LLMs to write aspects of code for research (as explained above), but I will not use LLMs to do research or summarize research papers. If I reference a paper, it is because I have read at least some parts of that paper and can justify why I am citing said paper.</p>
+<p>I will use LLMs to remind me of mathematical details (e.g.&nbsp;how are robust standard errors computed using linear algebra). The benefit here is staying in a flow state. I know which books on my shelf contain this information, should I ever need to reference them, but rather than get the book, and flip through the pages to find the right passage, I instead ask LLMs to remind me. In this way, an LLM is like a desk mate in my laboratory in grad school.</p>
 
 
 </section>
-
-</main> <!-- /main -->
+</main> 
+  <hr class="about-sep">
+   <div class="about-links">
+  <a href="https://twitter.com/PhDemetri" class="about-link" rel="" target="">
+    <i class="bi bi-twitter"></i>
+     <span class="about-link-text">Twitter</span>
+  </a>
+  <a href="https://www.linkedin.com/in/demetripananos/" class="about-link" rel="" target="">
+    <i class="bi bi-linkedin"></i>
+     <span class="about-link-text">LinkedIn</span>
+  </a>
+  <a href="https://github.com/Dpananos" class="about-link" rel="" target="">
+    <i class="bi bi-github"></i>
+     <span class="about-link-text">Github</span>
+  </a>
+</div>
+</div>
+ <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -271,13 +197,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
   const isCodeAnnotation = (el) => {
     for (const clz of el.classList) {
       if (clz.startsWith('code-annotation-')) {                     
@@ -643,4 +562,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-02-08-bayes-decisions/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/ai/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
