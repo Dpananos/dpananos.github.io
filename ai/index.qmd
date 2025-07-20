@@ -20,7 +20,7 @@ about:
 
 LLMs play the role of interlocutor and editor in my writing.  I may ask LLMs to read my arguments and act as though they are someone with opposing perspectives in order to consider how best to respond to possible objections.  Additionally, I may ask LLMs to edit chunks of text to make them more concise (mostly because I have a tendency to be verbose).
 
-All text on this blog, and in publications in which I am listed as an author, is written by me.  While I use LLMs in the ways mentioned above, I will never copy-and-paste from an LLM, nor will I ask an LLM to write a blog post, section of a paper, or email for me.
+All text on this blog, and in publications in which I am listed as an author, is written by me. You can verify this because there are _several_ typos across my blog.  While I use LLMs in the ways mentioned above, I will never copy-and-paste from an LLM, nor will I ask an LLM to write a blog post, section of a paper, or email for me.
 
 ### Images
 
