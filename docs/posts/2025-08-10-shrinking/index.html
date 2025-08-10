@@ -103,6 +103,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Demetri Pananos Ph.D - Let’s Take About 15% Of The Top There">
@@ -202,12 +231,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>I keep coming back to <a href="https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003">A New Look at P Values for Randomized Clinical Trials</a> – an incredibly well written, and instant classic, paper on experiments. The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics from the Cochrane Database of Systematic Reviews and the Signal to Noise Ratio (SNR, the true effect divided by the standard error), thereby being able to examine the relationship between, as an example, making a type M error given the p value. It is an incredibly well written paper and I highly recommend you read it.</p>
+<p>I keep coming back to <a href="https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003">A New Look at P Values for Randomized Clinical Trials</a> – an instant classic paper on RCTs, which could be extended to online experimentation as well. The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics and the Signal to Noise Ratio (SNR, the true effect divided by the standard error) from the Cochrane Database of Systematic Reviews, thereby being able to examine the relationship between, as an example, the exaggeration factor (the amount by which the estimate of the treatment effect over estimates the truth) and the p value. It is an incredibly well written paper and I highly recommend you read it.</p>
 <p>Quoting from the paper directly</p>
 <blockquote class="blockquote">
 <p>Recall that the z statistic is the estimated effect divided by the standard error (SE) of the estimate. We also wish to consider the signal-to-noise ratio (SNR), which is the true effect divided by the SE of the effect estimate. The SNR cannot be observed directly, but there is a very simple relation between the SNR and the z statistic. Because the estimated effect is equal to the true effect plus an independent normal error term, the z statistic is equal to the SNR plus an independent, standard normal error term.1 Thus, the distribution of the z statistic is the “convolution” of the distribution of the SNR and the standard normal distribution. The crux of our approach is that we can estimate the distribution of the absolute z statistics across the Cochrane Database and then derive the distribution of the absolute SNRs by “deconvolution,” that is, by removing the standard normal component. This allows us to study a number of important statistical properties of the RCTs in the Cochrane Database.</p>
 </blockquote>
-<p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all traisl that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
+<p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all trails that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>rmix <span class="ot">=</span> <span class="cf">function</span>(n,p,m,s){</span>
@@ -223,7 +252,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>snr <span class="ot">&lt;-</span> <span class="fu">rmix</span>(n, p, m, s)</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, snr, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now that we have the simulated SNR and z statistics, it is very straight forward to, say, determine the statistical power for each simulated SNR and reproduce Figure 2 from the paper.</p>
+<p>Now that we have the simulated SNR and z statistics, it is very straight forward to replicate all results from the paper. As an example, here is how we can re-create figure 2 (the distribution of statistical power across the simulated SNR).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>power <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fl">1.96</span> <span class="sc">-</span> snr) <span class="sc">+</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="fl">1.96</span><span class="sc">-</span>snr)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(power, <span class="at">xlab =</span> <span class="st">'Power'</span>, <span class="at">breaks=</span><span class="dv">40</span>, <span class="at">col =</span> <span class="st">'white'</span>, <span class="at">probability =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -235,7 +264,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The paper goes on to make a number of damning conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes drastically (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
+<p>The paper goes on to make a number of conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes dramatically so (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
 <p>The mixture distribution for the z statistics is comprised of 4 normal distributions with standard deviation 1.17, 1.74, 2.38, and 5.73, with mixture weights 0.32, 0.3, 0.3, and 0.07. This means that the standard deviation of the mixture is 2.32. Let’s make a not-too-wrong assumption that the distribution of z values is approximately normal. Granted, this is demonstrably false – the distribution has fatter tails, but doing so will allow us to treat this distribution as a prior for future RCTs. Now, suppose we run an RCT in the future which would be exchangeable with those in the Cochrane database. Since the distribution of z is assumed normal then we can shrink the estimates by leveraging a conjugate normal prior (granted, prior for the z is not normal, but it is very close).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>s_z <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1.17</span>, <span class="fl">1.74</span>, <span class="fl">2.38</span>, <span class="fl">5.73</span>)</span>
@@ -258,8 +287,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>df_sum <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">p_strata =</span> p_strata, </span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">orignal =</span> new_exag,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">shrunken =</span> shrunken_exag</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Orignal =</span> new_exag,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Shrunken =</span> shrunken_exag</span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>p_strata, <span class="at">names_to =</span> <span class="st">'estimate'</span>, <span class="at">values_to =</span> <span class="st">'exag'</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(p_strata, </span>
@@ -276,37 +305,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>dodge_width <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.2</span></span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sum, <span class="fu">aes</span>(<span class="at">x =</span> strata_num, <span class="at">color =</span> estimate)) <span class="sc">+</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sum, <span class="fu">aes</span>(<span class="at">x =</span> strata_num, <span class="at">fill =</span> estimate)) <span class="sc">+</span></span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(</span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">xmin =</span> strata_num <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"Orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
 <span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">xmax =</span> strata_num <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"Orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> q25, <span class="at">ymax =</span> q75</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">fill =</span> <span class="cn">NA</span></span>
-<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(</span>
-<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> strata_num <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
-<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">xend =</span> strata_num <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> q50, <span class="at">yend =</span> q50</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  ),</span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">1</span></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
-<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reverse</span>(</span>
-<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">unique</span>(df_sum<span class="sc">$</span>strata_num),</span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">levels</span>(p_strata),</span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge =</span> <span class="dv">2</span>)</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Exaggeration Quartiles"</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  ), <span class="at">alpha =</span> <span class="fl">0.7</span>, <span class="at">color=</span><span class="st">'black'</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> strata_num <span class="sc">-</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"Orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">xend =</span> strata_num <span class="sc">+</span> <span class="fl">0.2</span> <span class="sc">+</span> </span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ifelse</span>(estimate <span class="sc">==</span> <span class="st">"Orignal"</span>, <span class="sc">-</span>dodge_width, dodge_width),</span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> q50, <span class="at">yend =</span> q50</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">1</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reverse</span>(</span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">unique</span>(df_sum<span class="sc">$</span>strata_num),</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">levels</span>(p_strata),</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge =</span> <span class="dv">2</span>)</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Exaggeration Quartiles"</span>,</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill=</span><span class="st">'Estimate'</span></span>
 <span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'top'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'top'</span>) <span class="sc">+</span> </span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -316,7 +346,87 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 1.0 (i.e.&nbsp;no exaggeration) and those RCTs which report small p values now have a much more accurate estimate.</p>
+<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor. However, we can do better. van Zwet (also an author on the paper) published a shrinkage estimator based on these data in <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.9173">Statsitics in Medicine</a> in 2021. His approach was to use <span class="math inline">\(\mathbb{E}(\mbox{SNR} \mid z)\)</span> as the shrunken estimate, and provides some code in that paper from which to estimate the marginal distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn’t require any regression, only some algebra). I’ve plotted van Zwet’s exageration factors below, which are even better than the normal normal conjugate model’s! Unfortuenetly, the shrinkage van Zwet’s shrinkage estimator doesn’t have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>z_hat <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(new_z, <span class="sc">~</span>{</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">&lt;-</span> s_z<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> p<span class="sc">*</span><span class="fu">dnorm</span>(.x,<span class="dv">0</span>,<span class="fu">sqrt</span>(s2<span class="sc">+</span><span class="dv">1</span>))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  q <span class="ot">&lt;-</span> q<span class="sc">/</span><span class="fu">sum</span>(q)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> .x <span class="sc">*</span> s2 <span class="sc">/</span> (s2<span class="sc">+</span><span class="dv">1</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(q <span class="sc">*</span> m)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>zwet_shrunken_exag <span class="ot">&lt;-</span> <span class="fu">abs</span>(z_hat <span class="sc">/</span> new_snr)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign a numeric index per estimate for dodging</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>df_sum <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">p_strata =</span> p_strata, </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">Orignal =</span> new_exag,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">Shrunken =</span> shrunken_exag,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">van Zwet Shrunken</span><span class="st">`</span> <span class="ot">=</span> zwet_shrunken_exag</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>p_strata, <span class="at">names_to =</span> <span class="st">'estimate'</span>, <span class="at">values_to =</span> <span class="st">'exag'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(p_strata, </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>           estimate</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>           ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">q25 =</span> <span class="fu">quantile</span>(exag, <span class="fl">0.25</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">q50 =</span> <span class="fu">quantile</span>(exag, <span class="fl">0.50</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">q75 =</span> <span class="fu">quantile</span>(exag, <span class="fl">0.75</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">mn =</span> <span class="fu">mean</span>(exag)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">strata_num =</span> <span class="fu">as.numeric</span>(p_strata)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(p_strata) <span class="sc">%&gt;%</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">est_index =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(estimate, </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"van Zwet Shrunken"</span>, <span class="st">"Shrunken"</span>, <span class="st">"Orignal"</span>)))) <span class="sc">%&gt;%</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>bar_width <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sum, <span class="fu">aes</span>(<span class="at">x =</span> strata_num, <span class="at">fill =</span> estimate)) <span class="sc">+</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  <span class="co"># IQR rectangles</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_rect</span>(<span class="fu">aes</span>(</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">xmin =</span> strata_num <span class="sc">+</span> (est_index <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">*</span> bar_width,</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">xmax =</span> strata_num <span class="sc">+</span> (est_index <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">*</span> bar_width <span class="sc">+</span> bar_width,</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> q25, <span class="at">ymax =</span> q75</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>  <span class="at">colour =</span> <span class="st">"black"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Median lines</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> strata_num <span class="sc">+</span> (est_index <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">*</span> bar_width,</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">xend =</span> strata_num <span class="sc">+</span> (est_index <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">*</span> bar_width <span class="sc">+</span> bar_width,</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> q50, <span class="at">yend =</span> q50</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">1</span>, <span class="at">colour =</span> <span class="st">"black"</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">size =</span> <span class="fl">1.5</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reverse</span>(</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">breaks =</span> <span class="fu">unique</span>(df_sum<span class="sc">$</span>strata_num),</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">levels</span>(p_strata),</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge =</span> <span class="dv">2</span>)</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Exaggeration Quartiles"</span>,</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">'Estimate'</span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">'top'</span>) <span class="sc">+</span> </span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 

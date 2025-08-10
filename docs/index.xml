@@ -21,12 +21,12 @@
 
 
 
-<p>I keep coming back to <a href="https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003">A New Look at P Values for Randomized Clinical Trials</a> – an incredibly well written, and instant classic, paper on experiments. The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics from the Cochrane Database of Systematic Reviews and the Signal to Noise Ratio (SNR, the true effect divided by the standard error), thereby being able to examine the relationship between, as an example, making a type M error given the p value. It is an incredibly well written paper and I highly recommend you read it.</p>
+<p>I keep coming back to <a href="https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003">A New Look at P Values for Randomized Clinical Trials</a> – an instant classic paper on RCTs, which could be extended to online experimentation as well. The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics and the Signal to Noise Ratio (SNR, the true effect divided by the standard error) from the Cochrane Database of Systematic Reviews, thereby being able to examine the relationship between, as an example, the exaggeration factor (the amount by which the estimate of the treatment effect over estimates the truth) and the p value. It is an incredibly well written paper and I highly recommend you read it.</p>
 <p>Quoting from the paper directly</p>
 <blockquote class="blockquote">
 <p>Recall that the z statistic is the estimated effect divided by the standard error (SE) of the estimate. We also wish to consider the signal-to-noise ratio (SNR), which is the true effect divided by the SE of the effect estimate. The SNR cannot be observed directly, but there is a very simple relation between the SNR and the z statistic. Because the estimated effect is equal to the true effect plus an independent normal error term, the z statistic is equal to the SNR plus an independent, standard normal error term.1 Thus, the distribution of the z statistic is the “convolution” of the distribution of the SNR and the standard normal distribution. The crux of our approach is that we can estimate the distribution of the absolute z statistics across the Cochrane Database and then derive the distribution of the absolute SNRs by “deconvolution,” that is, by removing the standard normal component. This allows us to study a number of important statistical properties of the RCTs in the Cochrane Database.</p>
 </blockquote>
-<p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all traisl that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
+<p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all trails that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -108,7 +108,7 @@ font-style: inherit;">rnorm</span>(n, snr, <span class="dv" style="color: #AD000
 background-color: null;
 font-style: inherit;">1</span>)</span></code></pre></div>
 </div>
-<p>Now that we have the simulated SNR and z statistics, it is very straight forward to, say, determine the statistical power for each simulated SNR and reproduce Figure 2 from the paper.</p>
+<p>Now that we have the simulated SNR and z statistics, it is very straight forward to replicate all results from the paper. As an example, here is how we can re-create figure 2 (the distribution of statistical power across the simulated SNR).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">power <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -158,7 +158,7 @@ font-style: inherit;">probability =</span> T)</span></code></pre></div>
 </div>
 </div>
 </div>
-<p>The paper goes on to make a number of damning conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes drastically (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
+<p>The paper goes on to make a number of conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes dramatically so (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
 <p>The mixture distribution for the z statistics is comprised of 4 normal distributions with standard deviation 1.17, 1.74, 2.38, and 5.73, with mixture weights 0.32, 0.3, 0.3, and 0.07. This means that the standard deviation of the mixture is 2.32. Let’s make a not-too-wrong assumption that the distribution of z values is approximately normal. Granted, this is demonstrably false – the distribution has fatter tails, but doing so will allow us to treat this distribution as a prior for future RCTs. Now, suppose we run an RCT in the future which would be exchangeable with those in the Cochrane database. Since the distribution of z is assumed normal then we can shrink the estimates by leveraging a conjugate normal prior (granted, prior for the z is not normal, but it is very close).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">s_z <span class="ot" style="color: #003B4F;
@@ -293,10 +293,10 @@ background-color: null;
 font-style: inherit;">p_strata =</span> p_strata, </span>
 <span id="cb4-7">  <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">orignal =</span> new_exag,</span>
+font-style: inherit;">Orignal =</span> new_exag,</span>
 <span id="cb4-8">  <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">shrunken =</span> shrunken_exag</span>
+font-style: inherit;">Shrunken =</span> shrunken_exag</span>
 <span id="cb4-9">) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span> </span>
@@ -393,7 +393,7 @@ font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">x =</span> strata_num, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">color =</span> estimate)) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">fill =</span> estimate)) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
 <span id="cb4-26">  <span class="fu" style="color: #4758AB;
@@ -416,7 +416,7 @@ font-style: inherit;">ifelse</span>(estimate <span class="sc" style="color: #5E5
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"orignal"</span>, <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">"Orignal"</span>, <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>dodge_width, dodge_width),</span>
 <span id="cb4-29">    <span class="at" style="color: #657422;
@@ -434,7 +434,7 @@ font-style: inherit;">ifelse</span>(estimate <span class="sc" style="color: #5E5
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"orignal"</span>, <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">"Orignal"</span>, <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>dodge_width, dodge_width),</span>
 <span id="cb4-31">    <span class="at" style="color: #657422;
@@ -442,21 +442,24 @@ background-color: null;
 font-style: inherit;">ymin =</span> q25, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">ymax =</span> q75</span>
-<span id="cb4-32">  ),</span>
-<span id="cb4-33">  <span class="at" style="color: #657422;
+<span id="cb4-32">  ), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">fill =</span> <span class="cn" style="color: #8f5902;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">NA</span></span>
-<span id="cb4-34">  ) <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">0.7</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span></span>
+<span id="cb4-33">  ) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb4-35">  <span class="fu" style="color: #4758AB;
+<span id="cb4-34">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">geom_segment</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">aes</span>(</span>
-<span id="cb4-36">    <span class="at" style="color: #657422;
+<span id="cb4-35">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">x =</span> strata_num <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -465,16 +468,16 @@ background-color: null;
 font-style: inherit;">0.2</span> <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> </span>
-<span id="cb4-37">      <span class="fu" style="color: #4758AB;
+<span id="cb4-36">      <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">ifelse</span>(estimate <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"orignal"</span>, <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">"Orignal"</span>, <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>dodge_width, dodge_width),</span>
-<span id="cb4-38">    <span class="at" style="color: #657422;
+<span id="cb4-37">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">xend =</span> strata_num <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -483,30 +486,30 @@ background-color: null;
 font-style: inherit;">0.2</span> <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> </span>
-<span id="cb4-39">      <span class="fu" style="color: #4758AB;
+<span id="cb4-38">      <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">ifelse</span>(estimate <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"orignal"</span>, <span class="sc" style="color: #5E5E5E;
+font-style: inherit;">"Orignal"</span>, <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span>dodge_width, dodge_width),</span>
-<span id="cb4-40">    <span class="at" style="color: #657422;
+<span id="cb4-39">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">y =</span> q50, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">yend =</span> q50</span>
-<span id="cb4-41">  ),</span>
-<span id="cb4-42">  <span class="at" style="color: #657422;
+<span id="cb4-40">  ),</span>
+<span id="cb4-41">  <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span></span>
-<span id="cb4-43">  ) <span class="sc" style="color: #5E5E5E;
+<span id="cb4-42">  ) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb4-44">  <span class="fu" style="color: #4758AB;
+<span id="cb4-43">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
 background-color: null;
@@ -527,22 +530,22 @@ background-color: null;
 font-style: inherit;">0.5</span>) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb4-45">  <span class="fu" style="color: #4758AB;
+<span id="cb4-44">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">scale_x_reverse</span>(</span>
-<span id="cb4-46">    <span class="at" style="color: #657422;
+<span id="cb4-45">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">breaks =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">unique</span>(df_sum<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">$</span>strata_num),</span>
-<span id="cb4-47">    <span class="at" style="color: #657422;
+<span id="cb4-46">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">labels =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">levels</span>(p_strata),</span>
-<span id="cb4-48">    <span class="at" style="color: #657422;
+<span id="cb4-47">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">guide =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -551,22 +554,27 @@ background-color: null;
 font-style: inherit;">n.dodge =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb4-49">  ) <span class="sc" style="color: #5E5E5E;
+<span id="cb4-48">  ) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
-<span id="cb4-50">  <span class="fu" style="color: #4758AB;
+<span id="cb4-49">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">labs</span>(</span>
-<span id="cb4-51">    <span class="at" style="color: #657422;
+<span id="cb4-50">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">x =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
 font-style: inherit;">NULL</span>,</span>
-<span id="cb4-52">    <span class="at" style="color: #657422;
+<span id="cb4-51">    <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Exaggeration Quartiles"</span></span>
+font-style: inherit;">"Exaggeration Quartiles"</span>,</span>
+<span id="cb4-52">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Estimate'</span></span>
 <span id="cb4-53">  ) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span></span>
@@ -585,7 +593,16 @@ font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'top'</span>)</span></code></pre></div>
+font-style: inherit;">'top'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb4-56">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Set1"</span>)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -595,7 +612,429 @@ font-style: inherit;">'top'</span>)</span></code></pre></div>
 </div>
 </div>
 </div>
-<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 1.0 (i.e.&nbsp;no exaggeration) and those RCTs which report small p values now have a much more accurate estimate.</p>
+<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor. However, we can do better. van Zwet (also an author on the paper) published a shrinkage estimator based on these data in <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.9173">Statsitics in Medicine</a> in 2021. His approach was to use <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D(%5Cmbox%7BSNR%7D%20%5Cmid%20z)"> as the shrunken estimate, and provides some code in that paper from which to estimate the marginal distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn’t require any regression, only some algebra). I’ve plotted van Zwet’s exageration factors below, which are even better than the normal normal conjugate model’s! Unfortuenetly, the shrinkage van Zwet’s shrinkage estimator doesn’t have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">z_hat <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dbl</span>(new_z, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>{</span>
+<span id="cb5-2">  </span>
+<span id="cb5-3">  s2 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> s_z<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb5-4">  q <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> p<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(.x,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(s2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb5-5">  q <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> q<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sum</span>(q)</span>
+<span id="cb5-6">  m <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> .x <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> s2 <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (s2<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sum</span>(q <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> m)</span>
+<span id="cb5-8">})</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"></span>
+<span id="cb5-11">zwet_shrunken_exag <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abs</span>(z_hat <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> new_snr)</span>
+<span id="cb5-12"></span>
+<span id="cb5-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Assign a numeric index per estimate for dodging</span></span>
+<span id="cb5-14">df_sum <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb5-15">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p_strata =</span> p_strata, </span>
+<span id="cb5-16">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">Orignal =</span> new_exag,</span>
+<span id="cb5-17">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">Shrunken =</span> shrunken_exag,</span>
+<span id="cb5-18">  <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">`</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">van Zwet Shrunken</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">`</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> zwet_shrunken_exag</span>
+<span id="cb5-19">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb5-20">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_longer</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>p_strata, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'estimate'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">values_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'exag'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb5-21">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(p_strata, </span>
+<span id="cb5-22">           estimate</span>
+<span id="cb5-23">           ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-24">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise</span>(</span>
+<span id="cb5-25">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q25 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb5-26">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q50 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.50</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb5-27">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q75 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.75</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb5-28">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mn =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(exag)</span>
+<span id="cb5-29">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-30">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata_num =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.numeric</span>(p_strata)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-31">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(p_strata) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-32">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">est_index =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.numeric</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">factor</span>(estimate, </span>
+<span id="cb5-33">                                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">levels =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"van Zwet Shrunken"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Shrunken"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Orignal"</span>)))) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb5-34">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ungroup</span>()</span>
+<span id="cb5-35"></span>
+<span id="cb5-36">bar_width <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span></span>
+<span id="cb5-37"></span>
+<span id="cb5-38"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_sum, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> strata_num, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill =</span> estimate)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-39">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># IQR rectangles</span></span>
+<span id="cb5-40">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_rect</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(</span>
+<span id="cb5-41">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xmin =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (est_index <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> bar_width,</span>
+<span id="cb5-42">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xmax =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (est_index <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> bar_width <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> bar_width,</span>
+<span id="cb5-43">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymin =</span> q25, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymax =</span> q75</span>
+<span id="cb5-44">  ),</span>
+<span id="cb5-45">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">colour =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.7</span></span>
+<span id="cb5-46">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-47">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Median lines</span></span>
+<span id="cb5-48">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_segment</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(</span>
+<span id="cb5-49">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (est_index <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> bar_width,</span>
+<span id="cb5-50">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xend =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (est_index <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> bar_width <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> bar_width,</span>
+<span id="cb5-51">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> q50, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yend =</span> q50</span>
+<span id="cb5-52">  ),</span>
+<span id="cb5-53">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">colour =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"black"</span></span>
+<span id="cb5-54">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-55">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"grey50"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-56">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_x_reverse</span>(</span>
+<span id="cb5-57">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">breaks =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(df_sum<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>strata_num),</span>
+<span id="cb5-58">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">levels</span>(p_strata),</span>
+<span id="cb5-59">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">guide =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">guide_axis</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n.dodge =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb5-60">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-61">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(</span>
+<span id="cb5-62">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span>,</span>
+<span id="cb5-63">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exaggeration Quartiles"</span>,</span>
+<span id="cb5-64">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Estimate'</span></span>
+<span id="cb5-65">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-66">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_classic</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">base_size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb5-67">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'top'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb5-68">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Set1"</span>)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2025-08-10-shrinking/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 
