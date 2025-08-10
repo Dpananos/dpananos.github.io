@@ -330,7 +330,7 @@ window.Quarto = {
 <span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge =</span> <span class="dv">2</span>)</span>
 <span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"P Value Strata"</span>,</span>
 <span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Exaggeration Quartiles"</span>,</span>
 <span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill=</span><span class="st">'Estimate'</span></span>
 <span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
@@ -346,7 +346,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor. However, we can do better. van Zwet (also an author on the paper) published a shrinkage estimator based on these data in <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.9173">Statsitics in Medicine</a> in 2021. His approach was to use <span class="math inline">\(\mathbb{E}(\mbox{SNR} \mid z)\)</span> as the shrunken estimate, and provides some code in that paper from which to estimate the marginal distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn’t require any regression, only some algebra). I’ve plotted van Zwet’s exageration factors below, which are even better than the normal normal conjugate model’s! Unfortuenetly, the shrinkage van Zwet’s shrinkage estimator doesn’t have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.</p>
+<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor. However, we can do better. van Zwet (also an author on the paper) published a shrinkage estimator based on these data in <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.9173">Statsitics in Medicine</a> in 2021. His approach was to use <span class="math inline">\(\mathbb{E}(\mbox{SNR} \mid z)\)</span> as the shrunken estimate, and provides some code in that paper from which to estimate the conditional distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn’t require any regression, only some algebra). I’ve plotted van Zwet’s exaggeration factors below, which are even better than the normal normal conjugate model’s! Unfortunately, the shrinkage van Zwet’s shrinkage estimator doesn’t have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -411,7 +411,7 @@ window.Quarto = {
 <span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_axis</span>(<span class="at">n.dodge =</span> <span class="dv">2</span>)</span>
 <span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"P Value Strata"</span>,</span>
 <span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Exaggeration Quartiles"</span>,</span>
 <span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">'Estimate'</span></span>
 <span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>

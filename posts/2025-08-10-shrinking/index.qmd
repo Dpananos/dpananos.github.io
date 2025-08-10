@@ -117,7 +117,7 @@ ggplot(df_sum, aes(x = strata_num, fill = estimate)) +
     guide = guide_axis(n.dodge = 2)
   ) +
   labs(
-    x = NULL,
+    x = "P Value Strata",
     y = "Exaggeration Quartiles",
     fill='Estimate'
   ) +
@@ -131,7 +131,7 @@ ggplot(df_sum, aes(x = strata_num, fill = estimate)) +
 
 ```
 
-Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor.  However, we can do better.  van Zwet (also an author on the paper) published a shrinkage estimator based on these data in [Statsitics in Medicine](https://onlinelibrary.wiley.com/doi/10.1002/sim.9173) in 2021.  His approach was to use $\mathbb{E}(\mbox{SNR} \mid z)$ as the shrunken estimate, and provides some code in that paper from which to estimate the marginal distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn't require any regression, only some algebra).  I've plotted van Zwet's exageration factors below, which are even better than the normal normal conjugate model's!  Unfortuenetly, the shrinkage van Zwet's shrinkage estimator doesn't have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.
+Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 0.0 and results from statistically significant trials have a smaller exaggeration factor.  However, we can do better.  van Zwet (also an author on the paper) published a shrinkage estimator based on these data in [Statsitics in Medicine](https://onlinelibrary.wiley.com/doi/10.1002/sim.9173) in 2021.  His approach was to use $\mathbb{E}(\mbox{SNR} \mid z)$ as the shrunken estimate, and provides some code in that paper from which to estimate the conditional distribution of the SNR given z from the mixture of normals (it is actually quite clever and doesn't require any regression, only some algebra).  I've plotted van Zwet's exaggeration factors below, which are even better than the normal normal conjugate model's!  Unfortunately, the shrinkage van Zwet's shrinkage estimator doesn't have such a simple rule of thumb which could make for a snappy, Letterkenny referencing, blog post 🤷.
 
 
 
@@ -197,7 +197,7 @@ ggplot(df_sum, aes(x = strata_num, fill = estimate)) +
     guide = guide_axis(n.dodge = 2)
   ) +
   labs(
-    x = NULL,
+    x = "P Value Strata",
     y = "Exaggeration Quartiles",
     fill = 'Estimate'
   ) +
