@@ -10,7 +10,550 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Tue, 18 Mar 2025 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 10 Aug 2025 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Let’s Take About 15% Of The Top There</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2025-08-10-shrinking/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>I keep coming back to <a href="https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003">A New Look at P Values for Randomized Clinical Trials</a> – an incredibly well written, and instant classic, paper on experiments. The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics from the Cochrane Database of Systematic Reviews and the Signal to Noise Ratio (SNR, the true effect divided by the standard error), thereby being able to examine the relationship between, as an example, making a type M error given the p value. It is an incredibly well written paper and I highly recommend you read it.</p>
+<p>Quoting from the paper directly</p>
+<blockquote class="blockquote">
+<p>Recall that the z statistic is the estimated effect divided by the standard error (SE) of the estimate. We also wish to consider the signal-to-noise ratio (SNR), which is the true effect divided by the SE of the effect estimate. The SNR cannot be observed directly, but there is a very simple relation between the SNR and the z statistic. Because the estimated effect is equal to the true effect plus an independent normal error term, the z statistic is equal to the SNR plus an independent, standard normal error term.1 Thus, the distribution of the z statistic is the “convolution” of the distribution of the SNR and the standard normal distribution. The crux of our approach is that we can estimate the distribution of the absolute z statistics across the Cochrane Database and then derive the distribution of the absolute SNRs by “deconvolution,” that is, by removing the standard normal component. This allows us to study a number of important statistical properties of the RCTs in the Cochrane Database.</p>
+</blockquote>
+<p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all traisl that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2">rmix <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(n,p,m,s){</span>
+<span id="cb1-3">  d<span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rmultinom</span>(n,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>,p)</span>
+<span id="cb1-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(n,m<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%*%</span>d,s<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%*%</span>d)</span>
+<span id="cb1-5">}</span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Standard deviation for the snr</span></span>
+<span id="cb1-8">s <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.61</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.42</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.16</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5.64</span>)</span>
+<span id="cb1-9">p <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.32</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.3</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.07</span>)</span>
+<span id="cb1-10">m <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>)</span>
+<span id="cb1-11">n <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1e6</span></span>
+<span id="cb1-12">snr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rmix</span>(n, p, m, s)</span>
+<span id="cb1-13">z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(n, snr, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span></code></pre></div>
+</div>
+<p>Now that we have the simulated SNR and z statistics, it is very straight forward to, say, determine the statistical power for each simulated SNR and reproduce Figure 2 from the paper.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">power <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pnorm</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> snr) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pnorm</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.96</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>snr)</span>
+<span id="cb2-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">hist</span>(power, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlab =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Power'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">breaks=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">40</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'white'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">probability =</span> T)</span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2025-08-10-shrinking/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The paper goes on to make a number of damning conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes drastically (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
+<p>The mixture distribution for the z statistics is comprised of 4 normal distributions with standard deviation 1.17, 1.74, 2.38, and 5.73, with mixture weights 0.32, 0.3, 0.3, and 0.07. This means that the standard deviation of the mixture is 2.32. Let’s make a not-too-wrong assumption that the distirbution of z values is approximately normal. Granted, this is demonstrably false – the distribution has fatter tails, but doing so will allow us to treat this distribution as a prior for future RCTs. Now, suppose we run an RCT in the future which would be exchangeable with those in the Cochrane database. Since the distribution of z is assumed normal then we can shrink the estimates by leveraging a conjugate normal prior (granted, prior for the z is not normal, but it is very close).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">s_z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.17</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.74</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.38</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5.73</span>)</span>
+<span id="cb3-2">s_weighted <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">weighted.mean</span>(s_z<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, p))</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">new_snr <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rmix</span>(n, p, m, s)</span>
+<span id="cb3-5">new_z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(n, new_snr, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb3-6">shrunken_z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> new_z <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>s_weighted<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb3-7"></span>
+<span id="cb3-8">new_exag <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abs</span>(new_z<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>new_snr)</span>
+<span id="cb3-9">shrunken_exag <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abs</span>(shrunken_z<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>new_snr)</span></code></pre></div>
+</div>
+<p>Note that the z are multiplied by a factor which is approximately 0.843 (round up to 0.85 for a nice number, which is equivalent to a 15% reduction). Now, let’s recreate figure 3 for the shurnken estimates and compare them to the unshrunken estimates</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">p_values <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pnorm</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abs</span>(new_z))</span>
+<span id="cb4-2">p_strata <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cut</span>(p_values, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.001</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.005</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.01</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(.<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.1</span>)))</span>
+<span id="cb4-3"></span>
+<span id="cb4-4"></span>
+<span id="cb4-5">df_sum <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb4-6">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">p_strata =</span> p_strata, </span>
+<span id="cb4-7">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">orignal =</span> new_exag,</span>
+<span id="cb4-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">shrunken =</span> shrunken_exag</span>
+<span id="cb4-9">) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb4-10">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_longer</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>p_strata, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'estimate'</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">values_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'exag'</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb4-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(p_strata, </span>
+<span id="cb4-12">           estimate</span>
+<span id="cb4-13">           ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-14">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise</span>(</span>
+<span id="cb4-15">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q25 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb4-16">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q50 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.50</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb4-17">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">q75 =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">quantile</span>(exag, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.75</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">na.rm =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>),</span>
+<span id="cb4-18">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mn =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(exag)</span>
+<span id="cb4-19">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span></span>
+<span id="cb4-20">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">strata_num =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.numeric</span>(p_strata))</span>
+<span id="cb4-21"></span>
+<span id="cb4-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Plot</span></span>
+<span id="cb4-23"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(df_sum, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> strata_num)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-24">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_rect</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(</span>
+<span id="cb4-25">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xmin =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xmax =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>,</span>
+<span id="cb4-26">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymin =</span> q25, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymax =</span> q75, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span>estimate</span>
+<span id="cb4-27">  ),</span>
+<span id="cb4-28">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NA</span></span>
+<span id="cb4-29">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-30">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_segment</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(</span>
+<span id="cb4-31">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xend =</span> strata_num <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>,</span>
+<span id="cb4-32">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> q50, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yend =</span> q50, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color=</span>estimate</span>
+<span id="cb4-33">  ),</span>
+<span id="cb4-34">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb4-35">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-36">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"grey50"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-37">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_x_reverse</span>(</span>
+<span id="cb4-38">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">breaks =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(df_sum<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>strata_num),</span>
+<span id="cb4-39">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">levels</span>(p_strata),</span>
+<span id="cb4-40">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">guide =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">guide_axis</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n.dodge =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb4-41">    </span>
+<span id="cb4-42">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-43">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(</span>
+<span id="cb4-44">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span>,</span>
+<span id="cb4-45">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exaggeration Quartiles"</span></span>
+<span id="cb4-46">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb4-47">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_classic</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">base_size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb4-48">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span>(</span>
+<span id="cb4-49">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'top'</span></span>
+<span id="cb4-50">  )</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2025-08-10-shrinking/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 1.0 (i.e.&nbsp;no exaggeration) and those RCTs which report small p values now have a much more accurate estimate.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2025-08-10-shrinking/</guid>
+  <pubDate>Sun, 10 Aug 2025 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>More on Bayesian Statistics</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8452,65 +8995,6 @@ font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
   <category>Causal Inference</category>
   <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</guid>
   <pubDate>Sat, 11 Feb 2023 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Journeyman Statistics</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2022-12-06-journeyman/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>A number of people have asked me how to learn statistics. I don’t have a good answer for them. I find all books are deficient in some way: some too theoretical, others not theoretical enough. Some too focused on pen and paper calculation, others provide code that was very likely written decades ago and do not use modern packages or tidy principles (e.g they begin their analysis with <code>rm(list=ls()</code> or use <code>attach</code> and <code>detatch</code>). I can’t recommend my own path to learning statistics either, mostly because I did a Ph.D in statistics and had the benefit of a Masters in Applied Mathematics.</p>
-<p>I want to write a book for people who are not statisticians but need to make use of statistics anyway. The medical residents who need to do logistic regression for a research project, the social science grad student (save econometricians, I’d say we could learn something from them but we probably know all the same things by different names) who is more interested in their research than their statistical models, the business intelligence analyst who has to to analyze a (poorly planned) A/B test and would love nothing than to improve the experiment the next time around.</p>
-<p>This sequence of blog posts is going to be a sort of first go at that book. Not even an alpha or a rough draft, but rather somewhere to put some thoughts that might eventually make it into the book. This first post is about the motivation for the book, which I am tentatively calling “Journeyman Statistics”.</p>
-<section id="what-is-journeyman-statistics" class="level2">
-<h2 class="anchored" data-anchor-id="what-is-journeyman-statistics">What is Journeyman Statistics?</h2>
-<p>A journeyperson/woman/man is</p>
-<blockquote class="blockquote">
-<p>“a worker, skilled in a given building trade or craft, who has successfully completed an official apprenticeship qualification. Journeymen are considered competent and authorized to work in that field as a fully qualified employee. They earn their license by education, supervised experience and examination. Although journeymen have completed a trade certificate and are allowed to work as employees, they may not yet work as self-employed master craftsmen.</p>
-</blockquote>
-<p>What do I mean then by “journeyman statistics” and who are “journeyman statisticians”? Borrowing heavily from the definition above, journeyman statisticians are people who are trained in some field and are currently doing statistics in service of someone or something else. Journeyman statistics are then the statistical analyses performed by these people. I don’t think its tough to pick our journeyman statisticians; they are to a first approximation those who perform statistical analysis but are not statisticians first and foremost. They are biologists, medical residents, sociologists, analysts of several varietys, etc. To them, statistics is <em>the means</em> whereas statistics are <em>the end</em> to research (perhaps “pure”) statisticians.</p>
-<p>Its important to further distinguish journeyman statisticians from applied statisticians. Applied statisticians can, as Tukey once said, “play in everyone’s backyard”. They possess the necessary mathematical maturity and statistical expertise to move from field to field. A journeyman statistician, though they may be well versed in statistics, would likely stay in their own backyard (to continue the metaphor) in order to tackle problems there.</p>
-<p>Of course, I don’t mean to place people in boxes. You don’t need to subscribe to my taxonomy of statisticians (in fact, outside of this book I don’t think its a particularly useful taxonomy), and I think there are edge cases which threaten the taxonomy as a whole. The taxonomy is simply a model, and this model is useful for one thing: understanding motivations for learning statistics, and designing a path through statistical literature so as to serve those motivations.</p>
-</section>
-<section id="why-do-we-need-a-book-on-journeyman-statistics" class="level2">
-<h2 class="anchored" data-anchor-id="why-do-we-need-a-book-on-journeyman-statistics">Why Do We Need a Book on Journeyman Statistics?</h2>
-<p>The taxonomy allows us to understand who journeyman statisticians are, what their intentions are, what they may lack in terms of statistical understanding, what is enough to satiate their desire to learn statistics, and what details contribute “noise” rather than “signal”. As an example, I don’t think biology grad students need to know what <img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7Bplim%7D"> means, or any of the other topics adjacent to mathematical analysis in Casella and Berger’s <em>Statistical Inference</em>. They do need to go slightly beyond their sophmore classes which tell them they can use the t-test when <img src="https://latex.codecogs.com/png.latex?N%3E30">. Likewise, medical residents need to go beyond Martin Bland’s <em>An Introduction to Medical Statistics</em> and need to be able to confidently say “we shouldn’t do that” when their supervisors or superiors insist on a clearly flawed mode of analysis. However, they may get bogged down by the integrals in Frank Harrell’s <em>Regression Modelling Strategies</em> (as well as the sea of references to methodological papers). There are few books for people like that. I find that books are typically for sophmore students learning statistics for the first time, or applied statisticians. Journeyman statisticians need something in the middle. I hope this book is that something.</p>
-</section>
-<section id="what-will-this-book-contain" class="level2">
-<h2 class="anchored" data-anchor-id="what-will-this-book-contain">What Will This Book Contain?</h2>
-<p>Statisticians like to joke “its all regression”. There is truth in that phrase, and so this book will take the perspective that regression is the primary means of estimation. We’ll cover all the typical analyses as regression methods. This includes estimation of the mean, its just a one parameter regression. I want to get to GLM’s as quickly as possible while not getting bogged down by mathematical details, like whatever “mild regularity conditions” means. GLMs are the workhorse of applied statistics, and I see no point in leaving GLMs to later chapters. One thing that will be absent from the book is p values. The book will take an estimation approach and report only confidence intervals.</p>
-<p>The book will also contain code in both python and R, though I encourage readers to use R rather than python. Python’s statistical tools have a distinct econometrics flavor.</p>
-</section>
-<section id="what-benefit-is-there-to-reading-this-book" class="level2">
-<h2 class="anchored" data-anchor-id="what-benefit-is-there-to-reading-this-book">What Benefit is There to Reading This Book?</h2>
-<p>Before discussing why you should read this book, I want to discuss what I call “The Precision-Usefulness Tradeoff”, as I anticipate I will refer to this many times. In short, the tradeoff states</p>
-<blockquote class="blockquote">
-<p>Perfectly precise statements are completely useless. In order to become useful, the statement must be made less precise. The less precise, the more useful.</p>
-</blockquote>
-<p>Again, this is a model rather than a law. As an example, consider the definition for a 95% confidence interval.</p>
-<blockquote class="blockquote">
-<p>A 95% confidence interval is an interval estimate which, upon repeated construction under identical and ideal conditions, contains the estimand 95% of the time.</p>
-</blockquote>
-<p>I can make this statement more precise by writing it down mathematically</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20P%20%5Cleft(%20%5Cbar%7Bx%7D%20-%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cleq%20%5Cmu%20%5Cleq%20%5Cbar%7Bx%7D%20+%20z_%7B0.975%7D%20%5Csigma/%5Csqrt%7Bn%7D%20%5Cright)%20=%200.95%20"></p>
-<p>but it loses usefulness. This doesn’t really tell me what a confidence interval is, when to use one, or how to interpret one. However, the definition I initially presented perhaps permits some pathological cases. We can make the definition more useful by removing precision further</p>
-<blockquote class="blockquote">
-<p>A 95% confidence interval contains parameters consistent with the data.</p>
-</blockquote>
-<p>Now, we have a better idea how to interpret the interval, but the 95% is opaque to us.</p>
-<p>The reason I bring up this trade off is because the book is intended to give journeyman statisticians the tools required to move in Precision-Usefulness space. My hope is that when the time comes, you will be able to artfully trade precision for usefulness (e.g.&nbsp;to be pedantic when it is necessary, or to break the rules precisely because you know how and when they can be broken safely). This is the primary benefit of the book. Obviously, I can’t tell people <em>when</em> or <em>where</em> to move within that space. I will have to leave that to their best judgement.</p>
-<p>The second benefit is to solve the problem we began with; to answer “how to I go about learning statistics” in a satisfactory way.</p>
-
-
-</section>
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2022-12-06-journeyman/</guid>
-  <pubDate>Sat, 31 Dec 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

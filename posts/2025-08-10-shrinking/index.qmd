@@ -1,0 +1,126 @@
+---
+title: Let's Take About 15% Of The Top There
+date: 2025-08-10
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: true
+---
+
+
+I keep coming back to [A New Look at P Values for Randomized Clinical Trials](https://evidence.nejm.org/doi/full/10.1056/EVIDoa2300003) -- an incredibly well written, and instant classic, paper on experiments.  The authors, who include Gelman and Greenland, take an empirical Bayes approach to infer the joint distribution of z statistics from the Cochrane Database of Systematic Reviews and the Signal to Noise Ratio (SNR, the true effect divided by the standard error), thereby being able to examine the relationship between, as an example, making a type M error given the p value.  It is an incredibly well written paper and I highly recommend you read it.
+
+Quoting from the paper directly
+
+>Recall that the z statistic is the estimated effect divided by the standard error (SE) of the estimate. We also wish to consider the signal-to-noise ratio (SNR), which is the true effect divided by the SE of the effect estimate. The SNR cannot be observed directly, but there is a very simple relation between the SNR and the z statistic. Because the estimated effect is equal to the true effect plus an independent normal error term, the z statistic is equal to the SNR plus an independent, standard normal error term.1 Thus, the distribution of the z statistic is the “convolution” of the distribution of the SNR and the standard normal distribution. The crux of our approach is that we can estimate the distribution of the absolute z statistics across the Cochrane Database and then derive the distribution of the absolute SNRs by “deconvolution,” that is, by removing the standard normal component. This allows us to study a number of important statistical properties of the RCTs in the Cochrane Database.
+
+The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all traisl that are exchangeable with those in the database (i.e. trials that could be in the Cochrane Database in the future).  In R...
+
+
+```{r}
+#| code-fold: false
+library(tidyverse)
+rmix = function(n,p,m,s){
+  d=rmultinom(n,1,p)
+  rnorm(n,m%*%d,s%*%d)
+}
+
+# Standard deviation for the snr
+s <- c(0.61, 1.42, 2.16, 5.64)
+p <- c(0.32, 0.3, 0.3, 0.07)
+m <- rep(0, 4)
+n <- 1e6
+snr <- rmix(n, p, m, s)
+z <- rnorm(n, snr, 1)
+```
+
+Now that we have the simulated SNR and z statistics, it is very straight forward to, say, determine the statistical power for each simulated SNR and reproduce Figure 2 from the paper.
+
+```{r}
+#| code-fold: false
+power <- pnorm(-1.96 - snr) + 1 - pnorm(1.96-snr)
+hist(power, xlab = 'Power', breaks=40, col = 'white', probability = T)
+```
+
+The paper goes on to make a number of damning conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes drastically (see Figure 3, top left). This exaggeration made me think "why not just shrink the damn thing then", and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%.  Let's examine why.
+
+
+The mixture distribution for the z statistics is comprised of 4 normal distributions with standard deviation 1.17, 1.74, 2.38, and 5.73, with mixture weights 0.32, 0.3, 0.3, and 0.07.  This means that the standard deviation of the mixture is 2.32.  Let's make a not-too-wrong assumption that the distirbution of z values is approximately normal.  Granted, this is demonstrably false -- the distribution has fatter tails, but doing so will allow us to treat this distribution as a prior for future RCTs.  Now, suppose we run an RCT in the future which would be exchangeable with those in the Cochrane database.  Since the distribution of z is assumed normal then we can shrink the estimates by leveraging a conjugate normal prior (granted, prior for the z is not normal, but it is very close).
+
+```{r}
+#| code-fold: false
+
+s_z <- c(1.17, 1.74, 2.38, 5.73)
+s_weighted <- sqrt(weighted.mean(s_z^2, p))
+
+new_snr <- rmix(n, p, m, s)
+new_z <- rnorm(n, new_snr, 1)
+shrunken_z <- new_z * 1.0 / (1/s_weighted^2 + 1)
+
+new_exag <- abs(new_z/new_snr)
+shrunken_exag <- abs(shrunken_z/new_snr)
+```
+
+Note that the z are multiplied by a factor which is approximately 0.843 (round up to 0.85 for a nice number, which is equivalent to a 15% reduction).  Now, let's recreate figure 3 for the shurnken estimates and compare them to the unshrunken estimates
+
+```{r}
+p_values <- 2*pnorm(-abs(new_z))
+p_strata <- cut(p_values, c(c(0, 0.001, 0.005, 0.01, 0.05, 0.1), seq(.5, 1, 0.1)))
+
+
+df_sum <- tibble(
+  p_strata = p_strata, 
+  orignal = new_exag,
+  shrunken = shrunken_exag
+) %>% 
+  pivot_longer(-p_strata, names_to = 'estimate', values_to = 'exag') %>% 
+  group_by(p_strata, 
+           estimate
+           ) %>%
+  summarise(
+    q25 = quantile(exag, 0.25, na.rm = TRUE),
+    q50 = quantile(exag, 0.50, na.rm = TRUE),
+    q75 = quantile(exag, 0.75, na.rm = TRUE),
+    mn = mean(exag)
+  ) %>%
+  mutate(strata_num = as.numeric(p_strata))
+
+# Plot
+ggplot(df_sum, aes(x = strata_num)) +
+  geom_rect(aes(
+    xmin = strata_num - 0.4, xmax = strata_num + 0.4,
+    ymin = q25, ymax = q75, color=estimate
+  ),
+  fill = NA
+  ) +
+  geom_segment(aes(
+    x = strata_num - 0.4, xend = strata_num + 0.4,
+    y = q50, yend = q50, color=estimate
+  ),
+  size = 1
+  ) +
+  geom_hline(yintercept = 1, color = "grey50", size = 2, alpha = 0.5) +
+  scale_x_reverse(
+    breaks = unique(df_sum$strata_num),
+    labels = levels(p_strata),
+    guide = guide_axis(n.dodge = 2)
+    
+  ) +
+  labs(
+    x = NULL,
+    y = "Exaggeration Quartiles"
+  ) +
+  theme_classic(base_size = 14) + 
+  theme(
+    legend.position = 'top'
+  )
+
+
+
+
+```
+
+Unsurprisingly, the estimates are shrunk towards an exaggeration factor of 1.0 (i.e. no exaggeration) and those RCTs which report small p values now have a much more accurate estimate.
