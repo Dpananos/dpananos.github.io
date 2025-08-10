@@ -89,16 +89,24 @@ df_sum <- tibble(
   mutate(strata_num = as.numeric(p_strata))
 
 # Plot
-ggplot(df_sum, aes(x = strata_num)) +
+dodge_width <- -0.2
+
+ggplot(df_sum, aes(x = strata_num, color = estimate)) +
   geom_rect(aes(
-    xmin = strata_num - 0.4, xmax = strata_num + 0.4,
-    ymin = q25, ymax = q75, color=estimate
+    xmin = strata_num - 0.2 + 
+      ifelse(estimate == "orignal", -dodge_width, dodge_width),
+    xmax = strata_num + 0.2 + 
+      ifelse(estimate == "orignal", -dodge_width, dodge_width),
+    ymin = q25, ymax = q75
   ),
   fill = NA
   ) +
   geom_segment(aes(
-    x = strata_num - 0.4, xend = strata_num + 0.4,
-    y = q50, yend = q50, color=estimate
+    x = strata_num - 0.2 + 
+      ifelse(estimate == "orignal", -dodge_width, dodge_width),
+    xend = strata_num + 0.2 + 
+      ifelse(estimate == "orignal", -dodge_width, dodge_width),
+    y = q50, yend = q50
   ),
   size = 1
   ) +
@@ -107,16 +115,14 @@ ggplot(df_sum, aes(x = strata_num)) +
     breaks = unique(df_sum$strata_num),
     labels = levels(p_strata),
     guide = guide_axis(n.dodge = 2)
-    
   ) +
   labs(
     x = NULL,
     y = "Exaggeration Quartiles"
   ) +
-  theme_classic(base_size = 14) + 
-  theme(
-    legend.position = 'top'
-  )
+  theme_classic(base_size = 14) +
+  theme(legend.position = 'top')
+
 
 
 
