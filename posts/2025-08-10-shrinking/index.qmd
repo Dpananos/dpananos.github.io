@@ -59,7 +59,6 @@ s_weighted <- sqrt(weighted.mean(s_z^2, p))
 new_snr <- rmix(n, p, m, s)
 new_z <- rnorm(n, new_snr, 1)
 shrunken_z <- new_z * 1.0 / (1/s_weighted^2 + 1)
-
 new_exag <- abs(new_z/new_snr)
 shrunken_exag <- abs(shrunken_z/new_snr)
 
@@ -206,4 +205,3 @@ ggplot(df_sum, aes(x = strata_num, fill = estimate)) +
   scale_fill_brewer(palette = "Set1")
 
 ```
-

@@ -7,6 +7,7 @@ website:
   site-url: https://dpananos.github.io
   repo-url: https://github.com/Dpananos/dpananos.github.io
   repo-actions: [edit, issue]
+  google-analytics: "G-E73MJ55N1R"
   open-graph: true
   twitter-card:
     creator: "@PhDemetri"
