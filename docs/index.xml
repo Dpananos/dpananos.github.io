@@ -10,7 +10,361 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Sun, 10 Aug 2025 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 16 Aug 2025 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Pre Randomized Experiment Differences Don’t Mean DiD is Needed</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2025-08-16-pre/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p><a href="https://stats.stackexchange.com/a/669596/111259">Take a look at this interaction</a> I had with user jginestet on Cross Validated. In short, jginestet suggests that a randomized experiment assessing percent changes in tumor volume should adjust for pre-experiment differences (at this point, I’m nodding yes) and therefore the most appropriate method is DID – difference in differences – (at this point, I’m shaking my head no).</p>
+<p>User jginestet is right, pre-experiment differences should be adjusted for, but he is wrong when he suggests DiD is the way to do it. Let me explain</p>
+<section id="point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population" class="level2">
+<h2 class="anchored" data-anchor-id="point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population">Point 1: Before Intervention, Treatment and Control are Samples From The Same Population</h2>
+<p>By virtue of this point, the two groups have the same pre-experiment mean measure <em>in expectation</em>. The samples means are going to differ because of sampling variability. If <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BY%7D_i"> is the sample mean in group <img src="https://latex.codecogs.com/png.latex?i%20%5Cin%20%7Bt,%20c%7D">, then mathematically this means that <em>before intervention</em> <img src="https://latex.codecogs.com/png.latex?E%5B%5Cbar%7BY%7D_t%5D%20=%20E%5B%5Cbar%7BY%7D_c%5D%20=%20E%5BY%5D">. The same can’t be said for post intervention, and that is why we run the experiment. What does this mean for DiD?</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?%5Cbar%7BY%7D_%7Bi,%20j%7D"> indicate sample mean for group <img src="https://latex.codecogs.com/png.latex?i%20%5Cin%20%5Cleft%5C%7B%20t,%20c%20%5Cright%5C%7D"> in time period <img src="https://latex.codecogs.com/png.latex?j%20%5Cin%20%5Cleft%5C%7B%200,%201%20%5Cright%5C%7D"> (here 0 means before intervention, 1 means after intervention). DiD estimates the following quantity</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cwidehat%7B%5CDelta%7D%20=%20(%5Cbar%7BY%7D_%7Bt,%201%7D%20-%20%5Cbar%7BY%7D_%7Bt,%200%7D)%20-%20(%5Cbar%7BY%7D_%7Bc,%201%7D%20-%20%5Cbar%7BY%7D_%7Bc,%200%7D)%20%20"> If the treatment assignment is randomized, something nice happens now. Taking expectations</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign%7D%0AE%5B%5Cwidehat%7B%5CDelta%7D%5D%20&amp;=%20E%5B(%5Cbar%7BY%7D_%7Bt,%201%7D%20-%20%5Cbar%7BY%7D_%7Bt,%200%7D)%20-%20(%5Cbar%7BY%7D_%7Bc,%201%7D%20-%20%5Cbar%7BY%7D_%7Bc,%200%7D)%5D%20%5C%5C%0A&amp;=%20E%5B%5Cbar%7BY%7D_%7Bt,%201%7D%5D%20-%20E%5B%5Cbar%7BY%7D_%7Bt,%200%7D%5D%20-%20E%5B%5Cbar%7BY%7D_%7Bc,%201%7D%5D%20+%20E%5B%5Cbar%7BY%7D_%7Bc,%200%7D%5D%20%5C%5C%0A&amp;=%20E%5B%5Cbar%7BY%7D_%7Bt,%201%7D%5D%20-%20E%5B%5Cbar%7BY%7D_%7B0%7D%5D%20-%20E%5B%5Cbar%7BY%7D_%7Bc,%201%7D%5D%20+%20E%5B%5Cbar%7BY%7D_%7B0%7D%5D%5C%5C%0A&amp;=%20E%5B%5Cbar%7BY%7D_%7Bt,%201%7D%5D%20-%20%5Ccancel%7BE%5B%5Cbar%7BY%7D_%7B0%7D%5D%7D%20-%20E%5B%5Cbar%7BY%7D_%7Bc,%201%7D%5D%20+%20%5Ccancel%7BE%5B%5Cbar%7BY%7D_%7B0%7D%5D%7D%20%5C%5C%0A&amp;=%20E%5B%5Cbar%7BY%7D_%7Bt,%201%7D%5D%20-%20E%5B%5Cbar%7BY%7D_%7Bc,%201%7D%5D%0A%5Cend%7Balign%7D"></p>
+<p>Which is the difference in means after the intervention. DiD is not needed in randomized experiments because the pre-treatment difference is 0 in expectation. We don’t need to adjust for pre-experiment systematic differences because there are none.</p>
+</section>
+<section id="point-2-if-you-have-pre-experiment-data-you-should-condition-on-it" class="level2">
+<h2 class="anchored" data-anchor-id="point-2-if-you-have-pre-experiment-data-you-should-condition-on-it">Point 2: If You Have Pre Experiment Data, You Should Condition On It!</h2>
+<p>That being said, there is value to adjusting for pre-experiment data, just not with DiD. Consider the following simulation:</p>
+<ul>
+<li>I simulate a randomized experiment.</li>
+<li>I have a highly correlated, pre-experiment, measure of the outcome (e.g.&nbsp;could be weight in an intervention intended to help people lose weight). This is important since if the pre-experiment measure was not correlated with post experiment measure, the whole point of using, or even checking, pre-experiment measures would be moot. I fit a model using treatment indication with and without the pre-experiment data.</li>
+<li>I compare coverage of the estimators, hoping that they would have nominal coverage.</li>
+</ul>
+<p>And, if you run this simulation, you find they do indeed have nominal coverage. But something interesting happens when you examine coverage as a function of the pre experiment differences. See the plot below.</p>
+<p>This plot shows the coverage of the 95% confidence interval for the treatment effect within deciles of the standardized pre-experiment difference (essentially the z score for the difference). Note that for ANCOVA, the coverage is always at the nominal level, regardless of how big the pre-experiment differences are. But the difference in means has larger than expected coverage when pre-experiment differences are “small”, and wildly low coverage in cases where pre experiment differences are big. Despite this, <em>each method maintains nominal coverage across all simulated experiments</em>.</p>
+<p>Why does this matter? This plot is telling me that, so long as the outcomes are highly correlated, then pre-experiment differences should be adjusted for … with ANCOVA. These points are nicely summarized at a higher level in the section titled “Balance of prognostic factors is necessary for valid inference” from Senn’s <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.5713">“Seven myths of randomization in clinical trials”</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">r <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10000</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>{</span>
+<span id="cb1-4">  </span>
+<span id="cb1-5">  n <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span></span>
+<span id="cb1-6">  treatment <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rbinom</span>(n, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb1-7">  Y <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> MASS<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mvrnorm</span>(n, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>), <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.85</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.85</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">nrow=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>))</span>
+<span id="cb1-8">  </span>
+<span id="cb1-9">  y_post <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> Y[,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]</span>
+<span id="cb1-10">  y_pre <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> Y[,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]</span>
+<span id="cb1-11">  </span>
+<span id="cb1-12">  pre_experiment_z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">t.test</span>(y_pre <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> treatment)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>statistic</span>
+<span id="cb1-13">  </span>
+<span id="cb1-14">  fit_ols <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(y_post <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> treatment)</span>
+<span id="cb1-15">  fit_ancova <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">lm</span>(y_post <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> treatment <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> y_pre)</span>
+<span id="cb1-16">  models <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Diff in Means'</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> fit_ols, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Ancova'</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> fit_ancova)</span>
+<span id="cb1-17">  </span>
+<span id="cb1-18">  models <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-19">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">imap_dfr</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span>{</span>
+<span id="cb1-20">      broom<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tidy</span>(.x, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">conf.int=</span>T) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-21">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(term<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'treatment'</span>)} <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-22">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pre_experiment_z =</span> pre_experiment_z, </span>
+<span id="cb1-23">               <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">cover =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sign</span>(conf.low) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sign</span>(conf.high)), </span>
+<span id="cb1-24">               <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">model=</span>.y)</span>
+<span id="cb1-25">      )</span>
+<span id="cb1-26">  </span>
+<span id="cb1-27">  </span>
+<span id="cb1-28">})</span>
+<span id="cb1-29"></span>
+<span id="cb1-30">r <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-31">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(</span>
+<span id="cb1-32">    model, </span>
+<span id="cb1-33">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">decile =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ntile</span>(pre_experiment_z, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>)</span>
+<span id="cb1-34">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-35">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarise</span>(</span>
+<span id="cb1-36">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">coverage =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(cover),</span>
+<span id="cb1-37">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.groups =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"drop"</span></span>
+<span id="cb1-38">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%&gt;%</span> </span>
+<span id="cb1-39">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> decile, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> coverage, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> model)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-40">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-41">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.95</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">linetype =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dashed"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gray50"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-42">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_color_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Set1"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-43">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(</span>
+<span id="cb1-44">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Coverage by Pre-Experiment Score Decile"</span>,</span>
+<span id="cb1-45">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Decile of Pre-Experiment Difference in Means Z"</span>,</span>
+<span id="cb1-46">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Coverage"</span>,</span>
+<span id="cb1-47">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Model"</span></span>
+<span id="cb1-48">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-49">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_y_continuous</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">labels =</span> scales<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span>percent) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-50">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_minimal</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">base_size =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-51">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span>(</span>
+<span id="cb1-52">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top"</span></span>
+<span id="cb1-53">  )</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2025-08-16-pre/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>So, should pre experiment imbalance be adjusted for? Well yes. We’ve seen that coverage in this case can be quite small when imbalance is big, but if you know the imbalance is big then presumably you have the data to demonstrate that, so you can adjust for it with ANCOVA.</p>
+<p>Could you use DiD? Yes, you could, but there is no need to do so since the pre experiment population means are the same in expectation.</p>
+<p>Those who insist on DiD in the randomized case are right – that we should adjust for pre experiment imbalance – for the wrong reasons – because I presume they think there is a systematic difference between groups; there isn’t.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2025-08-16-pre/</guid>
+  <pubDate>Sat, 16 Aug 2025 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Let’s Take About 15% Of The Top There</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8631,858 +8985,6 @@ font-style: inherit;">'The optimal MDE is not the expected lift the team generat
   <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2023-03-31-optimal-mde/</guid>
   <pubDate>Fri, 31 Mar 2023 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Causal Risk Ratios in AB Tests with One Sided Non-Compliance</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>Sometimes we run AB tests where engaging with the treatment (and hence being treated) is optional. Since assignment to treatment is random, we can use the randomization as an instrumental variable (assuming there is a strong correlation between the instrument and the treatment, and that there are no backdoor paths between randomization and the final outcome).</p>
-<p>There are a few libraries to do estimate the LATE from an instrumental variable. However, none of them report a causal risk ratio, which is usually our choice of causal contrast for better or worse.</p>
-<p>In this post, I’m putting together some much appreciated advice from <a href="https://twitter.com/guilhermejd1/status/1624196853947416576"><span class="citation" data-cites="guilhermejd1">@guilhermejd1</span></a> and <a href="https://stats.stackexchange.com/a/605042/111259">dimitry on cross validated</a> on how to estimate a causal risk ratio in a randomized experiment with one sided non-compliance. I’ll first demonstrate how to do this with a simulation where we will actually have potential outcomes with which to compare. Then, I’ll apply this approach to a real experiment I helped run at Zapier.</p>
-<section id="simulation" class="level2">
-<h2 class="anchored" data-anchor-id="simulation">Simulation</h2>
-<p>Let <img src="https://latex.codecogs.com/png.latex?A"> be a binary indicator for assignment to treatment (1) or control (0). Let <img src="https://latex.codecogs.com/png.latex?d_j%5Ea"> be the potential outcome for engaging with the treatment under treatment <img src="https://latex.codecogs.com/png.latex?A=a"> for user <img src="https://latex.codecogs.com/png.latex?j">. Due to construction of the experiment, <img src="https://latex.codecogs.com/png.latex?d_j%5E0%20=%200%20%20%5Cforall%20j"> because users in control can not engage in the treatment by design. Dimitry writes</p>
-<blockquote class="blockquote">
-<p>“This is different than the typical experiment in labor economics, where people can take up job training somewhere else even if they are in the control group”.</p>
-</blockquote>
-<p>This means that we have two types of users in treatment group: <img src="https://latex.codecogs.com/png.latex?d_j%5E1%20=%201"> is a “complier” and <img src="https://latex.codecogs.com/png.latex?d_j%5E1%20=%200"> is a “never taker”. If our outcome is <img src="https://latex.codecogs.com/png.latex?y">, then LATE is the ATE for compliers and is also the ATT.</p>
-<p>Let’s set up a simulation. Here are some details:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?A"> is decided by a coinflip (i.e.&nbsp;bernoulli with probability of success 0.5)</li>
-<li>There is an unmeasured confounder <img src="https://latex.codecogs.com/png.latex?w">, which is also distributed in the population via a coinflip.</li>
-<li>The confounder and the treatment effect the probability of engaging with the treatment (being a complier). <img src="https://latex.codecogs.com/png.latex?P%5Cleft(d_j%5E1%20=%201%20%5Cmid%20A=1,%20w%5Cright)%20=%200.4%20-%200.2w">. Because of the one sided compliance, <img src="https://latex.codecogs.com/png.latex?P(d_j%5E0=1)%20=%200">.</li>
-<li>Probability of the outcome is <img src="https://latex.codecogs.com/png.latex?P%5Cleft(%20y%5Ea_j=1%20%5Cmid%20d%5E%7Ba%7D_j,%20w%20%5Cright)%20=%200.1%20+%200.5w%20+%200.1d_j%5E%7Ba%7D">. So the instrument only effects the outcome through compliance.</li>
-</ul>
-<p>Let’s simuilate this in R</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(kableExtra)</span>
-<span id="cb1-3">my_blue <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rgb</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">45</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">250</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">62</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">250</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">80</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">250</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_set</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">theme_classic</span>()) </span>
-<span id="cb1-5"></span>
-<span id="cb1-6"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">update_geom_defaults</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"point"</span>,   <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">list</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">fill =</span> my_blue, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">shape=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">21</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">color =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'black'</span>))</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)</span>
-<span id="cb2-2">N<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">as.integer</span>(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1e6</span>) <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Lots of precision</span></span>
-<span id="cb2-3">A <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb2-4">w <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb2-5"></span>
-<span id="cb2-6"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Potential outcomes</span></span>
-<span id="cb2-7">d_0 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb2-8">d_1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.2</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>w <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>A)</span>
-<span id="cb2-9">y_0 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>w)</span>
-<span id="cb2-10">y_1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>w <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>d_1)</span>
-<span id="cb2-11"></span>
-<span id="cb2-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># and now the observed data via switching equation</span></span>
-<span id="cb2-13">y <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> A<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>y_1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>A)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>y_0</span>
-<span id="cb2-14">d <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> A<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>d_1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>A)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>d_0</span>
-<span id="cb2-15">complier <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> d<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span></span></code></pre></div>
-</div>
-<p>From our setup, <img src="https://latex.codecogs.com/png.latex?LATE%20=%200.1">. Let’s compute that from our potential outcomes and estimate it using <img src="https://latex.codecogs.com/png.latex?A"> as an instrument.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">sample_late <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y_1[d_1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y_0[d_1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>])</span>
-<span id="cb3-2">est_late <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cov</span>(y, A)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cov</span>(d, A)</span></code></pre></div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:right;">
-True LATE
-</th>
-<th style="text-align:right;">
-Sample LATE
-</th>
-<th style="text-align:right;">
-IV Estimate of LATE
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:right;">
-0.1
-</td>
-<td style="text-align:right;">
-0.101
-</td>
-<td style="text-align:right;">
-0.103
-</td>
-</tr>
-</tbody>
-</table>
-<p>True LATE, sample LATE, and estimated LATE. All 3 agree to within 3 decimal places and any differences are just sampling variability.</p>
-</div>
-</div>
-</section>
-<section id="estimating-the-causal-risk-ratio" class="level2">
-<h2 class="anchored" data-anchor-id="estimating-the-causal-risk-ratio">Estimating The Causal Risk Ratio</h2>
-<p>In order to compute the causal risk ratio we need two quantities:</p>
-<ul>
-<li>An estimate of <img src="https://latex.codecogs.com/png.latex?E%5By%5E1_j%20%5Cmid%20d%5E1%5D">, and</li>
-<li>An estimate of <img src="https://latex.codecogs.com/png.latex?E%5By%5E0_j%20%5Cmid%20d%5E1%5D">.</li>
-</ul>
-<p><img src="https://latex.codecogs.com/png.latex?E%5By%5E1_j%20%5Cmid%20d%5E1%5D"> is easy to estimate; just compute the average outcome of those users in treatment who engaged with the treatment. Now because <img src="https://latex.codecogs.com/png.latex?LATE%20=%20E%5By%5E1_j%20%5Cmid%20d%5E1%5D%20-%20E%5By%5E0_j%20%5Cmid%20d%5E1%5D">, the second estimate we need is obtained from some algebra.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Estimate from the data</span></span>
-<span id="cb4-2">E_y1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y[d<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>])</span>
-<span id="cb4-3">E_y0 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> E_y1 <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> est_late <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># use the estimate, not the truth</span></span>
-<span id="cb4-4"></span>
-<span id="cb4-5">E_y1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span>E_y0</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.389267</code></pre>
-</div>
-</div>
-<p>Let’s compare this to the true estimate of the causal risk ratio using potential outcomes</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y_1[complier])<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(y_0[complier])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1.381259</code></pre>
-</div>
-</div>
-<p>Which is pretty damn close.</p>
-</section>
-<section id="a-real-example" class="level1">
-<h1>A Real Example</h1>
-<p>We ran an experiment where users could optionally watch a video. The video was intended to drive some other metric <img src="https://latex.codecogs.com/png.latex?y">. Here are the results from the experiment.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div id="zvewtafbqe" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>html {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
-}
-
-#zvewtafbqe .gt_table {
-  display: table;
-  border-collapse: collapse;
-  margin-left: auto;
-  margin-right: auto;
-  color: #333333;
-  font-size: 16px;
-  font-weight: normal;
-  font-style: normal;
-  background-color: #FFFFFF;
-  width: auto;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #A8A8A8;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #A8A8A8;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_heading {
-  background-color: #FFFFFF;
-  text-align: center;
-  border-bottom-color: #FFFFFF;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_caption {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-#zvewtafbqe .gt_title {
-  color: #333333;
-  font-size: 125%;
-  font-weight: initial;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-color: #FFFFFF;
-  border-bottom-width: 0;
-}
-
-#zvewtafbqe .gt_subtitle {
-  color: #333333;
-  font-size: 85%;
-  font-weight: initial;
-  padding-top: 0;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-color: #FFFFFF;
-  border-top-width: 0;
-}
-
-#zvewtafbqe .gt_bottom_border {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_col_headings {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_col_heading {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 6px;
-  padding-left: 5px;
-  padding-right: 5px;
-  overflow-x: hidden;
-}
-
-#zvewtafbqe .gt_column_spanner_outer {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: normal;
-  text-transform: inherit;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-#zvewtafbqe .gt_column_spanner_outer:first-child {
-  padding-left: 0;
-}
-
-#zvewtafbqe .gt_column_spanner_outer:last-child {
-  padding-right: 0;
-}
-
-#zvewtafbqe .gt_column_spanner {
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: bottom;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  overflow-x: hidden;
-  display: inline-block;
-  width: 100%;
-}
-
-#zvewtafbqe .gt_group_heading {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  text-align: left;
-}
-
-#zvewtafbqe .gt_empty_group_heading {
-  padding: 0.5px;
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  vertical-align: middle;
-}
-
-#zvewtafbqe .gt_from_md > :first-child {
-  margin-top: 0;
-}
-
-#zvewtafbqe .gt_from_md > :last-child {
-  margin-bottom: 0;
-}
-
-#zvewtafbqe .gt_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  margin: 10px;
-  border-top-style: solid;
-  border-top-width: 1px;
-  border-top-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 1px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 1px;
-  border-right-color: #D3D3D3;
-  vertical-align: middle;
-  overflow-x: hidden;
-}
-
-#zvewtafbqe .gt_stub {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#zvewtafbqe .gt_stub_row_group {
-  color: #333333;
-  background-color: #FFFFFF;
-  font-size: 100%;
-  font-weight: initial;
-  text-transform: inherit;
-  border-right-style: solid;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
-}
-
-#zvewtafbqe .gt_row_group_first td {
-  border-top-width: 2px;
-}
-
-#zvewtafbqe .gt_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#zvewtafbqe .gt_first_summary_row {
-  border-top-style: solid;
-  border-top-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_first_summary_row.thick {
-  border-top-width: 2px;
-}
-
-#zvewtafbqe .gt_last_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_grand_summary_row {
-  color: #333333;
-  background-color: #FFFFFF;
-  text-transform: inherit;
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#zvewtafbqe .gt_first_grand_summary_row {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  padding-left: 5px;
-  padding-right: 5px;
-  border-top-style: double;
-  border-top-width: 6px;
-  border-top-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_striped {
-  background-color: rgba(128, 128, 128, 0.05);
-}
-
-#zvewtafbqe .gt_table_body {
-  border-top-style: solid;
-  border-top-width: 2px;
-  border-top-color: #D3D3D3;
-  border-bottom-style: solid;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_footnotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_footnote {
-  margin: 0px;
-  font-size: 90%;
-  padding-left: 4px;
-  padding-right: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#zvewtafbqe .gt_sourcenotes {
-  color: #333333;
-  background-color: #FFFFFF;
-  border-bottom-style: none;
-  border-bottom-width: 2px;
-  border-bottom-color: #D3D3D3;
-  border-left-style: none;
-  border-left-width: 2px;
-  border-left-color: #D3D3D3;
-  border-right-style: none;
-  border-right-width: 2px;
-  border-right-color: #D3D3D3;
-}
-
-#zvewtafbqe .gt_sourcenote {
-  font-size: 90%;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-#zvewtafbqe .gt_left {
-  text-align: left;
-}
-
-#zvewtafbqe .gt_center {
-  text-align: center;
-}
-
-#zvewtafbqe .gt_right {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-#zvewtafbqe .gt_font_normal {
-  font-weight: normal;
-}
-
-#zvewtafbqe .gt_font_bold {
-  font-weight: bold;
-}
-
-#zvewtafbqe .gt_font_italic {
-  font-style: italic;
-}
-
-#zvewtafbqe .gt_super {
-  font-size: 65%;
-}
-
-#zvewtafbqe .gt_footnote_marks {
-  font-style: italic;
-  font-weight: normal;
-  font-size: 75%;
-  vertical-align: 0.4em;
-}
-
-#zvewtafbqe .gt_asterisk {
-  font-size: 100%;
-  vertical-align: 0;
-}
-
-#zvewtafbqe .gt_indent_1 {
-  text-indent: 5px;
-}
-
-#zvewtafbqe .gt_indent_2 {
-  text-indent: 10px;
-}
-
-#zvewtafbqe .gt_indent_3 {
-  text-indent: 15px;
-}
-
-#zvewtafbqe .gt_indent_4 {
-  text-indent: 20px;
-}
-
-#zvewtafbqe .gt_indent_5 {
-  text-indent: 25px;
-}
-</style>
-
-<table class="gt_table table table-sm table-striped small" data-quarto-postprocess="true">
-<thead class="gt_col_headings">
-<tr class="header">
-<th id="<strong>Characteristic</strong>" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col"><strong>Characteristic</strong></th>
-<th id="<strong>Overall</strong>, N = 10,119<sup class=&quot;gt_footnote_marks&quot;>1</sup>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Overall</strong>, N = 10,119<sup>1</sup></th>
-<th id="<strong>Complied</strong>, N = 219<sup class=&quot;gt_footnote_marks&quot;>1</sup>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Complied</strong>, N = 219<sup>1</sup></th>
-<th id="<strong>Never Taker</strong>, N = 9,900<sup class=&quot;gt_footnote_marks&quot;>1</sup>" class="gt_col_heading gt_columns_bottom_border gt_center" data-quarto-table-cell-role="th" scope="col"><strong>Never Taker</strong>, N = 9,900<sup>1</sup></th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">Y</td>
-<td class="gt_row gt_center" headers="stat_0"></td>
-<td class="gt_row gt_center" headers="stat_1"></td>
-<td class="gt_row gt_center" headers="stat_2"></td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
-<td class="gt_row gt_center" headers="stat_0">5,932.0 (58.6%)</td>
-<td class="gt_row gt_center" headers="stat_1">145.0 (66.2%)</td>
-<td class="gt_row gt_center" headers="stat_2">5,787.0 (58.5%)</td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
-<td class="gt_row gt_center" headers="stat_0">4,187.0 (41.4%)</td>
-<td class="gt_row gt_center" headers="stat_1">74.0 (33.8%)</td>
-<td class="gt_row gt_center" headers="stat_2">4,113.0 (41.5%)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">Treatment</td>
-<td class="gt_row gt_center" headers="stat_0"></td>
-<td class="gt_row gt_center" headers="stat_1"></td>
-<td class="gt_row gt_center" headers="stat_2"></td>
-</tr>
-<tr class="odd">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Control</td>
-<td class="gt_row gt_center" headers="stat_0">5,083.0 (50.2%)</td>
-<td class="gt_row gt_center" headers="stat_1">0.0 (0.0%)</td>
-<td class="gt_row gt_center" headers="stat_2">5,083.0 (51.3%)</td>
-</tr>
-<tr class="even">
-<td class="gt_row gt_left" headers="label">&nbsp;&nbsp;&nbsp;&nbsp;Treatment</td>
-<td class="gt_row gt_center" headers="stat_0">5,036.0 (49.8%)</td>
-<td class="gt_row gt_center" headers="stat_1">219.0 (100.0%)</td>
-<td class="gt_row gt_center" headers="stat_2">4,817.0 (48.7%)</td>
-</tr>
-</tbody><tfoot class="gt_footnotes">
-<tr class="odd">
-<td colspan="4" class="gt_footnote"><sup>1</sup> n (%)</td>
-</tr>
-</tfoot>
-
-</table>
-
-</div>
-</div>
-</div>
-<p>We can see that 74 of the 219 compliers actually had the outcome. This means we can estimate <img src="https://latex.codecogs.com/png.latex?E%5By%5E1%5Cmid%20d%5E1%5D%20%5Capprox%2074/219%20%5Capprox%2033.8%5C%25">. Using <code>ivreg</code>, the LATE is estimated to be 0.256, so the lift is estimated to be <img src="https://latex.codecogs.com/png.latex?0.338/(0.388-0.256)%20%5Capprox%202.56">. But there is still a problem.</p>
-<section id="oh-shit-i-forgot-a-bound" class="level2">
-<h2 class="anchored" data-anchor-id="oh-shit-i-forgot-a-bound">Oh Shit, I Forgot a Bound</h2>
-<p>Note that there is no bound on the LATE because it is estimated via OLS (sure, there are realistic bounds on how big this can be, but OLS isn’t enforcing those). In particular, what if <img src="https://latex.codecogs.com/png.latex?LATE%20=%20E%5By%5E1%20%5Cmid%20d%5E1%5D">? Then the denominator of the causal risk ratio would be 0. That’s…bad.</p>
-<p>More over, what if <img src="https://latex.codecogs.com/png.latex?LATE%20%5Capprox%20E%5By%5E1%20%5Cmid%20d%5E1%5D"> so that the denominator was really small? Then the causal risk ratio would basically blow up (that’s a technical term for “embiggen”).</p>
-<p>The only reason I bring this up is because it happens in this example. Let’s bootstrap the estimated causal risk ratio (what we call “lift”) and look at the distribuion of bootstrap replicates.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>LMAO look at that tail! The long tail us due to the problems I’ve highlighted. In fact, we can highlight the “Oh shit zone” on a plot of the bootstraps (below in the figure below). The red line is where the tail behavior comes from; if you have a bootstrap replicate on that line, you should be saying “oh shit”.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In fact, there are some estimates from the bootstrap which yield <img src="https://latex.codecogs.com/png.latex?E%5By%5E0%5Cmid%20d%5E1%5D%3C0"> so… what was the point if this?</p>
-</section>
-<section id="what-was-the-point-of-this-post" class="level2">
-<h2 class="anchored" data-anchor-id="what-was-the-point-of-this-post">What Was The Point Of This Post</h2>
-<p>Ok, so estimating the causal risk ratio in a randomized experiment with one sided non-compliance is technically possible, but the math can get…weird. In particular, bootstrapping the standard errors (which is probably the most sensible way of estimating the standard errors unless you’re a glutton for delta method punishment) shows that we can get non-nonsensical bootstrapped estimates of the counterfacutal average outcome for compliers.</p>
-<p>Honestly…I’m not sure where to go from here. Point estimates are possible but incomplete. Bootstrapping is a sanest way to get standard errors, but have no way of ensuring the estimates are bounded appropriately. All is not lost, its nice to know this sort of thing can happen. Maybe the most sensible thing to say here is “do not ask for causal risk ratios for these types of experiments” and that is worth its weight in gold.</p>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>AB Tests</category>
-  <category>Statistics</category>
-  <category>Causal Inference</category>
-  <guid>https://dpananos.github.io/posts/2023-02-11-iv-risk-ratio/</guid>
-  <pubDate>Sat, 11 Feb 2023 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

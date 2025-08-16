@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2022-08-16">
+<meta name="dcterms.date" content="2025-08-16">
 
-<title>Demetri Pananos Ph.D - PCA on The Tags for Cross Validated</title>
+<title>Demetri Pananos Ph.D - Pre Randomized Experiment Differences Don’t Mean DiD is Needed</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -111,15 +111,42 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 </script>
-<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta property="og:title" content="Demetri Pananos Ph.D - Pre Randomized Experiment Differences Don’t Mean DiD is Needed">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Pre Randomized Experiment Differences Don’t Mean DiD is Needed">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
@@ -175,11 +202,8 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">PCA on The Tags for Cross Validated</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">Machine Learning</div>
-              </div>
-                  </div>
+      <h1 class="title">Pre Randomized Experiment Differences Don’t Mean DiD is Needed</h1>
+                      </div>
   </div>
     
   
@@ -195,7 +219,7 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 16, 2022</p>
+        <p class="date">August 16, 2025</p>
       </div>
     </div>
     
@@ -211,11 +235,11 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
     <h2 id="toc-title">Sections</h2>
    
   <ul>
-  <li><a href="#data-modelling" id="toc-data-modelling" class="nav-link active" data-scroll-target="#data-modelling">Data &amp; Modelling</a></li>
-  <li><a href="#principal-components" id="toc-principal-components" class="nav-link" data-scroll-target="#principal-components">Principal Components</a></li>
+  <li><a href="#point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population" id="toc-point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population" class="nav-link active" data-scroll-target="#point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population">Point 1: Before Intervention, Treatment and Control are Samples From The Same Population</a></li>
+  <li><a href="#point-2-if-you-have-pre-experiment-data-you-should-condition-on-it" id="toc-point-2-if-you-have-pre-experiment-data-you-should-condition-on-it" class="nav-link" data-scroll-target="#point-2-if-you-have-pre-experiment-data-you-should-condition-on-it">Point 2: If You Have Pre Experiment Data, You Should Condition On It!</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-08-16-pre/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -224,207 +248,109 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 
 
 
-<p>Julia Silge gave a <a href="https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/">really good talk</a> in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc). These principal components were able to shed some light on what drove the variation in questions asked.</p>
-<p>I love this talk, and I crib it all the time. As of late, I’ve not been doing much SQL, so I figured I would recreate Julia’s analysis using data from <a href="https://stats.stackexchange.com/">cross validated</a>. But this time, with a twist!</p>
-<p>What if instead of understanding the drivers of variance in questions asked, we analyze the kinds of questions users answer. This could give us insight into the type of analysts we have on cross validated. The site is intended to be for statistical analysis, but it has a mix of prediction questions, machine learning questions, econometrics questions, and much more. Hang around there long enough and you will see some familiar faces (mine included) and you get a pretty good sense of who answers what kinds of questions.</p>
-<p>I’m going to use data available from the stack exchange data explorer available <a href="https://data.stackexchange.com/">here</a>. I’ve included a code box in this post with the query I’ve used. I’ve sliced out the top 250 users as ranked by reputation and the top 100 tags as calculated by prevalence. We can use <code>{tidymodels}</code> to do a lot of the heay lifting. Let’s get to it.</p>
-<details>
-<summary>
-Click to see SQL Query
-</summary>
-<p>
-</p><pre><code>with QA_Tags as (
-select
-
-A.Id as QuestionId,
-A.Title as QuestionTitle,
-A.Body as QuestionBody,
-
-B.Id as AnswerId,
-B.OwnerUserId,
-B.Body as AnswerBody,
-
-C.iD as UserId,
-C.DisplayName,
-dense_rank() over (order by C.Reputation desc) as rnk,
-
-D.TagId,
-E.TagName
-
-from
---Extract Answers from Posts Table
-(select * from Posts where PostTypeId = 2)  as B
---Extract Questions from Posts Table
-left join (select * from Posts where PostTypeId = 1)  as A
-on  A.Id = B.ParentId
-left join Users as C
-on B.OwnerUserId = C.Id
-left join PostTags as D
-on A.Id = D.PostId
-left join (select top 100 * from Tags where TagName is not NULL order by Count desc) as E
-on D.TagId = E.Id)
-
-select
-rnk,
-UserId, 
-DisplayName, 
-TagName,
-count(distinct QuestionId) as N
-from QA_tags
-where rnk&lt;=250
-group by rnk, UserId, DisplayName, TagName
-order by rnk</code></pre>
-<p></p>
-</details>
-<section id="data-modelling" class="level2">
-<h2 class="anchored" data-anchor-id="data-modelling">Data &amp; Modelling</h2>
-<p>Let’s Take a peek at the data, using me as an example. Below are my top 10 tags as a percent of my total answers. Looks like I like to answer questions about regression, hypothesis testing, and R most frequently. Each of the top 250 users has data similar to this in my dataset. I need to pivot it so that tags become features. Then, I can normalize the data and perform PCA.</p>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Name</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Tag</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Percent</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Regression</td>
-<td style="text-align: left;">11.40%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Hypothesis-Testing</td>
-<td style="text-align: left;">6.01%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">R</td>
-<td style="text-align: left;">5.90%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Machine-Learning</td>
-<td style="text-align: left;">5.45%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Logistic</td>
-<td style="text-align: left;">4.85%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Bayesian</td>
-<td style="text-align: left;">3.58%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Statistical-Significance</td>
-<td style="text-align: left;">3.42%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Confidence-Interval</td>
-<td style="text-align: left;">2.75%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">T-Test</td>
-<td style="text-align: left;">2.64%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Probability</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Generalized-Linear-Model</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-<p>Checkout how dummy easy the analysis is with tidymodels. I think I spent more time cleaning the data than I did modelling it.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(rnk <span class="sc">+</span> UserId <span class="sc">+</span> DisplayName <span class="sc">~</span> ., <span class="at">data =</span> d) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_pca</span>(<span class="fu">all_numeric_predictors</span>(), <span class="at">num_comp =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">prep</span>()</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>prin_comps <span class="ot">&lt;-</span> <span class="fu">bake</span>(rec, <span class="at">new_data =</span> d) </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>weights <span class="ot">&lt;-</span> rec <span class="sc">%&gt;%</span> </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">tidy</span>(<span class="at">number =</span> <span class="dv">2</span>, <span class="at">type =</span> <span class="st">"coef"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>The last two lines extract both the principal components and the weights for each tag on each component. Now. we’re ready to make some plots.</p>
+<p><a href="https://stats.stackexchange.com/a/669596/111259">Take a look at this interaction</a> I had with user jginestet on Cross Validated. In short, jginestet suggests that a randomized experiment assessing percent changes in tumor volume should adjust for pre-experiment differences (at this point, I’m nodding yes) and therefore the most appropriate method is DID – difference in differences – (at this point, I’m shaking my head no).</p>
+<p>User jginestet is right, pre-experiment differences should be adjusted for, but he is wrong when he suggests DiD is the way to do it. Let me explain</p>
+<section id="point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population" class="level2">
+<h2 class="anchored" data-anchor-id="point-1-before-intervention-treatment-and-control-are-samples-from-the-same-population">Point 1: Before Intervention, Treatment and Control are Samples From The Same Population</h2>
+<p>By virtue of this point, the two groups have the same pre-experiment mean measure <em>in expectation</em>. The samples means are going to differ because of sampling variability. If <span class="math inline">\(\bar{Y}_i\)</span> is the sample mean in group <span class="math inline">\(i \in {t, c}\)</span>, then mathematically this means that <em>before intervention</em> <span class="math inline">\(E[\bar{Y}_t] = E[\bar{Y}_c] = E[Y]\)</span>. The same can’t be said for post intervention, and that is why we run the experiment. What does this mean for DiD?</p>
+<p>Let <span class="math inline">\(\bar{Y}_{i, j}\)</span> indicate sample mean for group <span class="math inline">\(i \in \left\{ t, c \right\}\)</span> in time period <span class="math inline">\(j \in \left\{ 0, 1 \right\}\)</span> (here 0 means before intervention, 1 means after intervention). DiD estimates the following quantity</p>
+<p><span class="math display">\[ \widehat{\Delta} = (\bar{Y}_{t, 1} - \bar{Y}_{t, 0}) - (\bar{Y}_{c, 1} - \bar{Y}_{c, 0})  \]</span> If the treatment assignment is randomized, something nice happens now. Taking expectations</p>
+<p><span class="math display">\[ \begin{align}
+E[\widehat{\Delta}] &amp;= E[(\bar{Y}_{t, 1} - \bar{Y}_{t, 0}) - (\bar{Y}_{c, 1} - \bar{Y}_{c, 0})] \\
+&amp;= E[\bar{Y}_{t, 1}] - E[\bar{Y}_{t, 0}] - E[\bar{Y}_{c, 1}] + E[\bar{Y}_{c, 0}] \\
+&amp;= E[\bar{Y}_{t, 1}] - E[\bar{Y}_{0}] - E[\bar{Y}_{c, 1}] + E[\bar{Y}_{0}]\\
+&amp;= E[\bar{Y}_{t, 1}] - \cancel{E[\bar{Y}_{0}]} - E[\bar{Y}_{c, 1}] + \cancel{E[\bar{Y}_{0}]} \\
+&amp;= E[\bar{Y}_{t, 1}] - E[\bar{Y}_{c, 1}]
+\end{align}\]</span></p>
+<p>Which is the difference in means after the intervention. DiD is not needed in randomized experiments because the pre-treatment difference is 0 in expectation. We don’t need to adjust for pre-experiment systematic differences because there are none.</p>
 </section>
-<section id="principal-components" class="level2">
-<h2 class="anchored" data-anchor-id="principal-components">Principal Components</h2>
-<p>The results for the first 3 principal componensts are shown below. I’ve shown the 20 most extreme components for clarity.</p>
-<p>The first principal compnent has tags like “Anova”, “T-Test” and “SPSS” as heavily weighted positive, while “Machine Learning”, “Mathematical Statistics” and “Probability” are all weighted heavily negative (the direction of the weights doesn’t matter, it isn’t like one direction is better or worse). To me, I read this as “Beginner” vs “Advanced” answers. Questions with the former tags are usually from users who are maybe taking a stats class for the first time and are learning about the t test or Anova. The dead give away for this is the “SPSS” tag being weighted so heavily<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Looking at more weights verifies this, with the negative weights being associated with topics like “Neural Nets”, and “Maximum Likelihod” while the positive weights have tags like “Statistical Significance” and “Interpretation”.</p>
-<p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
-<div class="cell" data-layout-row="3" data-fig.dpi="240">
+<section id="point-2-if-you-have-pre-experiment-data-you-should-condition-on-it" class="level2">
+<h2 class="anchored" data-anchor-id="point-2-if-you-have-pre-experiment-data-you-should-condition-on-it">Point 2: If You Have Pre Experiment Data, You Should Condition On It!</h2>
+<p>That being said, there is value to adjusting for pre-experiment data, just not with DiD. Consider the following simulation:</p>
+<ul>
+<li>I simulate a randomized experiment.</li>
+<li>I have a highly correlated, pre-experiment, measure of the outcome (e.g.&nbsp;could be weight in an intervention intended to help people lose weight). This is important since if the pre-experiment measure was not correlated with post experiment measure, the whole point of using, or even checking, pre-experiment measures would be moot. I fit a model using treatment indication with and without the pre-experiment data.</li>
+<li>I compare coverage of the estimators, hoping that they would have nominal coverage.</li>
+</ul>
+<p>And, if you run this simulation, you find they do indeed have nominal coverage. But something interesting happens when you examine coverage as a function of the pre experiment differences. See the plot below.</p>
+<p>This plot shows the coverage of the 95% confidence interval for the treatment effect within deciles of the standardized pre-experiment difference (essentially the z score for the difference). Note that for ANCOVA, the coverage is always at the nominal level, regardless of how big the pre-experiment differences are. But the difference in means has larger than expected coverage when pre-experiment differences are “small”, and wildly low coverage in cases where pre experiment differences are big. Despite this, <em>each method maintains nominal coverage across all simulated experiments</em>.</p>
+<p>Why does this matter? This plot is telling me that, so long as the outcomes are highly correlated, then pre-experiment differences should be adjusted for … with ANCOVA. These points are nicely summarized at a higher level in the section titled “Balance of prognostic factors is necessary for valid inference” from Senn’s <a href="https://onlinelibrary.wiley.com/doi/10.1002/sim.5713">“Seven myths of randomization in clinical trials”</a>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>r <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10000</span>, <span class="sc">~</span>{</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  treatment <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>), <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.85</span>, <span class="fl">0.85</span>, <span class="dv">1</span>), <span class="at">nrow=</span><span class="dv">2</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  y_post <span class="ot">&lt;-</span> Y[,<span class="dv">1</span>]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  y_pre <span class="ot">&lt;-</span> Y[,<span class="dv">2</span>]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  pre_experiment_z <span class="ot">&lt;-</span> <span class="fu">t.test</span>(y_pre <span class="sc">~</span> treatment)<span class="sc">$</span>statistic</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  fit_ols <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_post <span class="sc">~</span> treatment)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  fit_ancova <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_post <span class="sc">~</span> treatment <span class="sc">+</span> y_pre)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  models <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">'Diff in Means'</span> <span class="ot">=</span> fit_ols, <span class="st">'Ancova'</span> <span class="ot">=</span> fit_ancova)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  models <span class="sc">%&gt;%</span> </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">imap_dfr</span>(<span class="sc">~</span>{</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      broom<span class="sc">::</span><span class="fu">tidy</span>(.x, <span class="at">conf.int=</span>T) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(term<span class="sc">==</span><span class="st">'treatment'</span>)} <span class="sc">%&gt;%</span> </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">pre_experiment_z =</span> pre_experiment_z, </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">cover =</span> <span class="sc">!</span>(<span class="fu">sign</span>(conf.low) <span class="sc">==</span> <span class="fu">sign</span>(conf.high)), </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>               <span class="at">model=</span>.y)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>r <span class="sc">%&gt;%</span> </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    model, </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">decile =</span> <span class="fu">ntile</span>(pre_experiment_z, <span class="dv">10</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">coverage =</span> <span class="fu">mean</span>(cover),</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> decile, <span class="at">y =</span> coverage, <span class="at">color =</span> model)) <span class="sc">+</span> </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fl">0.95</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"gray50"</span>) <span class="sc">+</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set1"</span>) <span class="sc">+</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Coverage by Pre-Experiment Score Decile"</span>,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Decile of Pre-Experiment Difference in Means Z"</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Coverage"</span>,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Model"</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats. I’m not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the top of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
-<p>Plotting PC1 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
-<div>
-
-</div>
-<div class="cell quarto-layout-panel" data-layout-nrow="2" data-fig.dpi="240">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-2.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </div>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>There appear to be at least three dimensions about which analysts on cross validated can be placed. Analysts can either opt to answer easy or difficult questions, which lean classical statistics or machine learning, with additional focus on forecasting on non-forecasting problems. That’s a fairly useful interpretation of the first three principal components!</p>
-<p>It could be fun to think about how best to use this information. Now that we know these three kinds of subgroups, could we use it to recommend users questions to answer? Its been the case that <a href="https://stats.meta.stackexchange.com/questions/5325/we-have-a-very-large-widening-gap-between-questions-and-answers-how-do-we-fix">there is a large gap between questions and answers</a>, so maybe this could be useful but also maybe not.</p>
+<p>So, should pre experiment imbalance be adjusted for? Well yes. We’ve seen that coverage in this case can be quite small when imbalance is big, but if you know the imbalance is big then presumably you have the data to demonstrate that, so you can adjust for it with ANCOVA.</p>
+<p>Could you use DiD? Yes, you could, but there is no need to do so since the pre experiment population means are the same in expectation.</p>
+<p>Those who insist on DiD in the randomized case are right – that we should adjust for pre experiment imbalance – for the wrong reasons – because I presume they think there is a systematic difference between groups; there isn’t.</p>
 
 
 </section>
 
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Because once you’ve taken a few stats courses, you know bette than to use SPSS.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -817,4 +743,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-08-16-pre/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
