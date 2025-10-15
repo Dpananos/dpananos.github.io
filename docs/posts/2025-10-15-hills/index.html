@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2022-08-16">
+<meta name="dcterms.date" content="2025-10-15">
 
-<title>Demetri Pananos Ph.D - PCA on The Tags for Cross Validated</title>
+<title>Demetri Pananos Ph.D - On Climbing Hills</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -111,15 +77,13 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 </script>
-<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
-<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta property="og:title" content="Demetri Pananos Ph.D - On Climbing Hills">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - PCA on The Tags for Cross Validated">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - On Climbing Hills">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
@@ -175,11 +139,8 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">PCA on The Tags for Cross Validated</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">Machine Learning</div>
-              </div>
-                  </div>
+      <h1 class="title">On Climbing Hills</h1>
+                      </div>
   </div>
     
   
@@ -195,7 +156,7 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 16, 2022</p>
+        <p class="date">October 15, 2025</p>
       </div>
     </div>
     
@@ -207,15 +168,7 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Sections</h2>
-   
-  <ul>
-  <li><a href="#data-modelling" id="toc-data-modelling" class="nav-link active" data-scroll-target="#data-modelling">Data &amp; Modelling</a></li>
-  <li><a href="#principal-components" id="toc-principal-components" class="nav-link" data-scroll-target="#principal-components">Principal Components</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -224,207 +177,16 @@ gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 
 
 
-<p>Julia Silge gave a <a href="https://www.rstudio.com/resources/rstudioconf-2018/understanding-pca-using-shiny-and-stack-overflow-data/">really good talk</a> in 2018 about PCA ond tags on stack overflow. She was able to interpret some of the components to infer some subgroups of users of stack overflow (front-end vs back-end, are they a Microsoft tech developer or not, are you an android dev or not, etc). These principal components were able to shed some light on what drove the variation in questions asked.</p>
-<p>I love this talk, and I crib it all the time. As of late, I’ve not been doing much SQL, so I figured I would recreate Julia’s analysis using data from <a href="https://stats.stackexchange.com/">cross validated</a>. But this time, with a twist!</p>
-<p>What if instead of understanding the drivers of variance in questions asked, we analyze the kinds of questions users answer. This could give us insight into the type of analysts we have on cross validated. The site is intended to be for statistical analysis, but it has a mix of prediction questions, machine learning questions, econometrics questions, and much more. Hang around there long enough and you will see some familiar faces (mine included) and you get a pretty good sense of who answers what kinds of questions.</p>
-<p>I’m going to use data available from the stack exchange data explorer available <a href="https://data.stackexchange.com/">here</a>. I’ve included a code box in this post with the query I’ve used. I’ve sliced out the top 250 users as ranked by reputation and the top 100 tags as calculated by prevalence. We can use <code>{tidymodels}</code> to do a lot of the heay lifting. Let’s get to it.</p>
-<details>
-<summary>
-Click to see SQL Query
-</summary>
-<p>
-</p><pre><code>with QA_Tags as (
-select
-
-A.Id as QuestionId,
-A.Title as QuestionTitle,
-A.Body as QuestionBody,
-
-B.Id as AnswerId,
-B.OwnerUserId,
-B.Body as AnswerBody,
-
-C.iD as UserId,
-C.DisplayName,
-dense_rank() over (order by C.Reputation desc) as rnk,
-
-D.TagId,
-E.TagName
-
-from
---Extract Answers from Posts Table
-(select * from Posts where PostTypeId = 2)  as B
---Extract Questions from Posts Table
-left join (select * from Posts where PostTypeId = 1)  as A
-on  A.Id = B.ParentId
-left join Users as C
-on B.OwnerUserId = C.Id
-left join PostTags as D
-on A.Id = D.PostId
-left join (select top 100 * from Tags where TagName is not NULL order by Count desc) as E
-on D.TagId = E.Id)
-
-select
-rnk,
-UserId, 
-DisplayName, 
-TagName,
-count(distinct QuestionId) as N
-from QA_tags
-where rnk&lt;=250
-group by rnk, UserId, DisplayName, TagName
-order by rnk</code></pre>
-<p></p>
-</details>
-<section id="data-modelling" class="level2">
-<h2 class="anchored" data-anchor-id="data-modelling">Data &amp; Modelling</h2>
-<p>Let’s Take a peek at the data, using me as an example. Below are my top 10 tags as a percent of my total answers. Looks like I like to answer questions about regression, hypothesis testing, and R most frequently. Each of the top 250 users has data similar to this in my dataset. I need to pivot it so that tags become features. Then, I can normalize the data and perform PCA.</p>
-<div class="cell">
-<div class="cell-output-display">
-<table class="table table-striped table-sm small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Name</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Tag</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Percent</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Regression</td>
-<td style="text-align: left;">11.40%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Hypothesis-Testing</td>
-<td style="text-align: left;">6.01%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">R</td>
-<td style="text-align: left;">5.90%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Machine-Learning</td>
-<td style="text-align: left;">5.45%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Logistic</td>
-<td style="text-align: left;">4.85%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Bayesian</td>
-<td style="text-align: left;">3.58%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Statistical-Significance</td>
-<td style="text-align: left;">3.42%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Confidence-Interval</td>
-<td style="text-align: left;">2.75%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">T-Test</td>
-<td style="text-align: left;">2.64%</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Probability</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Demetri Pananos</td>
-<td style="text-align: left;">Generalized-Linear-Model</td>
-<td style="text-align: left;">2.31%</td>
-</tr>
-</tbody>
-</table>
+<p>I’ve been climbing this hill for what feels like a long time. I can look back and see how high I’ve climbed, the rocks I’ve had to overcome, and the gullies I nearly was trapped in. But as I look forward, all I see is more hill.</p>
+<p>A lot of people are on this hill with me. Some are climbing with me, some are on other paths and we are just meeting either by accident or because this climb was more interesting to them. Some people don’t appreciate how far we’ve climbed, how much effort we had to give to get here.</p>
+<p>I’m a little tired of climbing. I’d like to set up camp on this part of the hill, but I have wound up coupling my livelihood to climbing. I pay bills by climbing, and sometimes I need to climb hills I don’t really like, or am not qualified to climb. That really drains my energy for the main climb, making me want to rest even more.</p>
+<p>The inability (or perhaps, desire to avoid) rest has made me irritable. When people ask me questions about climbing, I get short with them. I think I know a lot about climbing and am unable to be humble when someone shows me they are slightly higher on the hill than I am.</p>
+<p>Some days, I don’t climb at all. But I think to myself, if I am not a climber then who am I?</p>
+<p>I’ve learned a lot from climbing, but the remainder of the hill (should it ever end) is steeper. It might be time to find another hill, and bring the experience I’ve made on this one to a new path. New rocks, new gullies. Not sure when, but hopefully soon.</p>
 
 
-</div>
-</div>
-<p>Checkout how dummy easy the analysis is with tidymodels. I think I spent more time cleaning the data than I did modelling it.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(rnk <span class="sc">+</span> UserId <span class="sc">+</span> DisplayName <span class="sc">~</span> ., <span class="at">data =</span> d) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_normalize</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">step_pca</span>(<span class="fu">all_numeric_predictors</span>(), <span class="at">num_comp =</span> <span class="dv">3</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>       <span class="fu">prep</span>()</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>prin_comps <span class="ot">&lt;-</span> <span class="fu">bake</span>(rec, <span class="at">new_data =</span> d) </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>weights <span class="ot">&lt;-</span> rec <span class="sc">%&gt;%</span> </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="fu">tidy</span>(<span class="at">number =</span> <span class="dv">2</span>, <span class="at">type =</span> <span class="st">"coef"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>The last two lines extract both the principal components and the weights for each tag on each component. Now. we’re ready to make some plots.</p>
-</section>
-<section id="principal-components" class="level2">
-<h2 class="anchored" data-anchor-id="principal-components">Principal Components</h2>
-<p>The results for the first 3 principal componensts are shown below. I’ve shown the 20 most extreme components for clarity.</p>
-<p>The first principal compnent has tags like “Anova”, “T-Test” and “SPSS” as heavily weighted positive, while “Machine Learning”, “Mathematical Statistics” and “Probability” are all weighted heavily negative (the direction of the weights doesn’t matter, it isn’t like one direction is better or worse). To me, I read this as “Beginner” vs “Advanced” answers. Questions with the former tags are usually from users who are maybe taking a stats class for the first time and are learning about the t test or Anova. The dead give away for this is the “SPSS” tag being weighted so heavily<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Looking at more weights verifies this, with the negative weights being associated with topics like “Neural Nets”, and “Maximum Likelihod” while the positive weights have tags like “Statistical Significance” and “Interpretation”.</p>
-<p>Now remember, these components do not explain variance in questions. They explain variance in the question <em>answers</em>! So the first component is really about people who choose to answer simple versus complex topics. The second principal component has a fairly straightforward interpretation. This component explains variation between users who answer classical statistical questions versus those who opt to answer machine learning type questions. Lastly, the third principal component seems to be distinguishing users who answer forecasting type questions (see tags like “Arima”, “Time Series”, “Forecasting”, and “Econometrics”) versus non forecasting type questions.</p>
-<div class="cell" data-layout-row="3" data-fig.dpi="240">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/prin-comp-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>I think what is more interesting is that we can plot some of the more popular users on the site using the principal components. In the first plot, I’ve scattered PC1 vs PC2. Left to right means advanced vs simple questions. It is no surpriuse to see whuber farther left and BruceET farther right. Whuber can answer most anything, and I feel like he often accepts the challenge of a complex answer, opting to comment on simpler questions. Bruce, on the other hand, will always answer a simple question very robustly. Top to bottom means machine learning vs classical stats. I’m not surprised to see Frank Harrell closer to the top, as he has appeared in many questions if not only to scold people for using accuracy as a metric. No surprise Topepo is on the top of this PC. Interestingly, I’m kind of near the origin, if not a bit right of it. Seems like I strike a good balance between ML and stats, but often opt to answer simpler questions.</p>
-<p>Plotting PC1 vs PC3 shows a very predictable pattern. Users near the bottom are more forcasting types, so its no surprise that Rob Hyndman, Dimitris Rizopoulus (who does a lot of longitudinal work), and Stephan Kolassa are near the bottom. I’m near the top, I have no clue about any of that stuff to be honest.</p>
-<div>
 
-</div>
-<div class="cell quarto-layout-panel" data-fig.dpi="240" data-layout-nrow="2">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<p><img src="index_files/figure-html/prin-comp-3-2.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-</div>
-</section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>There appear to be at least three dimensions about which analysts on cross validated can be placed. Analysts can either opt to answer easy or difficult questions, which lean classical statistics or machine learning, with additional focus on forecasting on non-forecasting problems. That’s a fairly useful interpretation of the first three principal components!</p>
-<p>It could be fun to think about how best to use this information. Now that we know these three kinds of subgroups, could we use it to recommend users questions to answer? Its been the case that <a href="https://stats.meta.stackexchange.com/questions/5325/we-have-a-very-large-widening-gap-between-questions-and-answers-how-do-we-fix">there is a large gap between questions and answers</a>, so maybe this could be useful but also maybe not.</p>
-
-
-</section>
-
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Because once you’ve taken a few stats courses, you know bette than to use SPSS.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -817,4 +579,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2022-08-16-pca/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-10-15-hills/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
