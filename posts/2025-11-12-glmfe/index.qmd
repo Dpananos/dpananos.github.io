@@ -1,0 +1,165 @@
+---
+title: How to Fit a Generalized Linear Model with Fixed Effects (Pt 1)
+date: 2025-11-13
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+*To the Economists, I am sorry*.
+
+
+## What is a Fixed Effect Model?
+
+A model with fixed effects is the following
+
+$$ y_{i, t} = \beta_0 + \alpha_i + \beta \mathbf{x}_{i, t} + u_{i, t}  \>. $$
+
+Subjects (indexed by $i$) are followed over time (indexed by $t$) and outcomes $y$ are recorded.  Covariates $\mathbf{x}$ are also recorded and we fit the model using OLS. Each subject has an "idiosyncratic" effect $\alpha_i$ and there are shared coefficients $\beta$,  Now, we don't need to follow subjects over time to use a fixed effect model, this is just a typical use case.  
+
+If you're a statistician, you probably see this and think "they just added dummy variables to their regression can called it something new" and you would be right. Don't believe me?  I'll show you.
+
+```{r}
+
+library(fixest)
+library(tidyverse)
+library(modelsummary)
+
+data <- na.omit(palmerpenguins::penguins)
+# Regular old OLS fit
+fit_wout <- lm(body_mass_g ~ sex + bill_length_mm + species,data=data)
+# Fancy new fixed effets fit
+fit_w <- feols(body_mass_g ~ sex + bill_length_mm | species,data=data, vcov = 'iid')
+
+mods <- list('Without Fixed Effects' = fit_wout, 'With Fixed Effects' = fit_w)
+modelsummary(mods, gof_map = NA)
+```
+
+In the fixed effect model, the coefficients and standard errors for `sexmale` and `bill_length_mm` are the same as the regular model with dummies, but the species indicators are missing.  Why is that and why should I use a fixed effect model?
+
+Fixed effects models are great for when you need to account for those dummies but don't want to carry them around.  Think about adjusting for ZIP code (probably hundreds) in a regression in which you just care about some other variable.  
+
+But why should the coefficients be the same?  For that, we need to go back to ol' reliable
+
+![](reliable.jpeg){fig-align='center' width=50%}
+
+
+## FWL Theorem
+
+FWL states that the estimate of $\gamma$ from the model $Y=X\beta + D\gamma + u$ will be the same as the estimate obtained from $MY = MD\gamma + Mu$ , where
+
+$$ M = (I-X(X^\top X)^{-1}X^\top) = I-H $$
+Note that $H$ is the "hat" matrix because it "puts the hat on $Y$" in regression.  $H$ is also a projection matrix -- meaning that $\hat Y = HY$ is the projection of $Y$ onto the column space of $X$, $\mathcal{C} (X)$ .  Makes sense, since the prediction from the linear model is, literally,  a linear combination of the columns of $X$.
+
+This also means $I-H$ is a projection matrix, but left multiplication by this matrix projects the vector onto $\mathcal{C}(X)^\perp$, the orthogonal compliment of the column space of $X$.  Note that $(I-H)X = \mathbf{0}$ for this reason.  We'll come back to this after a brief interlude of algebra.
+
+## Why is $\gamma$ Left Unchanged?
+
+It would first behoove us to understand what the estimate of $\gamma$ is under each model.  Under the second model
+
+$$ \hat \gamma = ((MD)^\top MD)^{-1} (MD)^\top MY \>.$$
+Since $M$ is a projection matrix it is idempotent and symmetric, and so this expression simplifies to
+
+$$ \hat \gamma = (D^\top M D)^{-1} D^\top M Y \>.$$
+Under the first model, the estimate of $\gamma$ is more involved.  First, concatenate $X$ and $D$ column-wise so that $Z = \begin{bmatrix} X & D \end{bmatrix}$.  We can then express the estimates of $\beta$ and $\gamma$ in terms of inverses of block matrices
+
+$$ \begin{bmatrix} \beta \\ \gamma \end{bmatrix} = (Z^\top Z)^{-1} Z^\top Y $$
+Note that $Z^\top Z$ is a block matrix with the following form, so
+
+$$ Z^\top Z = \begin{bmatrix} X^\top X & X^\top D \\ D^\top X  & D^\top D\end{bmatrix} $$
+and therefore
+$$ \begin{bmatrix} \beta \\ \gamma \end{bmatrix} = \begin{bmatrix} X^\top X & X^\top D \\ D^\top X  & D^\top D\end{bmatrix}^{-1} \begin{bmatrix} X^\top Y \\ D^\top Y \end{bmatrix} \>.$$
+
+From this form, we can see we need the bottom row.  The inverse of a 2x2 block matrix is a fucking hairy thing, here it is
+
+$$
+\mathbf{P}^{-1} = \begin{bmatrix}
+\mathbf{A} & \mathbf{B} \\
+\mathbf{C} & \mathbf{F}
+\end{bmatrix}^{-1} = \begin{bmatrix}
+(\mathbf{A} - \mathbf{B} \mathbf{F}^{-1} \mathbf{C})^{-1} & - (\mathbf{A} - \mathbf{B} \mathbf{F}^{-1} \mathbf{C})^{-1} \mathbf{B} \mathbf{F}^{-1} \\
+- \mathbf{F}^{-1} \mathbf{C} (\mathbf{A} - \mathbf{B} \mathbf{F}^{-1} \mathbf{C})^{-1} & \mathbf{F}^{-1} + \mathbf{F}^{-1} \mathbf{C} (\mathbf{A} - \mathbf{B} \mathbf{F}^{-1} \mathbf{C})^{-1} \mathbf{B} \mathbf{F}^{-1}
+\end{bmatrix}
+$$
+
+and so the inverse of our block matrix is 
+
+$$
+\begin{bmatrix} X^\top X & X^\top D \\ D^\top X & D^\top D \end{bmatrix}^{-1} = 
+\begin{bmatrix}
+(X^\top X)^{-1} + (X^\top X)^{-1} X^\top D \Delta^{-1} D^\top X (X^\top X)^{-1} & -(X^\top X)^{-1} X^\top D \Delta^{-1} \\
+-\Delta^{-1} D^\top X (X^\top X)^{-1} & \Delta^{-1}
+\end{bmatrix}
+$$
+
+$$ \text{where } \Delta = D^\top D - D^\top X (X^\top X)^{-1} X^\top D $$
+The estimate for $\gamma$ is then
+
+$$ \hat \gamma  = -\Delta^{-1}D^\top X(X^\top X)^{-1}X^\top Y + \Delta^{-1}D^\top Y $$
+Note that the hat matrix appears in $\Delta$ and $\hat \gamma$. After some elbow grease, it can be shown
+
+$$ 
+\begin{align}
+\hat \gamma &= \Delta^{-1}\bigl(D^\top Y - D^\top X (X^\top X)^{-1} X^\top Y\bigr)\\
+&= \Delta^{-1} D^\top (I - X (X^\top X)^{-1} X^\top) Y\\
+&= (D^\top M D)^{-1} D^\top M Y
+\end{align}quart
+$$
+
+This proves that the application of the FWL theorem provides the same coefficients as a regression on the full matrix $Z$.
+
+## Quit the Mumbo Jumbo, What Does it Mean?
+
+Focusing on the modified regression, $MY = MD\gamma + Mu$ will be most helpful.  Recall that $M$ is a projection matrix which projects the right multiplied vector onto $\mathcal{C}(X)^\perp$.  So that means that $MY$ is the part of $Y$ which is uncorrelated with the columns of $X$, and likewise $MD$ is the part of $D$ which us uncorrelated with $X$. Then, when we perform the regression of $MY$ onto $MD$, we get the effect of $D$ on $Y$ independent of $X$.  That sounds a hell of a lot like $\gamma$ to me!
+
+## What Happens of $X$ is a Bunch of Indicators?
+
+Ok, so we have established that we can use the FWL theorem to get the same estimates from a modified regression, and we have a less mathematical understanding for why this happens.
+
+Let's connect the FWL theorem back to fixed effects estimation.  Suppose that $X$ is our matrix of indicators in $Y = X \beta + D \gamma +u$.  We're interested more in $\gamma$ than in $\beta$, so we're going to partial out $X$ using FWL. In this case, $X$ a matrix of dummies, which means:
+
+* $X^\top X = \operatorname{diag}(n_1, n_2, \cdots, n_k)$ is a diagonal matrix in which the each entry is the count of observations within each fixed effect group
+* $(X^\top X)^{-1} = \operatorname{diag}(n^{-1}_1, n^{-1}_2, \cdots, n^{-1}_k)$
+* $H = X(X^\top X)^{-1}X^\top$ is a block-diagonal matrix where the $j$-th block is an $n_j \times n_j$ matrix of ones scaled by $1/n_j$. Assuming the data is sorted by group, it looks like this:$$H = \begin{bmatrix}
+\frac{1}{n_1} \mathbf{J}_{n_1} & \mathbf{0} & \cdots & \mathbf{0} \\
+\mathbf{0} & \frac{1}{n_2} \mathbf{J}_{n_2} & \cdots & \mathbf{0} \\
+\vdots & \vdots & \ddots & \vdots \\
+\mathbf{0} & \mathbf{0} & \cdots & \frac{1}{n_k} \mathbf{J}_{n_k}
+\end{bmatrix}$$Where $\mathbf{J}_{n_j}$ is an $n_j \times n_j$ matrix of all ones. Consequently, when this matrix $H$ is multiplied by $Y$, it produces a vector where every observation $y_{ij}$ is replaced by its group mean $\bar{y}_j$.
+
+So in the case where $X$ is a column of dummies *multiplication by $I-H$ will subtract the group level mean defined by fixed effects*.  This is sometimes known as the "within-transform".  
+
+This is a nice little insight.  Rather than do all the linear algebra (which sure is fun!) we can just subtract means before doing our regression.  In R, that might look like
+
+```{r}
+library(dplyr)
+library(modelsummary)
+
+# Within transform manually
+augmented_d <- data %>% 
+  select(body_mass_g, sex, bill_length_mm, species) %>% 
+  mutate(sexmale = as.numeric(sex == "male")) %>% 
+  group_by(species) %>% 
+  mutate_at(
+    vars(body_mass_g, sexmale, bill_length_mm),
+    ~ .x - mean(.x)
+  ) %>%
+  ungroup()
+
+# Fit on demeaned data (no intercept)
+fit_within <- lm(body_mass_g ~ sexmale + bill_length_mm - 1, data = augmented_d)
+
+
+mods <- c(
+  mods, list("Within Transform" = fit_within)
+)
+
+modelsummary(mods, gof_map = NA)
+```
+
+
+
+Here, the standard errors disagree because I"ve not adjusted for the excess degrees of freedom from the fixed effects.
