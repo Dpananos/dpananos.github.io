@@ -1,0 +1,96 @@
+---
+title: Kuethe's Criterion and A/B Tests
+date: 2025-11-21
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+
+
+## On The Validity of a Normal Approximation to The Ratio of Means
+
+A/B tests often target the "lift" in the metric as an estimand.  As a reminder, the lift is
+
+$$ \lambda = \dfrac{E[Y(1)] - E[Y(0)]}{E[Y(0)]} $$
+and is interpreted as the percent improvement treatment had over control. Clearly, the lift can be problematic when $E[Y(0)]$ -- the expected value of the outcome under no treatment -- is too close to 0.  This is not a revolutionary insight and has been a popular critique of the estimand.
+
+Eppo (By Datadog) is familiar with the problem with lift, and as a consequence will not show the lift and associated confidence intervals when the control group's average outcome is within 10 standard errors of 0.  
+
+But why 10 standard errors? Ten is a nice number, but feels somewhat arbitrary. That decision came from a paper entitled ["On the existence of a normal approximation to the distribution of the ratio of two independent normal random variables"](https://www.researchgate.net/profile/F-Rubio/publication/257406150_On_the_existence_of_a_normal_approximation_to_the_distribution_of_the_ratio_of_two_independent_normal_random_variables/links/53d7a18a0cf2e38c632ddabc/On-the-existence-of-a-normal-approximation-to-the-distribution-of-the-ratio-of-two-independent-normal-random-variables.pdf) by Eloisa Diaz-Frances and Francisco J. Rubio. I'll give you the short version of the justification and leave you to read the paper if you like.
+
+In brief, Diaz-Frances and Rubio study the sampling distribution of the ratio of two normals with positive means.  Note, that is is related to A/B testing because a) the lift is a shifted version of such a random variable, and b) the CLT gives us good justification for treating the sample means as Gaussian random variables [^1]. Diaz-Frances and Rubio reference a paper by Kuethe and colleagues called ["Imaging obstructed ventilation with NMR using inert fluorinated gases"](https://pubmed.ncbi.nlm.nih.gov/10846046/) who also studied normal approximations such random variables and concluded that when the denominator's coefficient of variation is smaller than 0.1 (or, when the mean is 10 standard deviations away from 0) then there is a really small probability of observing a negative value from the normal approximation to the true sampling distribution.  This is what we call "Kuethe's criterion".  In A/B testing, the denominator's standard deviation is the standard error, and this is where our 10 standard error rule came from.  In short, we consider the normal approximation to the lift's sampling distribution valid only when Kuethe's criterion is met.
+
+[^1]: Assuming we have enough data that this is a good assumption.  Berry-Esseen theorem applies here, but that is another blog post altogether.
+
+Kuethe and colleagues report that the probability of observing a negative value from the normal approximation is something on the order of $10^-24$ which seems excessively small.  Also, I don't care about the probability of a negative value, I care much more about the coverage of my resulting confidence interval.  How does coverage change when Kuethe's criterion is not met?
+
+## A Very Short Simulation of Coverage
+
+It should be straight forward to determine the impact of beign $M$ standard errors away from the mean.  Consider a random variable $y$ such that
+
+$$ y \sim \mathcal{N}(M, 1^2 )\>. $$
+
+Note that the coefficient of variation for $y$ is $1/M$ and so when $M\geq10$, then Kuethe's criterion is satisfied.  To simulate what happens to coverage, I just need to simulate a bunch of these random variables for treatment and control, compute the standard error via the delta method, and determine coverage.  The simulation is actually pretty short.  
+
+```{r}
+#| code-fold: true
+between <- function(x, low, hi) (x<=hi) & (low <= x)
+
+sim_coverage <- function(Mc){
+  
+  actual_lift <- 0.0
+  Mt <- Mc * (actual_lift+1)
+  
+  # With this many simulations, I can be certain about the first 2 decimal places
+  Nsims <- 100000
+  
+  # The following random variables are guarenteed to have a coefficient of variation <= 0.1
+  yc <- rnorm(Nsims, Mc, 1)
+  yt <- rnorm(Nsims, Mt, 1)
+  lift <- yt/yc-1
+  
+  # Because we know their standard deviation, we can apply the delta method for the lift
+  se <- sqrt((Mt/Mc)^2 * (1/Mc^2 + 1/Mt^2))
+  
+  # Now, we can determine coverage
+  conf_lower <- lift - 1.96*se
+  conf_upper <- lift + 1.96*se
+  coverage <- mean(between(actual_lift, conf_lower, conf_upper))
+  
+  return(coverage)
+}
+
+
+M <- seq(2, 30, 0.25)
+
+coverage <- sapply(M, sim_coverage)
+f <- loess(coverage ~ M)
+
+# First plot normally
+plot(M, predict(f), ylim = c(0.8, 1), type='l',
+     xlab = "Standard Deviations Away From 0",
+     col='red', ylab = "Coverage of 95% CI")
+
+# Shade vertical region where M >= 10
+usr <- par("usr")  # xmin, xmax, ymin, ymax
+
+rect(xleft = 10,
+     ybottom = usr[3],
+     xright = usr[2],
+     ytop = usr[4],
+     col = adjustcolor("lightgray", alpha.f = 0.3),
+     border = NA)
+
+# Redraw the line so it appears on top
+lines(M, predict(f), col='red')
+
+text(20, 0.975, "Kuethe's Criterion\nMet")
+text(5, 0.975, "Kuethe's Criterion\nNot Met")
+grid()
+abline(h = 0.95)
+
+```

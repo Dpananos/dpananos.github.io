@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2023-12-01">
+<meta name="dcterms.date" content="2025-11-21">
 
-<title>Brain Teaser About Frequentist Statistics – Demetri Pananos Ph.D</title>
+<title>Kuethe’s Criterion and A/B Tests – Demetri Pananos Ph.D</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -145,19 +145,19 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Brain Teaser About Frequentist Statistics – Demetri Pananos Ph.D">
+<meta property="og:title" content="Kuethe’s Criterion and A/B Tests – Demetri Pananos Ph.D">
 <meta property="og:description" content="">
-<meta property="og:image" content="https://dpananos.github.io/posts/2023-12-01-ron/linkedin.png">
+<meta property="og:image" content="https://dpananos.github.io/posts/2025-11-21-kuethe/index_files/figure-html/unnamed-chunk-1-1.png">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta property="og:image:height" content="868">
-<meta property="og:image:width" content="555">
-<meta name="twitter:title" content="Brain Teaser About Frequentist Statistics – Demetri Pananos Ph.D">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
+<meta name="twitter:title" content="Kuethe’s Criterion and A/B Tests – Demetri Pananos Ph.D">
 <meta name="twitter:description" content="">
-<meta name="twitter:image" content="https://dpananos.github.io/posts/2023-12-01-ron/linkedin.png">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2025-11-21-kuethe/index_files/figure-html/unnamed-chunk-1-1.png">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image-height" content="868">
-<meta name="twitter:image-width" content="555">
+<meta name="twitter:image-height" content="960">
+<meta name="twitter:image-width" content="1344">
 </head>
 
 <body class="nav-fixed quarto-light">
@@ -210,7 +210,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Brain Teaser About Frequentist Statistics</h1>
+      <h1 class="title">Kuethe’s Criterion and A/B Tests</h1>
                       </div>
   </div>
     
@@ -227,7 +227,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">December 1, 2023</p>
+        <p class="date">November 21, 2025</p>
       </div>
     </div>
     
@@ -238,8 +238,15 @@ window.Quarto = {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#on-the-validity-of-a-normal-approximation-to-the-ratio-of-means" id="toc-on-the-validity-of-a-normal-approximation-to-the-ratio-of-means" class="nav-link active" data-scroll-target="#on-the-validity-of-a-normal-approximation-to-the-ratio-of-means">On The Validity of a Normal Approximation to The Ratio of Means</a></li>
+  <li><a href="#a-very-short-simulation-of-coverage" id="toc-a-very-short-simulation-of-coverage" class="nav-link" data-scroll-target="#a-very-short-simulation-of-coverage">A Very Short Simulation of Coverage</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-11-21-kuethe/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -248,30 +255,77 @@ window.Quarto = {
 
 
 
-<p>Ron Kohavi is somewhat of a prominent figure in the A/B testing community. Armed with having coauthored “Trustworthy Online Controlled Experiments”, experience at places like AirBNB and Microsoft, and what seems to be a $20/month subscription to ChatGPT, he will often post these kinds of questions on LinkedIn.</p>
-<p>The post below really caught my attention (probably because of the AI generated accompanying picture, a fad everyone seems to be doing for some reason).</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="linkedin.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
-</figure>
-</div>
-<p>This should be fairly simple to reason through. Below is a plot depicting the concept of statistical power. The black curve is the sampling distribution under the null, the blue curve is the sampling distribution under the alternative implied by the minimal detectable effect (MDE). The area under the blue curve is the statsitical power (its the probability we observe a test statistic greater than the critical value).</p>
+<section id="on-the-validity-of-a-normal-approximation-to-the-ratio-of-means" class="level2">
+<h2 class="anchored" data-anchor-id="on-the-validity-of-a-normal-approximation-to-the-ratio-of-means">On The Validity of a Normal Approximation to The Ratio of Means</h2>
+<p>A/B tests often target the “lift” in the metric as an estimand. As a reminder, the lift is</p>
+<p><span class="math display">\[ \lambda = \dfrac{E[Y(1)] - E[Y(0)]}{E[Y(0)]} \]</span> and is interpreted as the percent improvement treatment had over control. Clearly, the lift can be problematic when <span class="math inline">\(E[Y(0)]\)</span> – the expected value of the outcome under no treatment – is too close to 0. This is not a revolutionary insight and has been a popular critique of the estimand.</p>
+<p>Eppo (By Datadog) is familiar with the problem with lift, and as a consequence will not show the lift and associated confidence intervals when the control group’s average outcome is within 10 standard errors of 0.</p>
+<p>But why 10 standard errors? Ten is a nice number, but feels somewhat arbitrary. That decision came from a paper entitled <a href="https://www.researchgate.net/profile/F-Rubio/publication/257406150_On_the_existence_of_a_normal_approximation_to_the_distribution_of_the_ratio_of_two_independent_normal_random_variables/links/53d7a18a0cf2e38c632ddabc/On-the-existence-of-a-normal-approximation-to-the-distribution-of-the-ratio-of-two-independent-normal-random-variables.pdf">“On the existence of a normal approximation to the distribution of the ratio of two independent normal random variables”</a> by Eloisa Diaz-Frances and Francisco J. Rubio. I’ll give you the short version of the justification and leave you to read the paper if you like.</p>
+<p>In brief, Diaz-Frances and Rubio study the sampling distribution of the ratio of two normals with positive means. Note, that is is related to A/B testing because a) the lift is a shifted version of such a random variable, and b) the CLT gives us good justification for treating the sample means as Gaussian random variables <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Diaz-Frances and Rubio reference a paper by Kuethe and colleagues called <a href="https://pubmed.ncbi.nlm.nih.gov/10846046/">“Imaging obstructed ventilation with NMR using inert fluorinated gases”</a> who also studied normal approximations such random variables and concluded that when the denominator’s coefficient of variation is smaller than 0.1 (or, when the mean is 10 standard deviations away from 0) then there is a really small probability of observing a negative value from the normal approximation to the true sampling distribution. This is what we call “Kuethe’s criterion”. In A/B testing, the denominator’s standard deviation is the standard error, and this is where our 10 standard error rule came from. In short, we consider the normal approximation to the lift’s sampling distribution valid only when Kuethe’s criterion is met.</p>
+<p>Kuethe and colleagues report that the probability of observing a negative value from the normal approximation is something on the order of <span class="math inline">\(10^-24\)</span> which seems excessively small. Also, I don’t care about the probability of a negative value, I care much more about the coverage of my resulting confidence interval. How does coverage change when Kuethe’s criterion is not met?</p>
+</section>
+<section id="a-very-short-simulation-of-coverage" class="level2">
+<h2 class="anchored" data-anchor-id="a-very-short-simulation-of-coverage">A Very Short Simulation of Coverage</h2>
+<p>It should be straight forward to determine the impact of beign <span class="math inline">\(M\)</span> standard errors away from the mean. Consider a random variable <span class="math inline">\(y\)</span> such that</p>
+<p><span class="math display">\[ y \sim \mathcal{N}(M, 1^2 )\&gt;. \]</span></p>
+<p>Note that the coefficient of variation for <span class="math inline">\(y\)</span> is <span class="math inline">\(1/M\)</span> and so when <span class="math inline">\(M\geq10\)</span>, then Kuethe’s criterion is satisfied. To simulate what happens to coverage, I just need to simulate a bunch of these random variables for treatment and control, compute the standard error via the delta method, and determine coverage. The simulation is actually pretty short.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>between <span class="ot">&lt;-</span> <span class="cf">function</span>(x, low, hi) (x<span class="sc">&lt;=</span>hi) <span class="sc">&amp;</span> (low <span class="sc">&lt;=</span> x)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">1.96</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">dnorm</span>(x), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">labels=</span>F, <span class="at">ylab=</span><span class="st">''</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">col=</span><span class="st">'blue'</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(xs, <span class="fu">rev</span>(xs)),</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">dnorm</span>(xs, <span class="dv">3</span>, <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(xs))),</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">col=</span><span class="fu">alpha</span>(<span class="st">'blue'</span>, <span class="fl">0.3</span>),</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> F</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'topleft'</span>, <span class="at">col=</span><span class="fu">c</span>(<span class="st">'black'</span>,<span class="st">'blue'</span>), <span class="at">legend =</span> <span class="fu">c</span>(<span class="fu">expression</span>(H[<span class="dv">0</span>]), <span class="fu">expression</span>(H[A])), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>sim_coverage <span class="ot">&lt;-</span> <span class="cf">function</span>(Mc){</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  actual_lift <span class="ot">&lt;-</span> <span class="fl">0.0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  Mt <span class="ot">&lt;-</span> Mc <span class="sc">*</span> (actual_lift<span class="sc">+</span><span class="dv">1</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># With this many simulations, I can be certain about the first 2 decimal places</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  Nsims <span class="ot">&lt;-</span> <span class="dv">100000</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># The following random variables are guarenteed to have a coefficient of variation &lt;= 0.1</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  yc <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(Nsims, Mc, <span class="dv">1</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  yt <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(Nsims, Mt, <span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  lift <span class="ot">&lt;-</span> yt<span class="sc">/</span>yc<span class="dv">-1</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Because we know their standard deviation, we can apply the delta method for the lift</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>((Mt<span class="sc">/</span>Mc)<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> (<span class="dv">1</span><span class="sc">/</span>Mc<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>Mt<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now, we can determine coverage</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  conf_lower <span class="ot">&lt;-</span> lift <span class="sc">-</span> <span class="fl">1.96</span><span class="sc">*</span>se</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  conf_upper <span class="ot">&lt;-</span> lift <span class="sc">+</span> <span class="fl">1.96</span><span class="sc">*</span>se</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  coverage <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">between</span>(actual_lift, conf_lower, conf_upper))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(coverage)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">2</span>, <span class="dv">30</span>, <span class="fl">0.25</span>)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>coverage <span class="ot">&lt;-</span> <span class="fu">sapply</span>(M, sim_coverage)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> <span class="fu">loess</span>(coverage <span class="sc">~</span> M)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="co"># First plot normally</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(M, <span class="fu">predict</span>(f), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.8</span>, <span class="dv">1</span>), <span class="at">type=</span><span class="st">'l'</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Standard Deviations Away From 0"</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>     <span class="at">col=</span><span class="st">'red'</span>, <span class="at">ylab =</span> <span class="st">"Coverage of 95% CI"</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Shade vertical region where M &gt;= 10</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>usr <span class="ot">&lt;-</span> <span class="fu">par</span>(<span class="st">"usr"</span>)  <span class="co"># xmin, xmax, ymin, ymax</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(<span class="at">xleft =</span> <span class="dv">10</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>     <span class="at">ybottom =</span> usr[<span class="dv">3</span>],</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>     <span class="at">xright =</span> usr[<span class="dv">2</span>],</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>     <span class="at">ytop =</span> usr[<span class="dv">4</span>],</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="st">"lightgray"</span>, <span class="at">alpha.f =</span> <span class="fl">0.3</span>),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>     <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="co"># Redraw the line so it appears on top</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(M, <span class="fu">predict</span>(f), <span class="at">col=</span><span class="st">'red'</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">20</span>, <span class="fl">0.975</span>, <span class="st">"Kuethe's Criterion</span><span class="sc">\n</span><span class="st">Met"</span>)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="dv">5</span>, <span class="fl">0.975</span>, <span class="st">"Kuethe's Criterion</span><span class="sc">\n</span><span class="st">Not Met"</span>)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="fu">grid</span>()</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -281,46 +335,17 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>According to Ron, we run our experiment and observe the our (MDE) exactly. In our picture, that means we observe the mean of the sampling distribution under the alternative, so we just need to find how far out the MDE is with respect to the null distribution.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>xs <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="fl">1.96</span>, <span class="dv">10</span>, <span class="fl">0.1</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, <span class="fu">dnorm</span>(x), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">labels=</span>F, <span class="at">ylab=</span><span class="st">''</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(x, <span class="fu">dnorm</span>(x, <span class="dv">3</span>, <span class="dv">1</span>), <span class="at">type=</span><span class="st">'l'</span>, <span class="at">col=</span><span class="st">'blue'</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">polygon</span>(</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(xs, <span class="fu">rev</span>(xs)),</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="fu">dnorm</span>(xs, <span class="dv">3</span>, <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(xs))),</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">col=</span><span class="fu">alpha</span>(<span class="st">'blue'</span>, <span class="fl">0.3</span>),</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> F</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">'topleft'</span>, <span class="at">col=</span><span class="fu">c</span>(<span class="st">'black'</span>,<span class="st">'blue'</span>), <span class="at">legend =</span> <span class="fu">c</span>(<span class="fu">expression</span>(H[<span class="dv">0</span>]), <span class="fu">expression</span>(H[A])), <span class="at">lty=</span><span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Let’s do a little bit of math. Assuming the sampling distribution under the null is standard normal, the critical value would be <span class="math inline">\(\mu_0 + \sigma_0z_{1-\alpha}\)</span>. The critical value under the alternative would then be <span class="math inline">\(\mu_1 + z_{1-\beta}\sigma_1\)</span>. Plugging in some numbers, this means the mean under the alternative should have a z-zcore of <span class="math inline">\(\mu_0 + \sigma_0z_{1-\alpha} - \sigma_1z_{1-\beta}\)</span>. Now, we just need to evaluate <span class="math inline">\(1 - \mathbf{\Phi}(\mu_0 + \sigma_0z_{1-\alpha} - \sigma_1z_{1-\beta})\)</span>.</p>
-<p>Assume that these distributions are standardized so that <span class="math inline">\(\mu_0 = 0\)</span> and <span class="math inline">\(\sigma_0 = \sigma_1=1\)</span>. This results in a p-value of</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="fl">2.8</span>, <span class="at">lower.tail =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.00255513</code></pre>
-</div>
-</div>
-<p>and I bet because I’ve only focused on one tail I should multiply by 2, so a p value of ~ 0.005, <a href="https://www.linkedin.com/posts/ronnyk_test-your-intuition-on-p-values-you-design-activity-7136272639823663104-H7u8">which seems to be correct</a>.</p>
 
 
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Assuming we have enough data that this is a good assumption. Berry-Esseen theorem applies here, but that is another blog post altogether.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
@@ -725,4 +750,4 @@ window.Quarto = {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2023-12-01-ron/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2025-11-21-kuethe/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
