@@ -1,0 +1,120 @@
+---
+title: Cleaning Data Patterns
+date: 2026-02-09
+code-fold: false
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: true
+---
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+# Create simulated raw data with messy inputs
+set.seed(123)
+raw_data <- tibble(
+  id = 1:10,
+  smoking = c("Y", "N", "y", "n", "Yes", "No", NA, "y", "N", "maybe"),
+  hypertension = c("y", "Y", "n", "N", "yes", "no", "Y", NA, "n", "unknown"),
+  diabetes = c("N", "y", "Y", "n", "N", "yes", "y", "n", NA, "")
+)
+```
+
+
+I still clean data from time to time, and I find myself writing patterns that looks like
+```{r bad-pattern}
+
+raw_data %>%
+  mutate(
+    smoking = case_match(str_to_lower(smoking),
+      "y" ~ "Y",
+      "n" ~ "N",
+      .default = "N"
+    ),
+    hypertension = case_match(str_to_lower(hypertension),
+      "y" ~ "Y",
+      "n" ~ "N",
+      .default = "N"
+    ),
+    diabetes = case_match(str_to_lower(diabetes),
+      "y" ~ "Y",
+      "n" ~ "N",
+      .default = "N")
+  )
+
+```
+
+
+I know the aphorism is "If you write a piece of code 3 times, write a function" so I could do
+
+```{r}
+
+
+clean_yn <- function(x){
+  case_match(str_to_lower(x), 
+        "y" ~ "Y",
+        "n" ~ "N",
+        .default = "N"
+             )
+}
+
+raw_data %>%
+  mutate(
+    across(
+      all_of(c("smoking", "hypertension", "diabetes")),
+    ~clean_yn(.x)
+    ))
+```
+
+But I usually have to edit the name of the column too because often `smoking` is actually `Smoking (Yes or No)` (and while `{janitor}` helps it still leaves some cruft on the end of column names).  This makes the first pattern more attractive, despite the repetition.
+
+I asked gemini how it might handle this problem, and I was shown a neat little pattern I want to share.  The mutate-across pattern us actually pretty useful, so let's abstract that into a function and tack on a rename like so
+
+```{r}
+
+apply_cleaners <- function(data, clean_func, rename_map){
+  data |> 
+    mutate(
+      across(all_of(unname(rename_map)), ~clean_func(.x))
+    ) |> 
+    rename(all_of(rename_map))
+}
+```
+
+Now, I can specify a list of columns I want to clean with the same function, and the new names I want to use
+
+```{r}
+cleaning_tasks <- list(
+  rename_map = c('smoking_cleaned' = 'smoking', 
+                 'hypertension_cleaned' = 'hypertension',
+                 'diabetes_cleaned' = 'diabetes'),
+  func = clean_yn
+)
+
+apply_cleaners(raw_data, cleaning_tasks$func, cleaning_tasks$rename_map)
+```
+
+which doesn't seem that cool, unless you realize that what is returned is a tibble, which can be passed through `apply_cleaners` again.  Hence, `reduce` seems like a good tool here
+
+```{r}
+# Needs to be a list of lists 
+cleaning_tasks <- list(
+  "yn_cleaning_tasks" = list(
+    rename_map = c('smoking_cleaned' = 'smoking', 
+                   'hypertension_cleaned' = 'hypertension',
+                   'diabetes_cleaned' = 'diabetes'),
+    func = clean_yn
+  )
+)
+
+
+reduce(cleaning_tasks, function(data, task) {
+  apply_cleaners(data, task$func, task$rename_map)
+}, .init=raw_data)
+```
+
+This is overkill for many cleaning tasks, but when you're cleaning dozens of columns, I think this is nice!  It is very targets-y, which I like.
