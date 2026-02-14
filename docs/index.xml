@@ -10,7 +10,61 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Mon, 09 Feb 2026 05:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 14 Feb 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Things I Believe According to Claude</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-02-14-principles/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>I asked claude code to read through all the posts I’ve made in this blog in order to pull out some of my principles. Here is what claude thinks I believe</p>
+<section id="empathy-first-math-second" class="level2">
+<h2 class="anchored" data-anchor-id="empathy-first-math-second">Empathy First, Math Second</h2>
+<p><a href="../../posts/2023-05-14-ab-brain-dump/index.html">I think this is largely true, as evidenced by a previous post</a>. I’ve said, multiple times in the past week, that “experimentation is not a math problem, it is a people problem”. I think this also explains why I like talking to customers and doing user research.</p>
+</section>
+<section id="trade-precision-for-usefulness" class="level2">
+<h2 class="anchored" data-anchor-id="trade-precision-for-usefulness">Trade Precision for Usefulness</h2>
+<p>I absolutely believe this, perhaps to a fault. There is little alpha to be gained in being pedantic, much in the same way a data scientist is required to give “good enough” solution to a well posed problem and not a perfect solution to the wrong problem. Either end of the precision-usefulness tradeoff is too extreme, and the art is finding the middle ground.</p>
+</section>
+<section id="process-over-tools" class="level2">
+<h2 class="anchored" data-anchor-id="process-over-tools">Process Over Tools</h2>
+<p>Do I beleive this? I don’t know. I think claude went off the rails here, writing about me scaling experimentation by improving other people around me. I’m not sure I would agree with this being a principle.</p>
+</section>
+<section id="understand-why-not-just-how" class="level2">
+<h2 class="anchored" data-anchor-id="understand-why-not-just-how">Understand Why, Not Just How</h2>
+<p>Yes, this is absolutely a principle of mine. I see this in other areas of life too, not just work. Generally, things like “tradition” don’t land on me because “we’ve always done this” sounds like “I have not critically thought about why this practice is valuable”.</p>
+</section>
+<section id="simple-over-complex" class="level2">
+<h2 class="anchored" data-anchor-id="simple-over-complex">Simple Over Complex</h2>
+<p>I think most reasonable people would think this, but claude seems to be pulling on threads related to me prefering Frequentist solutions over Bayesian ones because most people are comfortable with Frequentism. Not sure that applies.</p>
+</section>
+<section id="someone-smarter-already-solved-it" class="level2">
+<h2 class="anchored" data-anchor-id="someone-smarter-already-solved-it">Someone Smarter Already Solved It</h2>
+<p>I really thought this early on in my PhD. To some extent, I still think this. Perhaps I should lean on this more.</p>
+</section>
+<section id="simulate-everything" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-everything">Simulate Everything</h2>
+<p>LOL yes. However, there is a lot of benefit to trying things pen and paper too!</p>
+</section>
+<section id="be-honest-about-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="be-honest-about-limitations">Be Honest About Limitations</h2>
+<p>Yes, maybe not honest enough. I have found myself pumping out sub par analyses because it was easier than explaining to a clinician (for the hundredth time) that dichotmization is bad and you should not do it. I used to tell myself “I can lose this battle in order to win the war”, but if I am always losing battles then how can I ever win? Maybe I need to be more hoenst.</p>
+</section>
+<section id="speed-matters" class="level2">
+<h2 class="anchored" data-anchor-id="speed-matters">Speed Matters</h2>
+<p>Yawn, this seems trite.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-02-14-principles/</guid>
+  <pubDate>Sat, 14 Feb 2026 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Cleaning Data Patterns</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8487,29 +8541,6 @@ font-style: inherit;">'Sat'</span>)</span>
  ]]></description>
   <guid>https://dpananos.github.io/posts/2023-09-24-l1/</guid>
   <pubDate>Sun, 24 Sep 2023 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Right In Ways You Don’t Care About</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2023-09-11-right/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>I’ve typically <a href="https://dpananos.github.io/posts/2023-06-26-did-you-do-your-homework/">been long on the value of data scientists</a> but I think I’m starting to lose my optimism.</p>
-<p>I was fucking around in git late one night and ran into merge conflicts. The first step when you get a merge conflict is to ask yourself “jesus christ, how did I keep this job?” which reminded me on <a href="https://twitter.com/vboykis/status/1681050831850811401">this tweet</a> from Vicky Boykis. Long story short, its a screen grab from a HN comment section in which some user laments how engineering gets instant errors while things like data science see errors pass silently.</p>
-<p>Tune hyperparameters on the test set? Everyone else does it.</p>
-<p>Run experiments “until significance”? Have a promotion.</p>
-<p>Run a pre-post? If numbers are good, yay us! It numbers are bad, did you try data dreding until they look good?</p>
-<p>Data Scientists are mentioned by name in David Graeber’s <em>Bullshit Jobs</em> and it is only now that I’ve begun to work (again) that I understand why. The irony is that because errors pass silently in data work, it is often difficult to assign blame or even to determine that someone should be blamed at all. You could be terrible at your job and keep it so long as you’re terrible in the right way. It makes me wonder why I put so much effort into being right in ways people don’t seem to care about. I should get an MBA or something.</p>
-
-
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2023-09-11-right/</guid>
-  <pubDate>Mon, 11 Sep 2023 04:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

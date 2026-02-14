@@ -1,0 +1,54 @@
+---
+title: Things I Believe According to Claude
+date: 2026-02-14
+code-fold: true
+echo: true
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: true
+---
+
+I asked claude code to read through all the posts I've made in this blog in order to pull out some of my principles.  Here is what claude thinks I believe
+
+
+## Empathy First, Math Second
+
+[I think this is largely true, as evidenced by a previous post](../2023-05-14-ab-brain-dump/index.qmd).  I've said, multiple times in the past week, that "experimentation is not a math problem, it is a people problem".  I think this also explains why I like talking to customers and doing user research.
+
+## Trade Precision for Usefulness
+
+I absolutely believe this, perhaps to a fault.  There is little alpha to be gained in being pedantic, much in the same way a data scientist is required to give "good enough" solution to a well posed problem and not a perfect solution to the wrong problem.  Either end of the precision-usefulness tradeoff is too extreme, and the art is finding the middle ground.
+
+## Process Over Tools
+
+Do I beleive this? I don't know.  I think claude went off the rails here, writing about me scaling experimentation by improving other people around me.  I'm not sure I would agree with this being a principle.
+
+
+## Understand Why, Not Just How
+
+Yes, this is absolutely a principle of mine.  I see this in other areas of life too, not just work.  Generally, things like "tradition" don't land on me because "we've always done this" sounds like "I have not critically thought about why this practice is valuable".
+
+## Simple Over Complex
+
+I think most reasonable people would think this, but claude seems to be pulling on threads related to me prefering Frequentist solutions over Bayesian ones because most people are comfortable with Frequentism.  Not sure that applies.
+
+## Someone Smarter Already Solved It
+
+I really thought this early on in my PhD. To some extent, I still think this. Perhaps I should lean on this more.
+
+## Simulate Everything
+
+LOL yes.  However, there is a lot of benefit to trying things pen and paper too! 
+
+## Be Honest About Limitations
+
+Yes, maybe not honest enough.  I have found myself pumping out sub par analyses because it was easier than explaining to a clinician (for the hundredth time) that dichotmization is bad and you should not do it.  I used to tell myself "I can lose this battle in order to win the war", but if I am always losing battles then how can I ever win?  Maybe I need to be more hoenst.
+
+## Speed Matters
+
+Yawn, this seems trite.
+
+
+
