@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2026-02-20">
+
+<title>Demetri Pananos Ph.D - Analytic Bayesian MDEs For A/B Testing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E73MJ55N1R"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - Analytic Bayesian MDEs For A/B Testing">
+<meta property="og:description" content="">
+<meta property="og:site_name" content="Demetri Pananos Ph.D">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Analytic Bayesian MDEs For A/B Testing">
+<meta name="twitter:description" content="">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html"> 
+<span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../ai/index.html"> 
+<span class="menu-text">AI</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Analytic Bayesian MDEs For A/B Testing</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 20, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#bayesian-approaches-to-ab-testing" id="toc-bayesian-approaches-to-ab-testing" class="nav-link" data-scroll-target="#bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</a></li>
+  <li><a href="#how-long-to-run-an-ab-test-as-a-bayesian" id="toc-how-long-to-run-an-ab-test-as-a-bayesian" class="nav-link" data-scroll-target="#how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</a></li>
+  <li><a href="#an-analytic-solution" id="toc-an-analytic-solution" class="nav-link" data-scroll-target="#an-analytic-solution">An Analytic Solution</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-02-20-time/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p><strong>Disclaimer</strong>: This blog post is inspired, almost entirely, by Tyler Buffington’s <em>excellent</em> statistics reading group presentation today on the value of information in A/B testing. The ideas presented here are mainly his, I’ve just gone ahead and done a little more math (but not much more).</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this post, I discuss decision criteria for Bayesian A/B testing and a way to think about minimal detectable effects (MDEs) for Bayesian A/B tests. I’ll also present some analytic results for calculating MDEs that can help us avoid doing simulations in practice at the cost of some mild assumptions.</p>
+<p>First, we’ll discuss a little background on some straight forward ways to analyze A/B tests as a Bayesian and discuss a few options for ship/no-ship decision rules for A/B tests. Then, I’ll introduce a way to think about calculating MDEs as a Bayesian, and finally share some analytic results.</p>
+</section>
+<section id="bayesian-approaches-to-ab-testing" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</h2>
+<p>Most A/B tests target the lift in a metric, defined as</p>
+<p><span class="math display">\[ \lambda = \dfrac{E[Y(1)]}{E[Y(0)]} - 1 \&gt;. \]</span></p>
+<p>We can obtain an estimate of the lift, <span class="math inline">\(\hat \lambda\)</span>, via the plug in principle and the associated, <span class="math inline">\(s_\lambda\)</span> via the delta method. Assuming <span class="math inline">\(\hat \lambda\)</span> is draw from a normal distribution (I’ve talked about this before <a href="../../posts/2025-11-21-kuethe/index.html">here</a>), and that <span class="math inline">\(s_\lambda\)</span> is know exactly, we can use a conjugate normal-normal model to obtain the posterior <span class="math inline">\(\Pr(\lambda \mid \hat \lambda)\)</span>. Assuming the prior mean and variance is <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span> respectively, the posterior variance and mean, <span class="math inline">\(V\)</span> and <span class="math inline">\(M\)</span>, are</p>
+<p><span class="math display">\[ V^{-1} = \dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2} \&gt;, \]</span> <span class="math display">\[ M = V \times \left(\dfrac{\hat \lambda}{s^2_\lambda} + \dfrac{\mu}{\tau^2}\right) \&gt;. \]</span></p>
+<p>Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, the following are some of the most popular I have seen in the wild:</p>
+<ul>
+<li>Ship if <span class="math inline">\(c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)\)</span>. This is sometimes called “Probability to beat control”.</li>
+<li>Ship if <span class="math inline">\(0 \lt M - z_{1-\alpha/2}\sqrt{V}\)</span>. This is like a Bayesian p-value.</li>
+<li>Ship if <span class="math inline">\(E[\mathcal{L(\lambda)}] &lt; \epsilon\)</span>. Here <span class="math inline">\(\mathcal{L}\)</span> is a loss function, and so the decision is based on expected loss being sufficiently small for the decision to ship the treatment. In what follows, I will use <span class="math inline">\(\mathcal{L(\lambda}) = \min(\lambda, 0)\)</span>.</li>
+</ul>
+<p>Now, these are just a few ways to make decisions (they are certainly not exhaustive). Prior to Tyler’s talk, I didn’t really have a great way to answer how long an experiment should take (save some ramblings about EVSI <a href="../../posts/2024-09-01-ab-length/index.html">here</a>). In addition to this, I was fairly biased towards preffering expected loss as a decision criterion without much evidence as to why I should prefer it. In what follows, I present some more concrete thoughts based on Tyler’s talk.</p>
+</section>
+<section id="how-long-to-run-an-ab-test-as-a-bayesian" class="level2">
+<h2 class="anchored" data-anchor-id="how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</h2>
+<p>The question of how long to run an A/B test is just a function of sample size. Assuming you accrue <span class="math inline">\(n\)</span> subjects per week, you can do some back of the napkin math to say how long the test should run to sufficiently power the experiment given an MDE. Often, we flip the script and present MDEs as a function of time (e.g.&nbsp;if you want a 3% MDE, run this experiment for 2 weeks. Want a smaller MDE? Run it longer). Run length is now a knob one can tune.</p>
+<p>This is doable as a Frequentist because we have a very clear relationship between power, MDE, and sample size (which is a function of time). Although there are Bayesian conceptions of power (e.g.&nbsp;conditional power, unconditional power, etc etc), the formulae for these don’t so straight forwardly relate time and desired effect sizes. This is further complicated by the prior – if your prior says a 5% lift is not probable, you probably shouldn’t design experiments to detect 5% lifts.</p>
+<p>Rather than seek a formula, we can simply draw random numbers to see what happens under different scenarios. Consider the following algorithm:</p>
+<ul>
+<li>Draw a true lift from your prior, <span class="math inline">\(\lambda\)</span>.</li>
+<li>Draw a control group mean from the implied sampling distribution (you need the control mean and standard error to do this, but you should know this if you were going to do a power calculation anyway).</li>
+<li>Draw a treatment group eman from the implied sampling distribution.<br>
+</li>
+<li>Compute <span class="math inline">\(\hat \lambda\)</span> and <span class="math inline">\(s_\lambda\)</span></li>
+<li>Compute <span class="math inline">\(M\)</span> and <span class="math inline">\(V\)</span>.</li>
+<li>Apply your decision rule. If you reach ship criteria, then return the true lift, else return 0.</li>
+<li>Repeat a few thousand times.</li>
+</ul>
+<p>This procedure is shown for 4 scenarios below. The histograms show the distribution of true impacts to the product under the decision rule. The large spike at 0 indicates those A/B tests which resulted in no ship decisions, and the remainder are the impacts from shipping.</p>
+<p>Note a few things. First, while difficult to see, there are some cases (especially in small sample sizes) where we ship harm to the product! This makes sense, when we have noisy measurements sometimes we can make type <span class="math inline">\(S\)</span> errors. As the sample size increases, the probability we make these errors decreases as does the proportion of no-ship decisions (the height of the spike decreases). Second, the mean of this distribution is the “average impact to the product”. This mean changes <em>slightly</em> due to my first point, and eventually the distribution of these impacts stabilizes to some limiting distribution (Tyler referred to this as the <em>Clairvoyant distribution</em>, essentially the distribution of impacts where you to know the true lift perfectly). Hence, there is some upper bound to the mean.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Distribution of shipped lifts under the probability to beat control decision rule (<span class="math inline">\(c = 0.95\)</span>) for increasing sample sizes. Prior is <span class="math inline">\(\operatorname{Normal}(0, 0.05^2)\)</span>, <span class="math inline">\(\sigma = 0.5\)</span>, and equal allocation (<span class="math inline">\(p = 0.5\)</span>). At small <span class="math inline">\(N\)</span>, most simulations result in no-ship (the spike at 0). As <span class="math inline">\(N\)</span> grows, the posterior tightens and more true positives are shipped.</figcaption>
+<p><img src="index_files/figure-html/example-procedure-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Below is a plot of the mean of this distribution as a function of sample size, and you can see this limiting behavior quite clearly. The proposal is to treat the average of this distribution as your MDE! From the plot, running A/B tests too short means the impact is going to be very small on average, but running longer means that (under the prior) you will impact the product more. There comes a point where running the test longer is not helpful, you encounter diminishing returns. This is a nice way to think about run time in my opinion! Now, MDE is probably the wrong term here, but it is analogous to the presented MDEs in a typical A/B testing approach.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Average impact to the product (MDE) as a function of sample size under the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The curve flattens as <span class="math inline">\(N\)</span> grows, reflecting diminishing returns from longer experiments. The loess-smoothed curve is based on 100,000 simulations at each sample size.</figcaption>
+<p><img src="index_files/figure-html/example-mde-curve-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that I’ve just shown simulations for probability to beat, but the simulation approach is sufficiently flexible to accommodate any decision rule (expected loss, Bayesian p values, or whatever you can cook up). If you’re an analyst, you can do this fairly readily on your computer. What if you wanted to make this a product many people can use, and use with reproducible results? Simulating is fine in my opinion, generating random numbers and counting should be pretty cheap, but it would be cool to have a formula for the expected value of this distribution as a function of the total sample size.</p>
+</section>
+<section id="an-analytic-solution" class="level2">
+<h2 class="anchored" data-anchor-id="an-analytic-solution">An Analytic Solution</h2>
+<p>Let’s stick with probability to beat for a moment. The ship decision is, equivalently,</p>
+<p><span class="math display">\[ c \lt \Phi\left(\dfrac{M}{\sqrt{V}}\right) \&gt;, \]</span></p>
+<p>or equivalently</p>
+<p><span class="math display">\[ \Phi^{-1}(c) \lt \dfrac{M}{\sqrt{V}} \&gt;. \]</span></p>
+<p>Here, <span class="math inline">\(\Phi\)</span> is the CDF of a standard normal distribution. The discourse and evidence across the A/B testing suggests that most A/B tests fail to move metrics, meaning that we should expect <span class="math inline">\(\mu \approx 0\)</span> as our prior mean. As a consequence, our ship condition would be</p>
+<p><span class="math display">\[ \Phi^{-1}(c) \lt  \dfrac{\hat \lambda}{s^2_\lambda\sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}}} \&gt;.\]</span></p>
+<p>Additionally, I personally think that an appropriate prior standard deviation is going to be small since we don’t routinely detect enormous hurt/help to the product. As a consequence of this, this would mean that <span class="math inline">\(\lambda \approx 0\)</span>, or that the average outcomes in groups are going to be similar, at least to a first order approximation! This means that the sampling variance of the lift can be approximated as</p>
+<p><span class="math display">\[ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar y^2_c} \right) \&gt;. \]</span> Here, the subscripts indicate estimates for treatment, <span class="math inline">\(t\)</span>, or control, <span class="math inline">\(c\)</span>. This means we can re-write our decision criteria solely as a function of the estimated lift</p>
+<p><span class="math display">\[  S = \Phi^{-1}(c) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \&gt;. \]</span></p>
+<p>If we know the true lift <span class="math inline">\(\lambda\)</span>, we could calculate the probability hat this criteria would be met by <span class="math inline">\(\hat \lambda\)</span>. It would be</p>
+<p><span class="math display">\[ \Pr(S \lt \hat \lambda \mid \lambda) = 1 - \Phi\left(\dfrac{S-\lambda}{s_\lambda} \right)\]</span></p>
+<p>but of course we don’t know <span class="math inline">\(\lambda\)</span>. We do however have a prior over <span class="math inline">\(\lambda\)</span>, so we can compute the MDE as</p>
+<p><span class="math display">\[ \mbox{mde} = \int_{-\infty}^{\infty}  \lambda \cdot \left(1 - \Phi\left(\dfrac{S-\lambda}{s_\lambda} \right) \right) f(\lambda) d\lambda \&gt;. \]</span></p>
+<p>Here, <span class="math inline">\(f\)</span> is the prior density of <span class="math inline">\(\lambda\)</span>. Now, this looks like a right hairy bastard, but it is actually quite manageable for R or other numerical integration since the integrand is nice and smooth. Shown below are the simulated and analytic results for the probability to beat control decision rule. The approximation isn’t bad!</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Simulated vs analytic MDE for the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The close agreement confirms the analytic solution is a good approximation, at leasrt under the proposed parameters. Prior is <span class="math inline">\(\operatorname{Normal}(0, 0.05^2)\)</span>, <span class="math inline">\(\sigma = 0.5\)</span>, and equal allocation (<span class="math inline">\(p = 0.5\)</span>).</figcaption>
+<p><img src="index_files/figure-html/prob-to-beat-comparison-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This sort of exercise can be done for the remaining two decision rules. While I leave that exercise to the reader (or perhaps to their AI), I will leave you with just a plot comparing the analytic formulae and the simulations.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Simulated (red) and analytic (blue) MDE curves for three decision rules: probability to beat control (solid, <span class="math inline">\(c = 0.95\)</span>), 95% credible interval excluding zero (dashed), and expected loss (dotted, <span class="math inline">\(\epsilon = 0.001\)</span>). The expected loss rule is the most permissive, shipping more often and yielding higher average impact at each sample size.</figcaption>
+<p><img src="index_files/figure-html/comparisons-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-02-20-time/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
