@@ -202,7 +202,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How Long to Run a Bayesian AB Test</h1>
+      <h1 class="title">Calibration of Mind Changing for Bayesian AB Tests</h1>
                       </div>
   </div>
     
@@ -289,7 +289,7 @@ window.Quarto = {
 <p>Suppose I had the opportunity to gain additional samples. Were I to observe <span class="math inline">\(\tilde{y}_A, \tilde{y}_B\)</span>, the expected loss would be</p>
 <p><span class="math display">\[ E[\mathcal{L}](\tilde{D})= \underset{{x \in \{A, B\}}}{\operatorname{min}}  \int_{\theta_A} \int_{\theta_{B}} \mathcal{L}(\theta_A, \theta_B, x) p(\theta_A, \theta_{B} \mid y_A + \tilde{y}_A, y_B + \tilde{y}_B) \, d\theta_B \, d\theta_A  \]</span> where <span class="math inline">\(\tilde{D}\)</span> is the optimal decision from the new data. Of course, we can’t say what this optimal decision would be since we don’t know the new data. But, having a model for these data, we could sample from that model and integrate over the uncertainty for <span class="math inline">\(\tilde{y}_A, \tilde{y}_B\)</span>. That means we would compute</p>
 <p><span class="math display">\[ E[\mathcal{L}](\tilde{D})= \int_{\theta_a} \int_{\theta_b}\underset{{x \in \{A, B\}}}{\operatorname{min}}  \int_{\tilde{\theta}_A} \int_{\tilde{\theta}_{B}} \mathcal{L}(\tilde{\theta}_A, \tilde{\theta}_B, x) p(\tilde{\theta}_A, \tilde{\theta}_{B} \mid y_A + \tilde{y}_A, y_B + \tilde{y}_B) p(\tilde{y}_A, \tilde{y}_B \mid \theta_A, \theta_B ) p(\theta_A, \theta_B \mid y_A, y_B) \, d\tilde{\theta}_B \, d\tilde{\theta}_A  \, d\theta_B \, d\theta_A \]</span></p>
-<p>Now, this looks like a right harry integral. However, its straightforward to understand. Consider the following process:</p>
+<p>Now, this looks like a right hairy integral. However, its straightforward to understand. Consider the following process:</p>
 <ul>
 <li>Use the posterior predictive (<span class="math inline">\(p(\tilde{y}_A, \tilde{y}_B \mid \theta_A, \theta_B ) p(\theta_A, \theta_B \mid y_A, y_B)\)</span>) to sample data you would have seen were you to continue the experiment.</li>
 <li>Act as if that data was the true data and condition your model on it to obtain your future updated posterior (<span class="math inline">\(p(\tilde{\theta}_A, \tilde{\theta}_{B} \mid y_A + \tilde{y}_A, y_B + \tilde{y}_B)\)</span>)</li>

@@ -3594,7 +3594,7 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
   <pubDate>Mon, 03 Mar 2025 05:00:00 GMT</pubDate>
 </item>
 <item>
-  <title>How Long to Run a Bayesian AB Test</title>
+  <title>Calibration of Mind Changing for Bayesian AB Tests</title>
   <dc:creator>Demetri Pananos</dc:creator>
   <link>https://dpananos.github.io/posts/2024-09-01-ab-length/</link>
   <description><![CDATA[ 
@@ -3690,7 +3690,7 @@ font-style: inherit;">loss_b=</span>loss_b)</span>
 <p>Suppose I had the opportunity to gain additional samples. Were I to observe <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7By%7D_A,%20%5Ctilde%7By%7D_B">, the expected loss would be</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20E%5B%5Cmathcal%7BL%7D%5D(%5Ctilde%7BD%7D)=%20%5Cunderset%7B%7Bx%20%5Cin%20%5C%7BA,%20B%5C%7D%7D%7D%7B%5Coperatorname%7Bmin%7D%7D%20%20%5Cint_%7B%5Ctheta_A%7D%20%5Cint_%7B%5Ctheta_%7BB%7D%7D%20%5Cmathcal%7BL%7D(%5Ctheta_A,%20%5Ctheta_B,%20x)%20p(%5Ctheta_A,%20%5Ctheta_%7BB%7D%20%5Cmid%20y_A%20+%20%5Ctilde%7By%7D_A,%20y_B%20+%20%5Ctilde%7By%7D_B)%20%5C,%20d%5Ctheta_B%20%5C,%20d%5Ctheta_A%20%20"> where <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7BD%7D"> is the optimal decision from the new data. Of course, we can’t say what this optimal decision would be since we don’t know the new data. But, having a model for these data, we could sample from that model and integrate over the uncertainty for <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7By%7D_A,%20%5Ctilde%7By%7D_B">. That means we would compute</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20E%5B%5Cmathcal%7BL%7D%5D(%5Ctilde%7BD%7D)=%20%5Cint_%7B%5Ctheta_a%7D%20%5Cint_%7B%5Ctheta_b%7D%5Cunderset%7B%7Bx%20%5Cin%20%5C%7BA,%20B%5C%7D%7D%7D%7B%5Coperatorname%7Bmin%7D%7D%20%20%5Cint_%7B%5Ctilde%7B%5Ctheta%7D_A%7D%20%5Cint_%7B%5Ctilde%7B%5Ctheta%7D_%7BB%7D%7D%20%5Cmathcal%7BL%7D(%5Ctilde%7B%5Ctheta%7D_A,%20%5Ctilde%7B%5Ctheta%7D_B,%20x)%20p(%5Ctilde%7B%5Ctheta%7D_A,%20%5Ctilde%7B%5Ctheta%7D_%7BB%7D%20%5Cmid%20y_A%20+%20%5Ctilde%7By%7D_A,%20y_B%20+%20%5Ctilde%7By%7D_B)%20p(%5Ctilde%7By%7D_A,%20%5Ctilde%7By%7D_B%20%5Cmid%20%5Ctheta_A,%20%5Ctheta_B%20)%20p(%5Ctheta_A,%20%5Ctheta_B%20%5Cmid%20y_A,%20y_B)%20%5C,%20d%5Ctilde%7B%5Ctheta%7D_B%20%5C,%20d%5Ctilde%7B%5Ctheta%7D_A%20%20%5C,%20d%5Ctheta_B%20%5C,%20d%5Ctheta_A%20"></p>
-<p>Now, this looks like a right harry integral. However, its straightforward to understand. Consider the following process:</p>
+<p>Now, this looks like a right hairy integral. However, its straightforward to understand. Consider the following process:</p>
 <ul>
 <li>Use the posterior predictive (<img src="https://latex.codecogs.com/png.latex?p(%5Ctilde%7By%7D_A,%20%5Ctilde%7By%7D_B%20%5Cmid%20%5Ctheta_A,%20%5Ctheta_B%20)%20p(%5Ctheta_A,%20%5Ctheta_B%20%5Cmid%20y_A,%20y_B)">) to sample data you would have seen were you to continue the experiment.</li>
 <li>Act as if that data was the true data and condition your model on it to obtain your future updated posterior (<img src="https://latex.codecogs.com/png.latex?p(%5Ctilde%7B%5Ctheta%7D_A,%20%5Ctilde%7B%5Ctheta%7D_%7BB%7D%20%5Cmid%20y_A%20+%20%5Ctilde%7By%7D_A,%20y_B%20+%20%5Ctilde%7By%7D_B)">)</li>
