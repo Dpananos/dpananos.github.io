@@ -31,9 +31,9 @@ We can obtain an estimate of the lift, $\hat \lambda$, via the plug in principle
 $$ V^{-1} = \dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2} \>, $$
 $$ M = V \times \left(\dfrac{\hat \lambda}{s^2_\lambda} + \dfrac{\mu}{\tau^2}\right) \>. $$
 
-Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, the following are some of the most popular I have seen in the wild:
+Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, many of the decision rules are based on inequalities of the posterior mean.  Here are just three I have seen in the wild:
 
-* Ship if $c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)$.  This is sometimes called "Probability to beat control".
+* Ship if $c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)$, which is equivalent to $\sqrt{V} \Phi^{-1}(c) \lt M$, where $\Phi$ is the standard normal CDF.  This is sometimes called "Probability to beat control".
 * Ship if $0 \lt M - z_{1-\alpha/2}\sqrt{V}$.  This is like a Bayesian p-value being less than $\alpha$.
 * Ship if $0 \lt M$. Ship whenever the posterior mean is positive.
 
@@ -103,6 +103,15 @@ analytic_impact_from_crit <- function(lambda_crit, se_lift, prior_mean = 0, prio
   integrate(integrand, lower = -Inf, upper = Inf)$value
 }
 
+# Closed-form expected impact: bivariate normal truncation moment
+# E[lambda * 1(lambda > S)] where lambda ~ N(prior_mean, prior_sd^2)
+# and S is the threshold adjusted for measurement noise (se_lift)
+closedform_impact_from_crit <- function(lambda_crit, se_lift, prior_mean = 0, prior_sd = 0.05) {
+  tau <- sqrt(prior_sd^2 + se_lift^2)
+  a   <- (prior_mean - lambda_crit) / tau
+  prior_mean * pnorm(a) + (prior_sd^2 / tau) * dnorm(a)
+}
+
 # =============================================================================
 # Decision Rule 1: Ship if P(lift > 0 | data) > cutoff
 # =============================================================================
@@ -120,6 +129,14 @@ analytic_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
   lambda_crit <- qnorm(cutoff) * se_lift^2 * post_sd_inv
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
+}
+
+closedform_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                  control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  lambda_crit <- qnorm(cutoff) * se_lift^2 * post_sd_inv
+  closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 # =============================================================================
@@ -141,6 +158,14 @@ analytic_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, pri
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
+closedform_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                     control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  lambda_crit <- qnorm((1 + ci_level) / 2) * se_lift^2 * post_sd_inv
+  closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
+}
+
 # =============================================================================
 # Decision Rule 3: Ship if M > 0
 # =============================================================================
@@ -156,6 +181,13 @@ analytic_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
   se_lift <- compute_se_lift(n, control_mean, prob_treatment)
   lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
+}
+
+closedform_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
+                                    control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
+  closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 ```
@@ -330,3 +362,129 @@ legend('bottomright',
        lty = c(1, 1, 2, 2, 3, 3), lwd = 2)
 ```
 
+## A Closed-Form Solution
+
+
+Wait a second...is that integral a right hairy bastard?  I was working with ChatGPT to relearn some more about numerical integration, I asked which numerical integration method would be best for this integrand (as if I wasn't going to just use the trapezoid rule with a fine grid and a large limits of integration).  ChatGPT brought be down the following line of argument (which I have written in my own words).
+
+A property of Gaussians allow us to re-write the integral as
+
+$$
+E[\text{impact} \mid N]
+=
+\int_{-\infty}^{\infty}
+\lambda \,
+\Phi\left(\dfrac{\lambda - S(N)}{s_\lambda} \right)
+f(\lambda)\, d\lambda.
+$$
+
+from which we can identify the integral as a legitimate expectation, namely
+
+$$
+E\!\left[
+\lambda \,
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+\right] \>.
+$$
+
+
+Introduce an auxiliary random variable. Let
+
+$$
+Y = S(N) + s_\lambda Z,
+\qquad
+Z \sim \operatorname{Normal}(0,1),
+$$
+
+independent of $\lambda$. Then
+
+$$
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+=
+\Pr(Y \le \lambda \mid \lambda) = E[\mathbf{1}(Y\leq \lambda \mid \lambda)]
+$$
+
+Here, I have used the fact that a probability can be expressed as the expectation of some indicator variable. This is handy because the expectation becomes
+
+$$
+=
+\mathbb{E}\!\left[
+\lambda \,
+\mathbb{E}[\mathbf{1}(Y \le \lambda)\mid \lambda]
+\right] = E\!\left[\lambda \mathbf{1}(Y \le \lambda)\right].
+$$
+
+via the law od total expectation. That’s just a truncated bivariate normal moment, which I guess has closed form!  
+
+Since $Y \perp \lambda$ then
+
+$$
+\lambda - Y
+\sim
+\operatorname{Normal}(\mu - S(N),\; \tau^2 + s_\lambda^2).
+$$
+
+and so the expectation can be written as 
+
+$$
+E\!\left[
+\lambda \,
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+\right] 
+=
+\mu \, \Phi(a)
++
+\dfrac{\tau^2}{\omega} \, \phi(a) \>.
+$$
+
+Here, $\omega^2 = \tau^2 + s_\lambda^2$, $a = \dfrac{\mu - S(N)}{\omega}$, and $\phi$ is the standard normal density.
+
+
+A few things are worth noting.  First, the dependence on $N$ enters entirely through $s_\lambda$, which affects both $\omega$ and $a$. As $N \to \infty$, $s_\lambda \to 0$, and we recover the Clairvoyant distribution:
+
+$$
+\omega \to \tau,
+\qquad
+a \to \dfrac{\mu}{\tau}.
+$$
+
+since $S(N) \rightarrow 0$ as $N$ becomes large.
+
+
+Finally, this formula works for all three decision rules (see below!). The only thing that changes across rules is the critical threshold $S(N)$. Once you have that, everything collapses to the same expression.
+
+
+```{r closedform-comparison}
+#| fig-cap: "Closed-form expected impact curves for all three decision rules: probability to beat control ($c = 0.95$, solid), 95% credible interval excluding zero (dashed), and M > 0 (dotted). The red horizontal line is the Clairvoyant distribution expectation — the upper bound achieved with perfect information."
+lns <- seq(2, 5, 0.25)
+ns  <- 10^lns
+
+closed_prob <- sapply(ns, \(x) closedform_decisions(n = x))
+closed_ci   <- sapply(ns, \(x) closedform_decisions_ci(n = x))
+closed_M    <- sapply(ns, \(x) closedform_decisions_M(n = x))
+
+# Clairvoyant limit: se_lift -> 0, threshold -> 0, so E[lambda * 1(lambda > 0)]
+clairvoyant <- closedform_impact_from_crit(lambda_crit = 0, se_lift = 0)
+
+ylim <- range(0, closed_prob, closed_ci, closed_M, clairvoyant)
+
+plot(lns, closed_prob, type = 'l', lwd = 2, lty = 1,
+     xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n', ylim = ylim)
+axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
+grid()
+lines(lns, closed_ci, lwd = 2, lty = 2)
+lines(lns, closed_M,  lwd = 2, lty = 3)
+abline(h = clairvoyant, col = 'red', lwd = 2)
+legend('bottomright',
+       legend = c(
+         expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
+         expression("95% CI for " * lambda > 0),
+         expression("M > 0"),
+         "Clairvoyant"
+       ),
+       col = c('black', 'black', 'black', 'red'),
+       lty = c(1, 2, 3, 1), lwd = 2)
+```
+
+
+  

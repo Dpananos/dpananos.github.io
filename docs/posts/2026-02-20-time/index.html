@@ -205,6 +205,7 @@ window.Quarto = {
   <li><a href="#bayesian-approaches-to-ab-testing" id="toc-bayesian-approaches-to-ab-testing" class="nav-link" data-scroll-target="#bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</a></li>
   <li><a href="#how-long-to-run-an-ab-test-as-a-bayesian" id="toc-how-long-to-run-an-ab-test-as-a-bayesian" class="nav-link" data-scroll-target="#how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</a></li>
   <li><a href="#an-analytic-solution" id="toc-an-analytic-solution" class="nav-link" data-scroll-target="#an-analytic-solution">An Analytic Solution</a></li>
+  <li><a href="#a-closed-form-solution" id="toc-a-closed-form-solution" class="nav-link" data-scroll-target="#a-closed-form-solution">A Closed-Form Solution</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-02-20-time/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -227,9 +228,9 @@ window.Quarto = {
 <p><span class="math display">\[ \lambda = \dfrac{E[Y(1)]}{E[Y(0)]} - 1 \&gt;. \]</span></p>
 <p>We can obtain an estimate of the lift, <span class="math inline">\(\hat \lambda\)</span>, via the plug in principle and the associated standard error, <span class="math inline">\(s_\lambda\)</span> via the delta method. Assuming <span class="math inline">\(\hat \lambda\)</span> is drawn from a normal distribution (I’ve talked about this before <a href="../../posts/2025-11-21-kuethe/index.html">here</a>), and that <span class="math inline">\(s_\lambda\)</span> is known exactly, we can use a conjugate normal-normal model to obtain the posterior distribution. Assuming the prior mean and variance is <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau^2\)</span> respectively, the posterior variance and mean, <span class="math inline">\(V\)</span> and <span class="math inline">\(M\)</span>, are</p>
 <p><span class="math display">\[ V^{-1} = \dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2} \&gt;, \]</span> <span class="math display">\[ M = V \times \left(\dfrac{\hat \lambda}{s^2_\lambda} + \dfrac{\mu}{\tau^2}\right) \&gt;. \]</span></p>
-<p>Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, the following are some of the most popular I have seen in the wild:</p>
+<p>Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, many of the decision rules are based on inequalities of the posterior mean. Here are just three I have seen in the wild:</p>
 <ul>
-<li>Ship if <span class="math inline">\(c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)\)</span>. This is sometimes called “Probability to beat control”.</li>
+<li>Ship if <span class="math inline">\(c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)\)</span>, which is equivalent to <span class="math inline">\(\sqrt{V} \Phi^{-1}(c) \lt M\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal CDF. This is sometimes called “Probability to beat control”.</li>
 <li>Ship if <span class="math inline">\(0 \lt M - z_{1-\alpha/2}\sqrt{V}\)</span>. This is like a Bayesian p-value being less than <span class="math inline">\(\alpha\)</span>.</li>
 <li>Ship if <span class="math inline">\(0 \lt M\)</span>. Ship whenever the posterior mean is positive.</li>
 </ul>
@@ -309,6 +310,83 @@ window.Quarto = {
 <figure class="figure">
 <figcaption>Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, <span class="math inline">\(c = 0.95\)</span>), 95% credible interval excluding zero (dashed), and M &gt; 0 (dotted, ship if posterior mean is positive). The M &gt; 0 rule is the most permissive, shipping more often and yielding higher average impact at each sample size.</figcaption>
 <p><img src="index_files/figure-html/comparisons-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="a-closed-form-solution" class="level2">
+<h2 class="anchored" data-anchor-id="a-closed-form-solution">A Closed-Form Solution</h2>
+<p>Wait a second…is that integral a right hairy bastard? I was working with ChatGPT to relearn some more about numerical integration, I asked which numerical integration method would be best for this integrand (as if I wasn’t going to just use the trapezoid rule with a fine grid and a large limits of integration). ChatGPT brought be down the following line of argument (which I have written in my own words).</p>
+<p>A property of Gaussians allow us to re-write the integral as</p>
+<p><span class="math display">\[
+E[\text{impact} \mid N]
+=
+\int_{-\infty}^{\infty}
+\lambda \,
+\Phi\left(\dfrac{\lambda - S(N)}{s_\lambda} \right)
+f(\lambda)\, d\lambda.
+\]</span></p>
+<p>from which we can identify the integral as a legitimate expectation, namely</p>
+<p><span class="math display">\[
+E\!\left[
+\lambda \,
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+\right] \&gt;.
+\]</span></p>
+<p>Introduce an auxiliary random variable. Let</p>
+<p><span class="math display">\[
+Y = S(N) + s_\lambda Z,
+\qquad
+Z \sim \operatorname{Normal}(0,1),
+\]</span></p>
+<p>independent of <span class="math inline">\(\lambda\)</span>. Then</p>
+<p><span class="math display">\[
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+=
+\Pr(Y \le \lambda \mid \lambda) = E[\mathbf{1}(Y\leq \lambda \mid \lambda)]
+\]</span></p>
+<p>Here, I have used the fact that a probability can be expressed as the expectation of some indicator variable. This is handy because the expectation becomes</p>
+<p><span class="math display">\[
+=
+\mathbb{E}\!\left[
+\lambda \,
+\mathbb{E}[\mathbf{1}(Y \le \lambda)\mid \lambda]
+\right] = E\!\left[\lambda \mathbf{1}(Y \le \lambda)\right].
+\]</span></p>
+<p>via the law od total expectation. That’s just a truncated bivariate normal moment, which I guess has closed form!</p>
+<p>Since <span class="math inline">\(Y \perp \lambda\)</span> then</p>
+<p><span class="math display">\[
+\lambda - Y
+\sim
+\operatorname{Normal}(\mu - S(N),\; \tau^2 + s_\lambda^2).
+\]</span></p>
+<p>and so the expectation can be written as</p>
+<p><span class="math display">\[
+E\!\left[
+\lambda \,
+\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
+\right]
+=
+\mu \, \Phi(a)
++
+\dfrac{\tau^2}{\omega} \, \phi(a) \&gt;.
+\]</span></p>
+<p>Here, <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span>, <span class="math inline">\(a = \dfrac{\mu - S(N)}{\omega}\)</span>, and <span class="math inline">\(\phi\)</span> is the standard normal density.</p>
+<p>A few things are worth noting. First, the dependence on <span class="math inline">\(N\)</span> enters entirely through <span class="math inline">\(s_\lambda\)</span>, which affects both <span class="math inline">\(\omega\)</span> and <span class="math inline">\(a\)</span>. As <span class="math inline">\(N \to \infty\)</span>, <span class="math inline">\(s_\lambda \to 0\)</span>, and we recover the Clairvoyant distribution:</p>
+<p><span class="math display">\[
+\omega \to \tau,
+\qquad
+a \to \dfrac{\mu}{\tau}.
+\]</span></p>
+<p>since <span class="math inline">\(S(N) \rightarrow 0\)</span> as <span class="math inline">\(N\)</span> becomes large.</p>
+<p>Finally, this formula works for all three decision rules (see below!). The only thing that changes across rules is the critical threshold <span class="math inline">\(S(N)\)</span>. Once you have that, everything collapses to the same expression.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Closed-form expected impact curves for all three decision rules: probability to beat control (<span class="math inline">\(c = 0.95\)</span>, solid), 95% credible interval excluding zero (dashed), and M &gt; 0 (dotted).</figcaption>
+<p><img src="index_files/figure-html/closedform-comparison-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
