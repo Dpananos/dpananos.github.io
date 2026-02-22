@@ -63,28 +63,20 @@ Note a few things.  First, while difficult to see, there are some cases (especia
 ```{r}
 
 # =============================================================================
-# Decision Rule 1: Ship if P(lift > 0 | data) > cutoff
+# Shared helpers
 # =============================================================================
 
-sim_decisions <- function(n = 5000,
-                          cutoff = 0.95,
-                          prior_mean = 0,
-                          prior_sd = 0.05,
-                          control_mean = 2.0,
-                          prob_treatment = 0.5,
-                          nsims = 100000) {
-
-  # --- 1. Standard Errors ---
+# Simulate data and compute posterior for a given n and prior
+sim_posterior <- function(n, prior_mean = 0, prior_sd = 0.05,
+                          control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
   sigma <- 0.5
   se_c <- sigma / sqrt(n * (1 - prob_treatment))
   se_t <- sigma / sqrt(n * prob_treatment)
 
-  # --- 2. Simulate Data ---
   true_lift <- rnorm(nsims, prior_mean, prior_sd)
   control   <- rnorm(nsims, control_mean, se_c)
   treatment <- rnorm(nsims, control_mean * (1 + true_lift), se_t)
 
-  # --- 3. Posterior ---
   estimated_lift    <- (treatment / control) - 1
   estimated_lift_se <- sqrt(se_t^2 / control^2 + se_c^2 * treatment^2 / control^4)
 
@@ -92,176 +84,78 @@ sim_decisions <- function(n = 5000,
   M <- V * (estimated_lift / estimated_lift_se^2 + prior_mean / prior_sd^2)
   S <- sqrt(V)
 
-  # --- 4. Decision Rule ---
-  # Ship if P(lift > 0 | data) > cutoff
-  prob_positive <- pnorm(0, mean = M, sd = S, lower.tail = FALSE)
-  impact <- ifelse(prob_positive > cutoff, true_lift, 0)
-
-  mean(impact)
+  list(true_lift = true_lift, M = M, S = S)
 }
 
-analytic_decisions <- function(n = 5000,
-                               cutoff = 0.95,
-                               prior_mean = 0,
-                               prior_sd = 0.05,
-                               control_mean = 2.0,
-                               prob_treatment = 0.5) {
-
-  # --- 1. Standard Errors ---
-  sigma <- 0.5
+# SE of lift via delta method (approximation at lambda ~ 0)
+compute_se_lift <- function(n, control_mean = 2.0, prob_treatment = 0.5, sigma = 0.5) {
   se_c <- sigma / sqrt(n * (1 - prob_treatment))
   se_t <- sigma / sqrt(n * prob_treatment)
+  sqrt((se_t^2 + se_c^2) / control_mean^2)
+}
 
-  # SE of lift via delta method (at mu_t = mu_c)
-  se_lift <- sqrt((se_t^2 + se_c^2) / control_mean^2)
-
-  # --- 2. Critical Hurdle ---
-  # Minimum observed lift to satisfy P(lift > 0 | data) > cutoff
-  z_c <- qnorm(cutoff)
-  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- z_c * se_lift^2 * post_sd_inv
-
-  # --- 3. Expected Impact ---
-  # E[impact] = integral of delta * P(ship | delta) * prior(delta)
+# Analytic expected impact given a critical hurdle lambda_crit
+analytic_impact_from_crit <- function(lambda_crit, se_lift, prior_mean = 0, prior_sd = 0.05) {
   integrand <- function(delta) {
     prob_ship <- 1 - pnorm(lambda_crit, mean = delta, sd = se_lift)
     delta * prob_ship * dnorm(delta, prior_mean, prior_sd)
   }
-
   integrate(integrand, lower = -Inf, upper = Inf)$value
+}
+
+# =============================================================================
+# Decision Rule 1: Ship if P(lift > 0 | data) > cutoff
+# =============================================================================
+
+sim_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
+                          control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  p <- sim_posterior(n, prior_mean, prior_sd, control_mean, prob_treatment, nsims)
+  prob_positive <- pnorm(0, mean = p$M, sd = p$S, lower.tail = FALSE)
+  mean(ifelse(prob_positive > cutoff, p$true_lift, 0))
+}
+
+analytic_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  lambda_crit <- qnorm(cutoff) * se_lift^2 * post_sd_inv
+  analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 # =============================================================================
 # Decision Rule 2: Ship if lower 95% credible interval > 0
 # =============================================================================
 
-sim_decisions_ci <- function(n = 5000,
-                             ci_level = 0.95,
-                             prior_mean = 0,
-                             prior_sd = 0.05,
-                             control_mean = 2.0,
-                             prob_treatment = 0.5,
-                             nsims = 100000) {
-
-  # --- 1. Standard Errors ---
-  sigma <- 0.5
-  se_c <- sigma / sqrt(n * (1 - prob_treatment))
-  se_t <- sigma / sqrt(n * prob_treatment)
-
-  # --- 2. Simulate Data ---
-  true_lift <- rnorm(nsims, prior_mean, prior_sd)
-  control   <- rnorm(nsims, control_mean, se_c)
-  treatment <- rnorm(nsims, control_mean * (1 + true_lift), se_t)
-
-  # --- 3. Posterior ---
-  estimated_lift    <- (treatment / control) - 1
-  estimated_lift_se <- sqrt(se_t^2 / control^2 + se_c^2 * treatment^2 / control^4)
-
-  V <- 1 / (1 / estimated_lift_se^2 + 1 / prior_sd^2)
-  M <- V * (estimated_lift / estimated_lift_se^2 + prior_mean / prior_sd^2)
-  S <- sqrt(V)
-
-  # --- 4. Decision Rule ---
-  # Ship if lower bound of 95% credible interval > 0
-  lower_ci <- qnorm((1 - ci_level) / 2, mean = M, sd = S)
-  impact <- ifelse(lower_ci > 0, true_lift, 0)
-
-  mean(impact)
+sim_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
+                              control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  p <- sim_posterior(n, prior_mean, prior_sd, control_mean, prob_treatment, nsims)
+  lower_ci <- qnorm((1 - ci_level) / 2, mean = p$M, sd = p$S)
+  mean(ifelse(lower_ci > 0, p$true_lift, 0))
 }
 
-analytic_decisions_ci <- function(n = 5000,
-                                  ci_level = 0.95,
-                                  prior_mean = 0,
-                                  prior_sd = 0.05,
-                                  control_mean = 2.0,
-                                  prob_treatment = 0.5) {
-
-  # --- 1. Standard Errors ---
-  sigma <- 0.5
-  se_c <- sigma / sqrt(n * (1 - prob_treatment))
-  se_t <- sigma / sqrt(n * prob_treatment)
-
-  # SE of lift via delta method (at mu_t = mu_c)
-  se_lift <- sqrt((se_t^2 + se_c^2) / control_mean^2)
-
-  # --- 2. Critical Hurdle ---
-  # Minimum observed lift so that lower bound of CI > 0
-  z_ci <- qnorm((1 + ci_level) / 2)
+analytic_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                   control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- z_ci * se_lift^2 * post_sd_inv
-
-  # --- 3. Expected Impact ---
-  # E[impact] = integral of delta * P(ship | delta) * prior(delta)
-  integrand <- function(delta) {
-    prob_ship <- 1 - pnorm(lambda_crit, mean = delta, sd = se_lift)
-    delta * prob_ship * dnorm(delta, prior_mean, prior_sd)
-  }
-
-  integrate(integrand, lower = -Inf, upper = Inf)$value
+  lambda_crit <- qnorm((1 + ci_level) / 2) * se_lift^2 * post_sd_inv
+  analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 # =============================================================================
 # Decision Rule 3: Ship if M > 0
 # =============================================================================
 
-sim_decisions_M <- function(n = 5000,
-                             prior_mean = 0,
-                             prior_sd = 0.05,
-                             control_mean = 2.0,
-                             prob_treatment = 0.5,
-                             nsims = 100000) {
-
-  # --- 1. Standard Errors ---
-  sigma <- 0.5
-  se_c <- sigma / sqrt(n * (1 - prob_treatment))
-  se_t <- sigma / sqrt(n * prob_treatment)
-
-  # --- 2. Simulate Data ---
-  true_lift <- rnorm(nsims, prior_mean, prior_sd)
-  control   <- rnorm(nsims, control_mean, se_c)
-  treatment <- rnorm(nsims, control_mean * (1 + true_lift), se_t)
-
-  # --- 3. Posterior ---
-  estimated_lift    <- (treatment / control) - 1
-  estimated_lift_se <- sqrt(se_t^2 / control^2 + se_c^2 * treatment^2 / control^4)
-
-  V <- 1 / (1 / estimated_lift_se^2 + 1 / prior_sd^2)
-  M <- V * (estimated_lift / estimated_lift_se^2 + prior_mean / prior_sd^2)
-
-  # --- 4. Decision Rule ---
-  # Ship if posterior mean M > 0
-  impact <- ifelse(M > 0, true_lift, 0)
-
-  mean(impact)
+sim_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
+                             control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  p <- sim_posterior(n, prior_mean, prior_sd, control_mean, prob_treatment, nsims)
+  mean(ifelse(p$M > 0, p$true_lift, 0))
 }
 
-analytic_decisions_M <- function(n = 5000,
-                                  prior_mean = 0,
-                                  prior_sd = 0.05,
-                                  control_mean = 2.0,
-                                  prob_treatment = 0.5) {
-
-  # --- 1. Standard Errors ---
-  sigma <- 0.5
-  se_c <- sigma / sqrt(n * (1 - prob_treatment))
-  se_t <- sigma / sqrt(n * prob_treatment)
-
-  # SE of lift via delta method (at mu_t = mu_c)
-  se_lift <- sqrt((se_t^2 + se_c^2) / control_mean^2)
-
-  # --- 2. Critical Hurdle ---
-  # M > 0 iff hat_lambda > -prior_mean * se_lift^2 / prior_sd^2
-  # With prior_mean = 0, lambda_crit = 0
+analytic_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
+                                  control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
   lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
-
-  # --- 3. Expected Impact ---
-  # E[impact] = integral of delta * P(ship | delta) * prior(delta)
-  integrand <- function(delta) {
-    prob_ship <- 1 - pnorm(lambda_crit, mean = delta, sd = se_lift)
-    delta * prob_ship * dnorm(delta, prior_mean, prior_sd)
-  }
-
-  integrate(integrand, lower = -Inf, upper = Inf)$value
+  analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 ```
