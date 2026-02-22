@@ -205,7 +205,6 @@ window.Quarto = {
   <li><a href="#bayesian-approaches-to-ab-testing" id="toc-bayesian-approaches-to-ab-testing" class="nav-link" data-scroll-target="#bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</a></li>
   <li><a href="#how-long-to-run-an-ab-test-as-a-bayesian" id="toc-how-long-to-run-an-ab-test-as-a-bayesian" class="nav-link" data-scroll-target="#how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</a></li>
   <li><a href="#an-analytic-solution" id="toc-an-analytic-solution" class="nav-link" data-scroll-target="#an-analytic-solution">An Analytic Solution</a></li>
-  <li><a href="#a-closed-form-solution" id="toc-a-closed-form-solution" class="nav-link" data-scroll-target="#a-closed-form-solution">A Closed-Form Solution</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-02-20-time/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -231,7 +230,7 @@ window.Quarto = {
 <p>Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, many of the decision rules are based on inequalities of the posterior mean. Here are just three I have seen in the wild:</p>
 <ul>
 <li>Ship if <span class="math inline">\(c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)\)</span>, which is equivalent to <span class="math inline">\(\sqrt{V} \Phi^{-1}(c) \lt M\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal CDF. This is sometimes called “Probability to beat control”.</li>
-<li>Ship if <span class="math inline">\(0 \lt M - z_{1-\alpha/2}\sqrt{V}\)</span>. This is like a Bayesian p-value being less than <span class="math inline">\(\alpha\)</span>.</li>
+<li>Ship if <span class="math inline">\(z_{1-\alpha/2}\sqrt{V} \lt M\)</span>. This is like a Bayesian p-value being less than <span class="math inline">\(\alpha\)</span>.</li>
 <li>Ship if <span class="math inline">\(0 \lt M\)</span>. Ship whenever the posterior mean is positive.</li>
 </ul>
 <p>Now, these are just a few ways to make decisions (they are certainly not exhaustive). Prior to Tyler’s talk, I didn’t really have a great way to answer how long an A/B test should take (save some ramblings about EVSI <a href="../../posts/2024-09-01-ab-length/index.html">here</a>) were you to use a Bayesian analysis method. However, with these details, I think I can now give an answer.</p>
@@ -268,7 +267,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The curve flattens as <span class="math inline">\(N\)</span> grows, reflecting diminishing returns from longer experiments. The loess-smoothed curve is based on 100,000 simulations at each sample size.</figcaption>
+<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The curve flattens as <span class="math inline">\(N\)</span> grows, reflecting diminishing returns from longer experiments.Each dot is based on 100,000 simulations at each sample size.</figcaption>
 <p><img src="index_files/figure-html/example-mde-curve-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -278,115 +277,105 @@ window.Quarto = {
 </section>
 <section id="an-analytic-solution" class="level2">
 <h2 class="anchored" data-anchor-id="an-analytic-solution">An Analytic Solution</h2>
-<p>Let’s stick with probability to beat for a moment. The ship decision is, equivalently,</p>
-<p><span class="math display">\[ c \lt \Phi\left(\dfrac{M}{\sqrt{V}}\right) \&gt;, \]</span></p>
-<p>or equivalently</p>
-<p><span class="math display">\[ \Phi^{-1}(c) \lt \dfrac{M}{\sqrt{V}} \&gt;. \]</span></p>
-<p>Here, <span class="math inline">\(\Phi\)</span> is the CDF of a standard normal distribution. The discourse and evidence across the A/B testing suggests that most A/B tests fail to move metrics, meaning that we should expect <span class="math inline">\(\mu \approx 0\)</span> as our prior mean. As a consequence, our ship condition would be</p>
-<p><span class="math display">\[ \Phi^{-1}(c) \lt  \dfrac{\hat \lambda}{s^2_\lambda\sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}}} \&gt;.\]</span></p>
-<p>Additionally, I personally think that an appropriate prior standard deviation is going to be small since we don’t routinely detect enormous hurt/help to the product. As a consequence of this, this would mean that <span class="math inline">\(\lambda \approx 0\)</span>, or that the average outcomes in groups are going to be similar, at least to a first order approximation! This means that the sampling variance of the lift can be approximated as</p>
-<p><span class="math display">\[ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar y^2_c} \right) \&gt;. \]</span></p>
-<p>Here, the subscripts indicate estimates for treatment, <span class="math inline">\(t\)</span>, or control, <span class="math inline">\(c\)</span>. Note that this is where the sample size, and hence time, enters the equation. The sampling variability is a function of <span class="math inline">\(N\)</span>, though I’ve not written this out explicitly. I’ll add a dependency on <span class="math inline">\(N\)</span> going forward, and we can re-write our decision criteria solely as a function of the estimated lift as</p>
-<p><span class="math display">\[  S(N) = \Phi^{-1}(c) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \&gt;. \]</span></p>
-<p>If we know the true lift <span class="math inline">\(\lambda\)</span>, we could calculate the probability that this criteria would be met by <span class="math inline">\(\hat \lambda\)</span>. It would be</p>
-<p><span class="math display">\[ \Pr(S(N) \lt \hat \lambda \mid \lambda) = 1 - \Phi\left(\dfrac{S(N)-\lambda}{s_\lambda} \right)\]</span></p>
-<p>but of course we don’t know <span class="math inline">\(\lambda\)</span>. We do however have a prior over <span class="math inline">\(\lambda\)</span>, so we can compute the expected impact as</p>
-<p><span class="math display">\[ E[\mbox{impact} \mid N] = \int_{-\infty}^{\infty}  \lambda \cdot \left(1 - \Phi\left(\dfrac{S(N)-\lambda}{s_\lambda} \right) \right) f(\lambda) d\lambda \&gt;. \]</span></p>
-<p>Here, <span class="math inline">\(f\)</span> is the prior density of <span class="math inline">\(\lambda\)</span>. Now, this looks like a right hairy bastard, but it is actually quite manageable for R or other numerical integration since the integrand is nice and smooth. Shown below are the simulated and analytic results for the probability to beat control decision rule. The approximation isn’t bad!</p>
-<div class="cell">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<figcaption>Simulated vs analytic expected impact for the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The close agreement confirms the analytic solution is a good approximation, at least under the proposed parameters. Prior is <span class="math inline">\(\operatorname{Normal}(0, 0.05^2)\)</span>, <span class="math inline">\(\sigma = 0.5\)</span>, and equal allocation (<span class="math inline">\(p = 0.5\)</span>).</figcaption>
-<p><img src="index_files/figure-html/prob-to-beat-comparison-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>This sort of exercise can be done for the remaining two decision rules. Shown below is a plot comparing the analytic formulae and simulations for all three decision rules.</p>
-<div class="cell">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<figcaption>Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, <span class="math inline">\(c = 0.95\)</span>), 95% credible interval excluding zero (dashed), and M &gt; 0 (dotted, ship if posterior mean is positive). The M &gt; 0 rule is the most permissive, shipping more often and yielding higher average impact at each sample size.</figcaption>
-<p><img src="index_files/figure-html/comparisons-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="a-closed-form-solution" class="level2">
-<h2 class="anchored" data-anchor-id="a-closed-form-solution">A Closed-Form Solution</h2>
-<p>Wait a second…is that integral a right hairy bastard? I was working with ChatGPT to relearn some more about numerical integration, I asked which numerical integration method would be best for this integrand (as if I wasn’t going to just use the trapezoid rule with a fine grid and a large limits of integration). ChatGPT brought be down the following line of argument (which I have written in my own words).</p>
-<p>A property of Gaussians allow us to re-write the integral as</p>
+<p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules is of the form</p>
+<p><span class="math display">\[ \sqrt{V}\Phi^{-1}(p) \lt M \&gt;. \]</span></p>
+<p>For the three decision rules I’ve listed above, <span class="math inline">\(p = c\)</span>, <span class="math inline">\(p=1-\alpha/2\)</span>, and <span class="math inline">\(p=0.5\)</span>.</p>
+<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <span class="math inline">\(\mu \approx 0\)</span> and <span class="math inline">\(\left\lvert \hat \lambda \right\rvert \approx 0\)</span>. Given this, we can simplify the inequality a little. First, <span class="math inline">\(M = \hat \lambda / s^2_\lambda\)</span>, and</p>
+<p><span class="math display">\[ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar{y}^2_c}\right) \]</span></p>
+<p>Here, <span class="math inline">\(s^2\)</span> is the sampling variance of the treatment or control group (indicated by the subscript) and <span class="math inline">\(\bar y _c\)</span> is the average from the control group. Note there is an implicit reliance on <span class="math inline">\(N\)</span> here since <span class="math inline">\(s^2 \propto 1/N\)</span>. I’m going to indicate reliance on <span class="math inline">\(N\)</span> going forward to make this discussion a little easier. We can re-write the inequality based only on <span class="math inline">\(\hat \lambda\)</span> as</p>
+<p><span class="math display">\[ S(N) = \Phi^{-1}(p) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \]</span></p>
+<p>With this inequality in hand, we can recover the expectation of the Clairvoyant distribution and obtain a closed form expression for the expected impact as a function of <span class="math inline">\(N\)</span>. We want to know</p>
 <p><span class="math display">\[
 E[\text{impact} \mid N]
 =
-\int_{-\infty}^{\infty}
-\lambda \,
-\Phi\left(\dfrac{\lambda - S(N)}{s_\lambda} \right)
-f(\lambda)\, d\lambda.
+E\!\left[\lambda \,\mathbf 1\{\hat\lambda &gt; S(N)\}\right].
 \]</span></p>
-<p>from which we can identify the integral as a legitimate expectation, namely</p>
+<p>Under the normal–normal model we have</p>
 <p><span class="math display">\[
-E\!\left[
-\lambda \,
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-\right] \&gt;.
-\]</span></p>
-<p>Introduce an auxiliary random variable. Let</p>
-<p><span class="math display">\[
-Y = S(N) + s_\lambda Z,
+\lambda \sim \mathcal N(\mu,\tau^2),
 \qquad
-Z \sim \operatorname{Normal}(0,1),
-\]</span></p>
-<p>independent of <span class="math inline">\(\lambda\)</span>. Then</p>
-<p><span class="math display">\[
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-=
-\Pr(Y \le \lambda \mid \lambda) = E[\mathbf{1}(Y\leq \lambda \mid \lambda)]
-\]</span></p>
-<p>Here, I have used the fact that a probability can be expressed as the expectation of some indicator variable. This is handy because the expectation becomes</p>
-<p><span class="math display">\[
-=
-\mathbb{E}\!\left[
-\lambda \,
-\mathbb{E}[\mathbf{1}(Y \le \lambda)\mid \lambda]
-\right] = E\!\left[\lambda \mathbf{1}(Y \le \lambda)\right].
-\]</span></p>
-<p>via the law od total expectation. That’s just a truncated bivariate normal moment, which I guess has closed form!</p>
-<p>Since <span class="math inline">\(Y \perp \lambda\)</span> then</p>
-<p><span class="math display">\[
-\lambda - Y
+\hat\lambda \mid \lambda
 \sim
-\operatorname{Normal}(\mu - S(N),\; \tau^2 + s_\lambda^2).
+\mathcal N(\lambda, s_\lambda^2).
 \]</span></p>
-<p>and so the expectation can be written as</p>
+<p>Since everything is Gaussian, we can rewrite the shipping event as</p>
 <p><span class="math display">\[
-E\!\left[
-\lambda \,
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-\right]
-=
-\mu \, \Phi(a)
-+
-\dfrac{\tau^2}{\omega} \, \phi(a) \&gt;.
+\hat\lambda &gt; S(N)
+\;\;\Longleftrightarrow\;\;
+\lambda - Y &gt; 0,
 \]</span></p>
-<p>Here, <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span>, <span class="math inline">\(a = \dfrac{\mu - S(N)}{\omega}\)</span>, and <span class="math inline">\(\phi\)</span> is the standard normal density.</p>
-<p>A few things are worth noting. First, the dependence on <span class="math inline">\(N\)</span> enters entirely through <span class="math inline">\(s_\lambda\)</span>, which affects both <span class="math inline">\(\omega\)</span> and <span class="math inline">\(a\)</span>. As <span class="math inline">\(N \to \infty\)</span>, <span class="math inline">\(s_\lambda \to 0\)</span>, and we recover the Clairvoyant distribution:</p>
+<p>where</p>
 <p><span class="math display">\[
-\omega \to \tau,
+Y \sim \mathcal N(S(N), s_\lambda^2),
 \qquad
-a \to \dfrac{\mu}{\tau}.
+Y \perp \lambda.
 \]</span></p>
-<p>since <span class="math inline">\(S(N) \rightarrow 0\)</span> as <span class="math inline">\(N\)</span> becomes large.</p>
-<p>Finally, this formula works for all three decision rules (see below!). The only thing that changes across rules is the critical threshold <span class="math inline">\(S(N)\)</span>. Once you have that, everything collapses to the same expression.</p>
+<p>Define</p>
+<p><span class="math display">\[
+D = \lambda - Y.
+\]</span></p>
+<p>Then</p>
+<p><span class="math display">\[
+D \sim \mathcal N(\mu - S(N),\, \omega^2),
+\qquad
+\omega^2 = \tau^2 + s_\lambda^2.
+\]</span></p>
+<p>So the expected impact becomes</p>
+<p><span class="math display">\[
+E[\lambda \mathbf 1(D&gt;0)].
+\]</span></p>
+<p>This is a standard bivariate normal moment. Using linear projection geometry,</p>
+<p><span class="math display">\[
+E[\lambda \mathbf 1(D&gt;0)]
+=
+\mu \Phi(a)
++
+\frac{\tau^2}{\omega}\phi(a),
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+a
+=
+\frac{\mu - S(N)}{\omega},
+\qquad
+\omega^2=\tau^2+s_\lambda^2.
+\]</span></p>
+<p>Because we assumed <span class="math inline">\(\mu \approx 0\)</span>, this simplifies to</p>
+<p><span class="math display">\[
+E[\text{impact} \mid N]
+=
+\frac{\tau^2}{\omega}
+\phi\!\left(
+\frac{-S(N)}{\omega}
+\right).
+\]</span></p>
+<p>Substituting the decision threshold</p>
+<p><span class="math display">\[
+S(N)
+=
+\Phi^{-1}(p)\, s_\lambda^2
+\sqrt{\frac{1}{s_\lambda^2}+\frac{1}{\tau^2}},
+\]</span></p>
+<p>gives a fully analytic expression for expected impact as a function of <span class="math inline">\(N\)</span> (through <span class="math inline">\(s_\lambda^2 \propto 1/N\)</span>).</p>
+<p>Thus, for any of the three decision rules, the entire curve of expected impact versus sample size collapses to</p>
+<p><span class="math display">\[
+E[\text{impact} \mid N]
+=
+\mu \Phi(a)
++
+\frac{\tau^2}{\sqrt{\tau^2+s_\lambda^2}}
+\phi(a),
+\qquad
+a=
+\frac{\mu-S(N)}{\sqrt{\tau^2+s_\lambda^2}}.
+\]</span></p>
+<p>The only difference across rules is the constant <span class="math inline">\(p\)</span> embedded inside <span class="math inline">\(S(N)\)</span>. Everything else is identical.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Closed-form expected impact curves for all three decision rules: probability to beat control (<span class="math inline">\(c = 0.95\)</span>, solid), 95% credible interval excluding zero (dashed), and M &gt; 0 (dotted).</figcaption>
-<p><img src="index_files/figure-html/closedform-comparison-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Simulated (open markers) and closed-form analytic (black lines) expected impact for all three decision rules. The red horizontal line is the Clairvoyant upper bound. Prior is <span class="math inline">\(\operatorname{Normal}(0, 0.05^2)\)</span>, <span class="math inline">\(\sigma = 0.5\)</span>, equal allocation.</figcaption>
+<p><img src="index_files/figure-html/final-comparison-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

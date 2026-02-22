@@ -34,7 +34,7 @@ $$ M = V \times \left(\dfrac{\hat \lambda}{s^2_\lambda} + \dfrac{\mu}{\tau^2}\ri
 Whereas a Frequentist would make their ship/no-ship decision based on statistical significance, a Bayesian has a few options. Assuming increases to the metric are favorable, many of the decision rules are based on inequalities of the posterior mean.  Here are just three I have seen in the wild:
 
 * Ship if $c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)$, which is equivalent to $\sqrt{V} \Phi^{-1}(c) \lt M$, where $\Phi$ is the standard normal CDF.  This is sometimes called "Probability to beat control".
-* Ship if $0 \lt M - z_{1-\alpha/2}\sqrt{V}$.  This is like a Bayesian p-value being less than $\alpha$.
+* Ship if $z_{1-\alpha/2}\sqrt{V} \lt M$.  This is like a Bayesian p-value being less than $\alpha$.
 * Ship if $0 \lt M$. Ship whenever the posterior mean is positive.
 
 Now, these are just a few ways to make decisions (they are certainly not exhaustive).  Prior to Tyler's talk, I didn't really have a great way to answer how long an A/B test should take (save some ramblings about EVSI [here](../2024-09-01-ab-length/index.qmd)) were you to use a Bayesian analysis method. However, with these details, I think I can now give an answer.
@@ -245,13 +245,13 @@ for (i in seq_along(sample_sizes)) {
 Below is a plot of the mean of this distribution as a function of sample size, and you can see this limiting behavior quite clearly.  The proposal is to base your run time on the expectation of the Clairvoyant distribution. From the plot, running A/B tests too short means the impact is going to be very small on average, but running longer means that (under the prior) you will impact the product more.  There comes a point where running the test longer is not helpful because you encounter diminishing returns.  This is a nice way to think about run time in my opinion! You know what your average impact would be were you to have perfect information, and you can collect enough samples so that you are sufficiently close to this without wasting time obtaining additional samples.  I think that is pretty elegant!
 
 ```{r example-mde-curve}
-#| fig-cap: "Average impact to the product as a function of sample size under the probability to beat control rule ($c = 0.95$). The curve flattens as $N$ grows, reflecting diminishing returns from longer experiments. The loess-smoothed curve is based on 100,000 simulations at each sample size."
+#| fig-cap: "Average impact to the product as a function of sample size under the probability to beat control rule ($c = 0.95$). The curve flattens as $N$ grows, reflecting diminishing returns from longer experiments.Each dot is based on 100,000 simulations at each sample size."
 lns <- seq(2, 5, 0.25)
 ns <- 10^lns
 sim_prob <- sapply(ns, \(x) sim_decisions(n = x))
-smoothed_sim_prob <- loess(sim_prob ~ lns)
 
-plot(lns, predict(smoothed_sim_prob), yaxt='n', xlab=expression(log[10](N)), ylab='Expected Impact', type='l')
+
+plot(lns, sim_prob, yaxt='n', xlab=expression(log[10](N)), ylab='Expected Impact')
 axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
 ```
 
@@ -260,231 +260,168 @@ Note that I've just shown simulations for probability to beat, but the simulatio
 
 ## An Analytic Solution
 
-Let's stick with probability to beat for a moment.  The ship decision is, equivalently, 
+Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort.  First, note that all three of the decision rules is of the form
 
-$$ c \lt \Phi\left(\dfrac{M}{\sqrt{V}}\right) \>, $$
+$$ \sqrt{V}\Phi^{-1}(p) \lt M \>. $$
 
-or equivalently
+For the three decision rules I've listed above, $p = c$, $p=1-\alpha/2$, and $p=0.5$.  
 
-$$ \Phi^{-1}(c) \lt \dfrac{M}{\sqrt{V}} \>. $$
+Now, let's talk about our prior.  The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked).  This allows us to assume that $\mu \approx 0$ and $\left\lvert \hat \lambda \right\rvert \approx 0$.  Given this, we can simplify the inequality a little.  First, $M = \hat \lambda / s^2_\lambda$, and
 
-Here, $\Phi$ is the CDF of a standard normal distribution. The discourse and evidence across the A/B testing suggests that most A/B tests fail to move metrics, meaning that we should expect $\mu \approx 0$ as our prior mean.  As a consequence, our ship condition would be
+$$ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar{y}^2_c}\right) $$
 
-$$ \Phi^{-1}(c) \lt  \dfrac{\hat \lambda}{s^2_\lambda\sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}}} \>.$$
+Here, $s^2$ is the sampling variance of the treatment or control group (indicated by the subscript)  and $\bar y _c$ is the average from the control group. Note there is an implicit reliance on $N$ here since $s^2 \propto 1/N$. I'm going to indicate reliance on $N$ going forward to make this discussion a little easier.  We can re-write the inequality based only on $\hat \lambda$ as 
 
-Additionally, I personally think that an appropriate prior standard deviation is going to be small since we don't routinely detect enormous hurt/help to the product.  As a consequence of this, this would mean that $\lambda \approx 0$, or that the average outcomes in groups are going to be similar, at least to a first order approximation!  This means that the sampling variance of the lift can be approximated as 
+$$ S(N) = \Phi^{-1}(p) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda $$
 
-$$ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar y^2_c} \right) \>. $$
-
-Here, the subscripts indicate estimates for treatment, $t$, or control, $c$. Note that this is where the sample size, and hence time, enters the equation.  The sampling variability is a function of $N$, though I've not written this out explicitly. I'll add a dependency on $N$ going forward, and we can re-write our decision criteria solely as a function of the estimated lift as
-
-$$  S(N) = \Phi^{-1}(c) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \>. $$
-
-If we know the true lift $\lambda$, we could calculate the probability that this criteria would be met by $\hat \lambda$.  It would be
-
-$$ \Pr(S(N) \lt \hat \lambda \mid \lambda) = 1 - \Phi\left(\dfrac{S(N)-\lambda}{s_\lambda} \right)$$
-
-
-but of course we don't know $\lambda$.  We do however have a prior over $\lambda$, so we can compute the expected impact as
-
-$$ E[\mbox{impact} \mid N] = \int_{-\infty}^{\infty}  \lambda \cdot \left(1 - \Phi\left(\dfrac{S(N)-\lambda}{s_\lambda} \right) \right) f(\lambda) d\lambda \>. $$
-
-Here, $f$ is the prior density of $\lambda$. Now, this looks like a right hairy bastard, but it is actually quite manageable for R or other numerical integration since the integrand is nice and smooth.  Shown below are the simulated and analytic results for the probability to beat control decision rule. The approximation isn't bad!
-
-```{r prob-to-beat-comparison}
-#| fig-cap: "Simulated vs analytic expected impact for the probability to beat control rule ($c = 0.95$). The close agreement confirms the analytic solution is a good approximation, at least under the proposed parameters. Prior is $\\operatorname{Normal}(0, 0.05^2)$, $\\sigma = 0.5$, and equal allocation ($p = 0.5$)."
-lns <- seq(2, 5, 0.25)
-ns <- 10^lns
-
-sim_prob      <- sapply(ns, \(x) sim_decisions(n = x))
-analytic_prob <- sapply(ns, \(x) analytic_decisions(n = x))
-f_prob <- loess(sim_prob ~ lns)
-
-col_sim <- rgb(1, 0, 0, 0.75)
-col_ana <- rgb(0, 0, 1, 0.75)
-
-plot(lns, predict(f_prob), type = 'l', col = col_sim, lwd = 2,
-     xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n',
-     ylim = range(0, analytic_prob))
-axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
-grid()
-lines(lns, analytic_prob, col = col_ana, lwd = 2)
-legend('bottomright',
-       legend = c('Simulation', 'Analytic'),
-       col = c(col_sim, col_ana), lwd = 2)
-```
-
-This sort of exercise can be done for the remaining two decision rules.  Shown below is a plot comparing the analytic formulae and simulations for all three decision rules.
-
-
-```{r comparisons}
-#| fig-cap: "Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, $c = 0.95$), 95% credible interval excluding zero (dashed), and M > 0 (dotted, ship if posterior mean is positive). The M > 0 rule is the most permissive, shipping more often and yielding higher average impact at each sample size."
-lns <- seq(2, 5, 0.25)
-ns <- 10^lns
-
-# Compute all 6 expected impact curves
-sim_prob      <- sapply(ns, \(x) sim_decisions(n = x))
-analytic_prob <- sapply(ns, \(x) analytic_decisions(n = x))
-sim_ci        <- sapply(ns, \(x) sim_decisions_ci(n = x))
-analytic_ci   <- sapply(ns, \(x) analytic_decisions_ci(n = x))
-sim_M         <- sapply(ns, \(x) sim_decisions_M(n = x))
-analytic_M    <- sapply(ns, \(x) analytic_decisions_M(n = x))
-
-# Smooth simulation curves
-f_prob <- loess(sim_prob ~ lns)
-f_ci   <- loess(sim_ci ~ lns)
-f_M    <- loess(sim_M ~ lns)
-
-# Colors: red = simulation, blue = analytic
-# Linetype: solid = P(lift>0) rule, dashed = CI rule, dotted = M > 0
-col_sim <- rgb(1, 0, 0, 0.75)
-col_ana <- rgb(0, 0, 1, 0.75)
-
-ylim <- range(0, analytic_prob, analytic_ci, analytic_M)
-
-plot(lns, predict(f_prob), type = 'l', col = col_sim, lwd = 2, lty = 1,
-     xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n', ylim = ylim)
-axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
-grid()
-lines(lns, analytic_prob, col = col_ana, lwd = 2, lty = 1)
-lines(lns, predict(f_ci),  col = col_sim, lwd = 2, lty = 2)
-lines(lns, analytic_ci,    col = col_ana, lwd = 2, lty = 2)
-lines(lns, predict(f_M),   col = col_sim, lwd = 2, lty = 3)
-lines(lns, analytic_M,     col = col_ana, lwd = 2, lty = 3)
-legend('bottomright',
-       legend = c(expression("Simulation, " * P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
-                  expression("Analytic, " * P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
-                  expression("Simulation, 95% CI for " * lambda > 0),
-                  expression("Analytic, 95% CI for " * lambda > 0),
-                  expression("Simulation, M > 0"),
-                  expression("Analytic, M > 0")),
-       col = c(col_sim, col_ana, col_sim, col_ana, col_sim, col_ana),
-       lty = c(1, 1, 2, 2, 3, 3), lwd = 2)
-```
-
-## A Closed-Form Solution
-
-
-Wait a second...is that integral a right hairy bastard?  I was working with ChatGPT to relearn some more about numerical integration, I asked which numerical integration method would be best for this integrand (as if I wasn't going to just use the trapezoid rule with a fine grid and a large limits of integration).  ChatGPT brought be down the following line of argument (which I have written in my own words).
-
-A property of Gaussians allow us to re-write the integral as
+With this inequality in hand, we can recover the expectation of the Clairvoyant distribution and obtain a closed form expression for the expected impact as a function of $N$. We want to know
 
 $$
 E[\text{impact} \mid N]
 =
-\int_{-\infty}^{\infty}
-\lambda \,
-\Phi\left(\dfrac{\lambda - S(N)}{s_\lambda} \right)
-f(\lambda)\, d\lambda.
+E\!\left[\lambda \,\mathbf 1\{\hat\lambda > S(N)\}\right].
 $$
 
-from which we can identify the integral as a legitimate expectation, namely
+Under the normal–normal model we have
 
 $$
-E\!\left[
-\lambda \,
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-\right] \>.
-$$
-
-
-Introduce an auxiliary random variable. Let
-
-$$
-Y = S(N) + s_\lambda Z,
+\lambda \sim \mathcal N(\mu,\tau^2),
 \qquad
-Z \sim \operatorname{Normal}(0,1),
-$$
-
-independent of $\lambda$. Then
-
-$$
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-=
-\Pr(Y \le \lambda \mid \lambda) = E[\mathbf{1}(Y\leq \lambda \mid \lambda)]
-$$
-
-Here, I have used the fact that a probability can be expressed as the expectation of some indicator variable. This is handy because the expectation becomes
-
-$$
-=
-\mathbb{E}\!\left[
-\lambda \,
-\mathbb{E}[\mathbf{1}(Y \le \lambda)\mid \lambda]
-\right] = E\!\left[\lambda \mathbf{1}(Y \le \lambda)\right].
-$$
-
-via the law od total expectation. That’s just a truncated bivariate normal moment, which I guess has closed form!  
-
-Since $Y \perp \lambda$ then
-
-$$
-\lambda - Y
+\hat\lambda \mid \lambda
 \sim
-\operatorname{Normal}(\mu - S(N),\; \tau^2 + s_\lambda^2).
+\mathcal N(\lambda, s_\lambda^2).
 $$
 
-and so the expectation can be written as 
+Since everything is Gaussian, we can rewrite the shipping event as
 
 $$
-E\!\left[
-\lambda \,
-\Phi\!\left(\dfrac{\lambda - S(N)}{s_\lambda}\right)
-\right] 
-=
-\mu \, \Phi(a)
-+
-\dfrac{\tau^2}{\omega} \, \phi(a) \>.
+\hat\lambda > S(N)
+\;\;\Longleftrightarrow\;\;
+\lambda - Y > 0,
 $$
 
-Here, $\omega^2 = \tau^2 + s_\lambda^2$, $a = \dfrac{\mu - S(N)}{\omega}$, and $\phi$ is the standard normal density.
-
-
-A few things are worth noting.  First, the dependence on $N$ enters entirely through $s_\lambda$, which affects both $\omega$ and $a$. As $N \to \infty$, $s_\lambda \to 0$, and we recover the Clairvoyant distribution:
+where
 
 $$
-\omega \to \tau,
+Y \sim \mathcal N(S(N), s_\lambda^2),
 \qquad
-a \to \dfrac{\mu}{\tau}.
+Y \perp \lambda.
 $$
 
-since $S(N) \rightarrow 0$ as $N$ becomes large.
+Define
 
+$$
+D = \lambda - Y.
+$$
 
-Finally, this formula works for all three decision rules (see below!). The only thing that changes across rules is the critical threshold $S(N)$. Once you have that, everything collapses to the same expression.
+Then
 
+$$
+D \sim \mathcal N(\mu - S(N),\, \omega^2),
+\qquad
+\omega^2 = \tau^2 + s_\lambda^2.
+$$
 
-```{r closedform-comparison}
-#| fig-cap: "Closed-form expected impact curves for all three decision rules: probability to beat control ($c = 0.95$, solid), 95% credible interval excluding zero (dashed), and M > 0 (dotted). The red horizontal line is the Clairvoyant distribution expectation — the upper bound achieved with perfect information."
+So the expected impact becomes
+
+$$
+E[\lambda \mathbf 1(D>0)].
+$$
+
+This is a standard bivariate normal moment. Using linear projection geometry,
+
+$$
+E[\lambda \mathbf 1(D>0)]
+=
+\mu \Phi(a)
++
+\frac{\tau^2}{\omega}\phi(a),
+$$
+
+where
+
+$$
+a
+=
+\frac{\mu - S(N)}{\omega},
+\qquad
+\omega^2=\tau^2+s_\lambda^2.
+$$
+
+Because we assumed $\mu \approx 0$, this simplifies to
+
+$$
+E[\text{impact} \mid N]
+=
+\frac{\tau^2}{\omega}
+\phi\!\left(
+\frac{-S(N)}{\omega}
+\right).
+$$
+
+Substituting the decision threshold
+
+$$
+S(N)
+=
+\Phi^{-1}(p)\, s_\lambda^2
+\sqrt{\frac{1}{s_\lambda^2}+\frac{1}{\tau^2}},
+$$
+
+gives a fully analytic expression for expected impact as a function of $N$ (through $s_\lambda^2 \propto 1/N$).
+
+Thus, for any of the three decision rules, the entire curve of expected impact versus sample size collapses to
+
+$$
+E[\text{impact} \mid N]
+=
+\mu \Phi(a)
++
+\frac{\tau^2}{\sqrt{\tau^2+s_\lambda^2}}
+\phi(a),
+\qquad
+a=
+\frac{\mu-S(N)}{\sqrt{\tau^2+s_\lambda^2}}.
+$$
+
+The only difference across rules is the constant $p$ embedded inside $S(N)$. Everything else is identical.
+
+```{r final-comparison}
+#| fig-cap: "Simulated (open markers) and closed-form analytic (black lines) expected impact for all three decision rules. The red horizontal line is the Clairvoyant upper bound. Prior is $\\operatorname{Normal}(0, 0.05^2)$, $\\sigma = 0.5$, equal allocation."
 lns <- seq(2, 5, 0.25)
 ns  <- 10^lns
+
+sim_prob <- sapply(ns, \(x) sim_decisions(n = x))
+sim_ci   <- sapply(ns, \(x) sim_decisions_ci(n = x))
+sim_M    <- sapply(ns, \(x) sim_decisions_M(n = x))
 
 closed_prob <- sapply(ns, \(x) closedform_decisions(n = x))
 closed_ci   <- sapply(ns, \(x) closedform_decisions_ci(n = x))
 closed_M    <- sapply(ns, \(x) closedform_decisions_M(n = x))
 
-# Clairvoyant limit: se_lift -> 0, threshold -> 0, so E[lambda * 1(lambda > 0)]
 clairvoyant <- closedform_impact_from_crit(lambda_crit = 0, se_lift = 0)
 
-ylim <- range(0, closed_prob, closed_ci, closed_M, clairvoyant)
+ylim <- range(0, sim_prob, sim_ci, sim_M, closed_prob, closed_ci, closed_M, clairvoyant)
 
-plot(lns, closed_prob, type = 'l', lwd = 2, lty = 1,
+plot(lns, sim_prob, type = 'p', pch = 1, col = 'black',
      xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n', ylim = ylim)
 axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
 grid()
-lines(lns, closed_ci, lwd = 2, lty = 2)
-lines(lns, closed_M,  lwd = 2, lty = 3)
+points(lns, sim_ci, pch = 2, col = 'black')
+points(lns, sim_M,  pch = 0, col = 'black')
+lines(lns, closed_prob, col = 'black', lwd = 2, lty = 1)
+lines(lns, closed_ci,   col = 'black', lwd = 2, lty = 2)
+lines(lns, closed_M,    col = 'black', lwd = 2, lty = 3)
 abline(h = clairvoyant, col = 'red', lwd = 2)
 legend('bottomright',
        legend = c(
          expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
-         expression("95% CI for " * lambda > 0),
+         expression("95% CI"),
          expression("M > 0"),
          "Clairvoyant"
        ),
-       col = c('black', 'black', 'black', 'red'),
-       lty = c(1, 2, 3, 1), lwd = 2)
+       pch  = c(1,  2,  0,  NA),
+       lty  = c(1,  2,  3,  1),
+       col  = c('black', 'black', 'black', 'red'),
+       lwd  = 2, cex = 0.8)
 ```
-
-
-  
