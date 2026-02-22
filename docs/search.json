@@ -312,7 +312,7 @@
     "href": "posts/2026-02-20-time/index.html",
     "title": "How Long To Run an A/B Test as a Bayesian",
     "section": "",
-    "text": "Important\n\n\n\nThis blog post is inspired, almost entirely, by Tyler Buffington’s excellent statistics reading group presentation today at Datadog on the value of information in A/B testing. The ideas presented here are mainly his, I’ve just gone ahead and done a little more math. I’ve also relied a lot on AI to help me get through some of the math. I can’t remember all the tricks there are for manipulating expectations and bivariate normals, and so AI as been helpful here. In accordance with my AI page, all writing is in my own voice and I have used AI extensilvey to wite simulation code."
+    "text": "Important\n\n\n\nThis blog post is inspired, almost entirely, by Tyler Buffington’s excellent statistics reading group presentation today at Datadog on the value of information in A/B testing. The ideas presented here are mainly his, I’ve just gone ahead and done a little more math. I’ve also relied a lot on AI to help me get through some of the math. I can’t remember all the tricks there are for manipulating expectations and bivariate normals, and so AI as been helpful here. In accordance with my AI page, all writing is in my own voice and I have used AI extensively to write simulation code."
   },
   {
     "objectID": "posts/2026-02-20-time/index.html#introduction",
