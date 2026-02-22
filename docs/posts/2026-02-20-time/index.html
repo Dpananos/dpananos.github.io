@@ -305,7 +305,7 @@ Important
 <p><span class="math display">\[a = \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \&gt;.\]</span></p>
 <p>Substituting <span class="math inline">\(S(N)\)</span> back into our expression for <span class="math inline">\(a\)</span> gives a fully analytic expression for expected impact as a function of sample size</p>
 <p><span class="math display">\[E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)\]</span></p>
-<p>As a corollary, we can obtain the <strong>Clairvoyant impact</strong> (the impact with perfect information). As <span class="math inline">\(N \to \infty\)</span>, the sampling variance <span class="math inline">\(s_\lambda^2 \to 0\)</span>. In this limit, <span class="math inline">\(S(N) \to 0\)</span> and <span class="math inline">\(\omega \to \tau\)</span>. The expression collapses to the mean of a folded or truncated normal distribution:</p>
+<p>As a corollary, we can obtain the <strong>Clairvoyant impact</strong> (the impact with perfect information). As <span class="math inline">\(N \to \infty\)</span>, the sampling variance <span class="math inline">\(s_\lambda^2 \to 0\)</span>. In this limit, <span class="math inline">\(S(N) \to 0\)</span> and so the expression collapses to the mean of a folded or truncated normal distribution</p>
 <p><span class="math display">\[E[\text{Clairvoyant impact}] = \mu \Phi\left( \frac{\mu}{\tau} \right) + \tau \phi\left( \frac{\mu}{\tau} \right)\]</span></p>
 <div class="cell">
 <div class="cell-output-display">

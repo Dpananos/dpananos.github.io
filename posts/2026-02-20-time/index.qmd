@@ -298,7 +298,7 @@ Substituting $S(N)$ back into our expression for $a$ gives a fully analytic expr
 
 $$E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)$$
 
-As a corollary, we can obtain the **Clairvoyant impact** (the impact with perfect information). As $N \to \infty$, the sampling variance $s_\lambda^2 \to 0$. In this limit, $S(N) \to 0$ and $\omega \to \tau$. The expression collapses to the mean of a folded or truncated normal distribution:
+As a corollary, we can obtain the **Clairvoyant impact** (the impact with perfect information). As $N \to \infty$, the sampling variance $s_\lambda^2 \to 0$. In this limit, $S(N) \to 0$ and so the expression collapses to the mean of a folded or truncated normal distribution
 
 $$E[\text{Clairvoyant impact}] = \mu \Phi\left( \frac{\mu}{\tau} \right) + \tau \phi\left( \frac{\mu}{\tau} \right)$$
 
@@ -342,4 +342,5 @@ legend('bottomright',
        col  = c('black', 'black', 'black', 'red'),
        lwd  = 2, cex = 0.8)
 ```
+
 
