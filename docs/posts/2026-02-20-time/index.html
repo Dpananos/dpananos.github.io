@@ -215,7 +215,19 @@ window.Quarto = {
 
 
 
-<p><strong>Disclaimer</strong>: This blog post is inspired, almost entirely, by Tyler Buffington’s <em>excellent</em> statistics reading group presentation today at Datadog on the value of information in A/B testing. The ideas presented here are mainly his, I’ve just gone ahead and done a little more math (but not much more).</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This blog post is inspired, almost entirely, by Tyler Buffington’s <em>excellent</em> statistics reading group presentation today at Datadog on the value of information in A/B testing. The ideas presented here are mainly his, I’ve just gone ahead and done a little more math. I’ve also relied a lot on AI to help me get through some of the math. I can’t remember all the tricks there are for manipulating expectations and bivariate normals, and so AI as been helpful here. In accordance with my AI page, all writing is in my own voice and I have used AI extensilvey to wite simulation code.</p>
+</div>
+</div>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this post, I discuss decision criteria for Bayesian A/B testing and a way to think about experiment run times for Bayesian A/B tests. I’ll also present some analytic results that can help us avoid doing simulations in practice at the cost of some mild assumptions.</p>
@@ -287,11 +299,11 @@ window.Quarto = {
 <p><span class="math display">\[E[\text{impact} \mid N] = E[\lambda \cdot \mathbf{1}\{\hat \lambda &gt; S(N)\}]\]</span></p>
 <p>Under our model, the joint distribution of the true effect and the observed effect is bivariate normal:</p>
 <p><span class="math display">\[\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 &amp; \tau^2 \\ \tau^2 &amp; \tau^2 + s_\lambda^2 \end{pmatrix} \right)\]</span></p>
-<p>Define <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span> as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of <span class="math inline">\(\lambda\)</span> over the truncation <span class="math inline">\(\hat \lambda &gt; S(N)\)</span> is:</p>
-<p><span class="math display">\[E[\lambda \cdot \mathbf{1}(\hat \lambda &gt; S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a)\]</span></p>
-<p>where the standardized distance <span class="math inline">\(a\)</span> is:</p>
-<p><span class="math display">\[a = \frac{\mu - S(N)}{\omega}\]</span></p>
-<p>Substituting <span class="math inline">\(S(N)\)</span> back into our expression for <span class="math inline">\(a\)</span> gives a fully analytic expression for expected impact as a function of sample size, valid for any prior mean <span class="math inline">\(\mu\)</span> and prior variance <span class="math inline">\(\tau^2\)</span>:</p>
+<p>Define <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span> as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of <span class="math inline">\(\lambda\)</span> over the truncation <span class="math inline">\(\hat \lambda &gt; S(N)\)</span> is</p>
+<p><span class="math display">\[E[\lambda \cdot \mathbf{1}(\hat \lambda &gt; S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a) \&gt;.\]</span></p>
+<p>Here, <span class="math inline">\(a\)</span> is</p>
+<p><span class="math display">\[a = \frac{\mu - S(N)}{\omega} \&gt;.\]</span></p>
+<p>Substituting <span class="math inline">\(S(N)\)</span> back into our expression for <span class="math inline">\(a\)</span> gives a fully analytic expression for expected impact as a function of sample size</p>
 <p><span class="math display">\[E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)\]</span></p>
 <p>As a corollary, we can obtain the <strong>Clairvoyant impact</strong> (the impact with perfect information). As <span class="math inline">\(N \to \infty\)</span>, the sampling variance <span class="math inline">\(s_\lambda^2 \to 0\)</span>. In this limit, <span class="math inline">\(S(N) \to 0\)</span> and <span class="math inline">\(\omega \to \tau\)</span>. The expression collapses to the mean of a folded or truncated normal distribution:</p>
 <p><span class="math display">\[E[\text{Clairvoyant impact}] = \mu \Phi\left( \frac{\mu}{\tau} \right) + \tau \phi\left( \frac{\mu}{\tau} \right)\]</span></p>

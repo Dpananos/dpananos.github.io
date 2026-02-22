@@ -10,7 +10,9 @@ draft: false
 cache: false
 ---
 
-**Disclaimer**: This blog post is inspired, almost entirely, by Tyler Buffington's _excellent_ statistics reading group presentation today at Datadog on the value of information in A/B testing.  The ideas presented here are mainly his, I've just gone ahead and done a little more math (but not much more).  
+::: {.callout-important}
+This blog post is inspired, almost entirely, by Tyler Buffington's _excellent_ statistics reading group presentation today at Datadog on the value of information in A/B testing.  The ideas presented here are mainly his, I've just gone ahead and done a little more math.  I've also relied a lot on AI to help me get through some of the math.  I can't remember all the tricks there are for manipulating expectations and bivariate normals, and so AI as been helpful here.  In accordance with my AI page, all writing is in my own voice and I have used AI extensilvey to wite simulation code.
+:::
 
 
 ## Introduction
@@ -284,15 +286,15 @@ Under our model, the joint distribution of the true effect and the observed effe
 
 $$\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 & \tau^2 \\ \tau^2 & \tau^2 + s_\lambda^2 \end{pmatrix} \right)$$
 
-Define $\omega^2 = \tau^2 + s_\lambda^2$ as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of $\lambda$ over the truncation $\hat \lambda > S(N)$ is:
+Define $\omega^2 = \tau^2 + s_\lambda^2$ as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of $\lambda$ over the truncation $\hat \lambda > S(N)$ is
 
-$$E[\lambda \cdot \mathbf{1}(\hat \lambda > S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a)$$
+$$E[\lambda \cdot \mathbf{1}(\hat \lambda > S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a) \>.$$
 
-where the standardized distance $a$ is:
+Here,  $a$ is
 
-$$a = \frac{\mu - S(N)}{\omega}$$
+$$a = \frac{\mu - S(N)}{\omega} \>.$$
 
-Substituting $S(N)$ back into our expression for $a$ gives a fully analytic expression for expected impact as a function of sample size, valid for any prior mean $\mu$ and prior variance $\tau^2$:
+Substituting $S(N)$ back into our expression for $a$ gives a fully analytic expression for expected impact as a function of sample size
 
 $$E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)$$
 
@@ -340,3 +342,4 @@ legend('bottomright',
        col  = c('black', 'black', 'black', 'red'),
        lwd  = 2, cex = 0.8)
 ```
+
