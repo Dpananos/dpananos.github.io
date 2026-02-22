@@ -275,7 +275,7 @@ With some algebra, we can express this inequality in terms of the observed lift 
 
 $$S(N) = s_\lambda^2 \left[ \Phi^{-1}(p) \sqrt{\frac{1}{\tau^2} + \frac{1}{s_\lambda^2}} - \frac{\mu}{\tau^2} \right] \lt \hat \lambda$$
 
-Note that $s_\lambda^2$ implicitly relies on $N$ via the standard error of the lift, $s_\lambda^2$.  Now, technically, $s^2_\lambda$ relies on the estimated lift $\hat \lambda$, but in practice the lifts are small (we don't routinely detect enormous hurt/help to the product).  This seems to be the prevailing opinion in the A/B testing literature and community, and so I'm going to hand wave this detail away.
+Note that $s_\lambda^2$ implicitly relies on $N$ via the standard errors for treatment and control.  Now, technically, $s^2_\lambda$ relies on the estimated lift $\hat \lambda$, but in practice the lifts are small (we don't routinely detect enormous hurt/help to the product).  This seems to be the prevailing opinion in the A/B testing literature and community, and so I'm going to hand wave this detail away.
 
 
 We want to calculate the expected true impact $\lambda$ given that we observe a signal $\hat \lambda$ strong enough to ship:
