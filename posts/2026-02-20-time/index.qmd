@@ -87,11 +87,13 @@ sim_posterior <- function(n, prior_mean = 0, prior_sd = 0.05,
   list(true_lift = true_lift, M = M, S = S)
 }
 
-# SE of lift via delta method (approximation at lambda ~ 0)
-compute_se_lift <- function(n, control_mean = 2.0, prob_treatment = 0.5, sigma = 0.5) {
+# SE of lift via delta method for g(T, C) = T/C - 1
+# evaluated at (E[T], E[C]) = (control_mean * (1 + prior_mean), control_mean)
+compute_se_lift <- function(n, prior_mean = 0, control_mean = 2.0, prob_treatment = 0.5, sigma = 0.5) {
   se_c <- sigma / sqrt(n * (1 - prob_treatment))
   se_t <- sigma / sqrt(n * prob_treatment)
-  sqrt((se_t^2 + se_c^2) / control_mean^2)
+  treatment_mean <- control_mean * (1 + prior_mean)
+  sqrt(se_t^2 / control_mean^2 + se_c^2 * treatment_mean^2 / control_mean^4)
 }
 
 # Analytic expected impact given a critical hurdle lambda_crit
@@ -125,17 +127,17 @@ sim_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.
 
 analytic_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
                                 control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- qnorm(cutoff) * se_lift^2 * post_sd_inv
+  lambda_crit <- se_lift^2 * (qnorm(cutoff) * post_sd_inv - prior_mean / prior_sd^2)
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 closedform_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
                                   control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- qnorm(cutoff) * se_lift^2 * post_sd_inv
+  lambda_crit <- se_lift^2 * (qnorm(cutoff) * post_sd_inv - prior_mean / prior_sd^2)
   closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
@@ -152,17 +154,17 @@ sim_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd
 
 analytic_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
                                    control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- qnorm((1 + ci_level) / 2) * se_lift^2 * post_sd_inv
+  lambda_crit <- se_lift^2 * (qnorm((1 + ci_level) / 2) * post_sd_inv - prior_mean / prior_sd^2)
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 closedform_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
                                      control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
-  lambda_crit <- qnorm((1 + ci_level) / 2) * se_lift^2 * post_sd_inv
+  lambda_crit <- se_lift^2 * (qnorm((1 + ci_level) / 2) * post_sd_inv - prior_mean / prior_sd^2)
   closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
@@ -178,14 +180,14 @@ sim_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
 
 analytic_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
                                   control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
   analytic_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
 
 closedform_decisions_M <- function(n = 5000, prior_mean = 0, prior_sd = 0.05,
                                     control_mean = 2.0, prob_treatment = 0.5) {
-  se_lift     <- compute_se_lift(n, control_mean, prob_treatment)
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
   lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
   closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
 }
@@ -266,133 +268,38 @@ $$ \sqrt{V}\Phi^{-1}(p) \lt M \>. $$
 
 For the three decision rules I've listed above, $p = c$, $p=1-\alpha/2$, and $p=0.5$.  
 
-Now, let's talk about our prior.  The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked).  This allows us to assume that $\mu \approx 0$ and $\left\lvert \hat \lambda \right\rvert \approx 0$.  Given this, we can simplify the inequality a little.  When $\mu = 0$ the posterior mean reduces to $M = V\hat \lambda / s^2_\lambda$, and
 
-$$ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar{y}^2_c}\right) $$
+With some algebra, we can express this inequality in terms of the observed lift $\hat \lambda$, which would be 
 
-Here, $s^2$ is the sampling variance of the treatment or control group (indicated by the subscript)  and $\bar y _c$ is the average from the control group. Note there is an implicit reliance on $N$ here since $s^2 \propto 1/N$. I'm going to indicate reliance on $N$ going forward to make this discussion a little easier.  We can re-write the inequality based only on $\hat \lambda$ as 
+$$S(N) = s_\lambda^2 \left[ \Phi^{-1}(p) \sqrt{\frac{1}{\tau^2} + \frac{1}{s_\lambda^2}} - \frac{\mu}{\tau^2} \right] \lt \hat \lambda$$
 
-$$ S(N) = \Phi^{-1}(p) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda $$
+Note that $s_\lambda^2$ implicitly relies on $N$ via the standard error of the lift, $s_\lambda^2$.  Now, technically, $s^2_\lambda$ relies on the estimated lift $\hat \lambda$, but in practice the lifts are small (we don't routinely detect enormous hurt/help to the product).  This seems to be the prevailing opinion in the A/B testing literature and community, and so I'm going to hand wave this detail away.
 
-With this inequality in hand, we can recover the expectation of the Clairvoyant distribution and obtain a closed form expression for the expected impact as a function of $N$. We want to know
 
-$$
-E[\text{impact} \mid N]
-=
-E\!\left[\lambda \,\mathbf 1\{\hat\lambda > S(N)\}\right].
-$$
+We want to calculate the expected true impact $\lambda$ given that we observe a signal $\hat \lambda$ strong enough to ship:
 
-Under the normal–normal model we have
+$$E[\text{impact} \mid N] = E[\lambda \cdot \mathbf{1}\{\hat \lambda > S(N)\}]$$
 
-$$
-\lambda \sim \mathcal N(\mu,\tau^2),
-\qquad
-\hat\lambda \mid \lambda
-\sim
-\mathcal N(\lambda, s_\lambda^2).
-$$
+Under our model, the joint distribution of the true effect and the observed effect is bivariate normal:
 
-Since everything is Gaussian, we can rewrite the shipping event as
+$$\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 & \tau^2 \\ \tau^2 & \tau^2 + s_\lambda^2 \end{pmatrix} \right)$$
 
-$$
-\hat\lambda > S(N)
-\;\;\Longleftrightarrow\;\;
-\lambda - Y > 0,
-$$
+Define $\omega^2 = \tau^2 + s_\lambda^2$ as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of $\lambda$ over the truncation $\hat \lambda > S(N)$ is:
 
-where
+$$E[\lambda \cdot \mathbf{1}(\hat \lambda > S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a)$$
 
-$$
-Y \sim \mathcal N(S(N), s_\lambda^2),
-\qquad
-Y \perp \lambda.
-$$
+where the standardized distance $a$ is:
 
-Define
+$$a = \frac{\mu - S(N)}{\omega}$$
 
-$$
-D = \lambda - Y.
-$$
+Substituting $S(N)$ back into our expression for $a$ gives a fully analytic expression for expected impact as a function of sample size, valid for any prior mean $\mu$ and prior variance $\tau^2$:
 
-Then
+$$E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)$$
 
-$$
-D \sim \mathcal N(\mu - S(N),\, \omega^2),
-\qquad
-\omega^2 = \tau^2 + s_\lambda^2.
-$$
+As a corollary, we can obtain the **Clairvoyant impact** (the impact with perfect information). As $N \to \infty$, the sampling variance $s_\lambda^2 \to 0$. In this limit, $S(N) \to 0$ and $\omega \to \tau$. The expression collapses to the mean of a folded or truncated normal distribution:
 
-So the expected impact becomes
+$$E[\text{Clairvoyant impact}] = \mu \Phi\left( \frac{\mu}{\tau} \right) + \tau \phi\left( \frac{\mu}{\tau} \right)$$
 
-$$
-E[\lambda \mathbf 1(D>0)].
-$$
-
-This is a standard bivariate normal moment. Using linear projection geometry,
-
-$$
-E[\lambda \mathbf 1(D>0)]
-=
-\mu \Phi(a)
-+
-\frac{\tau^2}{\omega}\phi(a),
-$$
-
-where
-
-$$
-a
-=
-\frac{\mu - S(N)}{\omega},
-\qquad
-\omega^2=\tau^2+s_\lambda^2.
-$$
-
-Because we assumed $\mu \approx 0$, this simplifies to
-
-$$
-E[\text{impact} \mid N]
-=
-\frac{\tau^2}{\omega}
-\phi\!\left(
-\frac{-S(N)}{\omega}
-\right).
-$$
-
-Substituting the decision threshold
-
-$$
-S(N)
-=
-\Phi^{-1}(p)\, s_\lambda^2
-\sqrt{\frac{1}{s_\lambda^2}+\frac{1}{\tau^2}},
-$$
-
-gives a fully analytic expression for expected impact as a function of $N$ (through $s_\lambda^2 \propto 1/N$).
-
-Thus, for any of the three decision rules, the entire curve of expected impact versus sample size collapses to
-
-$$
-E[\text{impact} \mid N]
-=
-\mu \Phi(a)
-+
-\frac{\tau^2}{\sqrt{\tau^2+s_\lambda^2}}
-\phi(a),
-\qquad
-a=
-\frac{\mu-S(N)}{\sqrt{\tau^2+s_\lambda^2}}.
-$$
-
-The only difference across rules is the constant $p$ embedded inside $S(N)$. As a corollary, we can obtain the expectation of the Clairvoyant distribution by noting that $S(N) \to 0$ as $N \to \infty$, so $\omega \to \tau$ and $a \to \mu/\tau$.  Hence the expected impact with perfect information is
-
-$$
-E[\text{Clairvoyant impact}]
-=
-\mu \Phi\!\left(\frac{\mu}{\tau}\right)
-+
-\tau\,\phi\!\left(\frac{\mu}{\tau}\right).
-$$
 
 ```{r final-comparison}
 #| fig-cap: "Simulated (open markers) and closed-form analytic (black lines) expected impact for all three decision rules. The red horizontal line is the Clairvoyant upper bound. Prior is $\\operatorname{Normal}(0, 0.05^2)$, $\\sigma = 0.5$, equal allocation."

@@ -280,103 +280,21 @@ window.Quarto = {
 <p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules are of the form</p>
 <p><span class="math display">\[ \sqrt{V}\Phi^{-1}(p) \lt M \&gt;. \]</span></p>
 <p>For the three decision rules I’ve listed above, <span class="math inline">\(p = c\)</span>, <span class="math inline">\(p=1-\alpha/2\)</span>, and <span class="math inline">\(p=0.5\)</span>.</p>
-<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <span class="math inline">\(\mu \approx 0\)</span> and <span class="math inline">\(\left\lvert \hat \lambda \right\rvert \approx 0\)</span>. Given this, we can simplify the inequality a little. When <span class="math inline">\(\mu = 0\)</span> the posterior mean reduces to <span class="math inline">\(M = V\hat \lambda / s^2_\lambda\)</span>, and</p>
-<p><span class="math display">\[ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar{y}^2_c}\right) \]</span></p>
-<p>Here, <span class="math inline">\(s^2\)</span> is the sampling variance of the treatment or control group (indicated by the subscript) and <span class="math inline">\(\bar y _c\)</span> is the average from the control group. Note there is an implicit reliance on <span class="math inline">\(N\)</span> here since <span class="math inline">\(s^2 \propto 1/N\)</span>. I’m going to indicate reliance on <span class="math inline">\(N\)</span> going forward to make this discussion a little easier. We can re-write the inequality based only on <span class="math inline">\(\hat \lambda\)</span> as</p>
-<p><span class="math display">\[ S(N) = \Phi^{-1}(p) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \]</span></p>
-<p>With this inequality in hand, we can recover the expectation of the Clairvoyant distribution and obtain a closed form expression for the expected impact as a function of <span class="math inline">\(N\)</span>. We want to know</p>
-<p><span class="math display">\[
-E[\text{impact} \mid N]
-=
-E\!\left[\lambda \,\mathbf 1\{\hat\lambda &gt; S(N)\}\right].
-\]</span></p>
-<p>Under the normal–normal model we have</p>
-<p><span class="math display">\[
-\lambda \sim \mathcal N(\mu,\tau^2),
-\qquad
-\hat\lambda \mid \lambda
-\sim
-\mathcal N(\lambda, s_\lambda^2).
-\]</span></p>
-<p>Since everything is Gaussian, we can rewrite the shipping event as</p>
-<p><span class="math display">\[
-\hat\lambda &gt; S(N)
-\;\;\Longleftrightarrow\;\;
-\lambda - Y &gt; 0,
-\]</span></p>
-<p>where</p>
-<p><span class="math display">\[
-Y \sim \mathcal N(S(N), s_\lambda^2),
-\qquad
-Y \perp \lambda.
-\]</span></p>
-<p>Define</p>
-<p><span class="math display">\[
-D = \lambda - Y.
-\]</span></p>
-<p>Then</p>
-<p><span class="math display">\[
-D \sim \mathcal N(\mu - S(N),\, \omega^2),
-\qquad
-\omega^2 = \tau^2 + s_\lambda^2.
-\]</span></p>
-<p>So the expected impact becomes</p>
-<p><span class="math display">\[
-E[\lambda \mathbf 1(D&gt;0)].
-\]</span></p>
-<p>This is a standard bivariate normal moment. Using linear projection geometry,</p>
-<p><span class="math display">\[
-E[\lambda \mathbf 1(D&gt;0)]
-=
-\mu \Phi(a)
-+
-\frac{\tau^2}{\omega}\phi(a),
-\]</span></p>
-<p>where</p>
-<p><span class="math display">\[
-a
-=
-\frac{\mu - S(N)}{\omega},
-\qquad
-\omega^2=\tau^2+s_\lambda^2.
-\]</span></p>
-<p>Because we assumed <span class="math inline">\(\mu \approx 0\)</span>, this simplifies to</p>
-<p><span class="math display">\[
-E[\text{impact} \mid N]
-=
-\frac{\tau^2}{\omega}
-\phi\!\left(
-\frac{-S(N)}{\omega}
-\right).
-\]</span></p>
-<p>Substituting the decision threshold</p>
-<p><span class="math display">\[
-S(N)
-=
-\Phi^{-1}(p)\, s_\lambda^2
-\sqrt{\frac{1}{s_\lambda^2}+\frac{1}{\tau^2}},
-\]</span></p>
-<p>gives a fully analytic expression for expected impact as a function of <span class="math inline">\(N\)</span> (through <span class="math inline">\(s_\lambda^2 \propto 1/N\)</span>).</p>
-<p>Thus, for any of the three decision rules, the entire curve of expected impact versus sample size collapses to</p>
-<p><span class="math display">\[
-E[\text{impact} \mid N]
-=
-\mu \Phi(a)
-+
-\frac{\tau^2}{\sqrt{\tau^2+s_\lambda^2}}
-\phi(a),
-\qquad
-a=
-\frac{\mu-S(N)}{\sqrt{\tau^2+s_\lambda^2}}.
-\]</span></p>
-<p>The only difference across rules is the constant <span class="math inline">\(p\)</span> embedded inside <span class="math inline">\(S(N)\)</span>. As a corollary, we can obtain the expectation of the Clairvoyant distribution by noting that <span class="math inline">\(S(N) \to 0\)</span> as <span class="math inline">\(N \to \infty\)</span>, so <span class="math inline">\(\omega \to \tau\)</span> and <span class="math inline">\(a \to \mu/\tau\)</span>. Hence the expected impact with perfect information is</p>
-<p><span class="math display">\[
-E[\text{Clairvoyant impact}]
-=
-\mu \Phi\!\left(\frac{\mu}{\tau}\right)
-+
-\tau\,\phi\!\left(\frac{\mu}{\tau}\right).
-\]</span></p>
+<p>With some algebra, we can express this inequality in terms of the observed lift <span class="math inline">\(\hat \lambda\)</span>, which would be</p>
+<p><span class="math display">\[S(N) = s_\lambda^2 \left[ \Phi^{-1}(p) \sqrt{\frac{1}{\tau^2} + \frac{1}{s_\lambda^2}} - \frac{\mu}{\tau^2} \right] \lt \hat \lambda\]</span></p>
+<p>Note that <span class="math inline">\(s_\lambda^2\)</span> implicitly relies on <span class="math inline">\(N\)</span> via the standard error of the lift, <span class="math inline">\(s_\lambda^2\)</span>. Now, technically, <span class="math inline">\(s^2_\lambda\)</span> relies on the estimated lift <span class="math inline">\(\hat \lambda\)</span>, but in practice the lifts are small (we don’t routinely detect enormous hurt/help to the product). This seems to be the prevailing opinion in the A/B testing literature and community, and so I’m going to hand wave this detail away.</p>
+<p>We want to calculate the expected true impact <span class="math inline">\(\lambda\)</span> given that we observe a signal <span class="math inline">\(\hat \lambda\)</span> strong enough to ship:</p>
+<p><span class="math display">\[E[\text{impact} \mid N] = E[\lambda \cdot \mathbf{1}\{\hat \lambda &gt; S(N)\}]\]</span></p>
+<p>Under our model, the joint distribution of the true effect and the observed effect is bivariate normal:</p>
+<p><span class="math display">\[\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 &amp; \tau^2 \\ \tau^2 &amp; \tau^2 + s_\lambda^2 \end{pmatrix} \right)\]</span></p>
+<p>Define <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span> as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of <span class="math inline">\(\lambda\)</span> over the truncation <span class="math inline">\(\hat \lambda &gt; S(N)\)</span> is:</p>
+<p><span class="math display">\[E[\lambda \cdot \mathbf{1}(\hat \lambda &gt; S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a)\]</span></p>
+<p>where the standardized distance <span class="math inline">\(a\)</span> is:</p>
+<p><span class="math display">\[a = \frac{\mu - S(N)}{\omega}\]</span></p>
+<p>Substituting <span class="math inline">\(S(N)\)</span> back into our expression for <span class="math inline">\(a\)</span> gives a fully analytic expression for expected impact as a function of sample size, valid for any prior mean <span class="math inline">\(\mu\)</span> and prior variance <span class="math inline">\(\tau^2\)</span>:</p>
+<p><span class="math display">\[E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)\]</span></p>
+<p>As a corollary, we can obtain the <strong>Clairvoyant impact</strong> (the impact with perfect information). As <span class="math inline">\(N \to \infty\)</span>, the sampling variance <span class="math inline">\(s_\lambda^2 \to 0\)</span>. In this limit, <span class="math inline">\(S(N) \to 0\)</span> and <span class="math inline">\(\omega \to \tau\)</span>. The expression collapses to the mean of a folded or truncated normal distribution:</p>
+<p><span class="math display">\[E[\text{Clairvoyant impact}] = \mu \Phi\left( \frac{\mu}{\tau} \right) + \tau \phi\left( \frac{\mu}{\tau} \right)\]</span></p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
