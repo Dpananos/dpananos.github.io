@@ -35,7 +35,7 @@ Whereas a Frequentist would make their ship/no-ship decision based on statistica
 
 * Ship if $c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)$.  This is sometimes called "Probability to beat control".
 * Ship if $0 \lt M - z_{1-\alpha/2}\sqrt{V}$.  This is like a Bayesian p-value being less than $\alpha$.
-* Ship if $E[\mathcal{L}(\lambda)] < \epsilon$.  Here $\mathcal{L}$ is a loss function, and so the decision is based on expected loss being sufficiently small for the decision to ship the treatment.  In what follows, I will use $\mathcal{L}(\lambda) = \max(-\lambda, 0)$.
+* Ship if $0 \lt M$. Ship whenever the posterior mean is positive.
 
 Now, these are just a few ways to make decisions (they are certainly not exhaustive).  Prior to Tyler's talk, I didn't really have a great way to answer how long an A/B test should take (save some ramblings about EVSI [here](../2024-09-01-ab-length/index.qmd)) were you to use a Bayesian analysis method. However, with these details, I think I can now give an answer.
 
@@ -201,16 +201,15 @@ analytic_decisions_ci <- function(n = 5000,
 }
 
 # =============================================================================
-# Decision Rule 3: Ship if expected loss < epsilon
+# Decision Rule 3: Ship if M > 0
 # =============================================================================
 
-sim_decisions_loss <- function(n = 5000,
-                               epsilon = 0.001,
-                               prior_mean = 0,
-                               prior_sd = 0.05,
-                               control_mean = 2.0,
-                               prob_treatment = 0.5,
-                               nsims = 100000) {
+sim_decisions_M <- function(n = 5000,
+                             prior_mean = 0,
+                             prior_sd = 0.05,
+                             control_mean = 2.0,
+                             prob_treatment = 0.5,
+                             nsims = 100000) {
 
   # --- 1. Standard Errors ---
   sigma <- 0.5
@@ -228,23 +227,19 @@ sim_decisions_loss <- function(n = 5000,
 
   V <- 1 / (1 / estimated_lift_se^2 + 1 / prior_sd^2)
   M <- V * (estimated_lift / estimated_lift_se^2 + prior_mean / prior_sd^2)
-  S <- sqrt(V)
 
   # --- 4. Decision Rule ---
-  # Ship if E[max(-lambda, 0) | data] < epsilon
-  # Expected loss = S * dnorm(M/S) - M * pnorm(-M/S)
-  expected_loss <- S * dnorm(M / S) - M * pnorm(-M / S)
-  impact <- ifelse(expected_loss < epsilon, true_lift, 0)
+  # Ship if posterior mean M > 0
+  impact <- ifelse(M > 0, true_lift, 0)
 
   mean(impact)
 }
 
-analytic_decisions_loss <- function(n = 5000,
-                                    epsilon = 0.001,
-                                    prior_mean = 0,
-                                    prior_sd = 0.05,
-                                    control_mean = 2.0,
-                                    prob_treatment = 0.5) {
+analytic_decisions_M <- function(n = 5000,
+                                  prior_mean = 0,
+                                  prior_sd = 0.05,
+                                  control_mean = 2.0,
+                                  prob_treatment = 0.5) {
 
   # --- 1. Standard Errors ---
   sigma <- 0.5
@@ -255,19 +250,9 @@ analytic_decisions_loss <- function(n = 5000,
   se_lift <- sqrt((se_t^2 + se_c^2) / control_mean^2)
 
   # --- 2. Critical Hurdle ---
-  # Posterior variance (does not depend on observed data)
-  V <- 1 / (1 / se_lift^2 + 1 / prior_sd^2)
-  S <- sqrt(V)
-
-  # Find M* where expected loss = epsilon via root-finding
-  # L(M) = S * dnorm(M/S) - M * pnorm(-M/S) is strictly decreasing in M
-  loss_fn <- function(M_val) {
-    S * dnorm(M_val / S) - M_val * pnorm(-M_val / S) - epsilon
-  }
-  M_star <- uniroot(loss_fn, lower = -5 * S, upper = 5 * S)$root
-
-  # Back out lambda_crit from M*
-  lambda_crit <- (M_star / V - prior_mean / prior_sd^2) * se_lift^2
+  # M > 0 iff hat_lambda > -prior_mean * se_lift^2 / prior_sd^2
+  # With prior_mean = 0, lambda_crit = 0
+  lambda_crit <- -prior_mean * se_lift^2 / prior_sd^2
 
   # --- 3. Expected Impact ---
   # E[impact] = integral of delta * P(ship | delta) * prior(delta)
@@ -403,11 +388,11 @@ legend('bottomright',
        col = c(col_sim, col_ana), lwd = 2)
 ```
 
-This sort of exercise can be done for the remaining two decision rules.  While I leave that exercise to the reader (or perhaps to their AI), I will leave you with just a plot comparing the analytic formulae and the simulations.
+This sort of exercise can be done for the remaining two decision rules.  Shown below is a plot comparing the analytic formulae and simulations for all three decision rules.
 
 
 ```{r comparisons}
-#| fig-cap: "Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, $c = 0.95$), 95% credible interval excluding zero (dashed), and expected loss (dotted, $\\epsilon = 0.001$). The expected loss rule is the most permissive, shipping more often and yielding higher average impact at each sample size."
+#| fig-cap: "Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, $c = 0.95$), 95% credible interval excluding zero (dashed), and M > 0 (dotted, ship if posterior mean is positive). The M > 0 rule is the most permissive, shipping more often and yielding higher average impact at each sample size."
 lns <- seq(2, 5, 0.25)
 ns <- 10^lns
 
@@ -416,20 +401,20 @@ sim_prob      <- sapply(ns, \(x) sim_decisions(n = x))
 analytic_prob <- sapply(ns, \(x) analytic_decisions(n = x))
 sim_ci        <- sapply(ns, \(x) sim_decisions_ci(n = x))
 analytic_ci   <- sapply(ns, \(x) analytic_decisions_ci(n = x))
-sim_loss      <- sapply(ns, \(x) sim_decisions_loss(n = x))
-analytic_loss <- sapply(ns, \(x) analytic_decisions_loss(n = x))
+sim_M         <- sapply(ns, \(x) sim_decisions_M(n = x))
+analytic_M    <- sapply(ns, \(x) analytic_decisions_M(n = x))
 
 # Smooth simulation curves
 f_prob <- loess(sim_prob ~ lns)
 f_ci   <- loess(sim_ci ~ lns)
-f_loss <- loess(sim_loss ~ lns)
+f_M    <- loess(sim_M ~ lns)
 
 # Colors: red = simulation, blue = analytic
-# Linetype: solid = P(lift>0) rule, dashed = CI rule, dotted = expected loss
+# Linetype: solid = P(lift>0) rule, dashed = CI rule, dotted = M > 0
 col_sim <- rgb(1, 0, 0, 0.75)
 col_ana <- rgb(0, 0, 1, 0.75)
 
-ylim <- range(0, analytic_prob, analytic_ci, analytic_loss)
+ylim <- range(0, analytic_prob, analytic_ci, analytic_M)
 
 plot(lns, predict(f_prob), type = 'l', col = col_sim, lwd = 2, lty = 1,
      xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n', ylim = ylim)
@@ -438,15 +423,15 @@ grid()
 lines(lns, analytic_prob, col = col_ana, lwd = 2, lty = 1)
 lines(lns, predict(f_ci),  col = col_sim, lwd = 2, lty = 2)
 lines(lns, analytic_ci,    col = col_ana, lwd = 2, lty = 2)
-lines(lns, predict(f_loss), col = col_sim, lwd = 2, lty = 3)
-lines(lns, analytic_loss,   col = col_ana, lwd = 2, lty = 3)
+lines(lns, predict(f_M),   col = col_sim, lwd = 2, lty = 3)
+lines(lns, analytic_M,     col = col_ana, lwd = 2, lty = 3)
 legend('bottomright',
        legend = c(expression("Simulation, " * P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
                   expression("Analytic, " * P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
                   expression("Simulation, 95% CI for " * lambda > 0),
                   expression("Analytic, 95% CI for " * lambda > 0),
-                  expression("Simulation, E[loss] < " * epsilon),
-                  expression("Analytic, E[loss] < " * epsilon)),
+                  expression("Simulation, M > 0"),
+                  expression("Analytic, M > 0")),
        col = c(col_sim, col_ana, col_sim, col_ana, col_sim, col_ana),
        lty = c(1, 1, 2, 2, 3, 3), lwd = 2)
 ```

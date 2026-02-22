@@ -231,7 +231,7 @@ window.Quarto = {
 <ul>
 <li>Ship if <span class="math inline">\(c \lt \Pr(\lambda \gt 0 \mid \hat \lambda)\)</span>. This is sometimes called “Probability to beat control”.</li>
 <li>Ship if <span class="math inline">\(0 \lt M - z_{1-\alpha/2}\sqrt{V}\)</span>. This is like a Bayesian p-value being less than <span class="math inline">\(\alpha\)</span>.</li>
-<li>Ship if <span class="math inline">\(E[\mathcal{L}(\lambda)] &lt; \epsilon\)</span>. Here <span class="math inline">\(\mathcal{L}\)</span> is a loss function, and so the decision is based on expected loss being sufficiently small for the decision to ship the treatment. In what follows, I will use <span class="math inline">\(\mathcal{L}(\lambda) = \max(-\lambda, 0)\)</span>.</li>
+<li>Ship if <span class="math inline">\(0 \lt M\)</span>. Ship whenever the posterior mean is positive.</li>
 </ul>
 <p>Now, these are just a few ways to make decisions (they are certainly not exhaustive). Prior to Tyler’s talk, I didn’t really have a great way to answer how long an A/B test should take (save some ramblings about EVSI <a href="../../posts/2024-09-01-ab-length/index.html">here</a>) were you to use a Bayesian analysis method. However, with these details, I think I can now give an answer.</p>
 </section>
@@ -262,7 +262,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Below is a plot of the mean of this distribution as a function of sample size, and you can see this limiting behavior quite clearly. The proposal is to base your run time on the expectation of the Clairvoyant distribution. From the plot, running A/B tests too short means the impact is going to be very small on average, but running longer means that (under the prior) you will impact the product more. There comes a point where running the test longer is not helpful, you encounter diminishing returns. This is a nice way to think about run time in my opinion! You know what your average impact would be were you to have perfect information, and you can collect enough samples so that you are sufficiently close to this without wasting time obtaining additional samples. I think that is pretty elegant!</p>
+<p>Below is a plot of the mean of this distribution as a function of sample size, and you can see this limiting behavior quite clearly. The proposal is to base your run time on the expectation of the Clairvoyant distribution. From the plot, running A/B tests too short means the impact is going to be very small on average, but running longer means that (under the prior) you will impact the product more. There comes a point where running the test longer is not helpful because you encounter diminishing returns. This is a nice way to think about run time in my opinion! You know what your average impact would be were you to have perfect information, and you can collect enough samples so that you are sufficiently close to this without wasting time obtaining additional samples. I think that is pretty elegant!</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -302,12 +302,12 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>This sort of exercise can be done for the remaining two decision rules. While I leave that exercise to the reader (or perhaps to their AI), I will leave you with just a plot comparing the analytic formulae and the simulations.</p>
+<p>This sort of exercise can be done for the remaining two decision rules. Shown below is a plot comparing the analytic formulae and simulations for all three decision rules.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, <span class="math inline">\(c = 0.95\)</span>), 95% credible interval excluding zero (dashed), and expected loss (dotted, <span class="math inline">\(\epsilon = 0.001\)</span>). The expected loss rule is the most permissive, shipping more often and yielding higher average impact at each sample size.</figcaption>
+<figcaption>Simulated (red) and analytic (blue) expected impact curves for three decision rules: probability to beat control (solid, <span class="math inline">\(c = 0.95\)</span>), 95% credible interval excluding zero (dashed), and M &gt; 0 (dotted, ship if posterior mean is positive). The M &gt; 0 rule is the most permissive, shipping more often and yielding higher average impact at each sample size.</figcaption>
 <p><img src="index_files/figure-html/comparisons-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
