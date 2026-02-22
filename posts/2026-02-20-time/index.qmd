@@ -286,13 +286,13 @@ Under our model, the joint distribution of the true effect and the observed effe
 
 $$\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 & \tau^2 \\ \tau^2 & \tau^2 + s_\lambda^2 \end{pmatrix} \right)$$
 
-Define $\omega^2 = \tau^2 + s_\lambda^2$ as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of $\lambda$ over the truncation $\hat \lambda > S(N)$ is
+Using the properties of the multivariate normal distribution, the expected value of $\lambda$ over the truncation $\hat \lambda > S(N)$ is
 
-$$E[\lambda \cdot \mathbf{1}(\hat \lambda > S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a) \>.$$
+$$E[\lambda \cdot \mathbf{1}(\hat \lambda > S(N))] = \mu \Phi(a) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi(a) \>.$$
 
 Here,  $a$ is
 
-$$a = \frac{\mu - S(N)}{\omega} \>.$$
+$$a = \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \>.$$
 
 Substituting $S(N)$ back into our expression for $a$ gives a fully analytic expression for expected impact as a function of sample size
 

@@ -299,10 +299,10 @@ Important
 <p><span class="math display">\[E[\text{impact} \mid N] = E[\lambda \cdot \mathbf{1}\{\hat \lambda &gt; S(N)\}]\]</span></p>
 <p>Under our model, the joint distribution of the true effect and the observed effect is bivariate normal:</p>
 <p><span class="math display">\[\begin{pmatrix} \lambda \\ \hat \lambda \end{pmatrix} \sim \mathcal{N} \left( \begin{pmatrix} \mu \\ \mu \end{pmatrix}, \begin{pmatrix} \tau^2 &amp; \tau^2 \\ \tau^2 &amp; \tau^2 + s_\lambda^2 \end{pmatrix} \right)\]</span></p>
-<p>Define <span class="math inline">\(\omega^2 = \tau^2 + s_\lambda^2\)</span> as the total variance of the observed lift. Using the properties of the multivariate normal distribution, the expected value of <span class="math inline">\(\lambda\)</span> over the truncation <span class="math inline">\(\hat \lambda &gt; S(N)\)</span> is</p>
-<p><span class="math display">\[E[\lambda \cdot \mathbf{1}(\hat \lambda &gt; S(N))] = \mu \Phi(a) + \frac{\tau^2}{\omega} \phi(a) \&gt;.\]</span></p>
+<p>Using the properties of the multivariate normal distribution, the expected value of <span class="math inline">\(\lambda\)</span> over the truncation <span class="math inline">\(\hat \lambda &gt; S(N)\)</span> is</p>
+<p><span class="math display">\[E[\lambda \cdot \mathbf{1}(\hat \lambda &gt; S(N))] = \mu \Phi(a) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi(a) \&gt;.\]</span></p>
 <p>Here, <span class="math inline">\(a\)</span> is</p>
-<p><span class="math display">\[a = \frac{\mu - S(N)}{\omega} \&gt;.\]</span></p>
+<p><span class="math display">\[a = \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \&gt;.\]</span></p>
 <p>Substituting <span class="math inline">\(S(N)\)</span> back into our expression for <span class="math inline">\(a\)</span> gives a fully analytic expression for expected impact as a function of sample size</p>
 <p><span class="math display">\[E[\text{impact} \mid N] = \mu \Phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right) + \frac{\tau^2}{\sqrt{\tau^2 + s_\lambda^2}} \phi\left( \frac{\mu - S(N)}{\sqrt{\tau^2 + s_\lambda^2}} \right)\]</span></p>
 <p>As a corollary, we can obtain the <strong>Clairvoyant impact</strong> (the impact with perfect information). As <span class="math inline">\(N \to \infty\)</span>, the sampling variance <span class="math inline">\(s_\lambda^2 \to 0\)</span>. In this limit, <span class="math inline">\(S(N) \to 0\)</span> and <span class="math inline">\(\omega \to \tau\)</span>. The expression collapses to the mean of a folded or truncated normal distribution:</p>
