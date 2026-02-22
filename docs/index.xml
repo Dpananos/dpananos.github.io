@@ -25,7 +25,7 @@
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this post, I discuss decision criteria for Bayesian A/B testing and a way to think about experiment run times for Bayesian A/B tests. I’ll also present some analytic results that can help us avoid doing simulations in practice at the cost of some mild assumptions.</p>
-<p>First, I’ll discuss a little background on some straight forward ways to analyze A/B tests as a Bayesian and discuss a few options for ship/no-ship decision rules for A/B tests. Then, I’ll introduce a way to think about expected impact as a Bayesian, and finally share some analytic results.</p>
+<p>First, I’ll discuss a little background on some straightforward ways to analyze A/B tests as a Bayesian and discuss a few options for ship/no-ship decision rules for A/B tests. Then, I’ll introduce a way to think about expected impact as a Bayesian, and finally share some analytic results.</p>
 </section>
 <section id="bayesian-approaches-to-ab-testing" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</h2>
@@ -44,8 +44,8 @@
 <section id="how-long-to-run-an-ab-test-as-a-bayesian" class="level2">
 <h2 class="anchored" data-anchor-id="how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</h2>
 <p>The question of how long to run an A/B test is really a question of sample size. Assuming you accrue some number subjects per week, you can do some back of the napkin math to say how long the test should run to sufficiently power the experiment given an MDE and some information on the metric. Often, we flip the script and present MDEs as a function of time (e.g.&nbsp;if you want a 3% MDE, run this experiment for 2 weeks. Want a smaller MDE? Run it longer). Run length is now a knob one can tune.</p>
-<p>This is do-able as a Frequentist because we have a very clear relationship between power, MDE, and sample size (which is a function of time). Although there are Bayesian conceptions of power (e.g.&nbsp;conditional power, unconditional power, etc etc), the formulae for these don’t so straight forwardly relate time and desired effect sizes. This is further complicated by the prior – if your prior says a 5% lift is not probable, you probably shouldn’t design experiments to detect 5% lifts.</p>
-<p>Rather than seek a formula, we can simply draw random numbers to see what happens under different scenarios. Consider the following algorithm:</p>
+<p>This is do-able as a Frequentist because we have a very clear relationship between power, MDE, and sample size (which is a function of time). Although there are Bayesian conceptions of power (e.g.&nbsp;conditional power, unconditional power, etc etc), the formulae for these don’t so straightforwardly relate time and desired effect sizes. This is further complicated by the prior – if your prior says a 5% lift is not probable, you probably shouldn’t design experiments to detect 5% lifts.</p>
+<p>Rather than seek a formula right now, we can first draw random numbers to see what happens under different scenarios. Consider the following algorithm:</p>
 <ul>
 <li>Draw a true lift from your prior, <img src="https://latex.codecogs.com/png.latex?%5Clambda">.</li>
 <li>Draw a control group mean from the implied sampling distribution (you need the control mean and standard error to do this, but you should know this if you were going to do a power calculation anyway).</li>
@@ -73,7 +73,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<img src="https://latex.codecogs.com/png.latex?c%20=%200.95">). The curve flattens as <img src="https://latex.codecogs.com/png.latex?N"> grows, reflecting diminishing returns from longer experiments.Each dot is based on 100,000 simulations at each sample size.</figcaption>
+<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<img src="https://latex.codecogs.com/png.latex?c%20=%200.95">). The curve flattens as <img src="https://latex.codecogs.com/png.latex?N"> grows, reflecting diminishing returns from longer experiments. Each dot is based on 100,000 simulations at each sample size.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2026-02-20-time/index_files/figure-html/example-mde-curve-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -83,10 +83,10 @@
 </section>
 <section id="an-analytic-solution" class="level2">
 <h2 class="anchored" data-anchor-id="an-analytic-solution">An Analytic Solution</h2>
-<p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules is of the form</p>
+<p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules are of the form</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Csqrt%7BV%7D%5CPhi%5E%7B-1%7D(p)%20%5Clt%20M%20%5C%3E.%20"></p>
 <p>For the three decision rules I’ve listed above, <img src="https://latex.codecogs.com/png.latex?p%20=%20c">, <img src="https://latex.codecogs.com/png.latex?p=1-%5Calpha/2">, and <img src="https://latex.codecogs.com/png.latex?p=0.5">.</p>
-<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <img src="https://latex.codecogs.com/png.latex?%5Cmu%20%5Capprox%200"> and <img src="https://latex.codecogs.com/png.latex?%5Cleft%5Clvert%20%5Chat%20%5Clambda%20%5Cright%5Crvert%20%5Capprox%200">. Given this, we can simplify the inequality a little. First, <img src="https://latex.codecogs.com/png.latex?M%20=%20%5Chat%20%5Clambda%20/%20s%5E2_%5Clambda">, and</p>
+<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <img src="https://latex.codecogs.com/png.latex?%5Cmu%20%5Capprox%200"> and <img src="https://latex.codecogs.com/png.latex?%5Cleft%5Clvert%20%5Chat%20%5Clambda%20%5Cright%5Crvert%20%5Capprox%200">. Given this, we can simplify the inequality a little. When <img src="https://latex.codecogs.com/png.latex?%5Cmu%20=%200"> the posterior mean reduces to <img src="https://latex.codecogs.com/png.latex?M%20=%20V%5Chat%20%5Clambda%20/%20s%5E2_%5Clambda">, and</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20s%5E2_%5Clambda%20%5Capprox%20%5Cleft(%20%5Cdfrac%7Bs%5E2_t%20+%20s%5E2_c%7D%7B%5Cbar%7By%7D%5E2_c%7D%5Cright)%20"></p>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?s%5E2"> is the sampling variance of the treatment or control group (indicated by the subscript) and <img src="https://latex.codecogs.com/png.latex?%5Cbar%20y%20_c"> is the average from the control group. Note there is an implicit reliance on <img src="https://latex.codecogs.com/png.latex?N"> here since <img src="https://latex.codecogs.com/png.latex?s%5E2%20%5Cpropto%201/N">. I’m going to indicate reliance on <img src="https://latex.codecogs.com/png.latex?N"> going forward to make this discussion a little easier. We can re-write the inequality based only on <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Clambda"> as</p>
 <p><img src="https://latex.codecogs.com/png.latex?%20S(N)%20=%20%5CPhi%5E%7B-1%7D(p)%20%5Ccdot%20s%5E2_%5Clambda%20%5Ccdot%20%5Csqrt%7B%5Cdfrac%7B1%7D%7Bs%5E2_%5Clambda%7D%20+%20%5Cdfrac%7B1%7D%7B%5Ctau%5E2%7D%7D%20%5Clt%20%5Chat%20%5Clambda%20"></p>
@@ -115,7 +115,8 @@
 <p>gives a fully analytic expression for expected impact as a function of <img src="https://latex.codecogs.com/png.latex?N"> (through <img src="https://latex.codecogs.com/png.latex?s_%5Clambda%5E2%20%5Cpropto%201/N">).</p>
 <p>Thus, for any of the three decision rules, the entire curve of expected impact versus sample size collapses to</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0AE%5B%5Ctext%7Bimpact%7D%20%5Cmid%20N%5D%0A=%0A%5Cmu%20%5CPhi(a)%0A+%0A%5Cfrac%7B%5Ctau%5E2%7D%7B%5Csqrt%7B%5Ctau%5E2+s_%5Clambda%5E2%7D%7D%0A%5Cphi(a),%0A%5Cqquad%0Aa=%0A%5Cfrac%7B%5Cmu-S(N)%7D%7B%5Csqrt%7B%5Ctau%5E2+s_%5Clambda%5E2%7D%7D.%0A"></p>
-<p>The only difference across rules is the constant <img src="https://latex.codecogs.com/png.latex?p"> embedded inside <img src="https://latex.codecogs.com/png.latex?S(N)">. Everything else is identical.</p>
+<p>The only difference across rules is the constant <img src="https://latex.codecogs.com/png.latex?p"> embedded inside <img src="https://latex.codecogs.com/png.latex?S(N)">. As a corollary, we can obtain the expectation of the Clairvoyant distribution by noting that <img src="https://latex.codecogs.com/png.latex?S(N)%20%5Cto%200"> as <img src="https://latex.codecogs.com/png.latex?N%20%5Cto%20%5Cinfty">, so <img src="https://latex.codecogs.com/png.latex?%5Comega%20%5Cto%20%5Ctau"> and <img src="https://latex.codecogs.com/png.latex?a%20%5Cto%20%5Cmu/%5Ctau">. Hence the expected impact with perfect information is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5B%5Ctext%7BClairvoyant%20impact%7D%5D%0A=%0A%5Cmu%20%5CPhi%5C!%5Cleft(%5Cfrac%7B%5Cmu%7D%7B%5Ctau%7D%5Cright)%0A+%0A%5Ctau%5C,%5Cphi%5C!%5Cleft(%5Cfrac%7B%5Cmu%7D%7B%5Ctau%7D%5Cright).%0A"></p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">

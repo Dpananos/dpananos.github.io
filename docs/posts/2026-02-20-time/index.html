@@ -219,7 +219,7 @@ window.Quarto = {
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>In this post, I discuss decision criteria for Bayesian A/B testing and a way to think about experiment run times for Bayesian A/B tests. I’ll also present some analytic results that can help us avoid doing simulations in practice at the cost of some mild assumptions.</p>
-<p>First, I’ll discuss a little background on some straight forward ways to analyze A/B tests as a Bayesian and discuss a few options for ship/no-ship decision rules for A/B tests. Then, I’ll introduce a way to think about expected impact as a Bayesian, and finally share some analytic results.</p>
+<p>First, I’ll discuss a little background on some straightforward ways to analyze A/B tests as a Bayesian and discuss a few options for ship/no-ship decision rules for A/B tests. Then, I’ll introduce a way to think about expected impact as a Bayesian, and finally share some analytic results.</p>
 </section>
 <section id="bayesian-approaches-to-ab-testing" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-approaches-to-ab-testing">Bayesian Approaches to A/B Testing</h2>
@@ -238,8 +238,8 @@ window.Quarto = {
 <section id="how-long-to-run-an-ab-test-as-a-bayesian" class="level2">
 <h2 class="anchored" data-anchor-id="how-long-to-run-an-ab-test-as-a-bayesian">How Long To Run an A/B Test as a Bayesian</h2>
 <p>The question of how long to run an A/B test is really a question of sample size. Assuming you accrue some number subjects per week, you can do some back of the napkin math to say how long the test should run to sufficiently power the experiment given an MDE and some information on the metric. Often, we flip the script and present MDEs as a function of time (e.g.&nbsp;if you want a 3% MDE, run this experiment for 2 weeks. Want a smaller MDE? Run it longer). Run length is now a knob one can tune.</p>
-<p>This is do-able as a Frequentist because we have a very clear relationship between power, MDE, and sample size (which is a function of time). Although there are Bayesian conceptions of power (e.g.&nbsp;conditional power, unconditional power, etc etc), the formulae for these don’t so straight forwardly relate time and desired effect sizes. This is further complicated by the prior – if your prior says a 5% lift is not probable, you probably shouldn’t design experiments to detect 5% lifts.</p>
-<p>Rather than seek a formula, we can simply draw random numbers to see what happens under different scenarios. Consider the following algorithm:</p>
+<p>This is do-able as a Frequentist because we have a very clear relationship between power, MDE, and sample size (which is a function of time). Although there are Bayesian conceptions of power (e.g.&nbsp;conditional power, unconditional power, etc etc), the formulae for these don’t so straightforwardly relate time and desired effect sizes. This is further complicated by the prior – if your prior says a 5% lift is not probable, you probably shouldn’t design experiments to detect 5% lifts.</p>
+<p>Rather than seek a formula right now, we can first draw random numbers to see what happens under different scenarios. Consider the following algorithm:</p>
 <ul>
 <li>Draw a true lift from your prior, <span class="math inline">\(\lambda\)</span>.</li>
 <li>Draw a control group mean from the implied sampling distribution (you need the control mean and standard error to do this, but you should know this if you were going to do a power calculation anyway).</li>
@@ -267,7 +267,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The curve flattens as <span class="math inline">\(N\)</span> grows, reflecting diminishing returns from longer experiments.Each dot is based on 100,000 simulations at each sample size.</figcaption>
+<figcaption>Average impact to the product as a function of sample size under the probability to beat control rule (<span class="math inline">\(c = 0.95\)</span>). The curve flattens as <span class="math inline">\(N\)</span> grows, reflecting diminishing returns from longer experiments. Each dot is based on 100,000 simulations at each sample size.</figcaption>
 <p><img src="index_files/figure-html/example-mde-curve-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
@@ -277,10 +277,10 @@ window.Quarto = {
 </section>
 <section id="an-analytic-solution" class="level2">
 <h2 class="anchored" data-anchor-id="an-analytic-solution">An Analytic Solution</h2>
-<p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules is of the form</p>
+<p>Simulation is great to get some intuition for what is happening, but we can actually recover these curves analytically with a little effort. First, note that all three of the decision rules are of the form</p>
 <p><span class="math display">\[ \sqrt{V}\Phi^{-1}(p) \lt M \&gt;. \]</span></p>
 <p>For the three decision rules I’ve listed above, <span class="math inline">\(p = c\)</span>, <span class="math inline">\(p=1-\alpha/2\)</span>, and <span class="math inline">\(p=0.5\)</span>.</p>
-<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <span class="math inline">\(\mu \approx 0\)</span> and <span class="math inline">\(\left\lvert \hat \lambda \right\rvert \approx 0\)</span>. Given this, we can simplify the inequality a little. First, <span class="math inline">\(M = \hat \lambda / s^2_\lambda\)</span>, and</p>
+<p>Now, let’s talk about our prior. The literature and discourse on A/B testing is consistent on two claims: 1) Most A/B tests do not have impact, and 2) when there is an impact then it is usually modest (that is to say, we do not routinely see large hurt/help to the product, usually because the low hanging fruit have been picked). This allows us to assume that <span class="math inline">\(\mu \approx 0\)</span> and <span class="math inline">\(\left\lvert \hat \lambda \right\rvert \approx 0\)</span>. Given this, we can simplify the inequality a little. When <span class="math inline">\(\mu = 0\)</span> the posterior mean reduces to <span class="math inline">\(M = V\hat \lambda / s^2_\lambda\)</span>, and</p>
 <p><span class="math display">\[ s^2_\lambda \approx \left( \dfrac{s^2_t + s^2_c}{\bar{y}^2_c}\right) \]</span></p>
 <p>Here, <span class="math inline">\(s^2\)</span> is the sampling variance of the treatment or control group (indicated by the subscript) and <span class="math inline">\(\bar y _c\)</span> is the average from the control group. Note there is an implicit reliance on <span class="math inline">\(N\)</span> here since <span class="math inline">\(s^2 \propto 1/N\)</span>. I’m going to indicate reliance on <span class="math inline">\(N\)</span> going forward to make this discussion a little easier. We can re-write the inequality based only on <span class="math inline">\(\hat \lambda\)</span> as</p>
 <p><span class="math display">\[ S(N) = \Phi^{-1}(p) \cdot s^2_\lambda \cdot \sqrt{\dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2}} \lt \hat \lambda \]</span></p>
@@ -369,7 +369,14 @@ E[\text{impact} \mid N]
 a=
 \frac{\mu-S(N)}{\sqrt{\tau^2+s_\lambda^2}}.
 \]</span></p>
-<p>The only difference across rules is the constant <span class="math inline">\(p\)</span> embedded inside <span class="math inline">\(S(N)\)</span>. Everything else is identical.</p>
+<p>The only difference across rules is the constant <span class="math inline">\(p\)</span> embedded inside <span class="math inline">\(S(N)\)</span>. As a corollary, we can obtain the expectation of the Clairvoyant distribution by noting that <span class="math inline">\(S(N) \to 0\)</span> as <span class="math inline">\(N \to \infty\)</span>, so <span class="math inline">\(\omega \to \tau\)</span> and <span class="math inline">\(a \to \mu/\tau\)</span>. Hence the expected impact with perfect information is</p>
+<p><span class="math display">\[
+E[\text{Clairvoyant impact}]
+=
+\mu \Phi\!\left(\frac{\mu}{\tau}\right)
++
+\tau\,\phi\!\left(\frac{\mu}{\tau}\right).
+\]</span></p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
