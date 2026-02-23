@@ -192,7 +192,7 @@ legend('topright',
 From this plot, we learn a few things:  First, the decision rule to ship only if the credible interval excludes 0 is dominated by the probability to beat decision rule in both quarterly expected impact (at least for the parameters I've used here), and we can achieve higher impact with fewer samples per experiment (roughly 780 fewer assuming the optima are at $\log_{10}(N)=3.25$ and 3.5 respectively).  The one thing this plot is missing is some sort of uncertainty for these curves -- remember, these are expectations and the true cumulative impact is going to vary about these points, perhaps drastically so!  I think that is a better job for simulation.
 
 ```{r quarterly-impact-sim}
-#| fig-cap: "Simulated quarterly impact distributions (shaded bands: 10th–90th percentile; open markers: mean) overlaid on the closed-form curves (lines) from the previous plot. Simulation uses 10,000 quarters per sample size on a coarser grid. At large $N$, fewer than one experiment fits in a quarter, so impact collapses to zero."
+#| fig-cap: "Simulated quarterly impact distributions (shaded bands: 5th–95th percentile; open markers: mean and median) overlaid on the closed-form curves (lines) from the previous plot. Simulation uses 10,000 quarters per sample size on a coarser grid. At large $N$, fewer than one experiment fits in a quarter, so impact collapses to zero."
 
 sim_quarterly <- function(n, subjects_per_week = 2500, weeks_per_quarter = 13,
                            prior_mean = prior_mean_opt, prior_sd = prior_sd_opt,
@@ -233,18 +233,21 @@ ns_sim  <- 10^lns_sim
 
 sims <- lapply(ns_sim, sim_quarterly)
 
-sim_mean_prob <- sapply(sims, \(s) mean(s$prob))
-sim_mean_ci   <- sapply(sims, \(s) mean(s$ci))
-sim_lo_prob   <- sapply(sims, \(s) quantile(s$prob, 0.10))
-sim_hi_prob   <- sapply(sims, \(s) quantile(s$prob, 0.90))
-sim_lo_ci     <- sapply(sims, \(s) quantile(s$ci,   0.10))
-sim_hi_ci     <- sapply(sims, \(s) quantile(s$ci,   0.90))
+sim_mean_prob   <- sapply(sims, \(s) mean(s$prob))
+sim_mean_ci     <- sapply(sims, \(s) mean(s$ci))
+sim_median_prob <- sapply(sims, \(s) median(s$prob))
+sim_median_ci   <- sapply(sims, \(s) median(s$ci))
+sim_lo_prob     <- sapply(sims, \(s) quantile(s$prob, 0.05))
+sim_hi_prob     <- sapply(sims, \(s) quantile(s$prob, 0.95))
+sim_lo_ci       <- sapply(sims, \(s) quantile(s$ci,   0.05))
+sim_hi_ci       <- sapply(sims, \(s) quantile(s$ci,   0.95))
 
 rules <- list(
   list(
     label      = expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
     closed     = quarterly_impact_prob,
     sim_mean   = sim_mean_prob,
+    sim_median = sim_median_prob,
     sim_lo     = sim_lo_prob,
     sim_hi     = sim_hi_prob
   ),
@@ -252,6 +255,7 @@ rules <- list(
     label      = expression("95% Credible Interval"),
     closed     = quarterly_impact_ci,
     sim_mean   = sim_mean_ci,
+    sim_median = sim_median_ci,
     sim_lo     = sim_lo_ci,
     sim_hi     = sim_hi_ci
   )
@@ -259,7 +263,7 @@ rules <- list(
 
 ylim <- range(0, sim_hi_prob, sim_hi_ci, quarterly_impact_prob, quarterly_impact_ci, na.rm = TRUE)
 
-par(mfrow = c(1, 2))
+layout(matrix(c(1, 2, 3, 3), nrow = 2, byrow = TRUE), heights = c(10, 1.5))
 for (r in rules) {
   plot(lns, r$closed, type = 'l', lwd = 2, col = 'black',
        main = r$label,
@@ -269,7 +273,16 @@ for (r in rules) {
   grid()
   polygon(c(lns_sim, rev(lns_sim)), c(r$sim_hi, rev(r$sim_lo)),
           col = adjustcolor('black', alpha.f = 0.12), border = NA)
-  points(lns_sim, r$sim_mean, pch = 1, col = 'black')
+  points(lns_sim, r$sim_mean,   pch = 1, col = 'black')
+  points(lns_sim, r$sim_median, pch = 2, col = 'black')
 }
-par(mfrow = c(1, 1))
+par(mar = c(0, 0, 0, 0))
+plot.new()
+legend('center', horiz = TRUE,
+       legend = c("Closed-form", "Sim mean", "Sim median", "5th–95th pct."),
+       lty    = c(1,  NA, NA,  NA),
+       pch    = c(NA,  1,  2,  15),
+       col    = c('black', 'black', 'black', adjustcolor('black', alpha.f = 0.12)),
+       lwd    = 2, cex = 0.8, pt.cex = c(NA, 1, 1, 2))
+layout(1)
 ```
