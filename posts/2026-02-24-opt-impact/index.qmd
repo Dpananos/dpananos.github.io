@@ -1,0 +1,275 @@
+---
+title: Optimal Experiment Sample Sizes for Bayesian A/B Tests
+date: 2026-02-24
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+cache: false
+---
+
+
+```{r helpers}
+#| include: false
+
+# =============================================================================
+# Shared helpers
+# =============================================================================
+
+# Simulate data and compute posterior for a given n and prior
+sim_posterior <- function(n, prior_mean = 0, prior_sd = 0.05,
+                          control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  sigma <- 0.5
+  se_c <- sigma / sqrt(n * (1 - prob_treatment))
+  se_t <- sigma / sqrt(n * prob_treatment)
+
+  true_lift <- rnorm(nsims, prior_mean, prior_sd)
+  control   <- rnorm(nsims, control_mean, se_c)
+  treatment <- rnorm(nsims, control_mean * (1 + true_lift), se_t)
+
+  estimated_lift    <- (treatment / control) - 1
+  estimated_lift_se <- sqrt(se_t^2 / control^2 + se_c^2 * treatment^2 / control^4)
+
+  V <- 1 / (1 / estimated_lift_se^2 + 1 / prior_sd^2)
+  M <- V * (estimated_lift / estimated_lift_se^2 + prior_mean / prior_sd^2)
+  S <- sqrt(V)
+
+  list(true_lift = true_lift, M = M, S = S)
+}
+
+# SE of lift via delta method for g(T, C) = T/C - 1
+# evaluated at (E[T], E[C]) = (control_mean * (1 + prior_mean), control_mean)
+compute_se_lift <- function(n, prior_mean = 0, control_mean = 2.0, prob_treatment = 0.5, sigma = 0.5) {
+  se_c <- sigma / sqrt(n * (1 - prob_treatment))
+  se_t <- sigma / sqrt(n * prob_treatment)
+  treatment_mean <- control_mean * (1 + prior_mean)
+  sqrt(se_t^2 / control_mean^2 + se_c^2 * treatment_mean^2 / control_mean^4)
+}
+
+# Analytic expected impact given a critical hurdle lambda_crit
+analytic_impact_from_crit <- function(lambda_crit, se_lift, prior_mean = 0, prior_sd = 0.05) {
+  integrand <- function(delta) {
+    prob_ship <- 1 - pnorm(lambda_crit, mean = delta, sd = se_lift)
+    delta * prob_ship * dnorm(delta, prior_mean, prior_sd)
+  }
+  integrate(integrand, lower = -Inf, upper = Inf)$value
+}
+
+# Closed-form expected impact: bivariate normal truncation moment
+# E[lambda * 1(lambda > S)] where lambda ~ N(prior_mean, prior_sd^2)
+# and S is the threshold adjusted for measurement noise (se_lift)
+closedform_impact_from_crit <- function(lambda_crit, se_lift, prior_mean = 0, prior_sd = 0.05) {
+  tau <- sqrt(prior_sd^2 + se_lift^2)
+  a   <- (prior_mean - lambda_crit) / tau
+  prior_mean * pnorm(a) + (prior_sd^2 / tau) * dnorm(a)
+}
+
+# =============================================================================
+# Decision Rule 1: Ship if P(lift > 0 | data) > cutoff
+# =============================================================================
+
+sim_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
+                          control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  p <- sim_posterior(n, prior_mean, prior_sd, control_mean, prob_treatment, nsims)
+  prob_positive <- pnorm(0, mean = p$M, sd = p$S, lower.tail = FALSE)
+  mean(ifelse(prob_positive > cutoff, p$true_lift, 0))
+}
+
+closedform_decisions <- function(n = 5000, cutoff = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                  control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  lambda_crit <- se_lift^2 * (qnorm(cutoff) * post_sd_inv - prior_mean / prior_sd^2)
+  closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
+}
+
+# =============================================================================
+# Decision Rule 2: Ship if lower 95% credible interval > 0
+# =============================================================================
+
+sim_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
+                              control_mean = 2.0, prob_treatment = 0.5, nsims = 100000) {
+  p <- sim_posterior(n, prior_mean, prior_sd, control_mean, prob_treatment, nsims)
+  lower_ci <- qnorm((1 - ci_level) / 2, mean = p$M, sd = p$S)
+  mean(ifelse(lower_ci > 0, p$true_lift, 0))
+}
+
+closedform_decisions_ci <- function(n = 5000, ci_level = 0.95, prior_mean = 0, prior_sd = 0.05,
+                                     control_mean = 2.0, prob_treatment = 0.5) {
+  se_lift     <- compute_se_lift(n, prior_mean, control_mean, prob_treatment)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  lambda_crit <- se_lift^2 * (qnorm((1 + ci_level) / 2) * post_sd_inv - prior_mean / prior_sd^2)
+  closedform_impact_from_crit(lambda_crit, se_lift, prior_mean, prior_sd)
+}
+```
+
+This post is a spiritual successor to an [early post on this blog](../2023-03-31-optimal-mde/index.qmd) and a fast follow here from [this post about A/B test run times for Bayesians](../2026-02-20-time/index.qmd).  From that post, we are able to obtain an analytic approximation to the expected impact from a single experiment using a Bayesian analysis and a given decision rule.  Below is a plot like the one found in my other post, but this time perhaps with a more realistic prior.
+
+These curves tell me what my expected impact is going to be at given sample sizes, but not what sample size I should choose. Obviously, I want to impact the product as much as possible, but I don't want to spend months and months on a single experiment.  
+
+
+```{r optimistic-prior-comparison}
+#| fig-cap: "Simulated (open markers) and closed-form analytic (black lines) expected impact for all three decision rules. The red horizontal line is the Clairvoyant upper bound. Prior is $\\operatorname{Normal}(0.005, 0.01^2)$, $\\sigma = 0.5$, equal allocation."
+prior_mean_opt <- 0.005
+prior_sd_opt   <- 0.01
+
+lns <- seq(2, 5, 0.25)
+ns  <- 10^lns
+
+sim_prob <- sapply(ns, \(x) sim_decisions(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+sim_ci   <- sapply(ns, \(x) sim_decisions_ci(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+
+closed_prob <- sapply(ns, \(x) closedform_decisions(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+closed_ci   <- sapply(ns, \(x) closedform_decisions_ci(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+
+clairvoyant_opt <- closedform_impact_from_crit(lambda_crit = 0, se_lift = 0,
+                                                prior_mean = prior_mean_opt, prior_sd = prior_sd_opt)
+
+ylim <- range(0, sim_prob, sim_ci, closed_prob, closed_ci, clairvoyant_opt)
+
+plot(lns, sim_prob, type = 'p', pch = 1, col = 'black',
+     xlab = expression(log[10](N)), ylab = 'Expected Impact', yaxt = 'n', ylim = ylim)
+axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
+grid()
+points(lns, sim_ci, pch = 2, col = 'black')
+lines(lns, closed_prob, col = 'black', lwd = 2, lty = 1)
+lines(lns, closed_ci,   col = 'black', lwd = 2, lty = 2)
+abline(h = clairvoyant_opt, col = 'red', lwd = 2)
+legend('bottomright',
+       legend = c(
+         expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
+         expression("95% CI"),
+         "Clairvoyant"
+       ),
+       pch  = c(1,  2,  NA),
+       lty  = c(1,  2,  1),
+       col  = c('black', 'black', 'red'),
+       lwd  = 2, cex = 0.8)
+```
+
+
+Let's assume I can accrue $N$ total subjects per week.  I can either choose to run more experiments at a lower expected impact, or run fewer experiments with higher impact.  Remember, not every experiment is going to be a "ship" decision, this expected impact is over all experiments. There should be some sweet spot where I am running sufficiently many experiments with sufficiently high impact.  Intuitively, this should be the sample size we choose for our A/B tests.  For the curves above, the plot I describe looks something like the one shown below.
+
+```{r quarterly-impact}
+#| fig-cap: "Estimated cumulative quarterly impact as a function of experiment size, assuming 2,500 subjects per week and experiments run back to back. Larger experiments yield higher per-experiment impact but fewer experiments per quarter. Prior is $\\operatorname{Normal}(0.005, 0.01^2)$."
+subjects_per_week <- 2500
+weeks_per_quarter <- 13
+
+lns <- seq(2, 5, by = 0.05)
+ns  <- 10^lns
+
+n_experiments <- weeks_per_quarter * subjects_per_week / ns
+
+ei_prob <- sapply(ns, \(x) closedform_decisions(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+ei_ci   <- sapply(ns, \(x) closedform_decisions_ci(n = x, prior_mean = prior_mean_opt, prior_sd = prior_sd_opt))
+
+quarterly_impact_prob <- (1 + ei_prob) ^ n_experiments - 1
+quarterly_impact_ci   <- (1 + ei_ci)   ^ n_experiments - 1
+
+clairvoyant_quarterly <- (1 + clairvoyant_opt) ^ n_experiments - 1
+
+ylim <- range(0, quarterly_impact_prob, quarterly_impact_ci, na.rm = TRUE)
+
+plot(lns, quarterly_impact_prob, type = 'l', lwd = 2, lty = 1, col = 'black',
+     xlab = expression(log[10](N)), ylab = 'Cumulative Quarterly Impact', yaxt = 'n', ylim = ylim)
+axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
+grid()
+lines(lns, quarterly_impact_ci, lwd = 2, lty = 2, col = 'black')
+lines(lns, clairvoyant_quarterly, lwd = 2, lty = 1, col = 'red')
+legend('topright',
+       legend = c(
+         expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
+         expression("95% CI"),
+         "Clairvoyant"
+       ),
+       lty = c(1, 2, 1),
+       col = c('black', 'black', 'red'),
+       lwd = 2, cex = 0.8)
+```
+
+From this plot, we learn a few things:  First, the decision rule to ship only if the credible interval excludes 0 is dominated by the probability to beat decision rule in both quarterly expected impact (at least for the parameters I've used here), and we can achieve higher impact with fewer samples per experiment (roughly 780 fewer assuming the optima are at $\log_{10}(N)=3.25$ and 3.5 respectively).  The one thing this plot is missing is some sort of uncertainty for these curves -- remember, these are expectations and the true cumulative impact is going to vary about these points, perhaps drastically so!  I think that is a better job for simulation.
+
+```{r quarterly-impact-sim}
+#| fig-cap: "Simulated quarterly impact distributions (shaded bands: 10th–90th percentile; open markers: mean) overlaid on the closed-form curves (lines) from the previous plot. Simulation uses 10,000 quarters per sample size on a coarser grid. At large $N$, fewer than one experiment fits in a quarter, so impact collapses to zero."
+
+sim_quarterly <- function(n, subjects_per_week = 2500, weeks_per_quarter = 13,
+                           prior_mean = prior_mean_opt, prior_sd = prior_sd_opt,
+                           cutoff = 0.95, ci_level = 0.95,
+                           control_mean = 2.0, sigma = 0.5, prob_treatment = 0.5,
+                           nsims = 10000) {
+  n_exp <- floor(weeks_per_quarter * subjects_per_week / n)
+  if (n_exp == 0L) return(list(prob = rep(0, nsims), ci = rep(0, nsims)))
+
+  se_c  <- sigma / sqrt(n * (1 - prob_treatment))
+  se_t  <- sigma / sqrt(n * prob_treatment)
+  total <- nsims * n_exp
+
+  true_lift <- rnorm(total, prior_mean, prior_sd)
+  control   <- rnorm(total, control_mean, se_c)
+  treatment <- rnorm(total, control_mean * (1 + true_lift), se_t)
+
+  est_lift    <- (treatment / control) - 1
+  est_lift_se <- sqrt(se_t^2 / control^2 + se_c^2 * treatment^2 / control^4)
+
+  V <- 1 / (1 / est_lift_se^2 + 1 / prior_sd^2)
+  M <- V * (est_lift / est_lift_se^2 + prior_mean / prior_sd^2)
+  S <- sqrt(V)
+
+  impact_prob <- ifelse(pnorm(0, M, S, lower.tail = FALSE) > cutoff, true_lift, 0)
+  impact_ci   <- ifelse(qnorm((1 - ci_level) / 2, M, S) > 0,        true_lift, 0)
+
+  compound <- function(impacts) {
+    m <- matrix(impacts, nrow = nsims, ncol = n_exp)
+    apply(m, 1, \(row) prod(1 + row) - 1)
+  }
+
+  list(prob = compound(impact_prob), ci = compound(impact_ci))
+}
+
+lns_sim <- seq(2, 4.6, by = 0.2)
+ns_sim  <- 10^lns_sim
+
+sims <- lapply(ns_sim, sim_quarterly)
+
+sim_mean_prob <- sapply(sims, \(s) mean(s$prob))
+sim_mean_ci   <- sapply(sims, \(s) mean(s$ci))
+sim_lo_prob   <- sapply(sims, \(s) quantile(s$prob, 0.10))
+sim_hi_prob   <- sapply(sims, \(s) quantile(s$prob, 0.90))
+sim_lo_ci     <- sapply(sims, \(s) quantile(s$ci,   0.10))
+sim_hi_ci     <- sapply(sims, \(s) quantile(s$ci,   0.90))
+
+rules <- list(
+  list(
+    label      = expression(P(lambda > 0 ~ "|" ~ hat(lambda)) > 0.95),
+    closed     = quarterly_impact_prob,
+    sim_mean   = sim_mean_prob,
+    sim_lo     = sim_lo_prob,
+    sim_hi     = sim_hi_prob
+  ),
+  list(
+    label      = expression("95% Credible Interval"),
+    closed     = quarterly_impact_ci,
+    sim_mean   = sim_mean_ci,
+    sim_lo     = sim_lo_ci,
+    sim_hi     = sim_hi_ci
+  )
+)
+
+ylim <- range(0, sim_hi_prob, sim_hi_ci, quarterly_impact_prob, quarterly_impact_ci, na.rm = TRUE)
+
+par(mfrow = c(1, 2))
+for (r in rules) {
+  plot(lns, r$closed, type = 'l', lwd = 2, col = 'black',
+       main = r$label,
+       xlab = expression(log[10](N)), ylab = 'Cumulative Quarterly Impact',
+       yaxt = 'n', ylim = ylim)
+  axis(2, at = axTicks(2), labels = scales::percent(axTicks(2)))
+  grid()
+  polygon(c(lns_sim, rev(lns_sim)), c(r$sim_hi, rev(r$sim_lo)),
+          col = adjustcolor('black', alpha.f = 0.12), border = NA)
+  points(lns_sim, r$sim_mean, pch = 1, col = 'black')
+}
+par(mfrow = c(1, 1))
+```

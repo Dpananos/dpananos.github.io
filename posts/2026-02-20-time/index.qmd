@@ -342,5 +342,3 @@ legend('bottomright',
        col  = c('black', 'black', 'black', 'red'),
        lwd  = 2, cex = 0.8)
 ```
-
-
