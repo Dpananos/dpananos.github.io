@@ -1,6 +1,6 @@
 ---
 title: Musings About The Normal Normal Model
-date: 2026-03-16
+date: 2026-03-22
 code-fold: false
 echo: false
 fig-cap-location: top
@@ -174,7 +174,7 @@ Now that we have set up our problem, let's discuss when and how treating the ele
 
 Let's focus on the block of the covariance matrix associated with experiment $k$. Let's assume the sampling variance for the treatment arms in this experiment are roughly equal, such that $s^2_{k,i} = s^2_t + s^2_{c,k}$ for all $i = 1, \ldots, n_k$. 
 
-The $n_k \times n_k$ marginal covariance block for this experiment, $V_k$, incorporates the treatment variance, control variance, and between-arm heterogeneity $\tau^2$:
+The $n_k \times n_k$ marginal covariance block for this experiment, $V_k$, incorporates the treatment sampling variance, control sampling variance, and between-arm heterogeneity $\tau^2$:
 $$V_k = (s^2_t + \tau^2) I_{n_k} + s^2_{c,k} \mathbf{1}_{n_k} \mathbf{1}_{n_k}^T$$
 
 For economy of thought, let $v = s^2_t + \tau^2$. We can invert this matrix using the Sherman-Morrison formula:
@@ -199,7 +199,7 @@ This means that no matter how many treatment arms you add to experiment $k$, the
 
 If we naively assume independence, the off-diagonal terms $s^2_{c,k}$ are zeroed out in $\Sigma$. The total information becomes the sum of $n_k$ independent precisions:
 $$\mathcal{I}_{indep} = \frac{n_k}{v + s^2_{c,k}}$$
-As $n_k \to \infty$, the naive model's information $\mathcal{I}_{indep} \to \infty$. By treating the effect measures as independent, the model becomes infinitely overconfident, allowing a single experiment to entirely dominate the hyper-parameter estimates.
+As $n_k \to \infty$, the naive model's information $\mathcal{I}_{indep} \to \infty$. By treating elements of $\delta$ as independent, the model becomes overconfident, allowing a single experiment to entirely dominate the hyper-parameter estimates.
 
 ```{r}
 set.seed(1)
@@ -213,7 +213,7 @@ fit_mcmc(sim_mega, caption = "50 effect measures: one experiment contributes 26 
 
 ## 2. The Control Is Estimated With A Lot of Error
 
-Suppose the true mean of the control group in experiment $k$ is $\mu_c$, but due to sampling variance, the observed mean is drawn with a massive negative error, $-\epsilon$. Consequently, all $n_k$ observed effect measures $\delta_{k,i}$ will be artificially inflated by $+\epsilon$. 
+Suppose the true mean of the control group in experiment $k$ is $\mu_c$, but due to sampling variance, the observed mean is drawn with a massive negative error. Consequently, all $n_k$ observed effect measures $\delta_{k,i}$ will be artificially inflated.
 
 In the marginal log-likelihood, the penalty term for experiment $k$ is proportional to:
 $$- \frac{1}{2} (\delta_k - \mu \mathbf{1}_{n_k})^T V_k^{-1} (\delta_k - \mu \mathbf{1}_{n_k})$$
@@ -221,12 +221,9 @@ $$- \frac{1}{2} (\delta_k - \mu \mathbf{1}_{n_k})^T V_k^{-1} (\delta_k - \mu \ma
 Looking back at our derivation of $V_k^{-1}$, the off-diagonal elements are exactly:
 $$- \frac{s^2_{c,k}}{v(v + n_k s^2_{c,k})}$$
 
-These strictly negative off-diagonal terms are the mathematical mechanism for discounting the shared anomaly. When computing the quadratic form, the cross-terms subtract value away from the likelihood if multiple $\delta_{k,i}$ deviate from $\mu$ in the same direction. The model deduces that a simultaneous shift of all $n_k$ arms is highly improbable unless it was driven by the shared variance component $s^2_{c,k}$. 
+These strictly negative off-diagonal terms discount the shared anomaly. When computing the quadratic form, the cross-terms subtract value away from the likelihood if multiple $\delta_{k,i}$ deviate from $\mu$ in the same direction. A simultaneous shift of all $n_k$ arms is highly unlikely unless it was driven by the shared variance component $s^2_{c,k}$. 
 
-If we assume an independent, diagonal $\Sigma$, these negative correcting terms disappear. The model receives $n_k$ independent signals that the treatment effect is $\mu + \epsilon$. This breaks inference in two ways:
-
-1.  **Biased $\mu$:** The grand mean is pulled violently upward toward $\mu + \epsilon$.
-2.  **Biased $\tau$:** Because the $n_k$ effect measures are artificially clustered tightly together (shifted by the exact same $\epsilon$), the model assumes there is very little between-arm heterogeneity, crushing the estimate of $\tau$ toward zero.
+If we assume an independent, diagonal $\Sigma$, these negative correcting terms disappear. The model receives $n_k$ independent signals that the treatment effect is larger than it was in reality, leading to potential bias in $\mu$ and $\tau$.
 
 ```{r}
 set.seed(1)
@@ -241,7 +238,7 @@ fit_mcmc(sim_outlier, caption = "Same structure as above (26 + 24 = 50 effects, 
 
 ## 3. Your Propensity Score Highly Favors the Variant Over The Treatment
 
-The degree to which we _have_ to model the correlation depends entirely on the ratio of the control sampling variance to the treatment sampling variance. 
+The degree to which we _have_ to model the correlation depends on the ratio of the control sampling variance to the treatment sampling variance. 
 
 For any two variants $i$ and $j$ in experiment $k$, the correlation of their effect measures in the likelihood is:
 $$\rho_{i,j} = \frac{s^2_{c,k}}{\sqrt{(s^2_{t,k,i} + s^2_{c,k})(s^2_{t,k,j} + s^2_{c,k})}}$$
@@ -249,12 +246,7 @@ $$\rho_{i,j} = \frac{s^2_{c,k}}{\sqrt{(s^2_{t,k,i} + s^2_{c,k})(s^2_{t,k,j} + s^
 If $s^2_{t,k,i} \approx s^2_{t,k,j}$, this simplifies to:
 $$\rho \approx \frac{s^2_{c,k}}{s^2_t + s^2_{c,k}}$$
 
-This gives us the exact boundary conditions for when the diagonal approximation is safe, and when it is disastrous:
-
-If the control group has the majority of traffic then $s^2_{c,k}$ will be tiny compared to the treatment variance $s^2_t$. The correlation approaches zero, $\Sigma$ becomes essentially diagonal, and sampling a single effect measure throws away valuable, nearly-independent information.
-
-
-If the treatment has teh majority of traffic, $s^2_{c,k}$ dominates $s^2_t$. The correlation approaches 1. The effect measures are almost perfectly co-linear, and treating them as independent should severly bias estimates.
+This gives us an idea of when the approximation is safe. If the control group has the majority of traffic then $s^2_{c,k}$ will be tiny compared to the treatment variance $s^2_t$. The correlation approaches zero, $\Sigma$ becomes essentially diagonal, and sampling a single effect measure throws away valuable, nearly-independent information. If the treatment has the majority of traffic, $s^2_{c,k}$ dominates $s^2_t$. The correlation approaches 1. The effect measures are almost perfectly co-linear, and treating them as independent should severly bias estimates.
 
 ```{r}
 set.seed(1)

@@ -10,11 +10,11 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Mon, 16 Mar 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 22 Mar 2026 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Musings About The Normal Normal Model</title>
   <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2026-03-16-shrink/</link>
+  <link>https://dpananos.github.io/posts/2026-03-22-shrink/</link>
   <description><![CDATA[ 
 
 
@@ -154,13 +154,13 @@ Important
 <section id="youve-got-a-single-experiment-with-a-lot-of-variants" class="level2">
 <h2 class="anchored" data-anchor-id="youve-got-a-single-experiment-with-a-lot-of-variants">1. You’ve Got A Single Experiment With A Lot of Variants</h2>
 <p>Let’s focus on the block of the covariance matrix associated with experiment <img src="https://latex.codecogs.com/png.latex?k">. Let’s assume the sampling variance for the treatment arms in this experiment are roughly equal, such that <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bk,i%7D%20=%20s%5E2_t%20+%20s%5E2_%7Bc,k%7D"> for all <img src="https://latex.codecogs.com/png.latex?i%20=%201,%20%5Cldots,%20n_k">.</p>
-<p>The <img src="https://latex.codecogs.com/png.latex?n_k%20%5Ctimes%20n_k"> marginal covariance block for this experiment, <img src="https://latex.codecogs.com/png.latex?V_k">, incorporates the treatment variance, control variance, and between-arm heterogeneity <img src="https://latex.codecogs.com/png.latex?%5Ctau%5E2">: <img src="https://latex.codecogs.com/png.latex?V_k%20=%20(s%5E2_t%20+%20%5Ctau%5E2)%20I_%7Bn_k%7D%20+%20s%5E2_%7Bc,k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET"></p>
+<p>The <img src="https://latex.codecogs.com/png.latex?n_k%20%5Ctimes%20n_k"> marginal covariance block for this experiment, <img src="https://latex.codecogs.com/png.latex?V_k">, incorporates the treatment sampling variance, control sampling variance, and between-arm heterogeneity <img src="https://latex.codecogs.com/png.latex?%5Ctau%5E2">: <img src="https://latex.codecogs.com/png.latex?V_k%20=%20(s%5E2_t%20+%20%5Ctau%5E2)%20I_%7Bn_k%7D%20+%20s%5E2_%7Bc,k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET"></p>
 <p>For economy of thought, let <img src="https://latex.codecogs.com/png.latex?v%20=%20s%5E2_t%20+%20%5Ctau%5E2">. We can invert this matrix using the Sherman-Morrison formula: <img src="https://latex.codecogs.com/png.latex?V_k%5E%7B-1%7D%20=%20%5Cfrac%7B1%7D%7Bv%7D%20I_%7Bn_k%7D%20-%20%5Cfrac%7Bs%5E2_%7Bc,k%7D%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET"></p>
 <p>The total precision this experiment provides for estimating <img src="https://latex.codecogs.com/png.latex?%5Cmu"> is the sum of all elements in the inverse covariance matrix, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET%20V_k%5E%7B-1%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D">. We can derive this exactly:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A%5Cmathcal%7BI%7D_%7Bcorr%7D%20&amp;=%20%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET%20%5Cleft(%20%5Cfrac%7B1%7D%7Bv%7D%20I_%7Bn_k%7D%20-%20%5Cfrac%7Bs%5E2_%7Bc,k%7D%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%20%5Cmathbf%7B1%7D_%7Bn_k%7D%5ET%20%5Cright)%20%5Cmathbf%7B1%7D_%7Bn_k%7D%20%5C%5C%0A&amp;=%20%5Cfrac%7Bn_k%7D%7Bv%7D%20-%20%5Cfrac%7Bn_k%5E2%20s%5E2_%7Bc,k%7D%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D%20%5C%5C%0A&amp;=%20%5Cfrac%7Bn_k%20(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%20-%20n_k%5E2%20s%5E2_%7Bc,k%7D%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D%20%5C%5C%0A&amp;=%20%5Cfrac%7Bn_k%20v%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D%20%5C%5C%0A&amp;=%20%5Cfrac%7Bn_k%7D%7Bv%20+%20n_k%20s%5E2_%7Bc,k%7D%7D%0A%5Cend%7Balign*%7D%0A"></p>
 <p>Note that this quantity is bounded above <img src="https://latex.codecogs.com/png.latex?%5Clim_%7Bn_k%20%5Cto%20%5Cinfty%7D%20%5Cmathcal%7BI%7D_%7Bcorr%7D%20=%20%5Clim_%7Bn_k%20%5Cto%20%5Cinfty%7D%20%5Cfrac%7Bn_k%7D%7Bv%20+%20n_k%20s%5E2_%7Bc,k%7D%7D%20=%20%5Cfrac%7B1%7D%7Bs%5E2_%7Bc,k%7D%7D"></p>
 <p>This means that no matter how many treatment arms you add to experiment <img src="https://latex.codecogs.com/png.latex?k">, the information it contributes to <img src="https://latex.codecogs.com/png.latex?%5Cmu"> is strictly upper-bounded by the precision of the shared control group.</p>
-<p>If we naively assume independence, the off-diagonal terms <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> are zeroed out in <img src="https://latex.codecogs.com/png.latex?%5CSigma">. The total information becomes the sum of <img src="https://latex.codecogs.com/png.latex?n_k"> independent precisions: <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BI%7D_%7Bindep%7D%20=%20%5Cfrac%7Bn_k%7D%7Bv%20+%20s%5E2_%7Bc,k%7D%7D"> As <img src="https://latex.codecogs.com/png.latex?n_k%20%5Cto%20%5Cinfty">, the naive model’s information <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BI%7D_%7Bindep%7D%20%5Cto%20%5Cinfty">. By treating the effect measures as independent, the model becomes infinitely overconfident, allowing a single experiment to entirely dominate the hyper-parameter estimates.</p>
+<p>If we naively assume independence, the off-diagonal terms <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> are zeroed out in <img src="https://latex.codecogs.com/png.latex?%5CSigma">. The total information becomes the sum of <img src="https://latex.codecogs.com/png.latex?n_k"> independent precisions: <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BI%7D_%7Bindep%7D%20=%20%5Cfrac%7Bn_k%7D%7Bv%20+%20s%5E2_%7Bc,k%7D%7D"> As <img src="https://latex.codecogs.com/png.latex?n_k%20%5Cto%20%5Cinfty">, the naive model’s information <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BI%7D_%7Bindep%7D%20%5Cto%20%5Cinfty">. By treating elements of <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> as independent, the model becomes overconfident, allowing a single experiment to entirely dominate the hyper-parameter estimates.</p>
 <div class="cell">
 <div class="cell-output-display">
 <!-- preamble start -->
@@ -258,15 +258,11 @@ Important
 </section>
 <section id="the-control-is-estimated-with-a-lot-of-error" class="level2">
 <h2 class="anchored" data-anchor-id="the-control-is-estimated-with-a-lot-of-error">2. The Control Is Estimated With A Lot of Error</h2>
-<p>Suppose the true mean of the control group in experiment <img src="https://latex.codecogs.com/png.latex?k"> is <img src="https://latex.codecogs.com/png.latex?%5Cmu_c">, but due to sampling variance, the observed mean is drawn with a massive negative error, <img src="https://latex.codecogs.com/png.latex?-%5Cepsilon">. Consequently, all <img src="https://latex.codecogs.com/png.latex?n_k"> observed effect measures <img src="https://latex.codecogs.com/png.latex?%5Cdelta_%7Bk,i%7D"> will be artificially inflated by <img src="https://latex.codecogs.com/png.latex?+%5Cepsilon">.</p>
+<p>Suppose the true mean of the control group in experiment <img src="https://latex.codecogs.com/png.latex?k"> is <img src="https://latex.codecogs.com/png.latex?%5Cmu_c">, but due to sampling variance, the observed mean is drawn with a massive negative error. Consequently, all <img src="https://latex.codecogs.com/png.latex?n_k"> observed effect measures <img src="https://latex.codecogs.com/png.latex?%5Cdelta_%7Bk,i%7D"> will be artificially inflated.</p>
 <p>In the marginal log-likelihood, the penalty term for experiment <img src="https://latex.codecogs.com/png.latex?k"> is proportional to: <img src="https://latex.codecogs.com/png.latex?-%20%5Cfrac%7B1%7D%7B2%7D%20(%5Cdelta_k%20-%20%5Cmu%20%5Cmathbf%7B1%7D_%7Bn_k%7D)%5ET%20V_k%5E%7B-1%7D%20(%5Cdelta_k%20-%20%5Cmu%20%5Cmathbf%7B1%7D_%7Bn_k%7D)"></p>
 <p>Looking back at our derivation of <img src="https://latex.codecogs.com/png.latex?V_k%5E%7B-1%7D">, the off-diagonal elements are exactly: <img src="https://latex.codecogs.com/png.latex?-%20%5Cfrac%7Bs%5E2_%7Bc,k%7D%7D%7Bv(v%20+%20n_k%20s%5E2_%7Bc,k%7D)%7D"></p>
-<p>These strictly negative off-diagonal terms are the mathematical mechanism for discounting the shared anomaly. When computing the quadratic form, the cross-terms subtract value away from the likelihood if multiple <img src="https://latex.codecogs.com/png.latex?%5Cdelta_%7Bk,i%7D"> deviate from <img src="https://latex.codecogs.com/png.latex?%5Cmu"> in the same direction. The model deduces that a simultaneous shift of all <img src="https://latex.codecogs.com/png.latex?n_k"> arms is highly improbable unless it was driven by the shared variance component <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D">.</p>
-<p>If we assume an independent, diagonal <img src="https://latex.codecogs.com/png.latex?%5CSigma">, these negative correcting terms disappear. The model receives <img src="https://latex.codecogs.com/png.latex?n_k"> independent signals that the treatment effect is <img src="https://latex.codecogs.com/png.latex?%5Cmu%20+%20%5Cepsilon">. This breaks inference in two ways:</p>
-<ol type="1">
-<li><strong>Biased <img src="https://latex.codecogs.com/png.latex?%5Cmu">:</strong> The grand mean is pulled violently upward toward <img src="https://latex.codecogs.com/png.latex?%5Cmu%20+%20%5Cepsilon">.</li>
-<li><strong>Biased <img src="https://latex.codecogs.com/png.latex?%5Ctau">:</strong> Because the <img src="https://latex.codecogs.com/png.latex?n_k"> effect measures are artificially clustered tightly together (shifted by the exact same <img src="https://latex.codecogs.com/png.latex?%5Cepsilon">), the model assumes there is very little between-arm heterogeneity, crushing the estimate of <img src="https://latex.codecogs.com/png.latex?%5Ctau"> toward zero.</li>
-</ol>
+<p>These strictly negative off-diagonal terms discount the shared anomaly. When computing the quadratic form, the cross-terms subtract value away from the likelihood if multiple <img src="https://latex.codecogs.com/png.latex?%5Cdelta_%7Bk,i%7D"> deviate from <img src="https://latex.codecogs.com/png.latex?%5Cmu"> in the same direction. A simultaneous shift of all <img src="https://latex.codecogs.com/png.latex?n_k"> arms is highly unlikely unless it was driven by the shared variance component <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D">.</p>
+<p>If we assume an independent, diagonal <img src="https://latex.codecogs.com/png.latex?%5CSigma">, these negative correcting terms disappear. The model receives <img src="https://latex.codecogs.com/png.latex?n_k"> independent signals that the treatment effect is larger than it was in reality, leading to potential bias in <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Ctau">.</p>
 <div class="cell">
 <div class="cell-output-display">
 <!-- preamble start -->
@@ -364,12 +360,10 @@ Important
 </section>
 <section id="your-propensity-score-highly-favors-the-variant-over-the-treatment" class="level2">
 <h2 class="anchored" data-anchor-id="your-propensity-score-highly-favors-the-variant-over-the-treatment">3. Your Propensity Score Highly Favors the Variant Over The Treatment</h2>
-<p>The degree to which we <em>have</em> to model the correlation depends entirely on the ratio of the control sampling variance to the treatment sampling variance.</p>
+<p>The degree to which we <em>have</em> to model the correlation depends on the ratio of the control sampling variance to the treatment sampling variance.</p>
 <p>For any two variants <img src="https://latex.codecogs.com/png.latex?i"> and <img src="https://latex.codecogs.com/png.latex?j"> in experiment <img src="https://latex.codecogs.com/png.latex?k">, the correlation of their effect measures in the likelihood is: <img src="https://latex.codecogs.com/png.latex?%5Crho_%7Bi,j%7D%20=%20%5Cfrac%7Bs%5E2_%7Bc,k%7D%7D%7B%5Csqrt%7B(s%5E2_%7Bt,k,i%7D%20+%20s%5E2_%7Bc,k%7D)(s%5E2_%7Bt,k,j%7D%20+%20s%5E2_%7Bc,k%7D)%7D%7D"></p>
 <p>If <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bt,k,i%7D%20%5Capprox%20s%5E2_%7Bt,k,j%7D">, this simplifies to: <img src="https://latex.codecogs.com/png.latex?%5Crho%20%5Capprox%20%5Cfrac%7Bs%5E2_%7Bc,k%7D%7D%7Bs%5E2_t%20+%20s%5E2_%7Bc,k%7D%7D"></p>
-<p>This gives us the exact boundary conditions for when the diagonal approximation is safe, and when it is disastrous:</p>
-<p>If the control group has the majority of traffic then <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> will be tiny compared to the treatment variance <img src="https://latex.codecogs.com/png.latex?s%5E2_t">. The correlation approaches zero, <img src="https://latex.codecogs.com/png.latex?%5CSigma"> becomes essentially diagonal, and sampling a single effect measure throws away valuable, nearly-independent information.</p>
-<p>If the treatment has teh majority of traffic, <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> dominates <img src="https://latex.codecogs.com/png.latex?s%5E2_t">. The correlation approaches 1. The effect measures are almost perfectly co-linear, and treating them as independent should severly bias estimates.</p>
+<p>This gives us an idea of when the approximation is safe. If the control group has the majority of traffic then <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> will be tiny compared to the treatment variance <img src="https://latex.codecogs.com/png.latex?s%5E2_t">. The correlation approaches zero, <img src="https://latex.codecogs.com/png.latex?%5CSigma"> becomes essentially diagonal, and sampling a single effect measure throws away valuable, nearly-independent information. If the treatment has the majority of traffic, <img src="https://latex.codecogs.com/png.latex?s%5E2_%7Bc,k%7D"> dominates <img src="https://latex.codecogs.com/png.latex?s%5E2_t">. The correlation approaches 1. The effect measures are almost perfectly co-linear, and treating them as independent should severly bias estimates.</p>
 <div class="cell">
 <div class="cell-output-display">
 <!-- preamble start -->
@@ -474,8 +468,8 @@ Important
 </section>
 
  ]]></description>
-  <guid>https://dpananos.github.io/posts/2026-03-16-shrink/</guid>
-  <pubDate>Mon, 16 Mar 2026 04:00:00 GMT</pubDate>
+  <guid>https://dpananos.github.io/posts/2026-03-22-shrink/</guid>
+  <pubDate>Sun, 22 Mar 2026 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Optimal Experiment Sample Sizes for Bayesian A/B Tests</title>
