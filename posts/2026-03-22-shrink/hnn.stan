@@ -12,11 +12,16 @@ transformed data {
 parameters {
   real mu_z;
   real<lower=0> tau_z;
+  vector[N] zz;
+}
+transformed parameters{
+  vector[N] theta = mu_z + tau_z*zz;
 }
 model {
   mu_z ~ normal(0, 1);
+  zz ~ std_normal();
   tau_z ~ cauchy(0, 1);
-  z ~ multi_normal(rep_vector(mu_z, N), Sigma_z + diag_matrix(rep_vector(square(tau_z), N)));
+  z ~ multi_normal(theta, Sigma_z);
 }
 generated quantities {
   real mu = mu_z * s + m;

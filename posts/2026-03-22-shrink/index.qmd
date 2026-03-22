@@ -99,71 +99,66 @@ simulate_experiment_effects <- function(experiment_ids, mu = 1, tau = 1,
 }
 
 library(cmdstanr)
-library(tinytable)
+library(ggplot2)
 mod <- cmdstan_model("hnn.stan")
 
-fit_laplace <- function(sim, caption = NULL, draws = 10000) {
-  invisible(capture.output({
-    corr <- mod$laplace(
-      data = list(N = length(sim$deltas), delta = sim$deltas, Sigma = sim$Sigma),
-      draws = draws, refresh = 0
-    )
-    naive <- mod$laplace(
-      data = list(N = length(sim$deltas), delta = sim$deltas, Sigma = diag(diag(sim$Sigma))),
-      draws = draws, refresh = 0
-    )
-  }))
-  df <- data.frame(
-    Model = c("Correlated", "Naive", "True"),
-    mu = c(mean(corr$draws("mu")), mean(naive$draws("mu")), sim$mu),
-    tau = c(mean(corr$draws("tau")), mean(naive$draws("tau")), sim$tau)
-  )
-  tt(df, digits = 4, theme = "grid", caption = caption)
-}
-
-fit_mcmc <- function(sim, caption = NULL, show_messages = FALSE, show_exceptions = FALSE, refresh = 0) {
+fit_mcmc <- function(sim, show_messages = FALSE, show_exceptions = FALSE, refresh = 0) {
   corr <- mod$sample(
     data = list(N = length(sim$deltas), delta = sim$deltas, Sigma = sim$Sigma),
-    refresh = refresh, show_messages = show_messages, show_exceptions = show_exceptions
+    refresh = refresh, show_messages = show_messages, show_exceptions = show_exceptions,
+    adapt_delta = 0.99
   )
-  corr_summary <- data.frame(
-    Parameter = c("mu", "tau"),
-    Median = c(median(as.numeric(corr$draws("mu"))), median(as.numeric(corr$draws("tau")))),
-    SD = c(sd(as.numeric(corr$draws("mu"))), sd(as.numeric(corr$draws("tau"))))
-  )
+  corr_mu  <- as.numeric(corr$draws("mu"))
+  corr_tau <- as.numeric(corr$draws("tau"))
   rm(corr); gc()
   file.remove(list.files(tempdir(), pattern = "hnn-.*\\.csv$", full.names = TRUE))
 
   naive <- mod$sample(
     data = list(N = length(sim$deltas), delta = sim$deltas, Sigma = diag(diag(sim$Sigma))),
-    refresh = refresh, show_messages = show_messages, show_exceptions = show_exceptions
+    refresh = refresh, show_messages = show_messages, show_exceptions = show_exceptions,
+    adapt_delta = 0.99
   )
-  naive_summary <- data.frame(
-    Parameter = c("mu", "tau"),
-    Median = c(median(as.numeric(naive$draws("mu"))), median(as.numeric(naive$draws("tau")))),
-    SD = c(sd(as.numeric(naive$draws("mu"))), sd(as.numeric(naive$draws("tau"))))
-  )
+  naive_mu  <- as.numeric(naive$draws("mu"))
+  naive_tau <- as.numeric(naive$draws("tau"))
   rm(naive); gc()
   file.remove(list.files(tempdir(), pattern = "hnn-.*\\.csv$", full.names = TRUE))
 
-  df <- rbind(corr_summary, naive_summary)
-  df <- rbind(df, data.frame(Parameter = c("mu", "tau"), Median = c(sim$mu, sim$tau), SD = c(NA, NA)))
-  tt(df, digits = 4, theme = "grid", caption = caption) |>
-    group_tt(i = list("Correlated" = 1, "Naive" = 3, "True" = 5))
+  draws_long <- rbind(
+    data.frame(model = "Correlated", parameter = "mu",  value = corr_mu),
+    data.frame(model = "Correlated", parameter = "tau", value = corr_tau),
+    data.frame(model = "Naive",      parameter = "mu",  value = naive_mu),
+    data.frame(model = "Naive",      parameter = "tau", value = naive_tau)
+  )
+  true_vals <- data.frame(
+    parameter   = c("mu", "tau"),
+    true_value  = c(sim$mu, sim$tau)
+  )
+
+  p <- ggplot(draws_long, aes(x = value, color = model, fill = model)) +
+    geom_density(alpha = 0.3) +
+    geom_vline(data = true_vals, aes(xintercept = true_value),
+               linetype = "dashed", color = "black", linewidth = 0.8) +
+    facet_wrap(~parameter, scales = "free") +
+    labs(x = NULL, y = "Density", color = "Model", fill = "Model") +
+    theme_minimal()
+  print(p)
+
+  invisible(NULL)
 }
 ```
 
 
-We can sample from this model using stan. When the $\delta$ truly are independent, MCMC works fine.  Take a look at the table below.  I simulate $K=50$ experiments, each with $n_k=1 k = 1, \ldots, 50$ effect estimates.  
+We can sample from this model using stan. When the $\delta$ truly are independent, MCMC works fine.  I simulate $K=50$ experiments, each with $n_k=1 k = 1, \ldots, 50$ effect estimates.
 
 ```{r}
+#| fig-cap: "50 independent single-variant experiments (mu=1, tau=1, treatment_s=1, control_s=1). Both models agree because Sigma is already diagonal."
 set.seed(1)
 sim_baseline <- simulate_experiment_effects(
   experiment_ids = 1:50,
   treatment_s = 1,
   control_s = 1
 )
-fit_mcmc(sim_baseline, caption = "50 independent single-variant experiments. mu=1, tau=1, treatment_s=1, control_s=1. Both models agree because Sigma is already diagonal.")
+fit_mcmc(sim_baseline)
 ```
 
 
@@ -202,13 +197,14 @@ $$\mathcal{I}_{indep} = \frac{n_k}{v + s^2_{c,k}}$$
 As $n_k \to \infty$, the naive model's information $\mathcal{I}_{indep} \to \infty$. By treating elements of $\delta$ as independent, the model becomes overconfident, allowing a single experiment to entirely dominate the hyper-parameter estimates.
 
 ```{r}
+#| fig-cap: "One experiment contributes 26 variants, the remaining 24 are single-variant (treatment_s=1, control_s=1). The naive model over-weights the large experiment."
 set.seed(1)
 sim_mega <- simulate_experiment_effects(
   experiment_ids = c(rep(1, 26), 2:25),
   treatment_s = 1,
   control_s = 1
 )
-fit_mcmc(sim_mega, caption = "50 effect measures: one experiment contributes 26 variants, the remaining 24 are single-variant. Same variances as baseline (treatment_s=1, control_s=1).")
+fit_mcmc(sim_mega)
 ```
 
 ## 2. The Control Is Estimated With A Lot of Error
@@ -226,6 +222,7 @@ These strictly negative off-diagonal terms discount the shared anomaly. When com
 If we assume an independent, diagonal $\Sigma$, these negative correcting terms disappear. The model receives $n_k$ independent signals that the treatment effect is larger than it was in reality, leading to potential bias in $\mu$ and $\tau$.
 
 ```{r}
+#| fig-cap: "Same structure as above but the control mean in the 26-variant experiment is forced 4 SDs below its true value. The naive model mistakes the shared anomaly for a real signal."
 set.seed(1)
 sim_outlier <- simulate_experiment_effects(
   experiment_ids = c(rep(1, 26), 2:25),
@@ -233,7 +230,7 @@ sim_outlier <- simulate_experiment_effects(
   control_s = 1,
   force_outlier = TRUE
 )
-fit_mcmc(sim_outlier, caption = "Same structure as above (26 + 24 = 50 effects, treatment_s=1, control_s=1), but the control mean in the 26-variant experiment is forced 4 SDs below its true value.")
+fit_mcmc(sim_outlier)
 ```
 
 ## 3. Your Propensity Score Highly Favors the Variant Over The Treatment
@@ -249,13 +246,14 @@ $$\rho \approx \frac{s^2_{c,k}}{s^2_t + s^2_{c,k}}$$
 This gives us an idea of when the approximation is safe. If the control group has the majority of traffic then $s^2_{c,k}$ will be tiny compared to the treatment variance $s^2_t$. The correlation approaches zero, $\Sigma$ becomes essentially diagonal, and sampling a single effect measure throws away valuable, nearly-independent information. If the treatment has the majority of traffic, $s^2_{c,k}$ dominates $s^2_t$. The correlation approaches 1. The effect measures are almost perfectly co-linear, and treating them as independent should severly bias estimates.
 
 ```{r}
+#| fig-cap: "Same structure as above but treatment_s=0.1 and control_s=1, giving within-experiment correlation of about 0.99. The naive model is severely biased."
 set.seed(1)
 sim_high_corr <- simulate_experiment_effects(
   experiment_ids = c(rep(1, 26), 2:25),
   treatment_s = 0.1,
   control_s = 1
 )
-fit_mcmc(sim_high_corr, caption = "Same structure (26 + 24 = 50 effects), but treatment_s=0.1 and control_s=1, giving within-experiment correlation of about 0.99.")
+fit_mcmc(sim_high_corr)
 ```
 
 
