@@ -126,8 +126,8 @@ fit_mcmc <- function(sim, show_messages = FALSE, show_exceptions = FALSE, refres
   draws_long <- rbind(
     data.frame(model = "Correlated", parameter = "mu",  value = corr_mu),
     data.frame(model = "Correlated", parameter = "tau", value = corr_tau),
-    data.frame(model = "Naive",      parameter = "mu",  value = naive_mu),
-    data.frame(model = "Naive",      parameter = "tau", value = naive_tau)
+    data.frame(model = "Independent",      parameter = "mu",  value = naive_mu),
+    data.frame(model = "Independent",      parameter = "tau", value = naive_tau)
   )
   true_vals <- data.frame(
     parameter   = c("mu", "tau"),
