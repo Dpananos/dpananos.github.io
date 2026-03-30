@@ -1,5 +1,5 @@
 ---
-title: Analysis of Paired Ordinal Data -- More Than the T-Test
+title: "Analysis of Paired Data: Beyond The T-Test"
 date: 2026-03-27
 code-fold: false
 echo: false
@@ -13,17 +13,9 @@ format:
     html-math-method: mathjax
 ---
 
-This post is going to really belabor a point, so if you came for a quick read, this is not the post for you.  Here is the TL;DR
 
-::: {.callout collapse="false"}
-## TL;DR
 
-If you use ordinal regression and a cluster robust standard error, then you can benefit from the correlation in ordinal outcomes much like in a paired t-test.
-:::
-
-When answers are cheap, sometimes it pays dividends to really scrutinize the details. In this post I plan to do that.  We'll re-derive some basic results and take the long way to analyzing paired continuous data.  Then, we'll discuss how this can be paired to ordinal data and why that might matter (as a teaser, this can be applied to LLM Evals, at least in the way I've seen them done).
-
-## Paired Data
+## Warm Up: Pairs of Continuous Data
 
 Let the $y_{c, k}$ be some continuous outcome from the $k^{th}$ observation in pair $c$.  The $c^{th}$ pair is then $(y_{c, 1}, y_{c, 2})$.  If we want to test the null hypothesis that $E[y_{c, 1}] = E[y_{c, 2}]$ then the typical advice is to use a paired t-test.
 
@@ -107,80 +99,37 @@ $$
 (X^\prime X)^{-1}.
 $$
 
-Let's see what each component simplifies to. Since each cluster contributes the same $X_c$, we have
+Because our setup is quite straightforward, we can simplify some of these expressions.  First, let's tackle the "bread" of this sandwich estimator.  It can be shown that
 
-$$
-X^\prime X = \sum_{c \in \mathcal{C}} X_c^\prime X_c
-=
-n
-\begin{bmatrix}
-2 & 1 \\
-1 & 1
-\end{bmatrix},
-$$
+$$ X^\prime X = n \begin{bmatrix} 2 & 1 \\ 1 & 1 \end{bmatrix}$$
+$$ (X^\prime X)^{-1} = \dfrac{1}{n} \begin{bmatrix} 1 & -1 \\ -1 & 2 \end{bmatrix} \>.$$
 
-which implies
+Next, if we denote $y_c - X_c \hat \beta = \begin{bmatrix} y_{c, 1} - \bar y_1, y_{c, 2} - \bar y_2   \end{bmatrix}^\prime =  \begin{bmatrix} \hat e_{c, 1}, \hat e_{c, 2} \end{bmatrix} ^\prime = \hat e_c$ then we can show that
 
-$$
-(X^\prime X)^{-1}
-=
-\frac{1}{n}
-\begin{bmatrix}
-1 & -1 \\
--1 & 2
-\end{bmatrix}.
-$$
+$$ X_c^\prime \hat e_c = \begin{bmatrix} \hat e_{c, 1} + \hat e_{c,2} \\ \hat e_{c, 2} \end{bmatrix} \>.  $$
 
-Let $\hat e_c = y_c - X_c\hat \beta = \begin{bmatrix} y_{c, 1} - \bar y_{c, 1}, y_{c, 2} - \bar y_{c,2} \end{bmatrix} ^ \prime$.  Then
+Rather than multiply the bread by the meat, let's first notice that
 
-$$ X_c^\prime \hat e_c = \begin{bmatrix} y_{c, 1} - \bar y_{c, 1} \\ (y_{c, 1} - \bar y_{c, 1}) +  (y_{c, 2} - \bar y_{c,2}) \end{bmatrix}$$
+$$ (X^\prime X)^{-1} X^\prime_c \hat e_c = \dfrac{1}{n} \begin{bmatrix} \hat e_{c, 1} \\  \hat e_{c, 2} - \hat e_{c, 1} \end{bmatrix} \ $$
 
-and 
+which _greatly_ simplifies the covariance to
 
-$$  X^\prime_c\hat \Omega_c X_c = X^\prime_c \hat e_c \hat e_c ^\prime X_c = \begin{bmatrix}
-\left[(y_{c,1} - \bar y_1) + (y_{c,2} - \bar y_2)\right]^2 &
-\left[(y_{c,1} - \bar y_1) + (y_{c,2} - \bar y_2)\right](y_{c,2} - \bar y_2)
-\\[6pt]
-\left[(y_{c,1} - \bar y_1) + (y_{c,2} - \bar y_2)\right](y_{c,2} - \bar y_2) &
-(y_{c,2} - \bar y_2)^2
+$$\hat V(\hat \beta) = \dfrac{1}{n^2} \sum_{c \in \mathcal{C}}
+\begin{bmatrix} \hat e_{c, 1} \\  \hat e_{c, 2} - \hat e_{c, 1} \end{bmatrix} \begin{bmatrix} \hat e_{c, 1} &  \hat e_{c, 2} - \hat e_{c, 1} \end{bmatrix}
+ = \dfrac{1}{n^2} \begin{bmatrix} 
+\sum_{c \in \mathcal{C}} \hat e_{c, 1}^2 & \sum_{c \in \mathcal{C}} \hat e_{c, 1}(\hat e_{c, 2} - \hat e_{c, 1}) \\ 
+\sum_{c \in \mathcal{C}} \hat e_{c, 1}(\hat e_{c, 2} - \hat e_{c, 1}) & \sum_{c \in \mathcal{C}} (\hat e_{c, 2} - \hat e_{c, 1})^2 
 \end{bmatrix}$$
 
-Summing over $c$ and putting it all together
+The bottom right element is what we want to look at.  Note
 
-```{r}
-#| include: false
-library(fixest)
-library(tidyverse)
-Bigma <- matrix(c(1, 0.8, 0.8, 1), nrow=2)
-Y <- MASS::mvrnorm(n=1000, mu=c(0, 0), Sigma = Bigma)
+$$\begin{align}
+\sum_{c \in \mathcal{C}} (\hat e_{c, 2} - \hat e_{c, 1})^2 &= \sum_{c \in \mathcal{C}}\left((y_{c, 2} - \bar{y}_2) - (y_{c, 1} - \bar{y}_1)\right)^2 \\
+& = \sum_{c \in \mathcal{C}} \left( (y_{c, 2} - y_{c, 1}) - (\bar y_2 - \bar y_1) \right)^2 \\
+& = \sum_{c \in \mathcal{C}} (\beta_c - \hat \beta)^2
+\end{align}$$
 
-d <- tibble(y = c(Y[, 1], Y[, 2]),
-            cluster_id = rep(1:1000, 2),
-            k = rep(1:2, each=1000)
-            )
-
-# Non-clustered
-f1 <- feols(y~k, data=d)
-f2 <- feols(y~k, data=d, vcov = ~ cluster_id)
-
-#paired analysis
-f3 <- t.test(Pair(Y[, 2] , Y[, 1]) ~ 1)
-
-paired <- broom::tidy(f3) |> 
-  mutate(analysis = 'Paired') |> 
-  select(analysis, estimate, conf.low, conf.high)
-
-regressions <- list('Non-Clustered' = f1, 'Clustered' = f2) |> 
-  imap_dfr(~{
-    broom::tidy(.x, conf.int=T) |> 
-      filter(term=='k') |> 
-      mutate(analysis = .y) |> 
-      select(analysis, estimate, starts_with('conf'))
-  }) |> 
-  arrange(analysis)
+Which is approximately equal to the estimator for the variance we derived above (as $n$ gets large, the difference becomes negligible).
 
 
-bind_rows(paired, regressions) |> 
-  tinytable::tt(digits=4)
-```
-
+## Binary Data (or, When You Can't Take a Difference)
