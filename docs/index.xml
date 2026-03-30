@@ -9,7 +9,7 @@
 <link>https://dpananos.github.io/</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.4.549</generator>
+<generator>quarto-1.7.32</generator>
 <lastBuildDate>Sun, 22 Mar 2026 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Musings About The Normal Normal Model</title>
@@ -481,6 +481,7 @@ font-style: inherit;">"N"</span>)</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(x){</span>
 <span id="cb3-2">  <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -558,6 +559,7 @@ font-style: inherit;">clean_yn</span>(.x)</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(data, clean_func, rename_map){</span>
 <span id="cb5-2">  data <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -699,6 +701,7 @@ font-style: inherit;">func =</span> clean_yn</span>
 background-color: null;
 font-style: inherit;">reduce</span>(cleaning_tasks, <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(data, task) {</span>
 <span id="cb8-13">  <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -765,6 +768,7 @@ font-style: inherit;">.init=</span>raw_data)</span></code></pre></div>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(x, low, hi) (x<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span>hi) <span class="sc" style="color: #5E5E5E;
@@ -777,6 +781,7 @@ font-style: inherit;">&lt;=</span> x)</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(Mc){</span>
 <span id="cb1-4">  </span>
 <span id="cb1-5">  actual_lift <span class="ot" style="color: #003B4F;
@@ -2040,6 +2045,7 @@ font-style: inherit;">library</span>(tidyverse)</span>
 background-color: null;
 font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(n,p,m,s){</span>
 <span id="cb1-3">  d<span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3074,6 +3080,7 @@ font-style: inherit;">"Set1"</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
 <span id="cb1-2"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">data</span>{</span>
 <span id="cb1-3">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -3090,6 +3097,7 @@ font-style: inherit;">real</span> beta;</span>
 <span id="cb1-7">}</span>
 <span id="cb1-8"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">parameters</span>{</span>
 <span id="cb1-9">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -3098,6 +3106,7 @@ font-style: inherit;">real</span> mu;</span>
 background-color: null;
 font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>&gt; tau;</span>
@@ -3107,6 +3116,7 @@ font-style: inherit;">vector</span>[n] z;</span>
 <span id="cb1-12">}</span>
 <span id="cb1-13"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">transformed parameters</span> {</span>
 <span id="cb1-14">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -3114,6 +3124,7 @@ font-style: inherit;">vector</span>[n] theta = mu + tau * z;</span>
 <span id="cb1-15">}</span>
 <span id="cb1-16"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">model</span> {</span>
 <span id="cb1-17">  <span class="co" style="color: #5E5E5E;
 background-color: null;
@@ -3803,6 +3814,7 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(draws_a, draws_b){</span>
 <span id="cb1-2">  diff <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -3832,6 +3844,7 @@ font-style: inherit;">0</span>))</span>
 <span id="cb1-5">  </span>
 <span id="cb1-6">  <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">if</span>(loss_a <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;</span> loss_b){</span>
@@ -3842,6 +3855,7 @@ background-color: null;
 font-style: inherit;">"A"</span></span>
 <span id="cb1-8">  } <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">else</span> {</span>
 <span id="cb1-9">    winner <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -4402,6 +4416,7 @@ font-style: inherit;">$</span>ggPlot</span></code></pre></div>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">x=</span><span class="dv" style="color: #AD0000;
@@ -4679,6 +4694,7 @@ Type:  response </code></pre>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(d, s){</span>
 <span id="cb8-2">  <span class="fl" style="color: #AD0000;
 background-color: null;
@@ -4701,6 +4717,7 @@ font-style: inherit;">*</span>s</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(s){</span>
 <span id="cb8-6">  <span class="fl" style="color: #AD0000;
 background-color: null;
@@ -4929,6 +4946,7 @@ font-style: inherit;">import</span> itertools</span>
 <span id="cb1-7"></span>
 <span id="cb1-8"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">def</span> f(k:<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>, n:<span class="bu" style="color: null;
@@ -4974,12 +4992,14 @@ background-color: null;
 font-style: inherit;">-</span>k)</span>
 <span id="cb1-11">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> density.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">sum</span>()</span>
 <span id="cb1-12"></span>
 <span id="cb1-13"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">def</span> approx_f(n:<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>):</span>
@@ -5002,6 +5022,7 @@ background-color: null;
 font-style: inherit;">1</span>) </span>
 <span id="cb1-15">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
@@ -5030,8 +5051,10 @@ font-style: inherit;">=</span> np.zeros(coins.size)</span>
 <span id="cb1-20"></span>
 <span id="cb1-21"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, n <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(coins):</span>
@@ -5445,8 +5468,10 @@ font-style: inherit;">len</span>(p1)))</span>
 <span id="cb1-25"></span>
 <span id="cb1-26"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(p1):</span>
@@ -5622,8 +5647,10 @@ font-style: inherit;">0.5</span>)</span>
 <span id="cb1-48"></span>
 <span id="cb1-49"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(p1):</span>
@@ -6062,6 +6089,7 @@ font-style: inherit;">'A'</span>))</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(x, d) <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">pmin</span>((x), <span class="dv" style="color: #AD0000;
@@ -6403,6 +6431,7 @@ font-style: inherit;">real</span> sigma) {</span>
 <span id="cb1-4"> </span>
 <span id="cb1-5"> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> log(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span> - exp(generalized_gamma_lcdf(x | k, mu sigma)));</span>
@@ -6416,6 +6445,7 @@ font-style: inherit;">1</span> - exp(generalized_gamma_lcdf(x | k, mu sigma)));<
 <div class="cell-output cell-output-stdout">
 <div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">functions</span> {</span>
 <span id="cb2-2">  </span>
 <span id="cb2-3">  <span class="dt" style="color: #AD0000;
@@ -6444,6 +6474,7 @@ font-style: inherit;">1</span> / sqrt(k) * w)) - log(x);</span>
 <span id="cb2-8">    </span>
 <span id="cb2-9">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> d;</span>
 <span id="cb2-10">  }</span>
 <span id="cb2-11">  </span>
@@ -6469,6 +6500,7 @@ font-style: inherit;">real</span> d;</span>
 <span id="cb2-17">    </span>
 <span id="cb2-18">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> d;</span>
 <span id="cb2-19">  }</span>
 <span id="cb2-20">  </span>
@@ -6495,6 +6527,7 @@ background-color: null;
 font-style: inherit;">1</span> / sqrt(k) * w)));</span>
 <span id="cb2-26">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> d;</span>
 <span id="cb2-27">  }</span>
 <span id="cb2-28">  </span>
@@ -6511,6 +6544,7 @@ background-color: null;
 font-style: inherit;">real</span> sigma) {</span>
 <span id="cb2-30">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> log_diff_exp(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>, generalized_gamma_lcdf(x | k, mu, sigma));</span>
@@ -6544,6 +6578,7 @@ background-color: null;
 font-style: inherit;">2</span> * gamma) / Q;</span>
 <span id="cb2-37">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> exp(mu + sigma * w);</span>
 <span id="cb2-38">  }</span>
 <span id="cb2-39">  </span></code></pre></div>

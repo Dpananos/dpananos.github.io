@@ -1,0 +1,127 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Neat Litle Combinatorics Problem\"\n",
+        "date: \"2018-08-31\"\n",
+        "categories: [Python, Probability]\n",
+        "---\n",
+        "\n",
+        "I'll cut right to it.  Consider the set $S = (49, 8, 48, 15, 47, 4, 16, 23, 43, 44, 42, 45, 46 )$.  What is the expected value for the minimum of 6 samples from this set?\n",
+        "\n",
+        "We could always just sample form the set to estimate the expected value.  Here is a python script to do just that."
+      ],
+      "id": "25faba27"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import numpy as np\n",
+        "x = np.array([49, 8, 48, 15, 47, 4, 16, 23, 43, 44, 42, 45, 46])\n",
+        "\n",
+        "mins = []\n",
+        "for _ in range(1000):\n",
+        "    mins.append(np.random.choice(x,size = 6, replace = False).min())\n",
+        "\n",
+        "print(np.mean(mins))"
+      ],
+      "id": "a4f30ab6",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "But that is estimating the mean.  We can do better and directly compute it.  Here is some python code to create all subsets from $S$ of size 6.  Then, we simply take out the minimum from each subset and compute the mean."
+      ],
+      "id": "e8521522"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import numpy as np\n",
+        "from itertools import combinations, groupby\n",
+        "\n",
+        "x = np.array([49, 8, 48, 15, 47, 4, 16, 23, 43, 44, 42, 45, 46])\n",
+        "x = np.sort(x)\n",
+        "\n",
+        "c = list(combinations(x,6))\n",
+        "\n",
+        "mins = list(map(lambda x: x[0], c))\n",
+        "\n",
+        "s = 0\n",
+        "for k, g in groupby(sorted(mins)):\n",
+        "    s+=k*(len(list(g))/len(mins))\n",
+        "\n",
+        "print( s )"
+      ],
+      "id": "d881819a",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The script returns 8.18 repeating.  Great, but we can do even better!  If we can compute the probability density function, we can compute the mean analytically.  Let's consider a smaller problem to outline the solution.\n",
+        "\n",
+        "Let our set in question be $(1,2,3,4,5)$.  Let the minimum of a sample of 3 numbers from this set be the random variable $z$.  Now, note there are $\\binom{5}{3} = 10$ ways to choose 3 elements from a set of 5.\n",
+        "\n",
+        "How many subsets exist where the minimum is 1?  Well, if I sampled 1, then I would still have to pick 2 numbers from a possible 4 numbers larger than 1.  There are $\\binom{4}{2}$ ways to do this. So $p(z=1) = \\binom{4}{2} / \\binom{5}{3}$.\n",
+        "\n",
+        "In a similar fashion, there are $\\binom{3}{2}$ subsets where 2 is the minimum, and $\\binom{2}{2}$ subsets where 3 is the minimum.  There are no subsets where 4 or 5 are the minimum (why?).  So that means the expected minimum value for this set would be\n",
+        "\n",
+        "$$\\operatorname{E}(z) = \\dfrac{ \\sum_{k = 1}^{3} k\\binom{5-k}{2} }{\\binom{5}{3}}  $$\n",
+        "\n",
+        "Whatever that sum happens to be. Here is how you could code up the analytic solution to our problem."
+      ],
+      "id": "abe3ad11"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import numpy as np\n",
+        "from scipy.special import binom\n",
+        "\n",
+        "x = np.array([ 4, 8, 15, 16, 23, 42, 43, 44, 45, 46, 47, 48, 49])\n",
+        "x = np.sort(x)\n",
+        "\n",
+        "sample_size =6\n",
+        "sample_space = x[:-(sample_size-1)]\n",
+        "E = 0\n",
+        "for i,s in enumerate(sample_space,start = 1):\n",
+        "\n",
+        "    E+= s*binom(x.size-i,sample_size-1)\n",
+        "\n",
+        "print(E/binom(x.size, sample_size))"
+      ],
+      "id": "c10a809e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Full disclosure, this was on a job application (literally, on the job application), so sorry KiK for putting the answer out there, but the question was too fun not to write up!"
+      ],
+      "id": "7efd1d04"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

@@ -1,0 +1,314 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Gradient Descent with ODEs\"\n",
+        "date: \"2019-05-21\"\n",
+        "categories: [Python, Machine Learning, Statistics]\n",
+        "image: sir_curves.png\n",
+        "---\n",
+        "\n",
+        "Gradient descent usually isn't used to fit Ordinary Differential Equations (ODEs) to data (at least, that isn't how the Applied Mathematics departments to which I have been a part have done it).  Nevertheless, that doesn't mean that it can't be done.  For some of my recent GSoC work, I've been investigating how to compute gradients of solutions to ODEs without access to the solution's analytical form.  In this blog post, I describe how these gradients can be computed and how they can be used to fit ODEs to synchronous data with gradient descent.\n",
+        "\n",
+        "## Up To Speed With ODEs\n",
+        "\n",
+        "I realize not everyone might have studied ODEs.  Here is everything you need to know:\n",
+        "\n",
+        "A differential equation relates an unknown function $y \\in \\mathbb{R}^n$ to it's own derivative through a function $f: \\mathbb{R}^n \\times \\mathbb{R} \\times \\mathbb{R}^m \\rightarrow  \\mathbb{R}^n$, which also depends on time $t \\in \\mathbb{R}$ and possibly a set of parameters $\\theta \\in \\mathbb{R}^m$.  We usually write ODEs as\n",
+        "\n",
+        "$$y' = f(y,t,\\theta) \\quad y(t_0) = y_0$$\n",
+        "\n",
+        "Here, we refer to the vector $y$ as \"the system\", since the ODE above really defines a system of equations.  The problem is usually equipped with an initial state of the system $y(t_0) = y_0$ from which the system evolves forward in $t$.  Solutions to ODEs in analytic form are often *very hard* if not impossible, so most of the time we just numerically approximate the solution.  It doesn't matter how this is done because numerical integration is not the point of this post.  If you're interested, look up the class of *Runge-Kutta* methods.\n",
+        "\n",
+        "## Computing Gradients for ODEs\n",
+        "\n",
+        "In this section, I'm going to be using derivative notation rather than $\\nabla$ for gradients.  I think it is less ambiguous.\n",
+        "\n",
+        "If we want to fit an ODE model to data by minimizing some loss function $\\mathcal{L}$, then gradient descent looks like\n",
+        "\n",
+        "$$ \\theta_{n+1} = \\theta_n - \\alpha \\dfrac{\\partial \\mathcal{L}}{\\partial \\theta} $$\n",
+        "\n",
+        "In order to compute the gradient of the loss, we need the gradient of the solution, $y$, with respect to $\\theta$.  The gradient of the solution is the hard part here because it can not be computed (a) analytically (because analytic solutions are hard AF), or (b) through automatic differentiation without differentiating through the numerical integration of our ODE (which seems computationally wasteful).\n",
+        "\n",
+        "Thankfully, years of research into ODEs yields a way to do this (that is not the adjoint method.  Surprise!  You thought I was going to say the adjoint method didn't you?).  Forward mode sensitivity analysis calculates gradients by extending the ODE system to include the following equations:\n",
+        "\n",
+        "$$ \\dfrac{d}{dt}\\left( \\dfrac{\\partial y}{\\partial \\theta} \\right) = \\mathcal{J}_f \\dfrac{\\partial y}{\\partial \\theta} +\\dfrac{\\partial f}{\\partial \\theta} $$\n",
+        "\n",
+        "Here, $\\mathcal{J}$ is the Jacobian of $f$ with respect to $y$.  The forward sensitivity analysis is *just another differential equation* (see how it relates the derivative of the unknown $\\partial y / \\partial \\theta$ to itself?)!  In order to compute the gradient of $y$ with respect to $\\theta$ at time $t_i$, we compute\n",
+        "\n",
+        "$$ \\dfrac{\\partial y}{\\partial \\theta} = \\int_{t_0}^{t_i} \\mathcal{J}_f \\dfrac{\\partial y}{\\partial \\theta} + \\dfrac{\\partial f}{\\partial \\theta} \\, dt $$\n",
+        "\n",
+        "I know this looks scary, but since forward mode sensitivities are just ODEs, we actually just get this from what we can consider to be a black box\n",
+        "\n",
+        "$$\\dfrac{\\partial y}{\\partial \\theta} = \\operatorname{BlackBox}(f(y,t,\\theta), t_0, y_0, \\theta)$$\n",
+        "\n",
+        "So now that we have our gradient in hand, we can use the chain rule to write\n",
+        "\n",
+        "$$\\dfrac{\\partial \\mathcal{L}}{\\partial \\theta} =\\dfrac{\\partial \\mathcal{L}}{\\partial y} \\dfrac{\\partial y}{\\partial \\theta} $$\n",
+        "\n",
+        "We can use automatic differentiation to compute $\\dfrac{\\partial \\mathcal{L}}{\\partial y}$.\n",
+        "\n",
+        "OK, so that is some math (interesting to me, maybe not so much to you).  Let's actually implement this in python.\n",
+        "\n",
+        "\n",
+        "## Gradient Descent for the SIR Model\n",
+        "\n",
+        "The SIR model is a set of differential equations which govern how a disease spreads through a homogeneously mixed closed populations.  I could write an entire thesis on this model and its various extensions (in fact, I have), so I'll let you read about those on your free time.\n",
+        "\n",
+        "The system, shown below, is parameterized by a single parameter:\n",
+        "\n",
+        "$$ \\dfrac{dS}{dt} = -\\theta SI \\quad S(0) = 0.99 $$\n",
+        "\n",
+        "$$ \\dfrac{dI}{dt} = \\theta SI - I \\quad I(0) = 0.01 $$\n",
+        "\n",
+        "Let's define the system, the appropriate derivatives, generate some observations and fit $\\theta$ using gradient descent.  Here si what you'll need to get started:"
+      ],
+      "id": "5a3e7f65"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import autograd\n",
+        "from autograd.builtins import tuple\n",
+        "import autograd.numpy as np\n",
+        "\n",
+        "#Import ode solver and rename as BlackBox for consistency with blog\n",
+        "from scipy.integrate import odeint as BlackBox\n",
+        "import matplotlib.pyplot as plt"
+      ],
+      "id": "7c0522eb",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Let's then define the ODE system"
+      ],
+      "id": "71e8f9c8"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def f(y,t,theta):\n",
+        "    '''Function describing dynamics of the system'''\n",
+        "    S,I = y\n",
+        "    ds = -theta*S*I\n",
+        "    di = theta*S*I - I\n",
+        "\n",
+        "    return np.array([ds,di])"
+      ],
+      "id": "311432a7",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "and take appropriate derivatives"
+      ],
+      "id": "6fa979ee"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#Jacobian wrt y\n",
+        "J = autograd.jacobian(f,argnum=0)\n",
+        "#Gradient wrt theta\n",
+        "grad_f_theta = autograd.jacobian(f,argnum=2)"
+      ],
+      "id": "cce94dfc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Next, we'll define the augmented system (that is, the ODE plus the sensitivities)."
+      ],
+      "id": "9da7e654"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def ODESYS(Y,t,theta):\n",
+        "\n",
+        "    #Y will be length 4.\n",
+        "    #Y[0], Y[1] are the ODEs\n",
+        "    #Y[2], Y[3] are the sensitivities\n",
+        "\n",
+        "    #ODE\n",
+        "    dy_dt = f(Y[0:2],t,theta)\n",
+        "    #Sensitivities\n",
+        "    grad_y_theta = J(Y[:2],t,theta)@Y[-2::] + grad_f_theta(Y[:2],t,theta)\n",
+        "\n",
+        "    return np.concatenate([dy_dt,grad_y_theta])"
+      ],
+      "id": "3709d61d",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "We'll optimize the $L_2$ norm of the error\n"
+      ],
+      "id": "a5ca7581"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "def Cost(y_obs):\n",
+        "    def cost(Y):\n",
+        "        '''Squared Error Loss'''\n",
+        "        n = y_obs.shape[0]\n",
+        "        err = np.linalg.norm(y_obs - Y, 2, axis = 1)\n",
+        "\n",
+        "        return np.sum(err)/n\n",
+        "\n",
+        "    return cost"
+      ],
+      "id": "b5d8fca0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Create some observations from which to fit"
+      ],
+      "id": "25a56096"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "fig-height": 5,
+        "fig-width": 5
+      },
+      "source": [
+        "np.random.seed(19920908)\n",
+        "## Generate Data\n",
+        "#Initial Condition\n",
+        "Y0 = np.array([0.99,0.01, 0.0, 0.0])\n",
+        "#Space to compute solutions\n",
+        "t = np.linspace(0,5,101)\n",
+        "#True param value\n",
+        "theta = 5.5\n",
+        "\n",
+        "sol = BlackBox(ODESYS, y0 = Y0, t = t, args = tuple([theta]))\n",
+        "\n",
+        "#Corupt the observations with noise\n",
+        "y_obs = sol[:,:2] + np.random.normal(0,0.05,size = sol[:,:2].shape)\n",
+        "\n",
+        "plt.scatter(t,y_obs[:,0], marker = '.', alpha = 0.5, label = 'S')\n",
+        "plt.scatter(t,y_obs[:,1], marker = '.', alpha = 0.5, label = 'I')\n",
+        "\n",
+        "\n",
+        "plt.legend();"
+      ],
+      "id": "a77af80e",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "Perform Gradient Descent"
+      ],
+      "id": "117b9f2c"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "theta_iter = 1.5\n",
+        "cost = Cost(y_obs[:,:2])\n",
+        "grad_C = autograd.grad(cost)\n",
+        "\n",
+        "maxiter = 100\n",
+        "learning_rate = 1 #Big steps\n",
+        "for i in range(maxiter):\n",
+        "\n",
+        "    sol = BlackBox(ODESYS,y0 = Y0, t = t, args = tuple([theta_iter]))\n",
+        "\n",
+        "    Y = sol[:,:2]\n",
+        "\n",
+        "    theta_iter -=learning_rate*(grad_C(Y)*sol[:,-2:]).sum()\n",
+        "\n",
+        "    if i%10==0:\n",
+        "        print(\"Theta estimate: \", theta_iter)"
+      ],
+      "id": "3be60175",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "And lastly, compare our fitted curves to the true curves"
+      ],
+      "id": "ff36574f"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "sol = BlackBox(ODESYS, y0 = Y0, t = t, args = tuple([theta_iter]))\n",
+        "true_sol = BlackBox(ODESYS, y0 = Y0, t = t, args = tuple([theta]))\n",
+        "\n",
+        "\n",
+        "plt.plot(t,sol[:,0], label = 'S', color = 'C0', linewidth = 5)\n",
+        "plt.plot(t,sol[:,1], label = 'I', color = 'C1', linewidth = 5)\n",
+        "\n",
+        "plt.scatter(t,y_obs[:,0], marker = '.', alpha = 0.5)\n",
+        "plt.scatter(t,y_obs[:,1], marker = '.', alpha = 0.5)\n",
+        "\n",
+        "\n",
+        "plt.plot(t,true_sol[:,0], label = 'Estimated ', color = 'k')\n",
+        "plt.plot(t,true_sol[:,1], color = 'k')\n",
+        "\n",
+        "plt.legend()\n",
+        "\n",
+        "plt.tight_layout()\n",
+        "plt.savefig('sir_curves.png');"
+      ],
+      "id": "239eff75",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "## Conclusions\n",
+        "\n",
+        "Fitting ODEs via gradient descent is possible, and not as complicated as I had initially thought.  There are still some relaxations to be explored.  Namely: what happens if we have observations at time $t_i$ for one part of the system but not the other?  How does this scale as we add more parameters to the model?  Can we speed up gradient descent some how (because it takes too long to converge as it is, hence the `maxiter` variable).  In any case, this was an interesting, yet related, divergence from my GSoC work.  I hope you learned something."
+      ],
+      "id": "3a405ac8"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

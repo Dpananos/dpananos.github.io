@@ -1,0 +1,278 @@
+---
+title: "Bayesian Futility Analysis for A/B Tests"
+date: 2026-03-30
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+cache: false
+---
+
+## Introduction
+
+The sequential (or always valid) confidence interval we use at Datadog is great because experimenters can run an experiment until they detect an effect (albeit with a loss in power, but hey there is no free lunch).  But what if that day never comes?  
+
+In a [previous post](../2026-02-20-time/index.qmd), I discussed how to think about experiment run times for Bayesian A/B tests.  The key result was a closed-form expression for the expected impact to the product as a function of total sample size, given a prior on the true lift and a decision rule of the form $S(N) < \hat \lambda$.  That post answered the question: _before seeing any data, how long should I plan to run?_
+
+This post answers the complementary question: _given what I've seen so far, should I keep going?_ That is to say, this post concerns _futility_.  If at some interim point the probability of eventually reaching a ship decision is sufficiently low, we can stop the experiment early and save the traffic for something more promising.
+
+Frequentists have a well-developed theory for this in the form of group sequential designs (I've written about group sequential designs [here](../2022-07-06-gsd/index.qmd) and [here](../2022-07-31-gsd-pt-2/index.qmd), although I didn't cover futility back then).  The Bayesian version is, in my opinion, more natural: we condition directly on the posterior and ask a straightforward probability question.
+
+
+## Setup and Notation
+
+Recall the setup from the previous post.  We target the lift
+
+$$ \lambda = \dfrac{E[Y(1)]}{E[Y(0)]} - 1 \>. $$
+
+We observe an estimate $\hat \lambda$ with standard error $s_\lambda$ (via the delta method), and use a conjugate normal-normal model with prior $\lambda \sim \operatorname{Normal}(\mu, \tau^2)$.  The posterior variance and mean are
+
+$$ V^{-1} = \dfrac{1}{s^2_\lambda} + \dfrac{1}{\tau^2} \>, \qquad M = V \times \left(\dfrac{\hat \lambda}{s^2_\lambda} + \dfrac{\mu}{\tau^2}\right) \>. $$
+
+The three decision rules from the previous post all could be expressed in the form
+
+$$ S(N) < \hat \lambda \>, $$
+
+where
+
+$$ S(N) = s_\lambda^2 \left[ \Phi^{-1}(p) \sqrt{\frac{1}{\tau^2} + \frac{1}{s_\lambda^2}} - \frac{\mu}{\tau^2} \right] $$
+
+and $p = c$ (probability to beat control), $p = 1-\alpha/2$ (credible interval), or $p = 0.5$ (posterior mean positive).
+
+Suppose we have run the experiment for $K$ weeks, accruing $N_K$ total subjects.  We have observed $\hat \lambda_K$ with standard error $s_K$, giving us a posterior $(M_K, V_K)$.  If we continue for $W$ more weeks at a rate of $n_w$ subjects per week, the final sample size will be $N_f = N_K + W \cdot n_w$.  What is the probability we reach our shipping criteria after getting $W \cdot n_w$ more samples?
+
+
+```{r helpers}
+# =============================================================================
+# Constants
+# =============================================================================
+sigma <- 0.5
+prior_mean <- 0
+prior_sd <- 0.05
+control_mean <- 2.0
+prob_treatment <- 0.5
+N_K <- 10000
+
+# =============================================================================
+# Shared helpers (duplicated from the previous post for self-containment)
+# =============================================================================
+
+compute_se_lift <- function(n, prior_mean = 0, control_mean = 2.0,
+                            prob_treatment = 0.5, sigma = 0.5) {
+  se_c <- sigma / sqrt(n * (1 - prob_treatment))
+  se_t <- sigma / sqrt(n * prob_treatment)
+  treatment_mean <- control_mean * (1 + prior_mean)
+  sqrt(se_t^2 / control_mean^2 + se_c^2 * treatment_mean^2 / control_mean^4)
+}
+
+closedform_impact_from_crit <- function(lambda_crit, se_lift,
+                                         prior_mean = 0, prior_sd = 0.05) {
+  tau <- sqrt(prior_sd^2 + se_lift^2)
+  a   <- (prior_mean - lambda_crit) / tau
+  prior_mean * pnorm(a) + (prior_sd^2 / tau) * dnorm(a)
+}
+
+# Compute posterior from observed summary statistics
+compute_posterior <- function(lambda_hat, se_lambda, prior_mean = 0, prior_sd = 0.05) {
+  V <- 1 / (1 / se_lambda^2 + 1 / prior_sd^2)
+  M <- V * (lambda_hat / se_lambda^2 + prior_mean / prior_sd^2)
+  list(M = M, V = V)
+}
+
+# Compute the ship threshold S(N) for a given decision rule
+# p = 0.95 for P(lift > 0 | data) > 0.95
+# p = 0.975 for 95% credible interval
+# p = 0.5 for M > 0
+compute_threshold <- function(n, p, prior_mean = 0, prior_sd = 0.05,
+                               control_mean = 2.0, prob_treatment = 0.5, sigma = 0.5) {
+  se_lift <- compute_se_lift(n, prior_mean, control_mean, prob_treatment, sigma)
+  post_sd_inv <- sqrt(1 / prior_sd^2 + 1 / se_lift^2)
+  se_lift^2 * (qnorm(p) * post_sd_inv - prior_mean / prior_sd^2)
+}
+
+prob_ship_if_continue <- function(M_K, V_K, N_f, p = 0.95,
+                                   prior_mean = 0, prior_sd = 0.05,
+                                   control_mean = 2.0, prob_treatment = 0.5,
+                                   sigma = 0.5) {
+  se_f <- compute_se_lift(N_f, prior_mean, control_mean, prob_treatment, sigma)
+  S_f  <- compute_threshold(N_f, p, prior_mean, prior_sd,
+                             control_mean, prob_treatment, sigma)
+  pnorm((M_K - S_f) / sqrt(V_K + se_f^2))
+}
+
+expected_impact_if_continue <- function(M_K, V_K, N_f, p = 0.95,
+                                         prior_mean = 0, prior_sd = 0.05,
+                                         control_mean = 2.0, prob_treatment = 0.5,
+                                         sigma = 0.5) {
+  se_f <- compute_se_lift(N_f, prior_mean, control_mean, prob_treatment, sigma)
+  S_f  <- compute_threshold(N_f, p, prior_mean, prior_sd,
+                             control_mean, prob_treatment, sigma)
+  closedform_impact_from_crit(S_f, se_f, prior_mean = M_K, prior_sd = sqrt(V_K))
+}
+
+sim_futility <- function(M_K, V_K, N_f, p = 0.95,
+                          prior_mean = 0, prior_sd = 0.05,
+                          control_mean = 2.0, prob_treatment = 0.5,
+                          sigma = 0.5, B = 50000) {
+  se_f <- compute_se_lift(N_f, prior_mean, control_mean, prob_treatment, sigma)
+  S_f  <- compute_threshold(N_f, p, prior_mean, prior_sd,
+                             control_mean, prob_treatment, sigma)
+
+  true_lift    <- rnorm(B, M_K, sqrt(V_K))
+  observed_lift <- rnorm(B, true_lift, se_f)
+
+  mean(observed_lift > S_f)
+}
+```
+
+
+## The Closed-Form Solution
+
+We can avoid simulation entirely. The key insight is that the posterior $(M_K, V_K)$ plays exactly the same role as the prior $(\mu, \tau^2)$ did in the previous post.
+
+Conditional on the current posterior, the true lift is $\lambda \sim \operatorname{Normal}(M_K, V_K)$ and the final observed lift given $\lambda$ is $\hat \lambda_f \mid \lambda \sim \operatorname{Normal}(\lambda, s_f^2)$.  Marginalizing over $\lambda$:
+
+$$ \hat \lambda_f \sim \operatorname{Normal}(M_K, \> V_K + s_f^2) \>. $$
+
+The ship decision requires $\hat \lambda_f > S(N_f)$, so
+
+$$\Pr(\text{ship} \mid \text{continue until reaching } N_f) = \Phi\left(\frac{M_K - S(N_f)}{\sqrt{V_K + s_f^2}}\right) \>.$$
+
+Seems pretty straight forward.  The nice part about this approach is that we can check how good our forecasts are since $\Pr(\text{ship} \mid \text{continue until reaching } N_f)$ can be empirically validated.  This brings us to one of my favorite topics to talk to data scientists about: calibration!
+
+
+## Calibration, Such an Aggravation 
+
+The closed-form $\Pr(\text{ship} \mid \text{continue})$ is a prediction. We should verify it is **calibrated**: among experiments where we predict $\Pr(\text{ship}) = p$, roughly fraction $p$ should actually ship.
+
+To check this, we simulate the full lifecycle of many experiments end-to-end:
+
+1. Draw a true lift from the prior.
+2. Simulate interim data at week $K$ and compute the posterior $(M_K, V_K)$.
+3. Compute the closed-form $\Pr(\text{ship} \mid \text{continue to } N_f)$.
+4. Simulate the actual remaining data and check whether the experiment actually ships.
+5. Evaluate the calibration using something like `rms::val.prob` or similar tools.
+
+You can see that below
+
+```{r calibration}
+#| fig-cap: "Calibration of the closed-form futility probability. We simulate 100,000 experiments with an interim analysis at $N_K = 1{,}000$ and a final analysis at $N_f = 5{,}000$. Each point represents a bin of experiments grouped by their predicted $\\Pr(\\text{ship})$. The dashed line is perfect calibration."
+
+set.seed(123)
+nsims <- 100000
+N_K <- 1000
+N_f <- 5000
+p_rule <- 0.95
+
+se_K <- compute_se_lift(N_K)
+se_f <- compute_se_lift(N_f)
+S_f  <- compute_threshold(N_f, p = p_rule)
+
+# 1. Draw true lifts from the prior
+true_lift <- rnorm(nsims, prior_mean, prior_sd)
+
+# 2. Simulate interim data
+se_c_K <- sigma / sqrt(N_K * (1 - prob_treatment))
+se_t_K <- sigma / sqrt(N_K * prob_treatment)
+control_K   <- rnorm(nsims, control_mean, se_c_K)
+treatment_K <- rnorm(nsims, control_mean * (1 + true_lift), se_t_K)
+lambda_hat_K <- (treatment_K / control_K) - 1
+se_lambda_K  <- sqrt(se_t_K^2 / control_K^2 + se_c_K^2 * treatment_K^2 / control_K^4)
+
+# Compute interim posteriors
+V_K_vec <- 1 / (1 / se_lambda_K^2 + 1 / prior_sd^2)
+M_K_vec <- V_K_vec * (lambda_hat_K / se_lambda_K^2 + prior_mean / prior_sd^2)
+
+# 3. Closed-form predicted P(ship)
+predicted_p <- pnorm((M_K_vec - S_f) / sqrt(V_K_vec + se_f^2))
+
+# 4. Simulate the actual final observed lift
+# The final observed lift given the true lift has SE = se_f
+# But we need the full final observed lift, not just the future part
+# The final analysis sees all N_f subjects, so:
+se_c_f <- sigma / sqrt(N_f * (1 - prob_treatment))
+se_t_f <- sigma / sqrt(N_f * prob_treatment)
+control_f   <- rnorm(nsims, control_mean, se_c_f)
+treatment_f <- rnorm(nsims, control_mean * (1 + true_lift), se_t_f)
+lambda_hat_f <- (treatment_f / control_f) - 1
+
+# 5. Check if the experiment actually ships
+actually_shipped <- lambda_hat_f > S_f
+vp <- rms::val.prob(
+  p = predicted_p, 
+  y = actually_shipped
+)
+
+
+
+```
+
+Now, you might say "_Demetri, you were simulating from the prior. I am not surprised that the procedure is calibrated_".  While correct, I think you are missing my point.  You can _check_ if your procedure is calibrated yourself!  You can even do this retrospectively.  Take a look at what you knew a week before an experiment ended.  Then, compute the probability you would have made a ship decision a week later, and _voila_.  This is a great way to check if your prior is "right" in my opinion (a topic I anticipate I will write a lot more on in the coming months).
+
+
+## Bonus: Futility Boundary
+
+We can also ask "At each interim week, what is the minimum posterior mean $M_K$ such that $\Pr(\text{ship} \mid \text{continue to max duration}) > x\%$" for any given $x<0.5$?  This gives a **futility boundary** -- if your posterior mean is below the line at any point, stop the experiment!  Simply invert the win ship calculation to obtain
+
+$$S(N_f) -  z_{1-x} \sqrt{V_k + s^2_f} +  \leq M_k \>. $$
+
+```{r futility-boundary}
+#| fig-cap: "Futility boundaries for three thresholds ($x = 0.1\\%$, $1\\%$, $10\\%$): the minimum posterior mean $M_K$ at each interim week such that $\\Pr(\\text{ship}) > x$ if the experiment continues to week 8. Decision rule: probability to beat control $> 0.95$."
+
+max_weeks <- 8
+n_per_week <- 5000
+N_max <- max_weeks * n_per_week
+
+interim_weeks <- 1:(max_weeks - 1)
+
+thresholds <- list(
+  list(x = 0.10,  label = "10%",  col = "firebrick"),
+  list(x = 0.01,  label = "1%",   col = "darkorange"),
+  list(x = 0.001, label = "0.1%", col = "steelblue")
+)
+
+se_f <- compute_se_lift(N_max)
+S_f  <- compute_threshold(N_max, p = 0.95)
+
+# Compute all boundaries to set ylim
+all_boundaries <- lapply(thresholds, function(th) {
+  sapply(interim_weeks, function(k) {
+    N_K_local <- k * n_per_week
+    se_K_local <- compute_se_lift(N_K_local)
+    V_K_local <- 1 / (1 / se_K_local^2 + 1 / prior_sd^2)
+    S_f + qnorm(th$x) * sqrt(V_K_local + se_f^2)
+  })
+})
+
+ylim <- range(0, unlist(all_boundaries))
+
+plot(NULL, xlim = range(interim_weeks), ylim = ylim,
+     xlab = "Interim week", ylab = expression("Minimum" ~ M[K]))
+grid()
+abline(h = 0, lty = 2, col = 'gray50')
+
+# Shade regions beneath each boundary (draw from most to least stringent
+# so the narrower regions layer on top)
+ymin <- ylim[1]
+for (i in seq_along(thresholds)) {
+  b <- all_boundaries[[i]]
+  polygon(c(interim_weeks, rev(interim_weeks)),
+          c(b, rep(ymin, length(interim_weeks))),
+          col = adjustcolor(thresholds[[i]]$col, alpha.f = 0.2), border = NA)
+}
+
+for (i in seq_along(thresholds)) {
+  lines(interim_weeks, all_boundaries[[i]], type = 'b', pch = 16,
+        col = thresholds[[i]]$col, lwd = 2)
+}
+
+legend('bottomright',
+       legend = sapply(thresholds, \(th) paste0("x = ", th$label)),
+       col = sapply(thresholds, \(th) th$col),
+       lwd = 2, pch = 16, fill = sapply(thresholds, \(th) adjustcolor(th$col, alpha.f = 0.2)),
+       border = NA, cex = 0.8)
+```
+
+
