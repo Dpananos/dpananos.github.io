@@ -25,6 +25,7 @@ website:
         href: https://github.com/Dpananos
       - icon: twitter
         href: https://twitter.com/PhDemetri
+  draft-mode: unlinked
 format:
   html:
     theme: flatly
