@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.549">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2026-05-14">
+
+<title>Demetri Pananos Ph.D - Adventures in Covariance</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E73MJ55N1R"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
+</script>
+<script type="module" src="../../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Demetri Pananos Ph.D - Adventures in Covariance">
+<meta property="og:description" content="">
+<meta property="og:site_name" content="Demetri Pananos Ph.D">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Adventures in Covariance">
+<meta name="twitter:description" content="">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html"> 
+<span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../ai/index.html"> 
+<span class="menu-text">AI</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Adventures in Covariance</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 14, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#projections" id="toc-projections" class="nav-link active" data-scroll-target="#projections">Projections</a></li>
+  <li><a href="#outer-products" id="toc-outer-products" class="nav-link" data-scroll-target="#outer-products">Outer Products</a></li>
+  <li><a href="#covariance" id="toc-covariance" class="nav-link" data-scroll-target="#covariance">Covariance</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-05-14-cov/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<p>Let <span class="math inline">\(\mathbf{x}_1, \cdots, \mathbf{x}_n\)</span> be a sample of <span class="math inline">\(n\)</span> dimensional random variables with mean <span class="math inline">\(\mu\)</span>. Their covariance is defined as</p>
+<p><span class="math display">\[ \Sigma = \mathbb{E} \left[ (\mathbf{x}-\mathbf{\mu})(\mathbf{x}-\mathbf{\mu})^\top \right] \&gt;. \]</span> I don’t blame you for not really grokking what this means. Should you want to know, then we will need to revisit some fundamental concepts in linear algebra, starting with projections, moving on to outer products, and finally landing on covariances before briefly touching on PCA.</p>
+<section id="projections" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="projections">Projections</h2>
+<p>Consider a vector <span class="math inline">\(\mathbf{u} \in \mathbb{R}^n\)</span> which I want to project onto a vector <span class="math inline">\(\mathbf{v} \in \mathbb{R}^n\)</span> to obtain a new vector denoted <span class="math inline">\(\operatorname{proj}_{\mathbf{v}}(\mathbf{u})\)</span>. What do I even mean by “project”? By project, I mean obtain a vector in the direction of <span class="math inline">\(\mathbf{v}\)</span> which is geometrically closest to <span class="math inline">\(\mathbf{u}\)</span>. There are some useful interpretations of the projection as the “components of one vector in the direction of another”, and me may reach for that later. It may be useful to consider 3 cases and reason about what that means.</p>
+<ul>
+<li><p>In the case where <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are collinear (i.e.&nbsp;<span class="math inline">\(\left&lt; \mathbf{u}, \mathbf{v} \right&gt; = \pm 1\)</span> ), then the closest vector to <span class="math inline">\(\mathbf{u}\)</span> in the direction of <span class="math inline">\(\mathbf{v}\)</span> is <span class="math inline">\(\mathbf{v}\)</span> itself (or -<span class="math inline">\(\mathbf{v}\)</span> as the case may be)! So whatever the projection is, it should return <span class="math inline">\(\mathbf{v}\)</span>.</p></li>
+<li><p>In the case where <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are orthogonal (i.e.&nbsp;<span class="math inline">\(\left&lt; \mathbf{u}, \mathbf{v} \right&gt; =0\)</span> ), then the closest vector to <span class="math inline">\(\mathbf{u}\)</span> in the direction of <span class="math inline">\(\mathbf{v}\)</span> is the zero vector, <span class="math inline">\(\mathbf{0}\)</span>. This may seem weird, but see the little animation below for a rationale as to why.</p></li>
+<li><p>In the case where <span class="math inline">\(\mathbf{u}\)</span> and <span class="math inline">\(\mathbf{v}\)</span> are neither collinear nor orthogonal (i.e.&nbsp;<span class="math inline">\(0 \lt \left&lt; \mathbf{u}, \mathbf{v} \right&gt; \lt 1\)</span> ), what should the projection return? What is the closest vector in this case? We can use some algebra to reason about this. Since <span class="math inline">\(\operatorname{proj}_{\mathbf{v}}(\mathbf{u})\)</span> is in the direction of <span class="math inline">\(\mathbf{v}\)</span>, it is a scalar multiple of <span class="math inline">\(\mathbf{v}\)</span>, hence <span class="math inline">\(\operatorname{proj}_{\mathbf{v}}(\mathbf{u}) = c \mathbf{v}\)</span> for some <span class="math inline">\(c\)</span>. Hence, we can use some algebra to find the closest vector. The scalar we are looking for, <span class="math inline">\(c\)</span>, is the solution to</p></li>
+</ul>
+<p><span class="math display">\[ c = \underset{\tilde c \in \mathbb{R}}{\arg \min} \left\lVert \mathbf{u} - \tilde c\mathbf{v} \right\rVert^2 \&gt;.\]</span></p>
+<p>It is not hard to find such a scalar. Simply expand out the norm, differentiate with respect to <span class="math inline">\(\tilde c\)</span> and set to 0.</p>
+<p><span class="math display">\[ \dfrac{d}{d \tilde c} \left( \mathbf{u}^\top \mathbf{u} - 2 \tilde c \mathbf{u}^\top \mathbf{v} + \tilde c^2 \mathbf{v}^\top \mathbf{v}\right) = -2\mathbf{u}^\top \mathbf{v} + 2 \tilde c \mathbf{v}^\top \mathbf{v} = 0 \]</span></p>
+<p><span class="math display">\[\therefore  \boxed{ c =  \dfrac{\mathbf{u}^\top \mathbf{v}}{\mathbf{v}^\top \mathbf{v}}}\]</span></p>
+<p>You can verify this is a minimum since the second derivative of the above quantity is always positive. The projection will be</p>
+<p><span class="math display">\[\operatorname{proj}_{\mathbf{v}}(\mathbf{u}) = \dfrac{\mathbf{u}^\top \mathbf{v}}{\mathbf{v}^\top \mathbf{v}} \mathbf{v}\]</span></p>
+<p>Use the slider below to vary the angle between <span class="math inline">\(\mathbf{u}\)</span> (blue) and <span class="math inline">\(\mathbf{v}\)</span> (red). The projection <span class="math inline">\(\operatorname{proj}_{\mathbf{v}}(\mathbf{u})\)</span> is drawn in green, with a dashed line showing the residual <span class="math inline">\(\mathbf{u} - \operatorname{proj}_{\mathbf{v}}(\mathbf{u})\)</span> meeting <span class="math inline">\(\mathbf{v}\)</span> at a right angle. This makes sense given what we know about right triangles and their hypotenuse. Imagine taking some other vector, <span class="math inline">\(\mathbf{w}\)</span> in the direction of <span class="math inline">\(\mathbf{v}\)</span> and asserting that was the closest vector. This would form a right triangle where <span class="math inline">\(\mathbf{u} - \mathbf{w}\)</span> was the hypotenuse and would hence be longer in magnitude than <span class="math inline">\(\mathbf{u} - \operatorname{proj}_{\mathbf{v}}(\mathbf{u})\)</span>.</p>
+<div class="column-page" style="display: flex; flex-direction: column; align-items: center;">
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="49" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 48;"><span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>viewof theta <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">360</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Angle between u and v (°)"</span>})</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>viewof c_w   <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="op">-</span><span class="fl">1.5</span><span class="op">,</span> <span class="fl">1.5</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.4</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Scale c for w = c·v"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="55" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 54;"><span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>deg <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="cn">PI</span> <span class="op">/</span> <span class="dv">180</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>v_raw <span class="op">=</span> [<span class="dv">2</span><span class="op">,</span> <span class="dv">1</span>]</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>v_norm_raw <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(v_raw[<span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> v_raw[<span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> [v_raw[<span class="dv">0</span>] <span class="op">/</span> v_norm_raw<span class="op">,</span> v_raw[<span class="dv">1</span>] <span class="op">/</span> v_norm_raw]</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>phi <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">atan2</span>(v[<span class="dv">1</span>]<span class="op">,</span> v[<span class="dv">0</span>])</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> [<span class="bu">Math</span><span class="op">.</span><span class="fu">cos</span>(phi <span class="op">+</span> theta <span class="op">*</span> deg)<span class="op">,</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sin</span>(phi <span class="op">+</span> theta <span class="op">*</span> deg)]</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>dot <span class="op">=</span> (a<span class="op">,</span> b) <span class="kw">=&gt;</span> a[<span class="dv">0</span>]<span class="op">*</span>b[<span class="dv">0</span>] <span class="op">+</span> a[<span class="dv">1</span>]<span class="op">*</span>b[<span class="dv">1</span>]</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>norm <span class="op">=</span> a <span class="kw">=&gt;</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(<span class="fu">dot</span>(a<span class="op">,</span> a))</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="fu">dot</span>(u<span class="op">,</span> v)</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>proj <span class="op">=</span> [k <span class="op">*</span> v[<span class="dv">0</span>]<span class="op">,</span> k <span class="op">*</span> v[<span class="dv">1</span>]]</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> [c_w <span class="op">*</span> v[<span class="dv">0</span>]<span class="op">,</span> c_w <span class="op">*</span> v[<span class="dv">1</span>]]</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>perp <span class="op">=</span> [<span class="op">-</span>v[<span class="dv">1</span>]<span class="op">,</span> v[<span class="dv">0</span>]]</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>side <span class="op">=</span> <span class="fu">dot</span>(perp<span class="op">,</span> [u[<span class="dv">0</span>] <span class="op">-</span> proj[<span class="dv">0</span>]<span class="op">,</span> u[<span class="dv">1</span>] <span class="op">-</span> proj[<span class="dv">1</span>]]) <span class="op">&gt;=</span> <span class="dv">0</span> <span class="op">?</span> <span class="op">-</span><span class="dv">1</span> <span class="op">:</span> <span class="dv">1</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>label_offset <span class="op">=</span> <span class="fl">0.22</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>proj_label <span class="op">=</span> [proj[<span class="dv">0</span>] <span class="op">+</span> side <span class="op">*</span> label_offset <span class="op">*</span> perp[<span class="dv">0</span>]<span class="op">,</span> proj[<span class="dv">1</span>] <span class="op">+</span> side <span class="op">*</span> label_offset <span class="op">*</span> perp[<span class="dv">1</span>]]</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>w_label <span class="op">=</span> [w[<span class="dv">0</span>] <span class="op">+</span> side <span class="op">*</span> label_offset <span class="op">*</span> perp[<span class="dv">0</span>]<span class="op">,</span> w[<span class="dv">1</span>] <span class="op">+</span> side <span class="op">*</span> label_offset <span class="op">*</span> perp[<span class="dv">1</span>]]</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>res_norm <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">hypot</span>(u[<span class="dv">0</span>] <span class="op">-</span> proj[<span class="dv">0</span>]<span class="op">,</span> u[<span class="dv">1</span>] <span class="op">-</span> proj[<span class="dv">1</span>])</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>hyp_norm <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">hypot</span>(u[<span class="dv">0</span>] <span class="op">-</span> w[<span class="dv">0</span>]<span class="op">,</span> u[<span class="dv">1</span>] <span class="op">-</span> w[<span class="dv">1</span>])</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>lim <span class="op">=</span> <span class="fl">1.6</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>stats <span class="op">=</span> <span class="fu">md</span><span class="vs">`**‖u − proj_v(u)‖** = </span><span class="sc">${</span>res_norm<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">  ·  **‖u − w‖** = </span><span class="sc">${</span>hyp_norm<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-5" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-7" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-8" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-9" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-10" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-11" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-12" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-13" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-14" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-15" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-16" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-17" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-18" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-19" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-2-20" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="79" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 78;"><span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>  <span class="dt">height</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span>lim<span class="op">,</span> lim]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"x"</span>}<span class="op">,</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span>lim<span class="op">,</span> lim]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"y"</span>}<span class="op">,</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>  <span class="dt">aspectRatio</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>  <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">0</span>]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#bbb"</span>})<span class="op">,</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">0</span>]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#bbb"</span>})<span class="op">,</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>    <span class="co">// v's line through origin</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>      [[<span class="op">-</span>v[<span class="dv">0</span>]<span class="op">*</span>lim<span class="op">,</span> <span class="op">-</span>v[<span class="dv">1</span>]<span class="op">*</span>lim]<span class="op">,</span> [v[<span class="dv">0</span>]<span class="op">*</span>lim<span class="op">,</span> v[<span class="dv">1</span>]<span class="op">*</span>lim]]<span class="op">,</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#888"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"2,3"</span>}</span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>    )<span class="op">,</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>    <span class="co">// residual: u to proj (right-angle leg)</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a>      [u<span class="op">,</span> proj]<span class="op">,</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"forestgreen"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"4,3"</span>}</span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>    )<span class="op">,</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a>    <span class="co">// hypotenuse: u to w</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a>      [u<span class="op">,</span> w]<span class="op">,</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"darkorange"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"6,4"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">1.8</span>}</span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a>    )<span class="op">,</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>    <span class="co">// proj-to-w leg along v (completes right triangle)</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(</span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a>      [proj<span class="op">,</span> w]<span class="op">,</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#aaa"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"2,3"</span>}</span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>    )<span class="op">,</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a>    <span class="co">// vectors as arrows</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">arrow</span>([{<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> u[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> u[<span class="dv">1</span>]}]<span class="op">,</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a>               {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"steelblue"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span>})<span class="op">,</span></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">arrow</span>([{<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> v[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> v[<span class="dv">1</span>]}]<span class="op">,</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a>               {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"firebrick"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span>})<span class="op">,</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">arrow</span>([{<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> proj[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> proj[<span class="dv">1</span>]}]<span class="op">,</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a>               {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"forestgreen"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">2.5</span>})<span class="op">,</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">arrow</span>([{<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> w[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> w[<span class="dv">1</span>]}]<span class="op">,</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a>               {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"darkorange"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span>})<span class="op">,</span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a>    <span class="co">// labels</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> u[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> u[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">t</span><span class="op">:</span> <span class="st">"u"</span>}]<span class="op">,</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>              {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span> <span class="st">"t"</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"steelblue"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span>})<span class="op">,</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> v[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> v[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">t</span><span class="op">:</span> <span class="st">"v"</span>}]<span class="op">,</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>              {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span> <span class="st">"t"</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"firebrick"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span>})<span class="op">,</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> proj_label[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> proj_label[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">t</span><span class="op">:</span> <span class="st">"Projection"</span>}]<span class="op">,</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>              {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span> <span class="st">"t"</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"forestgreen"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">13</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span>})<span class="op">,</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> w_label[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> w_label[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">t</span><span class="op">:</span> <span class="st">"w"</span>}]<span class="op">,</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a>              {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span> <span class="st">"t"</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"darkorange"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span>})</span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-3" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="133" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 132;"><span id="cb4-133"><a href="#cb4-133" aria-hidden="true" tabindex="-1"></a>stats</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-4" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+</div>
+<p>In summary, the projection is just the vector which is closest to some other vector. This looks awfully familliar if you squint. Have you seen this before?</p>
+<p>Maybe if we realize inner products are scalars and so we can write <span class="math inline">\(\mathbf{u}^\top \mathbf{v} = \mathbf{v}^\top \mathbf{u}\)</span>, and then massaging the equation for <span class="math inline">\(c\)</span>, along with judicious use of brackets, we can get</p>
+<p><span class="math display">\[ \operatorname{proj}_{\mathbf{v}}(\mathbf{u}) = \mathbf{v}(\mathbf{v}^\top \mathbf{v})^{-1}  \mathbf{v}^\top \mathbf{u} \&gt;.\]</span></p>
+<p>Now does this look familiar? It almost looks like <span class="math inline">\(X (X^\top X)^{-1} X^\top y\)</span>. This is no coincidence. We know that <a href="../../posts/2025-11-12-glmfe/index.html"><span class="math inline">\(X (X^\top X)^{-1} X^\top\)</span> is a projection matrix</a> and will project <span class="math inline">\(y\)</span> onto the column space of <span class="math inline">\(X\)</span>.</p>
+<p>To me, the insight here is reframing the projection formula we may learn in an introduction to linear algebra from an operation on <span class="math inline">\(\mathbf{v}\)</span> to an operation on <span class="math inline">\(\mathbf{u}\)</span>. The formula <span class="math inline">\(\left(\mathbf{u}^\top \mathbf{v}\right)/({\mathbf{v}^\top \mathbf{v}})  \mathbf{v}\)</span> makes it appear as if <span class="math inline">\(\mathbf{u}\)</span> is ancillary to the computation in so far as it is used in creating the scalar needed to rescale <span class="math inline">\(\mathbf{v}\)</span>; that <span class="math inline">\(\mathbf{v}\)</span> is the thing being transformed. If we change our perspective and think of <span class="math inline">\(\mathbf{u}\)</span> as being transformed – and not just transformed, but transformed <em>linearly</em> – we can make good headway to understanding covariance.</p>
+</section>
+<section id="outer-products" class="level2">
+<h2 class="anchored" data-anchor-id="outer-products">Outer Products</h2>
+<p>All linear transformations on vectors can be represented my matrices. This begs the question “If projection is a linear operation, what is the matrix representation of projection”? Importantly, we need to represent projection between a matrix, <span class="math inline">\(A\)</span>, and the vector <span class="math inline">\(\mathbf{u}\)</span>. Given <span class="math inline">\(\mathbf{v}\)</span> and <span class="math inline">\(\mathbf{u}\)</span>, we know how to compute the projection, so it might be useful to start there and try to see the operation as linear in <span class="math inline">\(\mathbf{u}\)</span>. Let’s write out the first few elements of the projection to try and spot a pattern.</p>
+<p>The components are</p>
+<p><span class="math display">\[
+\begin{aligned}
+\left[ \operatorname{proj}_{\mathbf{v}}(\mathbf{u}) \right]_1 &amp;= \dfrac{u_1 v_1 + u_2 v_2 + \cdots + u_n v_n}{v_1^2 + v_2^2 + \cdots + v_n^2}\, v_1 \\[6pt]
+\left[ \operatorname{proj}_{\mathbf{v}}(\mathbf{u}) \right]_2 &amp;= \dfrac{u_1 v_1 + u_2 v_2 + \cdots + u_n v_n}{v_1^2 + v_2^2 + \cdots + v_n^2}\, v_2 \\[6pt]
+&amp;\;\;\vdots \\[6pt]
+\left[ \operatorname{proj}_{\mathbf{v}}(\mathbf{u}) \right]_n &amp;= \dfrac{u_1 v_1 + u_2 v_2 + \cdots + u_n v_n}{v_1^2 + v_2^2 + \cdots + v_n^2}\, v_n
+\end{aligned}
+\]</span></p>
+<p>Now, it should be straightforward to write this as a matrix operation. Notice that all the entries share the squared norm of <span class="math inline">\(\mathbf{v}\)</span>, so we can pull that out. The remaining sums for the <span class="math inline">\(k^{th}\)</span> component are</p>
+<p><span class="math display">\[ \left[ \operatorname{proj}_{\mathbf{v}}(\mathbf{u}) \right]_k = \dfrac{1}{\lVert \mathbf{v} \rVert|^2} \sum_{i=1}^n (u_i v_i) v_k\]</span></p>
+<p>which is re-written as</p>
+<p><span class="math display">\[
+\operatorname{proj}_{\mathbf{v}}(\mathbf{u}) = \dfrac{1}{\lVert \mathbf{v} \rVert^2}
+\begin{bmatrix}
+v_1 v_1 &amp; v_1 v_2 &amp; \cdots &amp; v_1 v_n \\
+v_2 v_1 &amp; v_2 v_2 &amp; \cdots &amp; v_2 v_n \\
+\vdots  &amp; \vdots  &amp; \ddots &amp; \vdots  \\
+v_n v_1 &amp; v_n v_2 &amp; \cdots &amp; v_n v_n
+\end{bmatrix}
+\begin{bmatrix}
+u_1 \\
+u_2 \\
+\vdots \\
+u_n
+\end{bmatrix} \&gt;.
+\]</span></p>
+<p>Now we’re getting somewhere. Let’s return back to the equation for the projection and recall we can move scalars around as needed. If we replace the inner product of <span class="math inline">\(\mathbf{v}\)</span> with itself with notation for the squared norm, we find</p>
+<p><span class="math display">\[\operatorname{proj}_{\mathbf{v}}(\mathbf{u}) = \dfrac{1}{\lVert \mathbf{v} \rVert^2} \mathbf{v}  \mathbf{v}^\top \mathbf{u} \&gt;.\]</span></p>
+<p>This hints that</p>
+<p><span class="math display">\[
+\mathbf{v}  \mathbf{v}^\top = \begin{bmatrix}
+v_1 v_1 &amp; v_1 v_2 &amp; \cdots &amp; v_1 v_n \\
+v_2 v_1 &amp; v_2 v_2 &amp; \cdots &amp; v_2 v_n \\
+\vdots  &amp; \vdots  &amp; \ddots &amp; \vdots  \\
+v_n v_1 &amp; v_n v_2 &amp; \cdots &amp; v_n v_n
+\end{bmatrix}\&gt;.
+\]</span> Indeed, this is true! We call <span class="math inline">\(\mathbf{v}  \mathbf{v}^\top\)</span> and “outer product” (as opposed to an inner product). This operation makes sense if we think of multiplying an <span class="math inline">\(n\times 1\)</span> matrix with a <span class="math inline">\(1 \times n\)</span> matrix and producing an <span class="math inline">\(n \times n\)</span> matrix (though I don’t find this compelling).</p>
+<p>To me, the insight here is that <span class="math inline">\(\frac{1}{\lVert \mathbf{v} \rVert^2} \mathbf{v}  \mathbf{v}^\top\)</span> is a matrix and represents a linear transformation; it represents the projection onto the span of <span class="math inline">\(\mathbf{v}\)</span>. This is key because covariance is written as an expectation of outer products. Hence, whatever we are averaging, it must have to do something with projections onto something.</p>
+</section>
+<section id="covariance" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="covariance">Covariance</h2>
+<p>Consider some multivarate data <span class="math inline">\(\mathbf{x}_i\)</span> with mean vector <span class="math inline">\(\mathbf{\mu} = \mathbf{0}\)</span> and unknown covariance matrix. From the formula above, we know we can estimate the covariance by taking an expectation of projection matrices (scaled by a factor of <span class="math inline">\(\lVert \mathbf{x}_i \rVert^2\)</span>). This implies that when we covariance matrices have <em>something</em> to do with projection, but what?</p>
+<p>Consider a standard result from multivariate statistics, that <span class="math inline">\(\operatorname{Var}(\mathbf{u}^\top \mathbf{x}) = \mathbf{u}^\top \Sigma \mathbf{u} = \mathbb{E}\left( \mathbf{u}^\top \mathbf{x} \mathbf{x}^\top  \mathbf{a }\right)\)</span>. The thing inside the expectation looks a lot like a projection of <span class="math inline">\(\mathbf{u}\)</span> onto the data, and then one final inner product with <span class="math inline">\(\mathbf{u}^\top\)</span>. If we reason through this, this operation is interpreted as:</p>
+<ul>
+<li>We first project <span class="math inline">\(\mathbf{u}\)</span> onto all data poionts, creating a set of vectors in the direction of the <span class="math inline">\(\mathbf{x}_i\)</span>.</li>
+<li>Recall from the projection section that <span class="math inline">\(\operatorname{proj}_{\mathbf{v}}(\mathbf{u}) \propto \mathbf{u}^\top \mathbf{v} = \mathbf{v}^\top \mathbf{u}\)</span>. So taking the inner product of these vectors with <span class="math inline">\(\mathbf{u}^\top\)</span> creates a quantity proportional to the length of the projection of <span class="math inline">\(\operatorname{proj}_{\mathbf{u}}(\mathbf{x}_x \mathbf{x}_i^\top \mathbf{u})\)</span>.<br>
+</li>
+<li>Averaging those quantities produces an estimate of the variance of <span class="math inline">\(\mathbf{u}^\top \mathbf{x}_i\)</span>. Why? The variance of (mean centered) data is just an expectation of squares, and through judicious use of brackets we can write <span class="math inline">\(\operatorname{Var}(\mathbf{u}^\top \mathbf{x}) = \mathbb{E}((\mathbf{x}^\top \mathbf{u})^2)\)</span>.</li>
+</ul>
+<p>The interactive visualization below demonstrates this process (I recommend first setting the number of points to 1 or 2 to really understand what it is showing). The dots are the datapoints, and the blue vector is <span class="math inline">\(\mathbf{u}\)</span>. The green vectors are the projections <span class="math inline">\(\operatorname{proj}_{\mathbf{x}_i}(\mathbf{u})\)</span>, and the yellow arrows indicate the length of the projection of <span class="math inline">\(\operatorname{proj}_{\mathbf{u}}(\mathbf{x}_i \mathbf{x}_i^\top \mathbf{u})\)</span> – that is, the projection <em>back</em> onto <span class="math inline">\(\mathbf{u}\)</span>. The length from the origin to the tip of the yellow arrow is what goes into the summand. Try rotating <span class="math inline">\(\mathbf{u}\)</span> so that the yellow arrows have smallest length possible and think about why that is (where are those green vectors being projected to, and why are they being projected there?). If you want to get a sense of why the variance calculation works, I would recommend stepping through the calculation of the expectation when <span class="math inline">\(\mathbf{u} = \begin{bmatrix}1 &amp; 0  \end{bmatrix}^\top\)</span> and see what you are left with.</p>
+<p>The insight here is that <span class="math inline">\(\operatorname{Var}(\mathbf{u}^\top \mathbf{x})\)</span> is not a single projection, it is really two projections – once onto the data, and again back onto <span class="math inline">\(\mathbf{u}\)</span>. Perhaps a smaller insight is that anytime we do an inner product of some sort, we should be thinking of projecting one vector onto another in some sense.</p>
+<p>I’m still not totally sold on this interpretation. I’ve asked Gemini for another explanation and it has said (I’m paraphrasing)</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\mathbf{x}_i \mathbf{x}^\top_i \mathbf{u}\)</span> captures how much of <span class="math inline">\(\mathbf{u}\)</span> is preserved by the data point <span class="math inline">\(\mathbf{x}\)</span>, and <span class="math inline">\(\mathbf{u}^\top (\mathbf{x}_i \mathbf{x}^\top_i \mathbf{u})\)</span> captures how much of the preserved part actually aligns with <span class="math inline">\(\mathbf{u}\)</span>.</p>
+</blockquote>
+<p>I’m not sure I find that a better interpretation, but this will have to do.</p>
+<div class="column-page" style="display: flex; flex-direction: column; align-items: center;">
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="232" data-source-offset="-0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 231;"><span id="cb5-232"><a href="#cb5-232" aria-hidden="true" tabindex="-1"></a>viewof theta_u_cov <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">360</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">45</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Angle of u (°)"</span>})</span>
+<span id="cb5-233"><a href="#cb5-233" aria-hidden="true" tabindex="-1"></a>viewof rho <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="op">-</span><span class="fl">0.99</span><span class="op">,</span> <span class="fl">0.99</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="fl">0.0</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Correlation ρ"</span>})</span>
+<span id="cb5-234"><a href="#cb5-234" aria-hidden="true" tabindex="-1"></a>viewof n_points <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">1</span><span class="op">,</span> <span class="dv">100</span>]<span class="op">,</span> {<span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> <span class="dt">step</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"Number of points"</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-5-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="238" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 237;"><span id="cb6-238"><a href="#cb6-238" aria-hidden="true" tabindex="-1"></a><span class="co">// regenerate point cloud with same seed whenever rho changes</span></span>
+<span id="cb6-239"><a href="#cb6-239" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> {</span>
+<span id="cb6-240"><a href="#cb6-240" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> s <span class="op">=</span> <span class="dv">1335</span><span class="op">;</span></span>
+<span id="cb6-241"><a href="#cb6-241" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> rand <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb6-242"><a href="#cb6-242" aria-hidden="true" tabindex="-1"></a>    s <span class="op">|=</span> <span class="dv">0</span><span class="op">;</span> s <span class="op">=</span> (s <span class="op">+</span> <span class="bn">0x6D2B79F5</span>) <span class="op">|</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-243"><a href="#cb6-243" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> t <span class="op">=</span> s<span class="op">;</span></span>
+<span id="cb6-244"><a href="#cb6-244" aria-hidden="true" tabindex="-1"></a>    t <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">imul</span>(t <span class="op">^</span> (t <span class="op">&gt;&gt;&gt;</span> <span class="dv">15</span>)<span class="op">,</span> t <span class="op">|</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb6-245"><a href="#cb6-245" aria-hidden="true" tabindex="-1"></a>    t <span class="op">^=</span> t <span class="op">+</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">imul</span>(t <span class="op">^</span> (t <span class="op">&gt;&gt;&gt;</span> <span class="dv">7</span>)<span class="op">,</span> t <span class="op">|</span> <span class="dv">61</span>)<span class="op">;</span></span>
+<span id="cb6-246"><a href="#cb6-246" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ((t <span class="op">^</span> (t <span class="op">&gt;&gt;&gt;</span> <span class="dv">14</span>)) <span class="op">&gt;&gt;&gt;</span> <span class="dv">0</span>) <span class="op">/</span> <span class="dv">4294967296</span><span class="op">;</span></span>
+<span id="cb6-247"><a href="#cb6-247" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb6-248"><a href="#cb6-248" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> randn <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb6-249"><a href="#cb6-249" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="dv">0</span><span class="op">,</span> r2 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-250"><a href="#cb6-250" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (r1 <span class="op">===</span> <span class="dv">0</span>) r1 <span class="op">=</span> <span class="fu">rand</span>()<span class="op">;</span></span>
+<span id="cb6-251"><a href="#cb6-251" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (r2 <span class="op">===</span> <span class="dv">0</span>) r2 <span class="op">=</span> <span class="fu">rand</span>()<span class="op">;</span></span>
+<span id="cb6-252"><a href="#cb6-252" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(<span class="op">-</span><span class="dv">2</span> <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(r1)) <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">cos</span>(<span class="dv">2</span> <span class="op">*</span> <span class="bu">Math</span><span class="op">.</span><span class="cn">PI</span> <span class="op">*</span> r2)<span class="op">;</span></span>
+<span id="cb6-253"><a href="#cb6-253" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb6-254"><a href="#cb6-254" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Cholesky of [[1, rho], [rho, 1]] =&gt; L = [[1, 0], [rho, sqrt(1 - rho^2)]]</span></span>
+<span id="cb6-255"><a href="#cb6-255" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> L22 <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(<span class="dv">1</span> <span class="op">-</span> rho <span class="op">*</span> rho)<span class="op">;</span></span>
+<span id="cb6-256"><a href="#cb6-256" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> n_points}<span class="op">,</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb6-257"><a href="#cb6-257" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> z1 <span class="op">=</span> <span class="fu">randn</span>()<span class="op">,</span> z2 <span class="op">=</span> <span class="fu">randn</span>()<span class="op">;</span></span>
+<span id="cb6-258"><a href="#cb6-258" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [z1<span class="op">,</span> rho <span class="op">*</span> z1 <span class="op">+</span> L22 <span class="op">*</span> z2]<span class="op">;</span></span>
+<span id="cb6-259"><a href="#cb6-259" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb6-260"><a href="#cb6-260" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-6" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code hidden" id="cb7" data-startfrom="265" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 264;"><span id="cb7-265"><a href="#cb7-265" aria-hidden="true" tabindex="-1"></a>covPlot <span class="op">=</span> {</span>
+<span id="cb7-266"><a href="#cb7-266" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> deg_cov <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="cn">PI</span> <span class="op">/</span> <span class="dv">180</span><span class="op">;</span></span>
+<span id="cb7-267"><a href="#cb7-267" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> u_cov <span class="op">=</span> [<span class="bu">Math</span><span class="op">.</span><span class="fu">cos</span>(theta_u_cov <span class="op">*</span> deg_cov)<span class="op">,</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">sin</span>(theta_u_cov <span class="op">*</span> deg_cov)]<span class="op">;</span></span>
+<span id="cb7-268"><a href="#cb7-268" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> projections <span class="op">=</span> points<span class="op">.</span><span class="fu">map</span>(p <span class="kw">=&gt;</span> {</span>
+<span id="cb7-269"><a href="#cb7-269" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> k <span class="op">=</span> u_cov[<span class="dv">0</span>]<span class="op">*</span>p[<span class="dv">0</span>] <span class="op">+</span> u_cov[<span class="dv">1</span>]<span class="op">*</span>p[<span class="dv">1</span>]<span class="op">;</span></span>
+<span id="cb7-270"><a href="#cb7-270" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [k <span class="op">*</span> p[<span class="dv">0</span>]<span class="op">,</span> k <span class="op">*</span> p[<span class="dv">1</span>]]<span class="op">;</span></span>
+<span id="cb7-271"><a href="#cb7-271" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb7-272"><a href="#cb7-272" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> on_u <span class="op">=</span> projections<span class="op">.</span><span class="fu">map</span>(P <span class="kw">=&gt;</span> {</span>
+<span id="cb7-273"><a href="#cb7-273" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> k <span class="op">=</span> P[<span class="dv">0</span>]<span class="op">*</span>u_cov[<span class="dv">0</span>] <span class="op">+</span> P[<span class="dv">1</span>]<span class="op">*</span>u_cov[<span class="dv">1</span>]<span class="op">;</span></span>
+<span id="cb7-274"><a href="#cb7-274" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [k <span class="op">*</span> u_cov[<span class="dv">0</span>]<span class="op">,</span> k <span class="op">*</span> u_cov[<span class="dv">1</span>]]<span class="op">;</span></span>
+<span id="cb7-275"><a href="#cb7-275" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb7-276"><a href="#cb7-276" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> lim_cov <span class="op">=</span> <span class="fl">3.2</span><span class="op">;</span></span>
+<span id="cb7-277"><a href="#cb7-277" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> big <span class="op">=</span> lim_cov <span class="op">*</span> <span class="dv">3</span><span class="op">;</span></span>
+<span id="cb7-278"><a href="#cb7-278" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb7-279"><a href="#cb7-279" aria-hidden="true" tabindex="-1"></a>    <span class="dt">width</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb7-280"><a href="#cb7-280" aria-hidden="true" tabindex="-1"></a>    <span class="dt">height</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb7-281"><a href="#cb7-281" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span>lim_cov<span class="op">,</span> lim_cov]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"x₁"</span>}<span class="op">,</span></span>
+<span id="cb7-282"><a href="#cb7-282" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y</span><span class="op">:</span> {<span class="dt">domain</span><span class="op">:</span> [<span class="op">-</span>lim_cov<span class="op">,</span> lim_cov]<span class="op">,</span> <span class="dt">label</span><span class="op">:</span> <span class="st">"x₂"</span>}<span class="op">,</span></span>
+<span id="cb7-283"><a href="#cb7-283" aria-hidden="true" tabindex="-1"></a>    <span class="dt">aspectRatio</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb7-284"><a href="#cb7-284" aria-hidden="true" tabindex="-1"></a>    <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb7-285"><a href="#cb7-285" aria-hidden="true" tabindex="-1"></a>    <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb7-286"><a href="#cb7-286" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">0</span>]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#bbb"</span>})<span class="op">,</span></span>
+<span id="cb7-287"><a href="#cb7-287" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">0</span>]<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#bbb"</span>})<span class="op">,</span></span>
+<span id="cb7-288"><a href="#cb7-288" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">link</span>(</span>
+<span id="cb7-289"><a href="#cb7-289" aria-hidden="true" tabindex="-1"></a>        [{<span class="dt">x1</span><span class="op">:</span> <span class="op">-</span>u_cov[<span class="dv">0</span>]<span class="op">*</span>big<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="op">-</span>u_cov[<span class="dv">1</span>]<span class="op">*</span>big<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> u_cov[<span class="dv">0</span>]<span class="op">*</span>big<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> u_cov[<span class="dv">1</span>]<span class="op">*</span>big}]<span class="op">,</span></span>
+<span id="cb7-290"><a href="#cb7-290" aria-hidden="true" tabindex="-1"></a>        {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"steelblue"</span><span class="op">,</span> <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"2,4"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">1.2</span>}</span>
+<span id="cb7-291"><a href="#cb7-291" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb7-292"><a href="#cb7-292" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">dot</span>(points<span class="op">,</span> {<span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> d[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> d[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">r</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"#666"</span>})<span class="op">,</span></span>
+<span id="cb7-293"><a href="#cb7-293" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">arrow</span>(</span>
+<span id="cb7-294"><a href="#cb7-294" aria-hidden="true" tabindex="-1"></a>        projections<span class="op">.</span><span class="fu">map</span>(p <span class="kw">=&gt;</span> ({<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> p[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> p[<span class="dv">1</span>]}))<span class="op">,</span></span>
+<span id="cb7-295"><a href="#cb7-295" aria-hidden="true" tabindex="-1"></a>        {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"forestgreen"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">1.5</span><span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> <span class="fl">0.7</span>}</span>
+<span id="cb7-296"><a href="#cb7-296" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb7-297"><a href="#cb7-297" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">arrow</span>(</span>
+<span id="cb7-298"><a href="#cb7-298" aria-hidden="true" tabindex="-1"></a>        projections<span class="op">.</span><span class="fu">map</span>((P<span class="op">,</span> i) <span class="kw">=&gt;</span> ({<span class="dt">x1</span><span class="op">:</span> P[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> P[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> on_u[i][<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> on_u[i][<span class="dv">1</span>]}))<span class="op">,</span></span>
+<span id="cb7-299"><a href="#cb7-299" aria-hidden="true" tabindex="-1"></a>        {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"darkorange"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">1.2</span><span class="op">,</span> <span class="dt">opacity</span><span class="op">:</span> <span class="fl">0.85</span>}</span>
+<span id="cb7-300"><a href="#cb7-300" aria-hidden="true" tabindex="-1"></a>      )<span class="op">,</span></span>
+<span id="cb7-301"><a href="#cb7-301" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">arrow</span>([{<span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> u_cov[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> u_cov[<span class="dv">1</span>]}]<span class="op">,</span></span>
+<span id="cb7-302"><a href="#cb7-302" aria-hidden="true" tabindex="-1"></a>                 {<span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"steelblue"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="fl">2.5</span>})<span class="op">,</span></span>
+<span id="cb7-303"><a href="#cb7-303" aria-hidden="true" tabindex="-1"></a>      Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> u_cov[<span class="dv">0</span>]<span class="op">,</span> <span class="dt">y</span><span class="op">:</span> u_cov[<span class="dv">1</span>]<span class="op">,</span> <span class="dt">t</span><span class="op">:</span> <span class="st">"u"</span>}]<span class="op">,</span></span>
+<span id="cb7-304"><a href="#cb7-304" aria-hidden="true" tabindex="-1"></a>                {<span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> <span class="dt">text</span><span class="op">:</span> <span class="st">"t"</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="st">"steelblue"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span>})</span>
+<span id="cb7-305"><a href="#cb7-305" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb7-306"><a href="#cb7-306" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb7-307"><a href="#cb7-307" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-7" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="pca" class="level2">
+<h2 class="anchored" data-anchor-id="pca">PCA</h2>
+<p>A natural question after thinking about this is “For what <span class="math inline">\(\mathbf{u}\)</span> is the <span class="math inline">\(\operatorname{Var}(\mathbf{u}^\top \mathbf{x})\)</span> largest/smallest?” Play around with the interactive viz above and see where that happens. If you play with the visualization above—especially with a high correlation and many points—you’ll notice that as you rotate <span class="math inline">\(\mathbf{u}\)</span>, those yellow arrows grow and shrink. At two specific points (separated by 90°), the total length of those yellow arrows reaches a maximum and a minimum. These are the Principal Components.</p>
+<p>Talk of largest/smallest implies we need to do some sort of optimization. From now on, let’s restrict ourself to those <span class="math inline">\(\mathbf{u}\)</span> such that <span class="math inline">\(\lVert \mathbf{u} \rVert = 1\)</span> (i.e.&nbsp;unit vectors). This will be a constraint in our optimization. Using Lagrange Multipliers, our objective function is</p>
+<p><span class="math display">\[ L(\mathbf{u}, \lambda) = \mathbf{u}^\top \Sigma \mathbf{u} - \lambda(\mathbf{u}^\top \mathbf{u} - 1) \&gt;.\]</span></p>
+<p>Differentiating with respect to <span class="math inline">\(\mathbf{u}\)</span> and setting the result to <span class="math inline">\(\mathbf{0}\)</span>: <span class="math display">\[ \dfrac{\partial L}{\partial \mathbf{u}} = 2\Sigma \mathbf{u} - 2\lambda \mathbf{u} = \mathbf{0} \]</span></p>
+<p><span class="math display">\[ \therefore \boxed{\Sigma \mathbf{u} = \lambda \mathbf{u}} \]</span></p>
+<p>It is unsurprising that the directions of minimum/maximum variance are the eigen vectors of <span class="math inline">\(\Sigma\)</span> – this is a commonly parroted fact about PCA! Since <span class="math inline">\(\mathbf{u}\)</span> is a unit vector, this also means</p>
+<p><span class="math display">\[ \operatorname{Var}(\mathbf{u}^\top \mathbf{x}) = \mathbf{u}^\top \Sigma \mathbf{u} = \mathbf{u}^\top \lambda \mathbf{u} = \lambda \]</span></p>
+<p>and so the eigenvalues of the covariance matrix are also the variances in that direction, another commonly parroted fact about PCA! Moreover, the eigenvectors from this approach are orthonormal meaning we can actually get a fairly solid interpretation of the covariance matrix in terms of projection matrices.</p>
+<p>From the definition I provided at the top of the post, the covariance matrix is an average of some projections. That is a “meh” interpretation, but consider the following. We can diagonalize <span class="math inline">\(\Sigma\)</span> via the spectral decomposition to be</p>
+<p><span class="math display">\[ \Sigma = \mathbf{U} \Lambda \mathbf{U}^\top = \sum_{j=1}^n \lambda_j \mathbf{u}_j \mathbf{u}_j^\top \]</span></p>
+<p>and look – another projection matrix! In fact, there are <span class="math inline">\(n\)</span> of them, so really <em>the covariance matrix is a weighted sum of projection matrices! The weights are the variance of the principle components</em> and while that may not be a very visceral interpretation, I do find it pretty damn cool.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InZpZXdvZiB0aGV0YSA9IElucHV0cy5yYW5nZShbMCwgMzYwXSwge3ZhbHVlOiA2MCwgc3RlcDogMSwgbGFiZWw6IFwiQW5nbGUgYmV0d2VlbiB1IGFuZCB2ICjCsClcIn0pXG52aWV3b2YgY193ICAgPSBJbnB1dHMucmFuZ2UoWy0xLjUsIDEuNV0sIHt2YWx1ZTogMC40LCBzdGVwOiAwLjAxLCBsYWJlbDogXCJTY2FsZSBjIGZvciB3ID0gY8K3dlwifSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMiIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImRlZyA9IE1hdGguUEkgLyAxODBcbnZfcmF3ID0gWzIsIDFdXG52X25vcm1fcmF3ID0gTWF0aC5zcXJ0KHZfcmF3WzBdKioyICsgdl9yYXdbMV0qKjIpXG52ID0gW3ZfcmF3WzBdIC8gdl9ub3JtX3Jhdywgdl9yYXdbMV0gLyB2X25vcm1fcmF3XVxucGhpID0gTWF0aC5hdGFuMih2WzFdLCB2WzBdKVxudSA9IFtNYXRoLmNvcyhwaGkgKyB0aGV0YSAqIGRlZyksIE1hdGguc2luKHBoaSArIHRoZXRhICogZGVnKV1cbmRvdCA9IChhLCBiKSA9PiBhWzBdKmJbMF0gKyBhWzFdKmJbMV1cbm5vcm0gPSBhID0+IE1hdGguc3FydChkb3QoYSwgYSkpXG5rID0gZG90KHUsIHYpXG5wcm9qID0gW2sgKiB2WzBdLCBrICogdlsxXV1cbncgPSBbY193ICogdlswXSwgY193ICogdlsxXV1cbnBlcnAgPSBbLXZbMV0sIHZbMF1dXG5zaWRlID0gZG90KHBlcnAsIFt1WzBdIC0gcHJvalswXSwgdVsxXSAtIHByb2pbMV1dKSA+PSAwID8gLTEgOiAxXG5sYWJlbF9vZmZzZXQgPSAwLjIyXG5wcm9qX2xhYmVsID0gW3Byb2pbMF0gKyBzaWRlICogbGFiZWxfb2Zmc2V0ICogcGVycFswXSwgcHJvalsxXSArIHNpZGUgKiBsYWJlbF9vZmZzZXQgKiBwZXJwWzFdXVxud19sYWJlbCA9IFt3WzBdICsgc2lkZSAqIGxhYmVsX29mZnNldCAqIHBlcnBbMF0sIHdbMV0gKyBzaWRlICogbGFiZWxfb2Zmc2V0ICogcGVycFsxXV1cbnJlc19ub3JtID0gTWF0aC5oeXBvdCh1WzBdIC0gcHJvalswXSwgdVsxXSAtIHByb2pbMV0pXG5oeXBfbm9ybSA9IE1hdGguaHlwb3QodVswXSAtIHdbMF0sIHVbMV0gLSB3WzFdKVxubGltID0gMS42XG5cbnN0YXRzID0gbWRgKirigJZ1IOKIkiBwcm9qX3YodSnigJYqKiA9ICR7cmVzX25vcm0udG9GaXhlZCgzKX0gIMK3ICAqKuKAlnUg4oiSIHfigJYqKiA9ICR7aHlwX25vcm0udG9GaXhlZCgzKX1gXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTMiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJQbG90LnBsb3Qoe1xuICB3aWR0aDogNjAwLFxuICBoZWlnaHQ6IDYwMCxcbiAgeDoge2RvbWFpbjogWy1saW0sIGxpbV0sIGxhYmVsOiBcInhcIn0sXG4gIHk6IHtkb21haW46IFstbGltLCBsaW1dLCBsYWJlbDogXCJ5XCJ9LFxuICBhc3BlY3RSYXRpbzogMSxcbiAgZ3JpZDogdHJ1ZSxcbiAgbWFya3M6IFtcbiAgICBQbG90LnJ1bGVYKFswXSwge3N0cm9rZTogXCIjYmJiXCJ9KSxcbiAgICBQbG90LnJ1bGVZKFswXSwge3N0cm9rZTogXCIjYmJiXCJ9KSxcbiAgICAvLyB2J3MgbGluZSB0aHJvdWdoIG9yaWdpblxuICAgIFBsb3QubGluZShcbiAgICAgIFtbLXZbMF0qbGltLCAtdlsxXSpsaW1dLCBbdlswXSpsaW0sIHZbMV0qbGltXV0sXG4gICAgICB7c3Ryb2tlOiBcIiM4ODhcIiwgc3Ryb2tlRGFzaGFycmF5OiBcIjIsM1wifVxuICAgICksXG4gICAgLy8gcmVzaWR1YWw6IHUgdG8gcHJvaiAocmlnaHQtYW5nbGUgbGVnKVxuICAgIFBsb3QubGluZShcbiAgICAgIFt1LCBwcm9qXSxcbiAgICAgIHtzdHJva2U6IFwiZm9yZXN0Z3JlZW5cIiwgc3Ryb2tlRGFzaGFycmF5OiBcIjQsM1wifVxuICAgICksXG4gICAgLy8gaHlwb3RlbnVzZTogdSB0byB3XG4gICAgUGxvdC5saW5lKFxuICAgICAgW3UsIHddLFxuICAgICAge3N0cm9rZTogXCJkYXJrb3JhbmdlXCIsIHN0cm9rZURhc2hhcnJheTogXCI2LDRcIiwgc3Ryb2tlV2lkdGg6IDEuOH1cbiAgICApLFxuICAgIC8vIHByb2otdG8tdyBsZWcgYWxvbmcgdiAoY29tcGxldGVzIHJpZ2h0IHRyaWFuZ2xlKVxuICAgIFBsb3QubGluZShcbiAgICAgIFtwcm9qLCB3XSxcbiAgICAgIHtzdHJva2U6IFwiI2FhYVwiLCBzdHJva2VEYXNoYXJyYXk6IFwiMiwzXCJ9XG4gICAgKSxcbiAgICAvLyB2ZWN0b3JzIGFzIGFycm93c1xuICAgIFBsb3QuYXJyb3coW3t4MTogMCwgeTE6IDAsIHgyOiB1WzBdLCB5MjogdVsxXX1dLFxuICAgICAgICAgICAgICAge3gxOiBcIngxXCIsIHkxOiBcInkxXCIsIHgyOiBcIngyXCIsIHkyOiBcInkyXCIsIHN0cm9rZTogXCJzdGVlbGJsdWVcIiwgc3Ryb2tlV2lkdGg6IDJ9KSxcbiAgICBQbG90LmFycm93KFt7eDE6IDAsIHkxOiAwLCB4MjogdlswXSwgeTI6IHZbMV19XSxcbiAgICAgICAgICAgICAgIHt4MTogXCJ4MVwiLCB5MTogXCJ5MVwiLCB4MjogXCJ4MlwiLCB5MjogXCJ5MlwiLCBzdHJva2U6IFwiZmlyZWJyaWNrXCIsIHN0cm9rZVdpZHRoOiAyfSksXG4gICAgUGxvdC5hcnJvdyhbe3gxOiAwLCB5MTogMCwgeDI6IHByb2pbMF0sIHkyOiBwcm9qWzFdfV0sXG4gICAgICAgICAgICAgICB7eDE6IFwieDFcIiwgeTE6IFwieTFcIiwgeDI6IFwieDJcIiwgeTI6IFwieTJcIiwgc3Ryb2tlOiBcImZvcmVzdGdyZWVuXCIsIHN0cm9rZVdpZHRoOiAyLjV9KSxcbiAgICBQbG90LmFycm93KFt7eDE6IDAsIHkxOiAwLCB4Mjogd1swXSwgeTI6IHdbMV19XSxcbiAgICAgICAgICAgICAgIHt4MTogXCJ4MVwiLCB5MTogXCJ5MVwiLCB4MjogXCJ4MlwiLCB5MjogXCJ5MlwiLCBzdHJva2U6IFwiZGFya29yYW5nZVwiLCBzdHJva2VXaWR0aDogMn0pLFxuICAgIC8vIGxhYmVsc1xuICAgIFBsb3QudGV4dChbe3g6IHVbMF0sIHk6IHVbMV0sIHQ6IFwidVwifV0sXG4gICAgICAgICAgICAgIHt4OiBcInhcIiwgeTogXCJ5XCIsIHRleHQ6IFwidFwiLCBkeTogLTEwLCBmaWxsOiBcInN0ZWVsYmx1ZVwiLCBmb250U2l6ZTogMTQsIGZvbnRXZWlnaHQ6IFwiYm9sZFwifSksXG4gICAgUGxvdC50ZXh0KFt7eDogdlswXSwgeTogdlsxXSwgdDogXCJ2XCJ9XSxcbiAgICAgICAgICAgICAge3g6IFwieFwiLCB5OiBcInlcIiwgdGV4dDogXCJ0XCIsIGR5OiAtMTAsIGZpbGw6IFwiZmlyZWJyaWNrXCIsIGZvbnRTaXplOiAxNCwgZm9udFdlaWdodDogXCJib2xkXCJ9KSxcbiAgICBQbG90LnRleHQoW3t4OiBwcm9qX2xhYmVsWzBdLCB5OiBwcm9qX2xhYmVsWzFdLCB0OiBcIlByb2plY3Rpb25cIn1dLFxuICAgICAgICAgICAgICB7eDogXCJ4XCIsIHk6IFwieVwiLCB0ZXh0OiBcInRcIiwgZmlsbDogXCJmb3Jlc3RncmVlblwiLCBmb250U2l6ZTogMTMsIGZvbnRXZWlnaHQ6IFwiYm9sZFwifSksXG4gICAgUGxvdC50ZXh0KFt7eDogd19sYWJlbFswXSwgeTogd19sYWJlbFsxXSwgdDogXCJ3XCJ9XSxcbiAgICAgICAgICAgICAge3g6IFwieFwiLCB5OiBcInlcIiwgdGV4dDogXCJ0XCIsIGZpbGw6IFwiZGFya29yYW5nZVwiLCBmb250U2l6ZTogMTQsIGZvbnRXZWlnaHQ6IFwiYm9sZFwifSlcbiAgXVxufSlcbiJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtNCIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6InN0YXRzXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTUiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJ2aWV3b2YgdGhldGFfdV9jb3YgPSBJbnB1dHMucmFuZ2UoWzAsIDM2MF0sIHt2YWx1ZTogNDUsIHN0ZXA6IDEsIGxhYmVsOiBcIkFuZ2xlIG9mIHUgKMKwKVwifSlcbnZpZXdvZiByaG8gPSBJbnB1dHMucmFuZ2UoWy0wLjk5LCAwLjk5XSwge3ZhbHVlOiAwLjAsIHN0ZXA6IDAuMDEsIGxhYmVsOiBcIkNvcnJlbGF0aW9uIM+BXCJ9KVxudmlld29mIG5fcG9pbnRzID0gSW5wdXRzLnJhbmdlKFsxLCAxMDBdLCB7dmFsdWU6IDEwLCBzdGVwOiAxLCBsYWJlbDogXCJOdW1iZXIgb2YgcG9pbnRzXCJ9KVxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0IiwiY2VsbE5hbWUiOiJvanMtY2VsbC02IiwiaW5saW5lIjpmYWxzZSwic291cmNlIjoiLy8gcmVnZW5lcmF0ZSBwb2ludCBjbG91ZCB3aXRoIHNhbWUgc2VlZCB3aGVuZXZlciByaG8gY2hhbmdlc1xucG9pbnRzID0ge1xuICBsZXQgcyA9IDEzMzU7XG4gIGNvbnN0IHJhbmQgPSAoKSA9PiB7XG4gICAgcyB8PSAwOyBzID0gKHMgKyAweDZEMkI3OUY1KSB8IDA7XG4gICAgbGV0IHQgPSBzO1xuICAgIHQgPSBNYXRoLmltdWwodCBeICh0ID4+PiAxNSksIHQgfCAxKTtcbiAgICB0IF49IHQgKyBNYXRoLmltdWwodCBeICh0ID4+PiA3KSwgdCB8IDYxKTtcbiAgICByZXR1cm4gKCh0IF4gKHQgPj4+IDE0KSkgPj4+IDApIC8gNDI5NDk2NzI5NjtcbiAgfTtcbiAgY29uc3QgcmFuZG4gPSAoKSA9PiB7XG4gICAgbGV0IHIxID0gMCwgcjIgPSAwO1xuICAgIHdoaWxlIChyMSA9PT0gMCkgcjEgPSByYW5kKCk7XG4gICAgd2hpbGUgKHIyID09PSAwKSByMiA9IHJhbmQoKTtcbiAgICByZXR1cm4gTWF0aC5zcXJ0KC0yICogTWF0aC5sb2cocjEpKSAqIE1hdGguY29zKDIgKiBNYXRoLlBJICogcjIpO1xuICB9O1xuICAvLyBDaG9sZXNreSBvZiBbWzEsIHJob10sIFtyaG8sIDFdXSA9PiBMID0gW1sxLCAwXSwgW3Jobywgc3FydCgxIC0gcmhvXjIpXV1cbiAgY29uc3QgTDIyID0gTWF0aC5zcXJ0KDEgLSByaG8gKiByaG8pO1xuICByZXR1cm4gQXJyYXkuZnJvbSh7bGVuZ3RoOiBuX3BvaW50c30sICgpID0+IHtcbiAgICBjb25zdCB6MSA9IHJhbmRuKCksIHoyID0gcmFuZG4oKTtcbiAgICByZXR1cm4gW3oxLCByaG8gKiB6MSArIEwyMiAqIHoyXTtcbiAgfSk7XG59XG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTciLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJjb3ZQbG90ID0ge1xuICBjb25zdCBkZWdfY292ID0gTWF0aC5QSSAvIDE4MDtcbiAgY29uc3QgdV9jb3YgPSBbTWF0aC5jb3ModGhldGFfdV9jb3YgKiBkZWdfY292KSwgTWF0aC5zaW4odGhldGFfdV9jb3YgKiBkZWdfY292KV07XG4gIGNvbnN0IHByb2plY3Rpb25zID0gcG9pbnRzLm1hcChwID0+IHtcbiAgICBjb25zdCBrID0gdV9jb3ZbMF0qcFswXSArIHVfY292WzFdKnBbMV07XG4gICAgcmV0dXJuIFtrICogcFswXSwgayAqIHBbMV1dO1xuICB9KTtcbiAgY29uc3Qgb25fdSA9IHByb2plY3Rpb25zLm1hcChQID0+IHtcbiAgICBjb25zdCBrID0gUFswXSp1X2NvdlswXSArIFBbMV0qdV9jb3ZbMV07XG4gICAgcmV0dXJuIFtrICogdV9jb3ZbMF0sIGsgKiB1X2NvdlsxXV07XG4gIH0pO1xuICBjb25zdCBsaW1fY292ID0gMy4yO1xuICBjb25zdCBiaWcgPSBsaW1fY292ICogMztcbiAgcmV0dXJuIFBsb3QucGxvdCh7XG4gICAgd2lkdGg6IDYwMCxcbiAgICBoZWlnaHQ6IDYwMCxcbiAgICB4OiB7ZG9tYWluOiBbLWxpbV9jb3YsIGxpbV9jb3ZdLCBsYWJlbDogXCJ44oKBXCJ9LFxuICAgIHk6IHtkb21haW46IFstbGltX2NvdiwgbGltX2Nvdl0sIGxhYmVsOiBcInjigoJcIn0sXG4gICAgYXNwZWN0UmF0aW86IDEsXG4gICAgZ3JpZDogdHJ1ZSxcbiAgICBtYXJrczogW1xuICAgICAgUGxvdC5ydWxlWChbMF0sIHtzdHJva2U6IFwiI2JiYlwifSksXG4gICAgICBQbG90LnJ1bGVZKFswXSwge3N0cm9rZTogXCIjYmJiXCJ9KSxcbiAgICAgIFBsb3QubGluayhcbiAgICAgICAgW3t4MTogLXVfY292WzBdKmJpZywgeTE6IC11X2NvdlsxXSpiaWcsIHgyOiB1X2NvdlswXSpiaWcsIHkyOiB1X2NvdlsxXSpiaWd9XSxcbiAgICAgICAge3gxOiBcIngxXCIsIHkxOiBcInkxXCIsIHgyOiBcIngyXCIsIHkyOiBcInkyXCIsIHN0cm9rZTogXCJzdGVlbGJsdWVcIiwgc3Ryb2tlRGFzaGFycmF5OiBcIjIsNFwiLCBzdHJva2VXaWR0aDogMS4yfVxuICAgICAgKSxcbiAgICAgIFBsb3QuZG90KHBvaW50cywge3g6IGQgPT4gZFswXSwgeTogZCA9PiBkWzFdLCByOiAzLCBmaWxsOiBcIiM2NjZcIn0pLFxuICAgICAgUGxvdC5hcnJvdyhcbiAgICAgICAgcHJvamVjdGlvbnMubWFwKHAgPT4gKHt4MTogMCwgeTE6IDAsIHgyOiBwWzBdLCB5MjogcFsxXX0pKSxcbiAgICAgICAge3gxOiBcIngxXCIsIHkxOiBcInkxXCIsIHgyOiBcIngyXCIsIHkyOiBcInkyXCIsIHN0cm9rZTogXCJmb3Jlc3RncmVlblwiLCBzdHJva2VXaWR0aDogMS41LCBvcGFjaXR5OiAwLjd9XG4gICAgICApLFxuICAgICAgUGxvdC5hcnJvdyhcbiAgICAgICAgcHJvamVjdGlvbnMubWFwKChQLCBpKSA9PiAoe3gxOiBQWzBdLCB5MTogUFsxXSwgeDI6IG9uX3VbaV1bMF0sIHkyOiBvbl91W2ldWzFdfSkpLFxuICAgICAgICB7eDE6IFwieDFcIiwgeTE6IFwieTFcIiwgeDI6IFwieDJcIiwgeTI6IFwieTJcIiwgc3Ryb2tlOiBcImRhcmtvcmFuZ2VcIiwgc3Ryb2tlV2lkdGg6IDEuMiwgb3BhY2l0eTogMC44NX1cbiAgICAgICksXG4gICAgICBQbG90LmFycm93KFt7eDE6IDAsIHkxOiAwLCB4MjogdV9jb3ZbMF0sIHkyOiB1X2NvdlsxXX1dLFxuICAgICAgICAgICAgICAgICB7eDE6IFwieDFcIiwgeTE6IFwieTFcIiwgeDI6IFwieDJcIiwgeTI6IFwieTJcIiwgc3Ryb2tlOiBcInN0ZWVsYmx1ZVwiLCBzdHJva2VXaWR0aDogMi41fSksXG4gICAgICBQbG90LnRleHQoW3t4OiB1X2NvdlswXSwgeTogdV9jb3ZbMV0sIHQ6IFwidVwifV0sXG4gICAgICAgICAgICAgICAge3g6IFwieFwiLCB5OiBcInlcIiwgdGV4dDogXCJ0XCIsIGR5OiAtMTAsIGZpbGw6IFwic3RlZWxibHVlXCIsIGZvbnRTaXplOiAxNCwgZm9udFdlaWdodDogXCJib2xkXCJ9KVxuICAgIF1cbiAgfSk7XG59XG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ3RoZXRhJykifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXRRdWlldCIsInNvdXJjZSI6InNoaW55SW5wdXQoJ2NfdycpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCd0aGV0YV91X2NvdicpIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdyaG8nKSJ9LHsibWV0aG9kTmFtZSI6ImludGVycHJldFF1aWV0Iiwic291cmNlIjoic2hpbnlJbnB1dCgnbl9wb2ludHMnKSJ9XX0=
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../posts/2026-05-14-cov";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "../..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-05-14-cov/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
