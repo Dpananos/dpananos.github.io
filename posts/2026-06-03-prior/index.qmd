@@ -29,7 +29,7 @@ In [A/B Testing with Fat Tails](https://eduardomazevedo.github.io/papers/azevedo
 * The t-distribution can be conceptualized as a mixture distribution. Suppose $W \sim \operatorname{Inverse-Gamma}(\nu/2, \nu/2)$, and let $X \mid W \sim \operatorname{Normal}(0, W)$.  Then the marginal distribution of $X$, integrating out $W$ is a t-distribution with degrees of freedom $\nu$.  So the t-distribution kind of naturally allows for this idea of treatment effects coming from a mixture.  Also, 
 * When using a t-distribution as the prior for the treatment effect, small lifts are shrunk more aggressively and large lifts are not shrunk so aggressively, as the authors of that paper indicate.  The effect is that we take the larger effects more on face value as opposed to shrinking them so much.  I've extolled the virtues of shrinkage, but shrinkage comes at a cost from the platform's perspective.  When you've got a big lift, shrinkage can cause a discrepancy between what the pen-and-paper math says the lift should be and what the platform reports.  For non-technical users, this can create confusion and raise suspicion of results, each of which can erode trust in the platform.  
 
-However, the updating step when using a t-distribution does not have a nice closed form expression like the normal-normal conjugate model. While the posterior mean can be obtained via numerical integration, the posterior variance (and hence credible intervals) are a bit of a pain to compute.  AI has made implementing these easier than ever, but try explaining the procedure in your docs (again...maybe easier with AI but not super clear in my opinion).
+However, the updating step when using a t-distribution does not have a nice closed form expression like the normal-normal conjugate model. While the posterior mean can be obtained via numerical integration, the posterior variance (and hence credible intervals) are a bit of a pain to compute.  You could use AI to implement the numerical intregration for the mean and variance, but try explaining the procedure in your docs (again...maybe easier with AI but not super clear in my opinion).
 
 Let's return to the t-distribution as a mixture for a moment.  The marginal density of $X$, $f(x)$, is represented by the following integral
 
@@ -252,7 +252,7 @@ abline(0, 1, lty = 2)
 
 
 
-# Discussion
 
-What I really like about this approach as compared to the t distribution is that I can (with some effort) persist this mixture distribution and obtain a posterior mean _and_ posterior variance, thereby giving me credible intervals, with only some elbow grease.  I won't do the calculations here to show you how to get $\operatorname{Var}(\delta \mid \hat \delta, d)$ but it is possible given the mixture components.
+
+
 [^1]: Hand waving aggressively

@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2026-05-29">
+<meta name="dcterms.date" content="2026-06-03">
 
-<title>Demetri Pananos Ph.D - Theory of Holdouts</title>
+<title>Demetri Pananos Ph.D - Better Priors for Bayesian Analysis of A/B Testing</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -109,10 +109,10 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - Theory of Holdouts">
+<meta property="og:title" content="Demetri Pananos Ph.D - Better Priors for Bayesian Analysis of A/B Testing">
 <meta property="og:description" content="">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - Theory of Holdouts">
+<meta name="twitter:title" content="Demetri Pananos Ph.D - Better Priors for Bayesian Analysis of A/B Testing">
 <meta name="twitter:description" content="">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
@@ -168,7 +168,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Theory of Holdouts</h1>
+      <h1 class="title">Better Priors for Bayesian Analysis of A/B Testing</h1>
                       </div>
   </div>
     
@@ -185,7 +185,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">May 29, 2026</p>
+        <p class="date">June 3, 2026</p>
       </div>
     </div>
     
@@ -197,7 +197,15 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#model" id="toc-model" class="nav-link" data-scroll-target="#model">Model</a></li>
+  <li><a href="#simulation" id="toc-simulation" class="nav-link" data-scroll-target="#simulation">Simulation</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-03-prior/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -206,13 +214,100 @@ window.Quarto = {
 
 
 
-<p>We need to define what counterfactual outcomes we want to contrast.</p>
-<p>One of them is very clear – it represents the state of the product had no further experiments been performed and no changes made. It is, in essence, a version of the product frozen in time. This is the “control” experience and serves the role of <span class="math inline">\(Y(0)\)</span> in standard potential outcomes notation.</p>
-<p>The tricky part is <span class="math inline">\(Y(1)\)</span>, and this is where a lot of approaches differ:</p>
+<section id="motivation" class="level1">
+<h1>Motivation</h1>
+<p>When estimating a treatment effect (typically the lift), <span class="math inline">\(\delta_i\)</span>, using the Bayesian methodology, Datadog uses a default prior of</p>
+<p><span class="math display">\[ \delta_i \sim \operatorname{Normal}(0, 0.05^2) \&gt;.\]</span></p>
+<p>Do I really believe that true effects are normally distributed? No, no I don’t. Under such a model, we should see true lifts larger than 10% in absolute value less than 5% of the time, and lifts less than 20% less than 1% of the time. Roughly, that means 1 in every 100 experiments should produce a lift that large. But I see effect sizes on that order more often than I should, and they have teeny tiny standard errors so sampling noise doesn’t completely explain why I’m seeing them so often. It is more likely that the latent distribution of true effects is better modeled as a mixture distribution; Most treatments produce small improvements, and some produce large ones. It may be the case that we can use our context from the intervention to select a better prior, but what do we do from the platform side when we don’t have access to that.</p>
+<p>In <a href="https://eduardomazevedo.github.io/papers/azevedo-et-al-ab.pdf">A/B Testing with Fat Tails</a> the authors argue that the distribution of true treatment effects across experiments is better modeled with a heavy-tailed Student-t prior than a Gaussian prior, leading to empirical Bayes estimates that shrink small effects toward zero while preserving the possibility of rare, genuinely large innovations. This approach is nice for a few reasons:</p>
+<ul>
+<li>The t-distribution can be conceptualized as a mixture distribution. Suppose <span class="math inline">\(W \sim \operatorname{Inverse-Gamma}(\nu/2, \nu/2)\)</span>, and let <span class="math inline">\(X \mid W \sim \operatorname{Normal}(0, W)\)</span>. Then the marginal distribution of <span class="math inline">\(X\)</span>, integrating out <span class="math inline">\(W\)</span> is a t-distribution with degrees of freedom <span class="math inline">\(\nu\)</span>. So the t-distribution kind of naturally allows for this idea of treatment effects coming from a mixture. Also,</li>
+<li>When using a t-distribution as the prior for the treatment effect, small lifts are shrunk more aggressively and large lifts are not shrunk so aggressively, as the authors of that paper indicate. The effect is that we take the larger effects more on face value as opposed to shrinking them so much. I’ve extolled the virtues of shrinkage, but shrinkage comes at a cost from the platform’s perspective. When you’ve got a big lift, shrinkage can cause a discrepancy between what the pen-and-paper math says the lift should be and what the platform reports. For non-technical users, this can create confusion and raise suspicion of results, each of which can erode trust in the platform.</li>
+</ul>
+<p>However, the updating step when using a t-distribution does not have a nice closed form expression like the normal-normal conjugate model. While the posterior mean can be obtained via numerical integration, the posterior variance (and hence credible intervals) are a bit of a pain to compute. You could use AI to implement the numerical intregration for the mean and variance, but try explaining the procedure in your docs (again…maybe easier with AI but not super clear in my opinion).</p>
+<p>Let’s return to the t-distribution as a mixture for a moment. The marginal density of <span class="math inline">\(X\)</span>, <span class="math inline">\(f(x)\)</span>, is represented by the following integral</p>
+<p><span class="math display">\[ f(x) = \int_{0}^{\infty} f(x \mid w) g(w) \&gt; dw \]</span></p>
+<p>which can be roughly thought of <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> as some sort of weighted average with infinitely many components. Much in the same way we may truncate a Taylor series to approximate some function, what if we used finitely many components and estimated a mixture distribution?</p>
+<p>This is, more or less, what van Zwet does in <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9290572/">The Statistical properties of RCTs and a Proposal for Shrinkage</a>. You know van Zwet, he was a co-author on one of my favorite papers which served as inspiration for <a href="../../posts/2025-08-10-shrinking/index.html">this</a> blog post. So let’s take a page out of van Zwet’s book and apply the same technique to AB testing.</p>
+</section>
+<section id="model" class="level1">
+<h1>Model</h1>
+<p>van Zwet considers results from RCTs (for our purposes, we can consider this an A/B test) as a triple <span class="math inline">\((\delta, \hat \delta, s)\)</span>, where <span class="math inline">\(\delta\)</span> is the true treatment effect, <span class="math inline">\(\hat \delta\)</span> is our noisy estimate of <span class="math inline">\(\delta\)</span>, and <span class="math inline">\(s\)</span> is the standard error. Rather than work with the triple, it is easier to consider the <span class="math inline">\(z\)</span> score, <span class="math inline">\(z = \hat \delta / s\)</span> and the noiseless analogue which van Zwet calls the “Signal to Noise Ratio”, or SNR, namely <span class="math inline">\(SNR = \delta / s\)</span>. The idea is to model the <span class="math inline">\(z\)</span> (for reasons I will get to eventually) and then compute <span class="math inline">\(s \cdot E[SNR \mid z]\)</span> as the estimated treatment effect which should regularize the estimate a little bit.</p>
+<p>Now, why model the <span class="math inline">\(z\)</span> and not the <span class="math inline">\(\hat \delta\)</span>? Note that the marginal distribution of the <span class="math inline">\(z\)</span> is a convolution between a standard normal and the distribution of the <span class="math inline">\(SNR\)</span>. Hence, if we model the <span class="math inline">\(z\)</span> as a mixture of normal, we can obtain the implied distribution of <span class="math inline">\(SNR\)</span> by subtracting 1 from each component’s variance, from which we can compute the regularized treatment effect. It is a bit of a round-world trip, but it is worth it.</p>
+<p>If you’re following along, this should give us the density of <span class="math inline">\(SNR\)</span>, <span class="math inline">\(g(SNR)\)</span> as</p>
+<p><span class="math display">\[
+g(SNR)
+=
+\sum_{k=1}^K
+\pi_k
+\operatorname{Normal}
+\left(
+SNR \mid 0, \sigma_k^2 - 1
+\right),
+\]</span> and the density of the <span class="math inline">\(z\)</span> as <span class="math display">\[
+f(z)
+=
+\sum_{k=1}^K
+\pi_k
+\operatorname{Normal}
+\left(
+z \mid 0, \sigma_k^2
+\right).
+\]</span></p>
+<p>So how do we compute <span class="math inline">\(E[SNR \mid z]\)</span>? Once we have fit the mixture distribution for <span class="math inline">\(z\)</span>, each mixture component implies a corresponding prior component for <span class="math inline">\(SNR\)</span>. Within each component, this is just the usual normal-normal update: if the marginal variance of component <span class="math inline">\(k\)</span> for <span class="math inline">\(z\)</span> is <span class="math inline">\(\sigma_k^2\)</span>, then the implied prior variance for <span class="math inline">\(SNR\)</span> is <span class="math inline">\(\sigma_k^2 - 1\)</span>. Therefore, conditional on belonging to component <span class="math inline">\(k\)</span>, the posterior mean of <span class="math inline">\(SNR\)</span> is</p>
+<p><span class="math display">\[
+E[SNR \mid z, k]
+=
+\frac{\sigma_k^2 - 1}{\sigma_k^2} z.
+\]</span></p>
+<p>But we do not know which component generated the observation, so we average these component-specific posterior means using the posterior probability that the observation came from each component:</p>
+<p><span class="math display">\[
+p(k \mid z)
+=
+\frac{
+\pi_k \phi(z;0,\sigma_k^2)
+}{
+\sum_{j=1}^K \pi_j \phi(z;0,\sigma_j^2)
+}.
+\]</span></p>
+<p>Putting these together,</p>
+<p><span class="math display">\[
+E[SNR \mid z]
+=
+\sum_{k=1}^K
+p(k \mid z)
+\frac{\sigma_k^2 - 1}{\sigma_k^2} z.
+\]</span></p>
+<p>Finally, since <span class="math inline">\(SNR = \delta / s\)</span>, the regularized treatment effect estimate is</p>
+<p><span class="math display">\[
+s \cdot E[SNR \mid z].
+\]</span></p>
+<p>Notice that this estimator behaves much like the posterior mean under a heavy-tailed prior. Small <span class="math inline">\(z\)</span>-scores are assigned primarily to the low-variance mixture components and are therefore shrunk aggressively toward zero. Large <span class="math inline">\(z\)</span>-scores, on the other hand, are increasingly attributed to the high-variance components, resulting in much less shrinkage. In this way, the finite mixture model captures the same intuition as the fat-tailed priors proposed in the Microsoft paper, while retaining the convenience of a closed-form posterior update.</p>
+</section>
+<section id="simulation" class="level1">
+<h1>Simulation</h1>
+<p>Take a look at the plot below. I simulated 2000 true lifts from a mixture distribution; 80% came from a normal with mean 0 and standard deviation 0.05, and the remaining 20% came from a heavier tailed distribution. I estimated a mixture distribution with four components, and created the <span class="math inline">\(E[SNR \mid z]\)</span> estimator.</p>
+<p>I’ve plotted the observed <span class="math inline">\(z\)</span> score versus the posterior expectation of the SNR and it has roughly the same shape as Figure 1 in the Microsoft paper.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Hand waving aggressively<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -605,4 +700,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-01-holdouts/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-03-prior/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

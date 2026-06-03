@@ -7,9 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Demetri Pananos">
-<meta name="dcterms.date" content="2026-05-29">
 
-<title>Demetri Pananos Ph.D - Theory of Holdouts</title>
+<title>Demetri Pananos Ph.D</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -109,11 +108,9 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../../styles.css">
-<meta property="og:title" content="Demetri Pananos Ph.D - Theory of Holdouts">
-<meta property="og:description" content="">
+<meta property="og:title" content="Demetri Pananos Ph.D">
 <meta property="og:site_name" content="Demetri Pananos Ph.D">
-<meta name="twitter:title" content="Demetri Pananos Ph.D - Theory of Holdouts">
-<meta name="twitter:description" content="">
+<meta name="twitter:title" content="Demetri Pananos Ph.D">
 <meta name="twitter:creator" content="@PhDemetri">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -168,7 +165,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Theory of Holdouts</h1>
+      
                       </div>
   </div>
     
@@ -182,12 +179,6 @@ window.Quarto = {
             </div>
     </div>
       
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">May 29, 2026</p>
-      </div>
-    </div>
     
       
     </div>
@@ -197,7 +188,26 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#a-trajectory-based-framework-for-long-term-holdout-evaluation" id="toc-a-trajectory-based-framework-for-long-term-holdout-evaluation" class="nav-link active" data-scroll-target="#a-trajectory-based-framework-for-long-term-holdout-evaluation">A Trajectory-Based Framework for Long-Term Holdout Evaluation</a>
+  <ul class="collapse">
+  <li><a href="#notation-and-exposure-space" id="toc-notation-and-exposure-space" class="nav-link" data-scroll-target="#notation-and-exposure-space">1. Notation and Exposure Space</a></li>
+  <li><a href="#structural-assumptions" id="toc-structural-assumptions" class="nav-link" data-scroll-target="#structural-assumptions">2. Structural Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#assumption-1-no-interference-sutva-style-isolation" id="toc-assumption-1-no-interference-sutva-style-isolation" class="nav-link" data-scroll-target="#assumption-1-no-interference-sutva-style-isolation">Assumption 1: No Interference (SUTVA-Style Isolation)</a></li>
+  <li><a href="#assumption-2-path-dependence" id="toc-assumption-2-path-dependence" class="nav-link" data-scroll-target="#assumption-2-path-dependence">Assumption 2: Path Dependence</a></li>
+  </ul></li>
+  <li><a href="#cohort-dynamics-and-the-steady-state-horizon" id="toc-cohort-dynamics-and-the-steady-state-horizon" class="nav-link" data-scroll-target="#cohort-dynamics-and-the-steady-state-horizon">3. Cohort Dynamics and the Steady-State Horizon</a>
+  <ul class="collapse">
+  <li><a href="#assumption-3-equilibration-absence-of-distant-carryover" id="toc-assumption-3-equilibration-absence-of-distant-carryover" class="nav-link" data-scroll-target="#assumption-3-equilibration-absence-of-distant-carryover">Assumption 3: Equilibration (Absence of Distant Carryover)</a></li>
+  </ul></li>
+  <li><a href="#causal-estimands-and-identification" id="toc-causal-estimands-and-identification" class="nav-link" data-scroll-target="#causal-estimands-and-identification">4. Causal Estimands and Identification</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-01-holdouts/math.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -206,11 +216,72 @@ window.Quarto = {
 
 
 
-<p>We need to define what counterfactual outcomes we want to contrast.</p>
-<p>One of them is very clear – it represents the state of the product had no further experiments been performed and no changes made. It is, in essence, a version of the product frozen in time. This is the “control” experience and serves the role of <span class="math inline">\(Y(0)\)</span> in standard potential outcomes notation.</p>
-<p>The tricky part is <span class="math inline">\(Y(1)\)</span>, and this is where a lot of approaches differ:</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All text in this post is AI generated until otherwise indicated.</p>
+</div>
+</div>
+<section id="a-trajectory-based-framework-for-long-term-holdout-evaluation" class="level1">
+<h1>A Trajectory-Based Framework for Long-Term Holdout Evaluation</h1>
+<section id="notation-and-exposure-space" class="level2">
+<h2 class="anchored" data-anchor-id="notation-and-exposure-space">1. Notation and Exposure Space</h2>
+<p>To evaluate the cumulative and long-term impact of multiple distinct treatments (innovations) introduced sequentially over time, we define a multi-dimensional, longitudinal exposure space. Let <span class="math inline">\(k\)</span> denote the total number of distinct treatments under consideration. We represent the exposure state of subject <span class="math inline">\(i\)</span> at a discrete time block <span class="math inline">\(t\)</span> as a <span class="math inline">\(k\)</span>-dimensional binary vector:</p>
+<p><span class="math display">\[\mathbf{a}_{t} = [a_{t,1}, a_{t,2}, \dots, a_{t,k}]^\top \in \{0, 1\}^k\]</span></p>
+<p>where <span class="math inline">\(a_{t,j} = 1\)</span> if subject <span class="math inline">\(i\)</span> is exposed to treatment <span class="math inline">\(j\)</span> at time <span class="math inline">\(t\)</span>, and <span class="math inline">\(0\)</span> otherwise. The special cases <span class="math inline">\(\mathbf{1}\)</span> and <span class="math inline">\(\mathbf{0}\)</span> denote the all-ones and all-zeros vectors, respectively.</p>
+<p>Because treatments roll out progressively across historical cycles, we track a subject’s longitudinal path as an exposure trajectory. Let <span class="math inline">\(\mathbf{\bar a}_t = \{\mathbf{a}_\tau\}_{\tau=1}^t\)</span> be the sequence of exposure vectors from the initiation of the program <span class="math inline">\(t=1\)</span> up to time <span class="math inline">\(t\)</span>. The complete trajectory over an experimental rollout horizon <span class="math inline">\(T\)</span> is represented by the <span class="math inline">\(T \times k\)</span> matrix object <span class="math inline">\(\mathbf{\bar a} = \{\mathbf{a}_t\}_{t=1}^T\)</span>. We write <span class="math inline">\(\mathbf{\bar 1}\)</span> for the counterfactual trajectory in which every treatment is active at all times, and <span class="math inline">\(\mathbf{\bar 0}\)</span> for the trajectory in which no treatment is ever active.</p>
+<p>Following the potential outcomes framework extended to longitudinal treatments, let <span class="math inline">\(Y_i(\mathbf{\bar a})\)</span> denote the potential outcome for subject <span class="math inline">\(i\)</span> under the complete exposure trajectory <span class="math inline">\(\mathbf{\bar a}\)</span>. Crucially, <span class="math inline">\(Y_i(\mathbf{\bar a}) \in \mathbb{R}\)</span> is a scalar-valued metric mapped from the matrix-valued trajectory argument, representing a cumulative or post-rollout behavioral summary.</p>
+<hr>
+</section>
+<section id="structural-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="structural-assumptions">2. Structural Assumptions</h2>
+<p>To bound the data-generating process and isolate the causal estimands of interest, we formalize the following core scoping and structural assumptions.</p>
+<section id="assumption-1-no-interference-sutva-style-isolation" class="level3">
+<h3 class="anchored" data-anchor-id="assumption-1-no-interference-sutva-style-isolation">Assumption 1: No Interference (SUTVA-Style Isolation)</h3>
+<p>The potential outcome for any subject <span class="math inline">\(i\)</span> under a joint treatment assignment vector across the entire population depends strictly on their own assigned trajectory:</p>
+<p><span class="math display">\[Y_i(\mathbf{\bar a}_1, \mathbf{\bar a}_2, \dots, \mathbf{\bar a}_N) = Y_i(\mathbf{\bar a}_i) \quad \forall i \in \{1, \dots, N\}\]</span></p>
+</section>
+<section id="assumption-2-path-dependence" class="level3">
+<h3 class="anchored" data-anchor-id="assumption-2-path-dependence">Assumption 2: Path Dependence</h3>
+<p>Let <span class="math inline">\(\mathbf{\bar a}^\alpha\)</span> and <span class="math inline">\(\mathbf{\bar a}^\beta\)</span> be two distinct exposure trajectories over the rollout window <span class="math inline">\(1 \dots T\)</span>. If they terminate in the identical cross-sectional exposure configuration at time <span class="math inline">\(T\)</span> (<span class="math inline">\(\mathbf{a}_T^\alpha = \mathbf{a}_T^\beta\)</span>), the potential outcomes are not assumed to be equal:</p>
+<p><span class="math display">\[\mathbb{E}[Y_i(\mathbf{\bar a}^\alpha)] \neq \mathbb{E}[Y_i(\mathbf{\bar a}^\beta)]\]</span></p>
+<p>This non-Markovian behavior is driven by two distinct structural mechanisms: 1. <em>Behavioral Memory and Hysteresis:</em> The underlying psychological or operational outcome process possesses memory. Phenomena such as user adaptation, learning curves, novelty decay, or UI fatigue imply that the effect of an exposure depends heavily on its duration and historical onset. 2. <em>Time-Aggregated Outcomes:</em> When the macro-metric <span class="math inline">\(Y_i\)</span> is computed as a sum or average over the experimental timeline, the trajectory matters mechanically. Even under a memoryless, instantaneous treatment effect, an exposure that was active longer contributes greater mass to the aggregate scalar than a late-stage deployment.</p>
+<hr>
+</section>
+</section>
+<section id="cohort-dynamics-and-the-steady-state-horizon" class="level2">
+<h2 class="anchored" data-anchor-id="cohort-dynamics-and-the-steady-state-horizon">3. Cohort Dynamics and the Steady-State Horizon</h2>
+<p>In practice, a population is randomized at <span class="math inline">\(t=1\)</span> into three operational arms: the <em>Status Quo</em> (<span class="math inline">\(SQ\)</span>), the <em>Winners Only</em> (<span class="math inline">\(WO\)</span>), and the <em>Active Testing Pool</em> (<span class="math inline">\(R\)</span>). Over the sequential rollout period <span class="math inline">\(t = 1, \dots, T\)</span>, winning treatments selected from group <span class="math inline">\(R\)</span> are cascaded to the <span class="math inline">\(WO\)</span> cohort. This enforces a strict structural monotonicity on the <span class="math inline">\(WO\)</span> trajectory as coordinates of <span class="math inline">\(\mathbf{a}_t\)</span> shift irreversibly from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>.</p>
+<p>Eventually, the rollout phase terminates at time <span class="math inline">\(T\)</span>, at which point all <span class="math inline">\(k\)</span> successful treatments are permanently activated for the <span class="math inline">\(WO\)</span> cohort, yielding the terminal vector <span class="math inline">\(\mathbf{a}_T = \mathbf{1}\)</span>. To evaluate the true cumulative impact while accounting for the lag effects implied by Assumption 2, we introduce a post-rollout evaluation window spanning from <span class="math inline">\(T+1\)</span> to <span class="math inline">\(T+K\)</span>.</p>
+<p>During this steady-state horizon, exposures are frozen: <span class="math display">\[\mathbf{a}_\tau^{WO} = \mathbf{1} \quad \text{and} \quad \mathbf{a}_\tau^{SQ} = \mathbf{0} \quad \forall \tau \in \{T+1, \dots, T+K\}\]</span></p>
+<p>Let <span class="math inline">\(\mathbf{\bar a}_{T+K}^{WO}\)</span> and <span class="math inline">\(\mathbf{\bar a}_{T+K}^{SQ}\)</span> represent these full, extended trajectories. We introduce a final stabilizing assumption:</p>
+<section id="assumption-3-equilibration-absence-of-distant-carryover" class="level3">
+<h3 class="anchored" data-anchor-id="assumption-3-equilibration-absence-of-distant-carryover">Assumption 3: Equilibration (Absence of Distant Carryover)</h3>
+<p>For a sufficiently large evaluation buffer <span class="math inline">\(K\)</span>, the marginal memory of the historical rollout path dissipates, allowing the potential outcome process to reach a steady-state equilibrium:</p>
+<p><span class="math display">\[\mathbb{E}[Y_{i, T+K}(\mathbf{\bar a}_{T+K}^{WO})] \approx \mathbb{E}[Y_{i, T+K}(\mathbf{\bar 1}_{T+K})] \quad \text{and} \quad \mathbb{E}[Y_{i, T+K}(\mathbf{\bar a}_{T+K}^{SQ})] = \mathbb{E}[Y_{i, T+K}(\mathbf{\bar 0}_{T+K})]\]</span></p>
+<hr>
+</section>
+</section>
+<section id="causal-estimands-and-identification" class="level2">
+<h2 class="anchored" data-anchor-id="causal-estimands-and-identification">4. Causal Estimands and Identification</h2>
+<p>Under the steady-state horizon, the principal objective of the holdout framework is to recover the structural contrast between the fully optimized product and the absolute baseline. The terminal causal estimand evaluated over the window <span class="math inline">\(T+1\)</span> to <span class="math inline">\(T+K\)</span> is defined as:</p>
+<p><span class="math display">\[\tau_{\text{prog}}(T+K) = \mathbb{E}[Y_{i, T+K}(\mathbf{\bar a}_{T+K}^{WO})] - \mathbb{E}[Y_{i, T+K}(\mathbf{\bar a}_{T+K}^{SQ})]\]</span></p>
+<p>By virtue of Assumption 3, the trajectory-bound historical artifact yields to a clean cross-sectional proxy:</p>
+<p><span class="math display">\[\tau_{\text{prog}}(T+K) \approx \mathbb{E}[Y_{i, T+K}(\mathbf{\bar 1})] - \mathbb{E}[Y_{i, T+K}(\mathbf{\bar 0})]\]</span></p>
+<p>This estimand effectively maps to the classical average treatment effect (ATE) of the fully unified treatment suite against the status quo, isolated from the temporal noise of the deployment schedule.</p>
+<p>Given initial randomization to the <span class="math inline">\(WO\)</span> and <span class="math inline">\(SQ\)</span> paths at <span class="math inline">\(t=1\)</span>, the trajectories are orthogonal to individual potential outcomes (<span class="math inline">\(\mathbf{\bar a} \perp \{Y_i(\mathbf{\bar a}^{WO}), Y_i(\mathbf{\bar 0})\}\)</span>). Consequently, the structural estimand is non-parametrically identified directly via the contrast of the observed empirical cohort means during the steady-state window:</p>
+<p><span class="math display">\[\hat{\tau}_{\text{prog}}(T+K) = \frac{1}{N_{WO}} \sum_{i \in WO} Y_{i, T+K} - \frac{1}{N_{SQ}} \sum_{i \in SQ} Y_{i, T+K}\]</span></p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -605,4 +676,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-01-holdouts/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-01-holdouts/math.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
