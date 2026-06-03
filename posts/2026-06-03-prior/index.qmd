@@ -6,7 +6,7 @@ echo: false
 fig-cap-location: top
 categories: []
 number-sections: false
-draft: true
+draft: false
 cache: false
 ---
 

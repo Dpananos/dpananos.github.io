@@ -10,7 +10,76 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.549</generator>
-<lastBuildDate>Thu, 14 May 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 03 Jun 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Better Priors for Bayesian Analysis of A/B Testing</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-06-03-prior/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="motivation" class="level1">
+<h1>Motivation</h1>
+<p>When estimating a treatment effect (typically the lift), <img src="https://latex.codecogs.com/png.latex?%5Cdelta_i">, using the Bayesian methodology, Datadog uses a default prior of</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdelta_i%20%5Csim%20%5Coperatorname%7BNormal%7D(0,%200.05%5E2)%20%5C%3E."></p>
+<p>Do I really believe that true effects are normally distributed? No, no I don’t. Under such a model, we should see true lifts larger than 10% in absolute value less than 5% of the time, and lifts less than 20% less than 1% of the time. Roughly, that means 1 in every 100 experiments should produce a lift that large. But I see effect sizes on that order more often than I should, and they have teeny tiny standard errors so sampling noise doesn’t completely explain why I’m seeing them so often. It is more likely that the latent distribution of true effects is better modeled as a mixture distribution; Most treatments produce small improvements, and some produce large ones. It may be the case that we can use our context from the intervention to select a better prior, but what do we do from the platform side when we don’t have access to that.</p>
+<p>In <a href="https://eduardomazevedo.github.io/papers/azevedo-et-al-ab.pdf">A/B Testing with Fat Tails</a> the authors argue that the distribution of true treatment effects across experiments is better modeled with a heavy-tailed Student-t prior than a Gaussian prior, leading to empirical Bayes estimates that shrink small effects toward zero while preserving the possibility of rare, genuinely large innovations. This approach is nice for a few reasons:</p>
+<ul>
+<li>The t-distribution can be conceptualized as a mixture distribution. Suppose <img src="https://latex.codecogs.com/png.latex?W%20%5Csim%20%5Coperatorname%7BInverse-Gamma%7D(%5Cnu/2,%20%5Cnu/2)">, and let <img src="https://latex.codecogs.com/png.latex?X%20%5Cmid%20W%20%5Csim%20%5Coperatorname%7BNormal%7D(0,%20W)">. Then the marginal distribution of <img src="https://latex.codecogs.com/png.latex?X">, integrating out <img src="https://latex.codecogs.com/png.latex?W"> is a t-distribution with degrees of freedom <img src="https://latex.codecogs.com/png.latex?%5Cnu">. So the t-distribution kind of naturally allows for this idea of treatment effects coming from a mixture. Also,</li>
+<li>When using a t-distribution as the prior for the treatment effect, small lifts are shrunk more aggressively and large lifts are not shrunk so aggressively, as the authors of that paper indicate. The effect is that we take the larger effects more on face value as opposed to shrinking them so much. I’ve extolled the virtues of shrinkage, but shrinkage comes at a cost from the platform’s perspective. When you’ve got a big lift, shrinkage can cause a discrepancy between what the pen-and-paper math says the lift should be and what the platform reports. For non-technical users, this can create confusion and raise suspicion of results, each of which can erode trust in the platform.</li>
+</ul>
+<p>However, the updating step when using a t-distribution does not have a nice closed form expression like the normal-normal conjugate model. While the posterior mean can be obtained via numerical integration, the posterior variance (and hence credible intervals) are a bit of a pain to compute. You could use AI to implement the numerical intregration for the mean and variance, but try explaining the procedure in your docs (again…maybe easier with AI but not super clear in my opinion).</p>
+<p>Let’s return to the t-distribution as a mixture for a moment. The marginal density of <img src="https://latex.codecogs.com/png.latex?X">, <img src="https://latex.codecogs.com/png.latex?f(x)">, is represented by the following integral</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20f(x)%20=%20%5Cint_%7B0%7D%5E%7B%5Cinfty%7D%20f(x%20%5Cmid%20w)%20g(w)%20%5C%3E%20dw%20"></p>
+<p>which can be roughly thought of <sup>1</sup> as some sort of weighted average with infinitely many components. Much in the same way we may truncate a Taylor series to approximate some function, what if we used finitely many components and estimated a mixture distribution?</p>
+<p>This is, more or less, what van Zwet does in <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9290572/">The Statistical properties of RCTs and a Proposal for Shrinkage</a>. You know van Zwet, he was a co-author on one of my favorite papers which served as inspiration for <a href="../../posts/2025-08-10-shrinking/index.html">this</a> blog post. So let’s take a page out of van Zwet’s book and apply the same technique to AB testing.</p>
+</section>
+<section id="model" class="level1">
+<h1>Model</h1>
+<p>van Zwet considers results from RCTs (for our purposes, we can consider this an A/B test) as a triple <img src="https://latex.codecogs.com/png.latex?(%5Cdelta,%20%5Chat%20%5Cdelta,%20s)">, where <img src="https://latex.codecogs.com/png.latex?%5Cdelta"> is the true treatment effect, <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Cdelta"> is our noisy estimate of <img src="https://latex.codecogs.com/png.latex?%5Cdelta">, and <img src="https://latex.codecogs.com/png.latex?s"> is the standard error. Rather than work with the triple, it is easier to consider the <img src="https://latex.codecogs.com/png.latex?z"> score, <img src="https://latex.codecogs.com/png.latex?z%20=%20%5Chat%20%5Cdelta%20/%20s"> and the noiseless analogue which van Zwet calls the “Signal to Noise Ratio”, or SNR, namely <img src="https://latex.codecogs.com/png.latex?SNR%20=%20%5Cdelta%20/%20s">. The idea is to model the <img src="https://latex.codecogs.com/png.latex?z"> (for reasons I will get to eventually) and then compute <img src="https://latex.codecogs.com/png.latex?s%20%5Ccdot%20E%5BSNR%20%5Cmid%20z%5D"> as the estimated treatment effect which should regularize the estimate a little bit.</p>
+<p>Now, why model the <img src="https://latex.codecogs.com/png.latex?z"> and not the <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Cdelta">? Note that the marginal distribution of the <img src="https://latex.codecogs.com/png.latex?z"> is a convolution between a standard normal and the distribution of the <img src="https://latex.codecogs.com/png.latex?SNR">. Hence, if we model the <img src="https://latex.codecogs.com/png.latex?z"> as a mixture of normal, we can obtain the implied distribution of <img src="https://latex.codecogs.com/png.latex?SNR"> by subtracting 1 from each component’s variance, from which we can compute the regularized treatment effect. It is a bit of a round-world trip, but it is worth it.</p>
+<p>If you’re following along, this should give us the density of <img src="https://latex.codecogs.com/png.latex?SNR">, <img src="https://latex.codecogs.com/png.latex?g(SNR)"> as</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ag(SNR)%0A=%0A%5Csum_%7Bk=1%7D%5EK%0A%5Cpi_k%0A%5Coperatorname%7BNormal%7D%0A%5Cleft(%0ASNR%20%5Cmid%200,%20%5Csigma_k%5E2%20-%201%0A%5Cright),%0A"> and the density of the <img src="https://latex.codecogs.com/png.latex?z"> as <img src="https://latex.codecogs.com/png.latex?%0Af(z)%0A=%0A%5Csum_%7Bk=1%7D%5EK%0A%5Cpi_k%0A%5Coperatorname%7BNormal%7D%0A%5Cleft(%0Az%20%5Cmid%200,%20%5Csigma_k%5E2%0A%5Cright).%0A"></p>
+<p>So how do we compute <img src="https://latex.codecogs.com/png.latex?E%5BSNR%20%5Cmid%20z%5D">? Once we have fit the mixture distribution for <img src="https://latex.codecogs.com/png.latex?z">, each mixture component implies a corresponding prior component for <img src="https://latex.codecogs.com/png.latex?SNR">. Within each component, this is just the usual normal-normal update: if the marginal variance of component <img src="https://latex.codecogs.com/png.latex?k"> for <img src="https://latex.codecogs.com/png.latex?z"> is <img src="https://latex.codecogs.com/png.latex?%5Csigma_k%5E2">, then the implied prior variance for <img src="https://latex.codecogs.com/png.latex?SNR"> is <img src="https://latex.codecogs.com/png.latex?%5Csigma_k%5E2%20-%201">. Therefore, conditional on belonging to component <img src="https://latex.codecogs.com/png.latex?k">, the posterior mean of <img src="https://latex.codecogs.com/png.latex?SNR"> is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5BSNR%20%5Cmid%20z,%20k%5D%0A=%0A%5Cfrac%7B%5Csigma_k%5E2%20-%201%7D%7B%5Csigma_k%5E2%7D%20z.%0A"></p>
+<p>But we do not know which component generated the observation, so we average these component-specific posterior means using the posterior probability that the observation came from each component:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ap(k%20%5Cmid%20z)%0A=%0A%5Cfrac%7B%0A%5Cpi_k%20%5Cphi(z;0,%5Csigma_k%5E2)%0A%7D%7B%0A%5Csum_%7Bj=1%7D%5EK%20%5Cpi_j%20%5Cphi(z;0,%5Csigma_j%5E2)%0A%7D.%0A"></p>
+<p>Putting these together,</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5BSNR%20%5Cmid%20z%5D%0A=%0A%5Csum_%7Bk=1%7D%5EK%0Ap(k%20%5Cmid%20z)%0A%5Cfrac%7B%5Csigma_k%5E2%20-%201%7D%7B%5Csigma_k%5E2%7D%20z.%0A"></p>
+<p>Finally, since <img src="https://latex.codecogs.com/png.latex?SNR%20=%20%5Cdelta%20/%20s">, the regularized treatment effect estimate is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0As%20%5Ccdot%20E%5BSNR%20%5Cmid%20z%5D.%0A"></p>
+<p>Notice that this estimator behaves much like the posterior mean under a heavy-tailed prior. Small <img src="https://latex.codecogs.com/png.latex?z">-scores are assigned primarily to the low-variance mixture components and are therefore shrunk aggressively toward zero. Large <img src="https://latex.codecogs.com/png.latex?z">-scores, on the other hand, are increasingly attributed to the high-variance components, resulting in much less shrinkage. In this way, the finite mixture model captures the same intuition as the fat-tailed priors proposed in the Microsoft paper, while retaining the convenience of a closed-form posterior update.</p>
+</section>
+<section id="simulation" class="level1">
+<h1>Simulation</h1>
+<p>Take a look at the plot below. I simulated 2000 true lifts from a mixture distribution; 80% came from a normal with mean 0 and standard deviation 0.05, and the remaining 20% came from a heavier tailed distribution. I estimated a mixture distribution with four components, and created the <img src="https://latex.codecogs.com/png.latex?E%5BSNR%20%5Cmid%20z%5D"> estimator.</p>
+<p>I’ve plotted the observed <img src="https://latex.codecogs.com/png.latex?z"> score versus the posterior expectation of the SNR and it has roughly the same shape as Figure 1 in the Microsoft paper.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2026-06-03-prior/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Hand waving aggressively↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-06-03-prior/</guid>
+  <pubDate>Wed, 03 Jun 2026 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Adventures in Covariance</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8667,145 +8736,6 @@ font-style: inherit;">"black"</span>)</span>
  ]]></description>
   <guid>https://dpananos.github.io/posts/2024-02-06-logit/</guid>
   <pubDate>Tue, 06 Feb 2024 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>The Winner’s Curse Is Easy To Understand From This Picture</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2024-01-22-curse/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>Take a look at the photo below, and it i should be easy to understand why The Winner’s Curse (the general tendency for detected effects to be an over estimate of the truth) is a thing.</p>
-<p>The plot shows our typical setup for a hypothesis test. In black is the sampling distribution of the test statistic for a difference in means under the null, and in blue is the statistic’s sampling distribution under the alternative. The shaded blue region represents the statistical power, and those effect sizes in the shaded region would be considered “statistically significant”.</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_f57febe84b86407f210dc36b318d860c">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">x <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>)</span>
-<span id="cb1-2">xs <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">seq</span>(<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.96</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(x, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(x), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">type=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ylab=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">''</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlab =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Difference in means'</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xaxt=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'n'</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">yaxt=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'n'</span>)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lines</span>(x, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(x, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">type=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'l'</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>)</span>
-<span id="cb1-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">polygon</span>(</span>
-<span id="cb1-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(xs, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rev</span>(xs)),</span>
-<span id="cb1-7">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>(xs, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>), <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">length</span>(xs))),</span>
-<span id="cb1-8">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col=</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">alpha</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'blue'</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.3</span>),</span>
-<span id="cb1-9">  <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">border =</span> F</span>
-<span id="cb1-10">)</span></code></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2024-01-22-curse/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The shaded blue region defines a lower truncated normal distribution. Were the alternative hypothesis true, and were we to run many experiments to estimate the difference in means, our detected effects would be samples from this distribution. Hence, using those samples to estimate the mean of the alternative distribution would result in a biased estimate of the mean.</p>
-<p>The expectation for a lower truncated normal distribution truncated at <img src="https://latex.codecogs.com/png.latex?x=a"> is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmu+%5Csigma%20%20%5Cdfrac%7B%5Cvarphi%5Cleft(%20%5Cdfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%20%5Cright)%7D%7B1%20-%20%5CPhi%5Cleft(%5Cdfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%5Cright)%7D%20%20%20%5C%3E."></p>
-<p>Here <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma"> are the mean and standard deviation of the distribution under the alternative, <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> is the standard normal density, <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is the standard normal cumulative distribution. So our estimate of the mean would be biased upwards by <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%20%5Cfrac%7B%5Cvarphi%5Cleft(%20%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%20%5Cright)%7D%7B1%20-%20%5CPhi%5Cleft(%5Cfrac%7Ba-%5Cmu%7D%7B%5Csigma%7D%5Cright)%7D">. That can be small or large depending on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma">.</p>
-<p>Without doing any differentiation to understand where this bias is largest, it should be intutituve from the picture that the bias is small/large when statistical power is large/small.</p>
-<p>Hence, estimates from underpowered studies should be met with &lt;fry_squint.jpg&gt;.</p>
-
-
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2024-01-22-curse/</guid>
-  <pubDate>Sat, 20 Jan 2024 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
