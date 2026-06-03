@@ -128,12 +128,22 @@ z \mid 0, \sigma_k^2
 $$
 
 
-So how do we compute $E[SNR \mid z]$? Once we have fit the mixture distribution for $z$, each mixture component implies a corresponding prior component for $SNR$. Within each component, this is just the usual normal-normal update: if the marginal variance of component $k$ for $z$ is $\sigma_k^2$, then the implied prior variance for $SNR$ is $\sigma_k^2 - 1$. Therefore, conditional on belonging to component $k$, the posterior mean of $SNR$ is
+So how do we compute $E[SNR \mid z]$? Once we have fit the mixture distribution for $z$, each mixture component implies a corresponding prior component for $SNR$. Within each component, this is just the usual normal-normal update: if the marginal variance of component $k$ for $z$ is $\sigma_k^2$, then the implied prior variance for $SNR$ is $\sigma_k^2 - 1$. Recall that $z \mid SNR \sim \operatorname{Normal}(SNR, 1)$, so within component $k$ the likelihood points the estimate at $z$ with variance 1, while the prior pulls it toward 0 with variance $\sigma_k^2 - 1$. As with any normal-normal update, the posterior mean is the precision-weighted average of these two, weighting each by its inverse variance:
 
 $$
 E[SNR \mid z, k]
 =
-\frac{\sigma_k^2 - 1}{\sigma_k^2} z.
+\underbrace{\frac{1/1}{1/1 + 1/(\sigma_k^2 - 1)}}_{\text{weight on } z}\, z
+\;+\;
+\underbrace{\frac{1/(\sigma_k^2 - 1)}{1/1 + 1/(\sigma_k^2 - 1)}}_{\text{weight on } 0}\, 0 .
+$$
+
+The weight on the prior mean contributes nothing since it multiplies 0, and the weight on $z$ simplifies, leaving
+
+$$
+E[SNR \mid z, k]
+=
+\frac{\sigma_k^2 - 1}{\sigma_k^2}\, z.
 $$
 
 But we do not know which component generated the observation, so we average these component-specific posterior means using the posterior probability that the observation came from each component:
@@ -215,7 +225,7 @@ abline(0, 1, lty = 2)
 ```
 
 
-
+So it seems we can achieve a similar result -- shrinking smaller treatment effects, while believing larger estimated treatment effects and applying less shrinkage -- without actually using a t-distribution.  Instead, we can just do the same conjugate normal normal calculation $k$ times, and then perform a weighted average.  I really like this.  This is not to say that the student t-distribution is worse or not worth doing -- quite the opposite.  Rather, if you're running A/B tests and you have an option for a Bayesian analysis, you're probably already using the conjugate normal normal model.  Just seems more convienient to reuse that approach rather than switch over wholesale.
 
 
 

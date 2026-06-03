@@ -264,11 +264,19 @@ f(z)
 z \mid 0, \sigma_k^2
 \right).
 \]</span></p>
-<p>So how do we compute <span class="math inline">\(E[SNR \mid z]\)</span>? Once we have fit the mixture distribution for <span class="math inline">\(z\)</span>, each mixture component implies a corresponding prior component for <span class="math inline">\(SNR\)</span>. Within each component, this is just the usual normal-normal update: if the marginal variance of component <span class="math inline">\(k\)</span> for <span class="math inline">\(z\)</span> is <span class="math inline">\(\sigma_k^2\)</span>, then the implied prior variance for <span class="math inline">\(SNR\)</span> is <span class="math inline">\(\sigma_k^2 - 1\)</span>. Therefore, conditional on belonging to component <span class="math inline">\(k\)</span>, the posterior mean of <span class="math inline">\(SNR\)</span> is</p>
+<p>So how do we compute <span class="math inline">\(E[SNR \mid z]\)</span>? Once we have fit the mixture distribution for <span class="math inline">\(z\)</span>, each mixture component implies a corresponding prior component for <span class="math inline">\(SNR\)</span>. Within each component, this is just the usual normal-normal update: if the marginal variance of component <span class="math inline">\(k\)</span> for <span class="math inline">\(z\)</span> is <span class="math inline">\(\sigma_k^2\)</span>, then the implied prior variance for <span class="math inline">\(SNR\)</span> is <span class="math inline">\(\sigma_k^2 - 1\)</span>. Recall that <span class="math inline">\(z \mid SNR \sim \operatorname{Normal}(SNR, 1)\)</span>, so within component <span class="math inline">\(k\)</span> the likelihood points the estimate at <span class="math inline">\(z\)</span> with variance 1, while the prior pulls it toward 0 with variance <span class="math inline">\(\sigma_k^2 - 1\)</span>. As with any normal-normal update, the posterior mean is the precision-weighted average of these two, weighting each by its inverse variance:</p>
 <p><span class="math display">\[
 E[SNR \mid z, k]
 =
-\frac{\sigma_k^2 - 1}{\sigma_k^2} z.
+\underbrace{\frac{1/1}{1/1 + 1/(\sigma_k^2 - 1)}}_{\text{weight on } z}\, z
+\;+\;
+\underbrace{\frac{1/(\sigma_k^2 - 1)}{1/1 + 1/(\sigma_k^2 - 1)}}_{\text{weight on } 0}\, 0 .
+\]</span></p>
+<p>The weight on the prior mean contributes nothing since it multiplies 0, and the weight on <span class="math inline">\(z\)</span> simplifies, leaving</p>
+<p><span class="math display">\[
+E[SNR \mid z, k]
+=
+\frac{\sigma_k^2 - 1}{\sigma_k^2}\, z.
 \]</span></p>
 <p>But we do not know which component generated the observation, so we average these component-specific posterior means using the posterior probability that the observation came from each component:</p>
 <p><span class="math display">\[
@@ -307,6 +315,7 @@ E[\delta \mid z, s] = s \cdot E[SNR \mid z].
 </div>
 </div>
 </div>
+<p>So it seems we can achieve a similar result – shrinking smaller treatment effects, while believing larger estimated treatment effects and applying less shrinkage – without actually using a t-distribution. Instead, we can just do the same conjugate normal normal calculation <span class="math inline">\(k\)</span> times, and then perform a weighted average. I really like this. This is not to say that the student t-distribution is worse or not worth doing – quite the opposite. Rather, if you’re running A/B tests and you have an option for a Bayesian analysis, you’re probably already using the conjugate normal normal model. Just seems more convienient to reuse that approach rather than switch over wholesale.</p>
 
 
 </section>
