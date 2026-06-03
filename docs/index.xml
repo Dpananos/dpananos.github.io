@@ -9,7 +9,7 @@
 <link>https://dpananos.github.io/</link>
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.4.549</generator>
+<generator>quarto-1.9.38</generator>
 <lastBuildDate>Wed, 03 Jun 2026 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Better Priors for Bayesian Analysis of A/B Testing</title>
@@ -61,7 +61,7 @@
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2026-06-03-prior/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="https://dpananos.github.io/posts/2026-06-03-prior/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -109,7 +109,7 @@
 <p>Use the slider below to vary the angle between <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D"> (blue) and <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bv%7D"> (red). The projection <img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7Bproj%7D_%7B%5Cmathbf%7Bv%7D%7D(%5Cmathbf%7Bu%7D)"> is drawn in green, with a dashed line showing the residual <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D%20-%20%5Coperatorname%7Bproj%7D_%7B%5Cmathbf%7Bv%7D%7D(%5Cmathbf%7Bu%7D)"> meeting <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bv%7D"> at a right angle. This makes sense given what we know about right triangles and their hypotenuse. Imagine taking some other vector, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> in the direction of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bv%7D"> and asserting that was the closest vector. This would form a right triangle where <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D%20-%20%5Cmathbf%7Bw%7D"> was the hypotenuse and would hence be longer in magnitude than <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bu%7D%20-%20%5Coperatorname%7Bproj%7D_%7B%5Cmathbf%7Bv%7D%7D(%5Cmathbf%7Bu%7D)">.</p>
 <div class="column-page" style="display: flex; flex-direction: column; align-items: center;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb1" data-startfrom="49" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 48;"><span id="cb1-49">viewof theta <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="49" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 48;"><span id="cb1-49">viewof theta <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Inputs<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -184,7 +184,7 @@ font-style: inherit;">label</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Scale c for w = c·v"</span>})</span></code></pre></div>
+font-style: inherit;">"Scale c for w = c·v"</span>})</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-1-1" data-nodetype="declaration">
@@ -201,7 +201,7 @@ font-style: inherit;">"Scale c for w = c·v"</span>})</span></code></pre></div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb2" data-startfrom="55" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 54;"><span id="cb2-55">deg <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="55" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 54;"><span id="cb2-55">deg <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -305,6 +305,7 @@ font-style: inherit;">=</span> (a<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span> b) <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> a[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]<span class="op" style="color: #5E5E5E;
@@ -324,6 +325,7 @@ font-style: inherit;">1</span>]</span>
 background-color: null;
 font-style: inherit;">=</span> a <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">Math</span><span class="op" style="color: #5E5E5E;
@@ -551,7 +553,7 @@ font-style: inherit;">3</span>)<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">}</span><span class="vs" style="color: #20794D;
 background-color: null;
-font-style: inherit;">`</span></span></code></pre></div>
+font-style: inherit;">`</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-2-1" data-nodetype="declaration">
@@ -694,7 +696,7 @@ font-style: inherit;">`</span></span></code></pre></div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb3" data-startfrom="79" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 78;"><span id="cb3-79">Plot<span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="79" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 78;"><span id="cb3-79">Plot<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
 background-color: null;
@@ -778,6 +780,7 @@ font-style: inherit;">grid</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">true</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span></span>
@@ -1657,7 +1660,7 @@ font-style: inherit;">:</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"bold"</span>})</span>
 <span id="cb3-127">  ]</span>
-<span id="cb3-128">})</span></code></pre></div>
+<span id="cb3-128">})</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-3" data-nodetype="expression">
 
@@ -1665,7 +1668,7 @@ font-style: inherit;">"bold"</span>})</span>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb4" data-startfrom="133" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 132;"><span id="cb4-133">stats</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb4" data-startfrom="133" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 132;"><span id="cb4-133">stats</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-4" data-nodetype="expression">
 
@@ -1713,7 +1716,7 @@ font-style: inherit;">"bold"</span>})</span>
 <p>I’m not sure I find that a better interpretation, but this will have to do.</p>
 <div class="column-page" style="display: flex; flex-direction: column; align-items: center;">
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb5" data-startfrom="232" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 231;"><span id="cb5-232">viewof theta_u_cov <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="232" data-source-offset="-0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 231;"><span id="cb5-232">viewof theta_u_cov <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> Inputs<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1825,7 +1828,7 @@ font-style: inherit;">label</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Number of points"</span>})</span></code></pre></div>
+font-style: inherit;">"Number of points"</span>})</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-5-1" data-nodetype="declaration">
@@ -1849,7 +1852,7 @@ font-style: inherit;">"Number of points"</span>})</span></code></pre></div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb6" data-startfrom="238" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 237;"><span id="cb6-238"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="238" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 237;"><span id="cb6-238"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">// regenerate point cloud with same seed whenever rho changes</span></span>
 <span id="cb6-239">points <span class="op" style="color: #5E5E5E;
@@ -1857,6 +1860,7 @@ background-color: null;
 font-style: inherit;">=</span> {</span>
 <span id="cb6-240">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">let</span> s <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -1866,10 +1870,12 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-241">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> rand <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> () <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> {</span>
 <span id="cb6-242">    s <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -1892,6 +1898,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-243">    <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">let</span> t <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> s<span class="op" style="color: #5E5E5E;
@@ -1947,6 +1954,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-246">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> ((t <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">^</span> (t <span class="op" style="color: #5E5E5E;
@@ -1969,13 +1977,16 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-248">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> randn <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> () <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> {</span>
 <span id="cb6-249">    <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">let</span> r1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -1991,6 +2002,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-250">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">while</span> (r1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">===</span> <span class="dv" style="color: #AD0000;
@@ -2004,6 +2016,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-251">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">while</span> (r2 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">===</span> <span class="dv" style="color: #AD0000;
@@ -2017,6 +2030,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-252">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">Math</span><span class="op" style="color: #5E5E5E;
@@ -2066,6 +2080,7 @@ background-color: null;
 font-style: inherit;">// Cholesky of [[1, rho], [rho, 1]] =&gt; L = [[1, 0], [rho, sqrt(1 - rho^2)]]</span></span>
 <span id="cb6-255">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> L22 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
@@ -2085,6 +2100,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-256">  <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">Array</span><span class="op" style="color: #5E5E5E;
@@ -2099,9 +2115,11 @@ font-style: inherit;">:</span> n_points}<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span> () <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> {</span>
 <span id="cb6-257">    <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> z1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
@@ -2117,6 +2135,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb6-258">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> [z1<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span> rho <span class="op" style="color: #5E5E5E;
@@ -2131,7 +2150,7 @@ font-style: inherit;">;</span></span>
 <span id="cb6-259">  })<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb6-260">}</span></code></pre></div>
+<span id="cb6-260">}</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-6" data-nodetype="declaration">
 
@@ -2139,11 +2158,12 @@ font-style: inherit;">;</span></span>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code hidden" id="cb7" data-startfrom="265" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 264;"><span id="cb7-265">covPlot <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb7" data-startfrom="265" data-source-offset="0" style="background: #f1f3f5;"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 264;"><span id="cb7-265">covPlot <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {</span>
 <span id="cb7-266">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> deg_cov <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
@@ -2161,6 +2181,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-267">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> u_cov <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [<span class="bu" style="color: null;
@@ -2186,6 +2207,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-268">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> projections <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> points<span class="op" style="color: #5E5E5E;
@@ -2194,9 +2216,11 @@ font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">map</span>(p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> {</span>
 <span id="cb7-269">    <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> u_cov[<span class="dv" style="color: #AD0000;
@@ -2218,6 +2242,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-270">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> [k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> p[<span class="dv" style="color: #AD0000;
@@ -2236,6 +2261,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-272">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> on_u <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> projections<span class="op" style="color: #5E5E5E;
@@ -2244,9 +2270,11 @@ font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">map</span>(P <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> {</span>
 <span id="cb7-273">    <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> P[<span class="dv" style="color: #AD0000;
@@ -2268,6 +2296,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-274">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> [k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> u_cov[<span class="dv" style="color: #AD0000;
@@ -2286,6 +2315,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-276">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> lim_cov <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
@@ -2295,6 +2325,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-277">  <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">const</span> big <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> lim_cov <span class="op" style="color: #5E5E5E;
@@ -2306,6 +2337,7 @@ background-color: null;
 font-style: inherit;">;</span></span>
 <span id="cb7-278">  <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> Plot<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
@@ -2390,6 +2422,7 @@ font-style: inherit;">grid</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">true</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span></span>
@@ -2552,6 +2585,7 @@ font-style: inherit;">x</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> d <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> d[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]<span class="op" style="color: #5E5E5E;
@@ -2562,6 +2596,7 @@ font-style: inherit;">y</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:</span> d <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> d[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>]<span class="op" style="color: #5E5E5E;
@@ -2594,6 +2629,7 @@ font-style: inherit;">.</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">map</span>(p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> ({<span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">x1</span><span class="op" style="color: #5E5E5E;
@@ -2698,6 +2734,7 @@ font-style: inherit;">map</span>((P<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">,</span> i) <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">=&gt;</span> ({<span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">x1</span><span class="op" style="color: #5E5E5E;
@@ -2965,7 +3002,7 @@ font-style: inherit;">"bold"</span>})</span>
 <span id="cb7-306">  })<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">;</span></span>
-<span id="cb7-307">}</span></code></pre></div>
+<span id="cb7-307">}</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-7" data-nodetype="declaration">
 
@@ -3418,7 +3455,7 @@ Important
 
 <p>I still clean data from time to time, and I find myself writing patterns that looks like</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">raw_data <span class="sc" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">raw_data <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span></span>
 <span id="cb1-2">  <span class="fu" style="color: #4758AB;
@@ -3504,7 +3541,7 @@ background-color: null;
 font-style: inherit;">.default =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"N"</span>)</span>
-<span id="cb1-17">  )</span></code></pre></div>
+<span id="cb1-17">  )</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
       id smoking hypertension diabetes
@@ -3523,10 +3560,11 @@ font-style: inherit;">"N"</span>)</span>
 </div>
 <p>I know the aphorism is “If you write a piece of code 3 times, write a function” so I could do</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">clean_yn <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">clean_yn <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(x){</span>
 <span id="cb3-2">  <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3580,7 +3618,7 @@ background-color: null;
 font-style: inherit;">~</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">clean_yn</span>(.x)</span>
-<span id="cb3-14">    ))</span></code></pre></div>
+<span id="cb3-14">    ))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
       id smoking hypertension diabetes
@@ -3600,10 +3638,11 @@ font-style: inherit;">clean_yn</span>(.x)</span>
 <p>But I usually have to edit the name of the column too because often <code>smoking</code> is actually <code>Smoking (Yes or No)</code> (and while <code>{janitor}</code> helps it still leaves some cruft on the end of column names). This makes the first pattern more attractive, despite the repetition.</p>
 <p>I asked gemini how it might handle this problem, and I was shown a neat little pattern I want to share. The mutate-across pattern us actually pretty useful, so let’s abstract that into a function and tack on a rename like so</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">apply_cleaners <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">apply_cleaners <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(data, clean_func, rename_map){</span>
 <span id="cb5-2">  data <span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -3630,11 +3669,11 @@ background-color: null;
 font-style: inherit;">rename</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">all_of</span>(rename_map))</span>
-<span id="cb5-7">}</span></code></pre></div>
+<span id="cb5-7">}</span></code></pre></div></div>
 </div>
 <p>Now, I can specify a list of columns I want to clean with the same function, and the new names I want to use</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">cleaning_tasks <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">cleaning_tasks <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3675,7 +3714,7 @@ font-style: inherit;">apply_cleaners</span>(raw_data, cleaning_tasks<span class=
 background-color: null;
 font-style: inherit;">$</span>func, cleaning_tasks<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>rename_map)</span></code></pre></div>
+font-style: inherit;">$</span>rename_map)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
       id smoking_cleaned hypertension_cleaned diabetes_cleaned
@@ -3694,7 +3733,7 @@ font-style: inherit;">$</span>rename_map)</span></code></pre></div>
 </div>
 <p>which doesn’t seem that cool, unless you realize that what is returned is a tibble, which can be passed through <code>apply_cleaners</code> again. Hence, <code>reduce</code> seems like a good tool here</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Needs to be a list of lists </span></span>
 <span id="cb8-2">cleaning_tasks <span class="ot" style="color: #003B4F;
@@ -3745,6 +3784,7 @@ font-style: inherit;">func =</span> clean_yn</span>
 background-color: null;
 font-style: inherit;">reduce</span>(cleaning_tasks, <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(data, task) {</span>
 <span id="cb8-13">  <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -3755,7 +3795,7 @@ background-color: null;
 font-style: inherit;">$</span>rename_map)</span>
 <span id="cb8-14">}, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">.init=</span>raw_data)</span></code></pre></div>
+font-style: inherit;">.init=</span>raw_data)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
       id smoking_cleaned hypertension_cleaned diabetes_cleaned
@@ -3807,10 +3847,11 @@ font-style: inherit;">.init=</span>raw_data)</span></code></pre></div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">between <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">between <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(x, low, hi) (x<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span>hi) <span class="sc" style="color: #5E5E5E;
@@ -3823,6 +3864,7 @@ font-style: inherit;">&lt;=</span> x)</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(Mc){</span>
 <span id="cb1-4">  </span>
 <span id="cb1-5">  actual_lift <span class="ot" style="color: #003B4F;
@@ -4104,7 +4146,7 @@ font-style: inherit;">abline</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">h =</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0.95</span>)</span></code></pre></div>
+font-style: inherit;">0.95</span>)</span></code></pre></div></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -4146,7 +4188,7 @@ font-style: inherit;">0.95</span>)</span></code></pre></div>
 <p>Subjects (indexed by <img src="https://latex.codecogs.com/png.latex?i">) are followed over time (indexed by <img src="https://latex.codecogs.com/png.latex?t">) and outcomes <img src="https://latex.codecogs.com/png.latex?y"> are recorded. Covariates <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D"> are also recorded and we fit the model using OLS. Each subject has an “idiosyncratic” effect <img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> and there are shared coefficients <img src="https://latex.codecogs.com/png.latex?%5Cbeta">, Now, we don’t need to follow subjects over time to use a fixed effect model, this is just a typical use case.</p>
 <p>If you’re a statistician, you probably see this and think “they just added dummy variables to their regression can called it something new” and you would be right. Don’t believe me? I’ll show you.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(fixest)</span>
 <span id="cb1-2"><span class="fu" style="color: #4758AB;
@@ -4219,7 +4261,7 @@ font-style: inherit;">modelsummary</span>(mods, <span class="at" style="color: #
 background-color: null;
 font-style: inherit;">gof_map =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
-font-style: inherit;">NA</span>)</span></code></pre></div>
+font-style: inherit;">NA</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
 <!-- preamble start -->
 
@@ -4408,7 +4450,7 @@ font-style: inherit;">NA</span>)</span></code></pre></div>
 <p>So in the case where <img src="https://latex.codecogs.com/png.latex?X"> is a column of dummies <em>multiplication by <img src="https://latex.codecogs.com/png.latex?I-H"> will subtract the group level mean defined by fixed effects</em>. This is sometimes known as the “within-transform”.</p>
 <p>This is a nice little insight. Rather than do all the linear algebra (which sure is fun!) we can just subtract means before doing our regression. In R, that might look like</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(dplyr)</span>
 <span id="cb2-2"><span class="fu" style="color: #4758AB;
@@ -4506,7 +4548,7 @@ font-style: inherit;">modelsummary</span>(mods, <span class="at" style="color: #
 background-color: null;
 font-style: inherit;">gof_map =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
-font-style: inherit;">NA</span>)</span></code></pre></div>
+font-style: inherit;">NA</span>)</span></code></pre></div></div>
 <div class="cell-output-display">
 <!-- preamble start -->
 
@@ -4727,7 +4769,7 @@ font-style: inherit;">NA</span>)</span></code></pre></div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(tidyverse)</span>
 <span id="cb1-2"></span>
@@ -5038,7 +5080,7 @@ background-color: null;
 font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"top"</span></span>
-<span id="cb1-54">  )</span></code></pre></div>
+<span id="cb1-54">  )</span></code></pre></div></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -5079,13 +5121,14 @@ font-style: inherit;">"top"</span></span>
 </blockquote>
 <p>The authors give the weights and standard deviations for the elements of the mixture distribution, and from these we can simulate SNRs from the population of all trails that are exchangeable with those in the database (i.e.&nbsp;trials that could be in the Cochrane Database in the future). In R…</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(tidyverse)</span>
 <span id="cb1-2">rmix <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">=</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(n,p,m,s){</span>
 <span id="cb1-3">  d<span class="ot" style="color: #003B4F;
 background-color: null;
@@ -5157,11 +5200,11 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">rnorm</span>(n, snr, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1</span>)</span></code></pre></div>
+font-style: inherit;">1</span>)</span></code></pre></div></div>
 </div>
 <p>Now that we have the simulated SNR and z statistics, it is very straight forward to replicate all results from the paper. As an example, here is how we can re-create figure 2 (the distribution of statistical power across the simulated SNR).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">power <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">power <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5200,7 +5243,7 @@ font-style: inherit;">col =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'white'</span>, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">probability =</span> T)</span></code></pre></div>
+font-style: inherit;">probability =</span> T)</span></code></pre></div></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -5212,7 +5255,7 @@ font-style: inherit;">probability =</span> T)</span></code></pre></div>
 <p>The paper goes on to make a number of conclusions, including that most RCTs which report a statistically significant treatment effect exaggerate the effect size, sometimes dramatically so (see Figure 3, top left). This exaggeration made me think “why not just shrink the damn thing then”, and given some of the information in the paper, I think we can come up with a nice little rule of thumb: most RCTs should shrink the treatment effect by about 15%. Let’s examine why.</p>
 <p>The mixture distribution for the z statistics is comprised of 4 normal distributions with standard deviation 1.17, 1.74, 2.38, and 5.73, with mixture weights 0.32, 0.3, 0.3, and 0.07. This means that the standard deviation of the mixture is 2.32. Let’s make a not-too-wrong assumption that the distribution of z values is approximately normal. Granted, this is demonstrably false – the distribution has fatter tails, but doing so will allow us to treat this distribution as a prior for future RCTs. Now, suppose we run an RCT in the future which would be exchangeable with those in the Cochrane database. Since the prior distribution of z is assumed normal, and conditional on the RCT z is also a normal random variable, then we can shrink the estimates by leveraging a conjugate normal prior.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">s_z <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">s_z <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -5284,13 +5327,13 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">abs</span>(shrunken_z<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span>new_snr)</span></code></pre></div>
+font-style: inherit;">/</span>new_snr)</span></code></pre></div></div>
 </div>
 <p>Note that the z are multiplied by a factor which is approximately 0.843 (round up to 0.85 for a nice number, which is equivalent to a 15% reduction). Now, let’s recreate figure 3 for the shurnken estimates and compare them to the unshrunken estimates</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">p_values <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">p_values <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
 background-color: null;
@@ -5653,7 +5696,7 @@ font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #6
 background-color: null;
 font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Set1"</span>)</span></code></pre></div>
+font-style: inherit;">"Set1"</span>)</span></code></pre></div></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -5667,7 +5710,7 @@ font-style: inherit;">"Set1"</span>)</span></code></pre></div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">z_hat <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">z_hat <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6076,7 +6119,7 @@ font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #6
 background-color: null;
 font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Set1"</span>)</span></code></pre></div>
+font-style: inherit;">"Set1"</span>)</span></code></pre></div></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -6117,9 +6160,10 @@ font-style: inherit;">"Set1"</span>)</span></code></pre></div>
 <p>Each A/B test will be fed to a hierarchical model (shown below in Stan). I place a flat prior on the population mean and parameterize the prior on the population variance so that I can study how estimates change when the prior is less/more variable.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
 <span id="cb1-2"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">data</span>{</span>
 <span id="cb1-3">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -6136,6 +6180,7 @@ font-style: inherit;">real</span> beta;</span>
 <span id="cb1-7">}</span>
 <span id="cb1-8"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">parameters</span>{</span>
 <span id="cb1-9">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -6144,6 +6189,7 @@ font-style: inherit;">real</span> mu;</span>
 background-color: null;
 font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>&gt; tau;</span>
@@ -6153,6 +6199,7 @@ font-style: inherit;">vector</span>[n] z;</span>
 <span id="cb1-12">}</span>
 <span id="cb1-13"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">transformed parameters</span> {</span>
 <span id="cb1-14">  <span class="dt" style="color: #AD0000;
 background-color: null;
@@ -6160,6 +6207,7 @@ font-style: inherit;">vector</span>[n] theta = mu + tau * z;</span>
 <span id="cb1-15">}</span>
 <span id="cb1-16"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">model</span> {</span>
 <span id="cb1-17">  <span class="co" style="color: #5E5E5E;
 background-color: null;
@@ -6169,13 +6217,13 @@ background-color: null;
 font-style: inherit;">3</span>, beta);</span>
 <span id="cb1-19">  z ~ std_normal();</span>
 <span id="cb1-20">  log_rr ~ normal(theta, stderr);</span>
-<span id="cb1-21">}</span></code></pre></div>
+<span id="cb1-21">}</span></code></pre></div></div>
 </div>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(tidyverse)</span>
 <span id="cb2-2"><span class="fu" style="color: #4758AB;
@@ -6534,7 +6582,7 @@ font-style: inherit;">$</span>max_rhat<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;</span><span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1.01</span>))</span></code></pre></div>
+font-style: inherit;">1.01</span>))</span></code></pre></div></div>
 </details>
 </div>
 <p>Below is a plot of the relative RMSE of the estimates from the Bayesian model. I’ve rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates. As you can see, more informative priors do result in better RMSE – <strong>to a point</strong>. When the prior becomes too informative, then the RMSE increases. This is due to pooling all estimates to the grand mean. Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e.&nbsp;implausible if they are noisy a la Gelman).</p>
@@ -6612,7 +6660,7 @@ font-style: inherit;">1.01</span>))</span></code></pre></div>
 </blockquote>
 <p>The proof can (probably) be found in most econometrics textbooks, but for now we will suffice for an example in R.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">fit <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">fit <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6630,12 +6678,12 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">coef</span>(fit)[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'vs'</span>])</span></code></pre></div>
+font-style: inherit;">'vs'</span>])</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        vs 
 -0.4072501 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">r1 <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">r1 <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6672,7 +6720,7 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">coef</span>(fwl_fit)[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'r2'</span>])</span></code></pre></div>
+font-style: inherit;">'r2'</span>])</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        r2 
 -0.4072501 </code></pre>
@@ -6680,7 +6728,7 @@ font-style: inherit;">'r2'</span>])</span></code></pre></div>
 </div>
 <p>The procedure described above is sometimes called “partialling out” or “residualizing”. Point estimates and standard errors should be the same from both procedures (note that you have to adjust the partialled out estimate of the standard error so that it has the same degrees of freedom as the full estimate, see code below).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">(se_vs_full <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">(se_vs_full <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6690,11 +6738,11 @@ font-style: inherit;">$</span>coefficients[<span class="st" style="color: #20794
 background-color: null;
 font-style: inherit;">"vs"</span>, <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"Std. Error"</span>])</span></code></pre></div>
+font-style: inherit;">"Std. Error"</span>])</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1816192</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">se_vs_fwl_raw <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">se_vs_fwl_raw <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -6769,7 +6817,7 @@ font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">sqrt</span>(sigma2_full <span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
+font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1816192</code></pre>
 </div>
@@ -6845,10 +6893,11 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%20%5Cmathcal%7BL%7D(%5Ctheta_A,%20%5Ctheta_b,%20x)%20=%20%5Cbegin%7Bcases%7D%20&amp;%20%5Cmax(%5Ctheta_B-%5Ctheta_A,%200)%20%5C%3E,%20&amp;%20x=A%20%5C%5C%5C%5C%20&amp;%20%5Cmax(%5Ctheta_A-%5Ctheta_B,%200)%20%5C%3E,%20&amp;%20x=B%5Cend%7Bcases%7D%20%5C%3E%20"></p>
 <p>I interpret this loss function to be the improvement to the mean outcome we would has missed out on, had we shipped the wrong variant. As an example, if we ship A but B is truly better, then we lose out on a total of <img src="https://latex.codecogs.com/png.latex?%5Ctheta_B%20-%20%5Ctheta_A">. If we ship A and A is truly the superior variant, then we lose out on 0 improvement to the metric (because we chose right). Note that this works for revenue too! This decision can be written succinctly in code using draws from the posterior as follows</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">decision <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">decision <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(draws_a, draws_b){</span>
 <span id="cb1-2">  diff <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -6878,6 +6927,7 @@ font-style: inherit;">0</span>))</span>
 <span id="cb1-5">  </span>
 <span id="cb1-6">  <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">if</span>(loss_a <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;</span> loss_b){</span>
@@ -6888,6 +6938,7 @@ background-color: null;
 font-style: inherit;">"A"</span></span>
 <span id="cb1-8">  } <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">else</span> {</span>
 <span id="cb1-9">    winner <span class="ot" style="color: #003B4F;
 background-color: null;
@@ -6905,7 +6956,7 @@ background-color: null;
 font-style: inherit;">loss_a=</span>loss_a, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">loss_b=</span>loss_b)</span>
-<span id="cb1-13">}</span></code></pre></div>
+<span id="cb1-13">}</span></code></pre></div></div>
 </div>
 </section>
 <section id="quick-primer-on-evsi" class="level2">
@@ -6944,7 +6995,7 @@ font-style: inherit;">loss_b=</span>loss_b)</span>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(tidyverse)</span>
 <span id="cb2-2"></span>
@@ -7360,14 +7411,14 @@ font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">furrr_options</span>(<span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">seed =</span>T))</span></code></pre></div>
+font-style: inherit;">seed =</span>T))</span></code></pre></div></div>
 </details>
 </div>
 <p>Calibration results are shown below. Its…not bad, right? I suppose if this calibration really irked you then you could run this simulation assuming the true lift was <img src="https://latex.codecogs.com/png.latex?z%5C%25">, and recalibrate the estimates using whatever procedure you like!</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">out <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">out <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -7379,7 +7430,7 @@ font-style: inherit;">valProbggplot</span>(prob_mind_change, mind_changed))</spa
 <span id="cb3-2"></span>
 <span id="cb3-3">out<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">$</span>ggPlot</span></code></pre></div>
+font-style: inherit;">$</span>ggPlot</span></code></pre></div></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -7444,10 +7495,11 @@ font-style: inherit;">$</span>ggPlot</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%20Y%20%5Cmid%20D,%20S%20%5Csim%20%5Coperatorname%7BBernoulli%7D(0.4%20-%200.1D%20+%200.4S)%20%5C%3E."></p>
 <p>I’ll simulate a million observations so that our precision is big enough to not worry about sampling variability. In R, that can be done with</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">sim_data <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">sim_data <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(<span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">x=</span><span class="dv" style="color: #AD0000;
@@ -7511,7 +7563,7 @@ font-style: inherit;">*</span>s)</span>
 <span id="cb1-7">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">data.frame</span>(s, d, y)</span>
-<span id="cb1-8">}</span></code></pre></div>
+<span id="cb1-8">}</span></code></pre></div></div>
 </div>
 <p>We’ll use this data to explore the “Right Way” and teh “Wrong Way” of analyzing the causal effect of <img src="https://latex.codecogs.com/png.latex?D"> on <img src="https://latex.codecogs.com/png.latex?Y">.</p>
 </section>
@@ -7521,7 +7573,7 @@ font-style: inherit;">data.frame</span>(s, d, y)</span>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(marginaleffects)</span>
 <span id="cb2-2"></span>
@@ -7591,7 +7643,7 @@ background-color: null;
 font-style: inherit;">pull</span>(pred) <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">%&gt;%</span> </span>
-<span id="cb2-9">  diff</span></code></pre></div>
+<span id="cb2-9">  diff</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -0.09910701</code></pre>
@@ -7601,7 +7653,7 @@ font-style: inherit;">%&gt;%</span> </span>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">library</span>(marginaleffects)</span>
 <span id="cb4-2"></span>
@@ -7640,7 +7692,7 @@ font-style: inherit;">variables =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'d'</span>, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">newdata =</span> nd)</span></code></pre></div>
+font-style: inherit;">newdata =</span> nd)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -7661,7 +7713,7 @@ Type:  response </code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">model <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1">model <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -7701,7 +7753,7 @@ font-style: inherit;">variables =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'d'</span>, <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">newdata =</span> nd)</span></code></pre></div>
+font-style: inherit;">newdata =</span> nd)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -7721,10 +7773,11 @@ Type:  response </code></pre>
 <p>As an interesting digression, we can actually compute what the wrong approach would produce in the limit of infinite data if we just leverage Bayes rule to rewrite <img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)"> as</p>
 <p><img src="https://latex.codecogs.com/png.latex?P(S=s%5Cmid%20D=d)%20=%20%5Cdfrac%7BP(D=d%20%5Cmid%20S=s)%20P(S=s)%7D%7BP(D=d)%7D%20%5C%3E.%20"></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">Ey <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">Ey <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(d, s){</span>
 <span id="cb8-2">  <span class="fl" style="color: #AD0000;
 background-color: null;
@@ -7747,6 +7800,7 @@ font-style: inherit;">*</span>s</span>
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">function</span>(s){</span>
 <span id="cb8-6">  <span class="fl" style="color: #AD0000;
 background-color: null;
@@ -7887,7 +7941,7 @@ background-color: null;
 font-style: inherit;">-</span> Eyd0</span>
 <span id="cb8-15"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#0.06</span></span></code></pre></div>
+font-style: inherit;">#0.06</span></span></code></pre></div></div>
 </div>
 <p>This really drives the point home that confounding is not a matter of more data, rather its a matter of the right data.</p>
 </section>
@@ -7944,7 +7998,7 @@ font-style: inherit;">#0.06</span></span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?%5CPr(D%20=%20k)%20=%20%5Csum_%7Bi=1%7D%5E%7Bn+1%7D%20%5CPr(B=i)%20%5CPr(A%20=%20i-k)"></p>
 <p>with the added stipulation that <img src="https://latex.codecogs.com/png.latex?%5CPr(A%3En)%20=%200">. Ok, not a fun sum to do by hand, let’s cook up a numpy function</p>
 <div id="3ffbd261" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -7975,6 +8029,7 @@ font-style: inherit;">import</span> itertools</span>
 <span id="cb1-7"></span>
 <span id="cb1-8"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">def</span> f(k:<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>, n:<span class="bu" style="color: null;
@@ -8020,12 +8075,14 @@ background-color: null;
 font-style: inherit;">-</span>k)</span>
 <span id="cb1-11">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> density.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">sum</span>()</span>
 <span id="cb1-12"></span>
 <span id="cb1-13"><span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">def</span> approx_f(n:<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>):</span>
@@ -8048,6 +8105,7 @@ background-color: null;
 font-style: inherit;">1</span>) </span>
 <span id="cb1-15">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">return</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
@@ -8076,8 +8134,10 @@ font-style: inherit;">=</span> np.zeros(coins.size)</span>
 <span id="cb1-20"></span>
 <span id="cb1-21"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, n <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(coins):</span>
@@ -8093,7 +8153,7 @@ background-color: null;
 font-style: inherit;">2</span>)</span>
 <span id="cb1-24">    probs[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> f(outcomes, n)</span></code></pre></div>
+font-style: inherit;">=</span> f(outcomes, n)</span></code></pre></div></div>
 </div>
 <div id="76be825d" class="cell" data-execution_count="2">
 <div class="cell-output cell-output-display">
@@ -8140,7 +8200,7 @@ font-style: inherit;">=</span> f(outcomes, n)</span></code></pre></div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">n <span class="ot" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">n <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -8331,7 +8391,7 @@ background-color: null;
 font-style: inherit;">/</span> log_rr_mean</span>
 <span id="cb1-30">  </span>
 <span id="cb1-31">  </span>
-<span id="cb1-32">})</span></code></pre></div>
+<span id="cb1-32">})</span></code></pre></div></div>
 </details>
 </div>
 <div class="cell">
@@ -8372,7 +8432,7 @@ font-style: inherit;">/</span> log_rr_mean</span>
 <div id="bd57bd8e" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
 background-color: null;
@@ -8491,8 +8551,10 @@ font-style: inherit;">len</span>(p1)))</span>
 <span id="cb1-25"></span>
 <span id="cb1-26"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(p1):</span>
@@ -8668,8 +8730,10 @@ font-style: inherit;">0.5</span>)</span>
 <span id="cb1-48"></span>
 <span id="cb1-49"><span class="cf" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
 background-color: null;
+font-weight: bold;
 font-style: inherit;">in</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">enumerate</span>(p1):</span>
@@ -8718,7 +8782,7 @@ font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"black"</span>)</span>
 <span id="cb1-56"></span>
-<span id="cb1-57">plt.show()</span></code></pre></div>
+<span id="cb1-57">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">

@@ -11,7 +11,65 @@ cache: false
 ---
 
 ```{r}
+#| include: false
 library(mixtools)
+
+# Simulate (true lift, observed lift, standard error) triples from an 80/20
+# mixture: most effects are small and Gaussian, a minority are heavy-tailed.
+# Data are symmetrized to enforce a symmetric prior and avoid spurious
+# finite-sample asymmetries.
+simulate_experiments <- function(nexperiments = 2000, weights = c(0.8, 0.2)) {
+  component_1 <- rnorm(nexperiments, 0, 0.05)
+  component_2 <- 0.075 * rt(nexperiments, 5)
+  ix <- sample(1:2, size = nexperiments, replace = TRUE, prob = weights)
+  true_lifts <- cbind(component_1, component_2)[cbind(1:nexperiments, ix)]
+
+  se_c1 <- runif(nexperiments, 0.01, 0.1)
+  se_c2 <- runif(nexperiments, 0.075, 0.5)
+  se <- cbind(se_c1, se_c2)[cbind(1:nexperiments, ix)]
+  observed_lifts <- rnorm(nexperiments, true_lifts, se)
+
+  list(
+    true_lifts     = c(true_lifts, -true_lifts),
+    observed_lifts = c(observed_lifts, -observed_lifts),
+    se             = c(se, se)
+  )
+}
+
+# Fit a K-component, mean-zero normal mixture to the z-scores.
+fit_z_mixture <- function(z, K = 4) {
+  normalmixEM(
+    x = z,
+    k = K,
+    mu = rep(0, K),
+    mean.constr = rep(0, K),
+    maxit = 10000,
+    epsilon = 1e-8
+  )
+}
+
+# Posterior mean of the SNR given an observed z-score, under the fitted
+# mixture. Each marginal z component with variance sigma_k^2 implies an SNR
+# prior component with variance sigma_k^2 - 1.
+posterior_snr_mean <- function(z, fit) {
+  wk <- fit$lambda
+  tau2 <- fit$sigma^2 - 1  # implied SNR prior variances
+
+  if (any(tau2 < 0)) {
+    stop("Some fitted marginal variances are less than 1, implying negative prior SNR variance.")
+  }
+
+  # p(z | k) weighted by mixture weight, then normalized to p(k | z).
+  comp_lik <- sapply(seq_along(wk), function(k) {
+    wk[k] * dnorm(z, mean = 0, sd = sqrt(tau2[k] + 1))
+  })
+  comp_lik <- matrix(comp_lik, nrow = length(z))
+  post_w <- comp_lik / rowSums(comp_lik)
+
+  # E[SNR | z, k] = tau_k^2 / (tau_k^2 + 1) * z, averaged over p(k | z).
+  comp_post_means <- outer(z, tau2 / (tau2 + 1))
+  rowSums(post_w * comp_post_means)
+}
 ```
 
 
@@ -111,64 +169,9 @@ Notice that this estimator behaves much like the posterior mean under a heavy-ta
 ```{r}
 #| include: false
 set.seed(1)
-
-# Simulate the true effects
-nexperiments <- 2000
-component_1 <- rnorm(nexperiments, 0, 0.05)
-component_2 <- 0.075 * rt(nexperiments, 5)
-ix <- sample(1:2, size=nexperiments, replace = T, prob = c(0.8, 0.2))
-true_lifts <- cbind(component_1, component_2)[cbind(1:nexperiments, ix)] 
-
-se_component_1 <- runif(nexperiments, 0.01, 0.1) 
-se_component_2 <- runif(nexperiments, 0.075, 0.5)
-se <- cbind(se_component_1, se_component_2)[cbind(1:nexperiments, ix)]
-observed_lifts <- rnorm(nexperiments, true_lifts, se)
-
-# For symmetric prior, symmetrize the data to avoid spurious asymmetries in finite samples.
-observed_lifts <- c(observed_lifts, -observed_lifts)
-true_lifts <- c(true_lifts, -true_lifts)
-se <- c(se, se)
-z <- observed_lifts / se
-xx <- seq(min(observed_lifts), max(observed_lifts), 0.01)
-
-par(mfrow = c(2, 2))
-hist(true_lifts, breaks=50, main = 'Symmetrized Histogram of True Lifts', xlab = expression(delta), probability = T)
-hist(observed_lifts, breaks=50, main = 'Symmetrized Histogram of Observed Lifts', xlab = expression(hat(delta)), probability = T)
-hist(true_lifts / se, breaks=50, main = 'Symmetrized Histogram of SNR', xlab = expression(SNR), probability = T)
-hist(observed_lifts / se, breaks=50, main = 'Symmetrized Histogram of Z', xlab = expression(z), probability = T)
-
-```
-
-
-
-```{r}
-#| include: false
-K <- 4
-fit <- normalmixEM(
-  x = z,
-  k = K,
-  mu = rep(0, K),
-  mean.constr = rep(0, K),
-  maxit = 10000,
-  epsilon = 1e-8
-)
-
-wk <- fit$lambda
-vk <- fit$sigma^2
-
-xmax <- 10
-xx <- seq(-xmax, xmax, 0.01)
-stage_1 <- rowSums(sapply(seq_along(wk), function(k) {
-  wk[k] * dnorm(xx, mean = 0, sd = sqrt(vk[k]))
-}))
-
-stage_2 <- rowSums(sapply(seq_along(wk), function(k) {
-  wk[k] * dnorm(xx, mean = 0, sd = sqrt(vk[k] - 1))
-}))
-
-
-plot(xx, stage_2, col='red', type='l')
-lines(xx, stage_1)
+sim <- simulate_experiments()
+z <- sim$observed_lifts / sim$se
+fit <- fit_z_mixture(z, K = 4)
 ```
 
 
@@ -179,46 +182,8 @@ Take a look at the plot below.  I simulated 2000 true lifts from a mixture distr
 I've plotted the observed $z$ score versus the posterior expectation of the SNR and it has roughly the same shape as Figure 1 in the Microsoft paper.
 
 ```{r}
-posterior_snr_mean <- function(z, fit) {
-  wk <- fit$lambda
-  vk_marginal <- fit$sigma^2
-  
-  # Prior variances for SNR components
-  tau2 <- vk_marginal - 1
-  
-  if (any(tau2 < 0)) {
-    stop("Some fitted marginal variances are less than 1, implying negative prior SNR variance.")
-  }
-  
-  # Component likelihoods: p(z | component k)
-  comp_lik <- sapply(seq_along(wk), function(k) {
-    wk[k] * dnorm(z, mean = 0, sd = sqrt(tau2[k] + 1))
-  })
-  
-  # Make sure this works for scalar or vector z
-  if (is.vector(comp_lik)) {
-    comp_lik <- matrix(comp_lik, nrow = length(z), byrow = FALSE)
-  }
-  
-  # Posterior component weights: p(k | z)
-  post_w <- comp_lik / rowSums(comp_lik)
-  
-  # Component posterior means:
-  # E[SNR | z, k] = tau_k^2 / (tau_k^2 + 1) * z
-  comp_post_means <- sapply(seq_along(wk), function(k) {
-    tau2[k] / (tau2[k] + 1) * z
-  })
-  
-  if (is.vector(comp_post_means)) {
-    comp_post_means <- matrix(comp_post_means, nrow = length(z), byrow = FALSE)
-  }
-  
-  # Mixture posterior mean
-  rowSums(post_w * comp_post_means)
-}
-
-
-posterior_snr <- posterior_snr_mean(xx,fit)
+xx <- seq(-10, 10, 0.01)
+posterior_snr <- posterior_snr_mean(xx, fit)
 
 par(mfrow = c(1, 2))
 

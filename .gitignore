@@ -4,3 +4,4 @@
 .Rproj.user
 data/
 .venv/
+**/*.quarto_ipynb
