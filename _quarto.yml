@@ -5,6 +5,7 @@ project:
 website:
   title: "Demetri Pananos Ph.D"
   site-url: https://dpananos.github.io
+  draft-mode: unlinked
   repo-url: https://github.com/Dpananos/dpananos.github.io
   repo-actions: [edit, issue]
   google-analytics: 
