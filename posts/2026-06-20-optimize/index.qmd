@@ -1,0 +1,520 @@
+---
+title: Fitting the Mixture
+date: 2026-06-20
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: true
+cache: false
+---
+
+# Brief Background
+
+Consider the following Bayesian model:
+
+$$ \hat \theta \mid \theta \sim \operatorname{Normal}(\theta, s) $$
+$$ \theta \sim g(\theta) $$
+
+When the prior is gaussian, $g(\theta) = \varphi(\theta; \mu, \tau^2)$, then we have the conjugate normal model.  The posterior is gaussian, with variance and mean
+
+$$ \tilde \tau^2 = \left( \dfrac{1}{s^2} + \dfrac{1}{\tau^2}\right)^{-1} $$
+
+$$ \tilde \mu = \tilde \tau^2 \left( \dfrac{\hat \theta}{s^2} + \dfrac{\mu}{\tau^2}\right) $$
+
+When $g$ is a mixture of gaussians, then the posterior is also a mixture of gaussians
+
+$$
+\begin{align}
+g(\theta) &= \sum_{k=1}^K \pi_k\, \varphi(\theta; \mu_k, \tau_k^2) \\
+&\text{subject to}\quad \sum_{k=1}^K \pi_k = 1,\quad \pi_k > 0\ \forall k\\
+\Pr(\theta \mid \hat\theta) &= \sum_{k=1}^K w_k\, \varphi(\theta;\tilde\mu_k,\tilde\tau_k)
+\end{align}
+$$
+
+where
+$$
+\begin{aligned}
+\tilde\tau_k^2 &= \left(\frac{1}{s^2} + \frac{1}{\tau_k^2}\right)^{-1}, \\
+\tilde\mu_k &= \tilde\tau_k^2 \left(\frac{\hat\theta}{s^2} + \frac{\mu_k}{\tau_k^2}\right), \\
+w_k &= \frac{\pi_k\,\varphi\!\left(\hat\theta; \mu_k, \sqrt{s^2+\tau_k^2}\right)}{\sum_{j=1}^K \pi_j\,\varphi\!\left(\hat\theta; \mu_j, \sqrt{s^2+\tau_j^2}\right)}.
+\end{aligned}
+$$
+
+
+We have established that if we can successfully approximate some target probability density, $h(\theta)$, with a mixture of gaussians then we can use that mixture as a prior and effectibly obtain a posterior as a sequence of conjugate normal updates.  
+
+The question then becomes how do we determine the parameters: $K$, $\pi_k$, $\mu_k$ and $\tau_k$?
+
+I currently am thinking of two ways.  I should say that for our implementation in production, either approach will suffice and the choice between the two approaches is really about what kind of story we want to tell in our MIT CODE submission.
+
+# Convex Optimization Over $\pi_k$
+
+Generally, we want to find a $g(\theta)$ which minimizes some squared loss criterion, such as
+
+$$\int_\theta (g(\theta) - h(\theta))^2 \, d \theta \approx  \Delta \theta \sum_{i=1}^N (g(\theta_i) - h(\theta_i))^2  \>.$$
+
+Note that squared loss is a convex loss function. Convexity is nice because there are a lot of tools we can use to solve convex optimization problems. However, if we jointly optimize over all parameters (assuming $K$ is set in advance), the resulting objective function is  non-convex.
+
+The primary source of this non-convexity comes from the Gaussian's parameters $\mu_k$ and $\tau_k$ and this makes the optimization tricky (although not impossible). However, if we specify $\mu_k$ and $\tau_k$ in advance, we can create a (large) set of fixed basis functions. The problem then turns into how best to weight those basis functions. Since the mixture density is linear in the weights $\pi_k$, the squared loss reduces to a strictly convex quadratic function of $\pi_k$. Furthermore, because the $\pi_k$ live on the $K$-dimensional simplex, and the simplex is a convex set, we are left with a highly tractable convex optimization problem.
+
+More formally, consturct a mesh $\theta_1, \cdots, \theta_N$ over which to evaluate the target density, so that $h_n = h(\theta_n)$.  Specify a set of parameters $\left\{ (\mu_k, \tau_k) \right\}_{k=1}^K$, and let $A$ be the matrix such that $A_{n, k} = \varphi(\theta_n; \mu_k, \tau^2_k)$.  We seek to solve the quadratic program
+
+\begin{aligned}
+\min_{\boldsymbol{\pi}} \quad & \frac{1}{2} \boldsymbol{\pi}^\top (A^\top A) \boldsymbol{\pi} - (A^\top \boldsymbol{h})^\top \boldsymbol{\pi} \\
+\text{subject to} \quad & \mathbf{1}^\top \boldsymbol{\pi} = 1, \\
+& \boldsymbol{\pi} \ge \mathbf{0} \>.
+\end{aligned}
+
+This can be done with numerous off the shelf quadratic program solvers, and we can ensure that $A^\top A$ is positive definite by adding a small ridge pentalty.
+
+There are pros and cons:
+
+* **Convexity guarentees a global optimum**.  No fiddling with initializations or getting stuck in local optima.  Convexity is a really big benefit here.
+
+* **Grid of parameters requires some thought**.  The fit from this approach can be poor unless we give some thought to how to specify the grid of means and standard deviations for the mixture components.  In the example below, we truncate the evaluation mesh at the $0.01\%$ and $99.99\%$ quantiles of $h$, place means evenly on that same interval, take component standard deviations on a log-spaced grid from $0.04s$ to $30s$ (where $s$ is a natural scale for the target), and form the dictionary as the full Cartesian product of those means and scales.
+
+* **The size of the basis is potentially larger than we need**.  We can use heuristics to solve this, for example we can solve the optimization, identify the "active set" (those basis functions with materially large weights), and then refit the model on the active set only.  This can reduce the basis appreciably depending on the size of the grid without much in the way of sacrificing fit.
+
+Below is an example of using this procedure to fit a skew normal distirbution.  Here are some of the finer details:
+
+The target is a skew-normal with shape $a = 10$, location $0$, and scale $s = 0.05$.  We evaluate both $h(\theta)$ and the mixture approximation on a mesh of $N = 2000$ equally spaced points over $\left[H^{-1}(\alpha), H^{-1}(1-\alpha)\right]$, where $H$ is the target CDF and $\alpha = 10^{-4}$.  Truncating at the $0.01\%$ and $99.99\%$ quantiles keeps the mesh focused on the bulk of the density without wasting basis functions in the far tails.
+
+The component dictionary is a Cartesian product of means and scales.  We place $50$ means evenly from the lower to upper percentile endpoints above—the same support as the evaluation mesh, rather than uniform percentiles of $h$ itself (which would be similar here but is not identical).  We use $25$ component standard deviations on a log-spaced grid from $0.04s$ to $30s$, so the basis spans narrow peaks through broad shoulders.  Each mean is paired with every scale, giving $K = 50 \times 25 = 1250$ basis functions and a design matrix $A$ with entries $A_{n,k} = \varphi(\theta_n; \mu_k, \tau_k^2)$.
+
+With $A$ and $\boldsymbol{h} = (h(\theta_1), \ldots, h(\theta_N))^\top$ fixed, we solve the quadratic program from above.  The Hessian $A^\top A$ can be rank-deficient when many components overlap, so we add a small ridge term proportional to the mean diagonal entry of $A^\top A$ before calling a standard QP solver (`cvxopt` via `qpsolvers`).  The solution $\boldsymbol{\pi}$ is constrained to the simplex, so weights are automatically non-negative and sum to one.
+
+The left panel plots $\log h(\theta)$ against $\log g(\theta)$ on the evaluation mesh.  The right panel shows the fitted weights $\pi_k$ on the $(\mu, \log \tau)$ grid as a heatmap, which makes it easy to see which regions of the dictionary the optimizer activates.
+
+```{python}
+#| include: false
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import minimize
+from scipy.stats import norm, skewnorm, t
+from qpsolvers import solve_qp
+
+ALPHA = 1e-4
+N_GRID = 2000
+N_SCALES = 25
+
+
+def design_matrix(theta, mu, tau):
+    return norm.pdf(theta[:, np.newaxis], loc=mu, scale=tau)
+
+
+def mixture_density(theta, pi, mu, tau):
+    return design_matrix(theta, mu, tau) @ pi
+
+
+def solve_mixture(A, hg, ridge_penalty=1e-8):
+    n_components = A.shape[1]
+    D0 = A.T @ A
+    P = 2 * (D0 + ridge_penalty * np.mean(np.diag(D0)) * np.eye(n_components))
+    q = -2 * (A.T @ hg)
+    C = np.ones((1, n_components))
+    b = np.array([1.0])
+    G = -np.eye(n_components)
+    return solve_qp(P, q, G, np.zeros(n_components), C, b, solver="cvxopt")
+
+
+def evaluation_mesh(h_dist, alpha=ALPHA, n_grid=N_GRID):
+    lo = h_dist.ppf(alpha)
+    hi = h_dist.ppf(1 - alpha)
+    theta = np.linspace(lo, hi, n_grid)
+    h = h_dist.pdf(theta)
+    return theta, h, lo, hi
+
+
+def scale_grid(s, n_scales=N_SCALES):
+    return np.exp(np.linspace(np.log(s * 0.04), np.log(s * 30), n_scales))
+
+
+def dictionary_grid(means, scales):
+    mus = np.repeat(means, len(scales))
+    taus = np.tile(scales, len(means))
+    return mus, taus
+
+
+def plot_density_fit(ax, theta, h, g):
+    ax.plot(theta, np.log(h), lw=2, label="$h(\\theta)$")
+    ax.plot(theta, np.log(g), alpha=0.5, lw=4, label="mixture approx.")
+    ax.set_xlabel("$\\theta$")
+    ax.set_ylabel("Log Probability Density")
+    ax.legend()
+
+
+def _unpack_joint_params(params, k):
+    return params[:k], params[k : 2 * k], params[2 * k : 3 * k]
+
+
+def joint_objective(params, theta, h, k):
+    pi, mu, tau = _unpack_joint_params(params, k)
+    residual = mixture_density(theta, pi, mu, tau) - h
+    return 0.5 * np.sum(residual**2)
+
+
+def joint_jacobian(params, theta, h, k):
+    pi, mu, tau = _unpack_joint_params(params, k)
+    fit = np.zeros_like(theta)
+    pdfs = np.zeros((k, len(theta)))
+
+    for idx in range(k):
+        pdfs[idx] = norm.pdf(theta, loc=mu[idx], scale=tau[idx])
+        fit += pi[idx] * pdfs[idx]
+
+    residual = fit - h
+    grad_pi = np.zeros(k)
+    grad_mu = np.zeros(k)
+    grad_tau = np.zeros(k)
+
+    for idx in range(k):
+        grad_pi[idx] = np.sum(residual * pdfs[idx])
+        dphi_dmu = pdfs[idx] * (theta - mu[idx]) / tau[idx] ** 2
+        grad_mu[idx] = np.sum(residual * pi[idx] * dphi_dmu)
+        dphi_dtau = pdfs[idx] * (((theta - mu[idx]) ** 2 / tau[idx] ** 3) - (1.0 / tau[idx]))
+        grad_tau[idx] = np.sum(residual * pi[idx] * dphi_dtau)
+
+    return np.concatenate([grad_pi, grad_mu, grad_tau])
+
+
+def initial_joint_params(k, s, h_dist):
+    pi = np.ones(k) / k
+    probs = np.linspace(ALPHA, 1 - ALPHA * 10, k)
+    mu = h_dist.ppf(probs)
+    tau = np.geomspace(s * 0.04, s * 30, k)
+    return np.concatenate([pi, mu, tau])
+
+
+def _joint_bounds(k, lo, hi, s):
+    return [(0.0, 1.0)] * k + [(lo, hi)] * k + [(s * 0.04, s * 30)] * k
+
+
+def _clip_joint_params(params, bounds, k):
+    clipped = params.copy()
+    for idx, (lower, upper) in enumerate(bounds):
+        clipped[idx] = np.clip(clipped[idx], lower, upper)
+    clipped[:k] = np.maximum(clipped[:k], 0.0)
+    clipped[:k] /= clipped[:k].sum()
+    return clipped
+
+
+def _run_joint_optimize(x0, theta, h, k, bounds):
+    constraints = {
+        "type": "eq",
+        "fun": lambda p, kk=k: np.sum(p[:kk]) - 1.0,
+        "jac": lambda p, kk=k: np.concatenate([np.ones(kk), np.zeros(2 * kk)]),
+    }
+    return minimize(
+        joint_objective,
+        x0,
+        args=(theta, h, k),
+        jac=lambda p, t=theta, hg=h, kk=k: joint_jacobian(p, t, hg, kk),
+        bounds=bounds,
+        constraints=constraints,
+        method="SLSQP",
+        options={"ftol": 1e-9, "maxiter": 5000, "disp": False},
+    )
+
+
+def fit_mixture_joint(theta, h, k, lo, hi, s, h_dist, n_starts=25, seed=0):
+    bounds = _joint_bounds(k, lo, hi, s)
+    x0 = _clip_joint_params(initial_joint_params(k, s, h_dist), bounds, k)
+    rng = np.random.default_rng(seed)
+    starts = [x0]
+
+    for _ in range(n_starts - 1):
+        x = x0.copy()
+        x[k : 2 * k] += rng.normal(0.0, 0.002, k)
+        x[2 * k : 3 * k] *= rng.lognormal(0.0, 0.2, k)
+        starts.append(_clip_joint_params(x, bounds, k))
+
+    best = None
+    for x_start in starts:
+        result = _run_joint_optimize(x_start, theta, h, k, bounds)
+        if best is None or result.fun < best.fun:
+            best = result
+
+    pi, mu, tau = _unpack_joint_params(best.x, k)
+    return pi, mu, tau, mixture_density(theta, pi, mu, tau)
+
+
+def _unpack_zero_mean_params(params, k):
+    return params[:k], params[k : 2 * k]
+
+
+def zero_mean_objective(params, theta, h, k):
+    pi, tau = _unpack_zero_mean_params(params, k)
+    residual = mixture_density(theta, pi, np.zeros(k), tau) - h
+    return 0.5 * np.sum(residual**2)
+
+
+def zero_mean_jacobian(params, theta, h, k):
+    pi, tau = _unpack_zero_mean_params(params, k)
+    mu = np.zeros(k)
+    fit = np.zeros_like(theta)
+    pdfs = np.zeros((k, len(theta)))
+
+    for idx in range(k):
+        pdfs[idx] = norm.pdf(theta, loc=mu[idx], scale=tau[idx])
+        fit += pi[idx] * pdfs[idx]
+
+    residual = fit - h
+    grad_pi = np.zeros(k)
+    grad_tau = np.zeros(k)
+
+    for idx in range(k):
+        grad_pi[idx] = np.sum(residual * pdfs[idx])
+        dphi_dtau = pdfs[idx] * ((theta**2 / tau[idx] ** 3) - (1.0 / tau[idx]))
+        grad_tau[idx] = np.sum(residual * pi[idx] * dphi_dtau)
+
+    return np.concatenate([grad_pi, grad_tau])
+
+
+def initial_zero_mean_params(k, s):
+    pi = np.ones(k) / k
+    tau = np.geomspace(s * 0.04, s * 30, k)
+    return np.concatenate([pi, tau])
+
+
+def _zero_mean_bounds(k, s):
+    return [(0.0, 1.0)] * k + [(s * 0.04, s * 30)] * k
+
+
+def _clip_zero_mean_params(params, bounds, k):
+    clipped = params.copy()
+    for idx, (lower, upper) in enumerate(bounds):
+        clipped[idx] = np.clip(clipped[idx], lower, upper)
+    clipped[:k] = np.maximum(clipped[:k], 0.0)
+    clipped[:k] /= clipped[:k].sum()
+    return clipped
+
+
+def _run_zero_mean_optimize(x0, theta, h, k, bounds):
+    constraints = {
+        "type": "eq",
+        "fun": lambda p, kk=k: np.sum(p[:kk]) - 1.0,
+        "jac": lambda p, kk=k: np.concatenate([np.ones(kk), np.zeros(kk)]),
+    }
+    return minimize(
+        zero_mean_objective,
+        x0,
+        args=(theta, h, k),
+        jac=lambda p, t=theta, hg=h, kk=k: zero_mean_jacobian(p, t, hg, kk),
+        bounds=bounds,
+        constraints=constraints,
+        method="SLSQP",
+        options={"ftol": 1e-9, "maxiter": 5000, "disp": False},
+    )
+
+
+def fit_mixture_joint_zero_mean(theta, h, k, s, n_starts=25, seed=0):
+    bounds = _zero_mean_bounds(k, s)
+    x0 = _clip_zero_mean_params(initial_zero_mean_params(k, s), bounds, k)
+    rng = np.random.default_rng(seed)
+    starts = [x0]
+
+    for _ in range(n_starts - 1):
+        x = x0.copy()
+        x[k : 2 * k] *= rng.lognormal(0.0, 0.2, k)
+        starts.append(_clip_zero_mean_params(x, bounds, k))
+
+    best = None
+    for x_start in starts:
+        result = _run_zero_mean_optimize(x_start, theta, h, k, bounds)
+        if best is None or result.fun < best.fun:
+            best = result
+
+    pi, tau = _unpack_zero_mean_params(best.x, k)
+    mu = np.zeros(k)
+    return pi, mu, tau, mixture_density(theta, pi, mu, tau)
+```
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Convex QP fit of a skew-normal target with a Gaussian mixture basis."
+
+s = 0.05  # target scale (omega in the paper)
+h_dist = skewnorm(a=10, loc=0, scale=s)
+n_means = 50
+
+theta, h, lo, hi = evaluation_mesh(h_dist)
+means = np.linspace(lo, hi, n_means)
+scales = scale_grid(s)
+mus, taus = dictionary_grid(means, scales)
+A = design_matrix(theta, mus, taus)
+
+pi = solve_mixture(A, h)
+g = A @ pi
+pi_grid = pi.reshape(n_means, N_SCALES).T
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120, constrained_layout=True)
+
+plot_density_fit(axes[0], theta, h, g)
+
+im = axes[1].pcolormesh(
+    means,
+    np.log(scales),
+    pi_grid,
+    cmap="viridis",
+    shading="auto",
+)
+axes[1].set_xlabel("$\\mu$")
+axes[1].set_ylabel("$\\log \\tau$")
+fig.colorbar(im, ax=axes[1], label="$\\pi_k$")
+
+plt.show()
+```
+
+Our main application will be approximating a Student's-$t$ distirbution, so we can make a simplifying assumption that $\mu_k=0 \> \forall k$.  This can greatly shrink the size of the basis from a few thousand to a few dozen. As you can see below, we can get away with fitting a Student's-$t$ with ~ 10 basis functions.
+
+
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Convex QP fit of a Student-$t_3$ target with a Gaussian mixture basis centered at zero."
+
+s = 0.05
+h_dist = t(df=3, loc=0, scale=s)
+
+theta, h, lo, hi = evaluation_mesh(h_dist)
+scales = scale_grid(s)
+A = design_matrix(theta, np.zeros(len(scales)), scales)
+
+pi = solve_mixture(A, h)
+g = A @ pi
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120, constrained_layout=True)
+
+plot_density_fit(axes[0], theta, h, g)
+
+axes[1].stem(np.log(scales), pi, basefmt=" ")
+axes[1].set_xlabel("$\\log \\tau$")
+axes[1].set_ylabel("$\\pi_k$")
+
+plt.show()
+```
+
+As a small aside, we can approximate the Student's-$t$ using Gauss-Laguerre Quadrature and completely avoid the optimization.  However, this requires many many more basis functions that we might use via the optimization approach.  Below, I use Gauss-Laguerre Quadrature to determine the basis functions.  
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Zero-optimization fit of a Student-$t_3$ target using a 100-component basis derived via Gauss-Laguerre Quadrature."
+
+from scipy.special import roots_genlaguerre, gamma
+
+
+s = 0.05
+nu = 3.0
+h_dist = t(df=nu, loc=0, scale=s)
+K_quad = 100
+
+# 1. Derive Optimal Basis analytically
+alpha = nu / 2.0
+beta_param = nu * (s**2) / 2.0
+gamma_param = alpha - 1.0
+
+# Extract nodes (z_k) and weights (w_k)
+nodes, weights = roots_genlaguerre(K_quad, gamma_param)
+
+# Convert nodes to optimal standard deviations and weights to mixture probabilities
+taus_smart = np.sqrt(beta_param / nodes)
+pis_smart = weights / gamma(alpha)
+
+# 2. Evaluate
+theta, h, lo, hi = evaluation_mesh(h_dist)
+A_smart = design_matrix(theta, np.zeros(len(taus_smart)), taus_smart)
+g_smart = A_smart @ pis_smart
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120, constrained_layout=True)
+
+plot_density_fit(axes[0], theta, h, g_smart)
+
+axes[1].stem(np.log(taus_smart), pis_smart, basefmt=" ")
+axes[1].set_xlabel("$\\log \\tau$ (Analytically Selected)")
+axes[1].set_ylabel("$\\pi_k$ (Analytically Selected)")
+
+plt.show()
+
+```
+
+So far as our paper goes, the convex optimization approach tells a very nice story of approximating arbitrary probability densities obeying mild regularity conditions supported on the real line.  The trade off is that you need a big basis set.  In my opinion, this is not a big deal.  Even if you didn't use some sort of heuristic to shrink the basis via using the active set, all the weights, means, and standard deviations stored in a databaase and the math is the same, the loop is just a little longer.  I personally like this approach because of the flexibility and guarentees provided by the convexity.
+
+# Optimize All Parameters Jointly
+
+The alternative is to optimize over $\pi_k$, $\mu_k$, and $\tau_k$ jointly.  With $K$ fixed in advance, we minimize the same discrete squared loss on the evaluation mesh as above, but now the objective is non-convex because the mixture density is nonlinear in the Gaussian parameters.  We use `SLSQP` from `scipy.optimize`, supplying an analytical Jacobian of the loss with respect to $(\pi_k, \mu_k, \tau_k)$.
+
+Several constraints keep the problem well posed.  The weights must lie on the simplex: $\pi_k \in [0, 1]$ and $\sum_k \pi_k = 1$, enforced as box bounds plus an equality constraint.  Each mean is restricted to the evaluation interval $\left[H^{-1}(\alpha), H^{-1}(1-\alpha)\right]$, and each scale is restricted to $\tau_k \in [0.04s, 30s]$, matching the scale grid used in the convex dictionary fit.  It is important that the upper bound on $\tau_k$ be wide enough to cover the tail; capping scales at the mesh width alone is too restrictive and produces poor fits.
+
+Initialization also matters.  We start each component with equal weight $1/K$, place means at quantiles of the target between $\alpha$ and $1 - 10\alpha$, and take scales on a log-spaced grid from $0.04s$ to $30s$.  Because the problem is non-convex, a single run from this starting point can stall in a bad local optimum.  We therefore repeat the optimization from several random perturbations of the initial $(\mu_k, \tau_k)$, renormalizing the weights after each perturbation, and retain the fit with the lowest loss.
+
+Below we refit the same skew-normal target as above, now with $K = 10$ free components.
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Joint SLSQP fit of a skew-normal target with K=10 Gaussian components."
+
+s = 0.05
+k = 10
+h_dist = skewnorm(a=10, loc=0, scale=s)
+
+theta, h, lo, hi = evaluation_mesh(h_dist)
+pi, mu, tau, g = fit_mixture_joint(theta, h, k, lo, hi, s, h_dist)
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120, constrained_layout=True)
+
+plot_density_fit(axes[0], theta, h, g)
+
+sizes = 400 * pi / pi.max()
+scatter = axes[1].scatter(
+    mu,
+    np.log(tau),
+    s=sizes,
+    c=pi,
+    cmap="viridis",
+    edgecolors="k",
+    linewidths=0.4,
+)
+axes[1].set_xlabel("$\\mu$")
+axes[1].set_ylabel("$\\log \\tau$")
+fig.colorbar(scatter, ax=axes[1], label="$\\pi_k$")
+
+plt.show()
+```
+
+For a symmetric Student's-$t$ target we can carry the same joint approach over, but now fix $\mu_k = 0$ for every component and optimize only over $(\pi_k, \tau_k)$.  The constraints and initialization are the same as above, restricted to weights and scales: $\pi_k \in [0, 1]$ with $\sum_k \pi_k = 1$, $\tau_k \in [0.04s, 30s]$, equal initial weights, log-spaced initial scales, and random restarts that perturb only $\tau_k$.  Below we fit the same Student-$t_3$ target with $K = 10$ zero-mean components. 
+
+```{python}
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Joint SLSQP fit of a Student-$t_3$ target with K=10 zero-mean Gaussian components."
+
+s = 0.05
+k = 10
+h_dist = t(df=3, loc=0, scale=s)
+
+theta, h, lo, hi = evaluation_mesh(h_dist)
+pi, mu, tau, g = fit_mixture_joint_zero_mean(theta, h, k, s)
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 4), dpi=120, constrained_layout=True)
+
+plot_density_fit(axes[0], theta, h, g)
+
+axes[1].stem(np.log(tau), pi, basefmt=" ")
+axes[1].set_xlabel("$\\log \\tau$")
+axes[1].set_ylabel("$\\pi_k$")
+
+plt.show()
+```
+
+
+There are pros and cons:
+
+* **Setting $K$**.  We will need a heuristic with which to choose $K$.  This means running multiple optimizations, which is risky since the problem is non-convex and may land in a local optima.  Although we can try to skirt this via the perturbation approach, its a real risk especially as the dimensionality increases.
+
+* **Small basis**.  If the optimization is successful, we can limit the size of the basis, even for priors outside the Student's-$t$ distribution.  I feel it is neccesary to remind you though that the math stays the same no matter if $K=6$ or $K=600$.  So far as the user is concerned, we are just using $h(\theta)$ as the prior so the size of the basis, from where I stand, is irrelevant and small $K$ is only nice if you have to do these calculations manually (which I don't think you would ever wantt to).  Even if a customer wanted to know the weights and parameters for our approximation, that's a simple query ande export. 

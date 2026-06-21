@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Demetri Pananos">
+<meta name="dcterms.date" content="2026-06-20">
+
+<title>Fitting the Mixture – Demetri Pananos Ph.D</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-6033a600180109c3731f6a886c29932c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-E73MJ55N1R"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
+</script>
+<meta name="quarto:status" content="draft">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Fitting the Mixture – Demetri Pananos Ph.D">
+<meta property="og:description" content="">
+<meta property="og:image" content="https://dpananos.github.io/posts/2026-06-20-optimize/index_files/figure-html/cell-3-output-1.png">
+<meta property="og:site_name" content="Demetri Pananos Ph.D">
+<meta property="og:image:height" content="987">
+<meta property="og:image:width" content="2426">
+<meta name="twitter:title" content="Fitting the Mixture – Demetri Pananos Ph.D">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="https://dpananos.github.io/posts/2026-06-20-optimize/index_files/figure-html/cell-3-output-1.png">
+<meta name="twitter:creator" content="@PhDemetri">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="987">
+<meta name="twitter:image-width" content="2426">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner"><div id="quarto-draft-alert" class="alert alert-warning"><i class="bi bi-pencil-square"></i>Draft</div>
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Demetri Pananos Ph.D</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../consulting/index.html"> 
+<span class="menu-text">Consulting</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../ai/index.html"> 
+<span class="menu-text">AI</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Dpananos"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/PhDemetri"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Fitting the Mixture</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Demetri Pananos </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 20, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Sections</h2>
+   
+  <ul>
+  <li><a href="#brief-background" id="toc-brief-background" class="nav-link active" data-scroll-target="#brief-background">Brief Background</a></li>
+  <li><a href="#convex-optimization-over-pi_k" id="toc-convex-optimization-over-pi_k" class="nav-link" data-scroll-target="#convex-optimization-over-pi_k">Convex Optimization Over <span class="math inline">\(\pi_k\)</span></a></li>
+  <li><a href="#optimize-all-parameters-jointly" id="toc-optimize-all-parameters-jointly" class="nav-link" data-scroll-target="#optimize-all-parameters-jointly">Optimize All Parameters Jointly</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-20-optimize/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="brief-background" class="level1">
+<h1>Brief Background</h1>
+<p>Consider the following Bayesian model:</p>
+<p><span class="math display">\[ \hat \theta \mid \theta \sim \operatorname{Normal}(\theta, s) \]</span> <span class="math display">\[ \theta \sim g(\theta) \]</span></p>
+<p>When the prior is gaussian, <span class="math inline">\(g(\theta) = \varphi(\theta; \mu, \tau^2)\)</span>, then we have the conjugate normal model. The posterior is gaussian, with variance and mean</p>
+<p><span class="math display">\[ \tilde \tau^2 = \left( \dfrac{1}{s^2} + \dfrac{1}{\tau^2}\right)^{-1} \]</span></p>
+<p><span class="math display">\[ \tilde \mu = \tilde \tau^2 \left( \dfrac{\hat \theta}{s^2} + \dfrac{\mu}{\tau^2}\right) \]</span></p>
+<p>When <span class="math inline">\(g\)</span> is a mixture of gaussians, then the posterior is also a mixture of gaussians</p>
+<p><span class="math display">\[
+\begin{align}
+g(\theta) &amp;= \sum_{k=1}^K \pi_k\, \varphi(\theta; \mu_k, \tau_k^2) \\
+&amp;\text{subject to}\quad \sum_{k=1}^K \pi_k = 1,\quad \pi_k &gt; 0\ \forall k\\
+\Pr(\theta \mid \hat\theta) &amp;= \sum_{k=1}^K w_k\, \varphi(\theta;\tilde\mu_k,\tilde\tau_k)
+\end{align}
+\]</span></p>
+<p>where <span class="math display">\[
+\begin{aligned}
+\tilde\tau_k^2 &amp;= \left(\frac{1}{s^2} + \frac{1}{\tau_k^2}\right)^{-1}, \\
+\tilde\mu_k &amp;= \tilde\tau_k^2 \left(\frac{\hat\theta}{s^2} + \frac{\mu_k}{\tau_k^2}\right), \\
+w_k &amp;= \frac{\pi_k\,\varphi\!\left(\hat\theta; \mu_k, \sqrt{s^2+\tau_k^2}\right)}{\sum_{j=1}^K \pi_j\,\varphi\!\left(\hat\theta; \mu_j, \sqrt{s^2+\tau_j^2}\right)}.
+\end{aligned}
+\]</span></p>
+<p>We have established that if we can successfully approximate some target probability density, <span class="math inline">\(h(\theta)\)</span>, with a mixture of gaussians then we can use that mixture as a prior and effectibly obtain a posterior as a sequence of conjugate normal updates.</p>
+<p>The question then becomes how do we determine the parameters: <span class="math inline">\(K\)</span>, <span class="math inline">\(\pi_k\)</span>, <span class="math inline">\(\mu_k\)</span> and <span class="math inline">\(\tau_k\)</span>?</p>
+<p>I currently am thinking of two ways. I should say that for our implementation in production, either approach will suffice and the choice between the two approaches is really about what kind of story we want to tell in our MIT CODE submission.</p>
+</section>
+<section id="convex-optimization-over-pi_k" class="level1">
+<h1>Convex Optimization Over <span class="math inline">\(\pi_k\)</span></h1>
+<p>Generally, we want to find a <span class="math inline">\(g(\theta)\)</span> which minimizes some squared loss criterion, such as</p>
+<p><span class="math display">\[\int_\theta (g(\theta) - h(\theta))^2 \, d \theta \approx  \Delta \theta \sum_{i=1}^N (g(\theta_i) - h(\theta_i))^2  \&gt;.\]</span></p>
+<p>Note that squared loss is a convex loss function. Convexity is nice because there are a lot of tools we can use to solve convex optimization problems. However, if we jointly optimize over all parameters (assuming <span class="math inline">\(K\)</span> is set in advance), the resulting objective function is non-convex.</p>
+<p>The primary source of this non-convexity comes from the Gaussian’s parameters <span class="math inline">\(\mu_k\)</span> and <span class="math inline">\(\tau_k\)</span> and this makes the optimization tricky (although not impossible). However, if we specify <span class="math inline">\(\mu_k\)</span> and <span class="math inline">\(\tau_k\)</span> in advance, we can create a (large) set of fixed basis functions. The problem then turns into how best to weight those basis functions. Since the mixture density is linear in the weights <span class="math inline">\(\pi_k\)</span>, the squared loss reduces to a strictly convex quadratic function of <span class="math inline">\(\pi_k\)</span>. Furthermore, because the <span class="math inline">\(\pi_k\)</span> live on the <span class="math inline">\(K\)</span>-dimensional simplex, and the simplex is a convex set, we are left with a highly tractable convex optimization problem.</p>
+<p>More formally, consturct a mesh <span class="math inline">\(\theta_1, \cdots, \theta_N\)</span> over which to evaluate the target density, so that <span class="math inline">\(h_n = h(\theta_n)\)</span>. Specify a set of parameters <span class="math inline">\(\left\{ (\mu_k, \tau_k) \right\}_{k=1}^K\)</span>, and let <span class="math inline">\(A\)</span> be the matrix such that <span class="math inline">\(A_{n, k} = \varphi(\theta_n; \mu_k, \tau^2_k)\)</span>. We seek to solve the quadratic program</p>
+<span class="math display">\[\begin{aligned}
+\min_{\boldsymbol{\pi}} \quad &amp; \frac{1}{2} \boldsymbol{\pi}^\top (A^\top A) \boldsymbol{\pi} - (A^\top \boldsymbol{h})^\top \boldsymbol{\pi} \\
+\text{subject to} \quad &amp; \mathbf{1}^\top \boldsymbol{\pi} = 1, \\
+&amp; \boldsymbol{\pi} \ge \mathbf{0} \&gt;.
+\end{aligned}\]</span>
+<p>This can be done with numerous off the shelf quadratic program solvers, and we can ensure that <span class="math inline">\(A^\top A\)</span> is positive definite by adding a small ridge pentalty.</p>
+<p>There are pros and cons:</p>
+<ul>
+<li><p><strong>Convexity guarentees a global optimum</strong>. No fiddling with initializations or getting stuck in local optima. Convexity is a really big benefit here.</p></li>
+<li><p><strong>Grid of parameters requires some thought</strong>. The fit from this approach can be poor unless we give some thought to how to specify the grid of means and standard deviations for the mixture components. In the example below, we truncate the evaluation mesh at the <span class="math inline">\(0.01\%\)</span> and <span class="math inline">\(99.99\%\)</span> quantiles of <span class="math inline">\(h\)</span>, place means evenly on that same interval, take component standard deviations on a log-spaced grid from <span class="math inline">\(0.04s\)</span> to <span class="math inline">\(30s\)</span> (where <span class="math inline">\(s\)</span> is a natural scale for the target), and form the dictionary as the full Cartesian product of those means and scales.</p></li>
+<li><p><strong>The size of the basis is potentially larger than we need</strong>. We can use heuristics to solve this, for example we can solve the optimization, identify the “active set” (those basis functions with materially large weights), and then refit the model on the active set only. This can reduce the basis appreciably depending on the size of the grid without much in the way of sacrificing fit.</p></li>
+</ul>
+<p>Below is an example of using this procedure to fit a skew normal distirbution. Here are some of the finer details:</p>
+<p>The target is a skew-normal with shape <span class="math inline">\(a = 10\)</span>, location <span class="math inline">\(0\)</span>, and scale <span class="math inline">\(s = 0.05\)</span>. We evaluate both <span class="math inline">\(h(\theta)\)</span> and the mixture approximation on a mesh of <span class="math inline">\(N = 2000\)</span> equally spaced points over <span class="math inline">\(\left[H^{-1}(\alpha), H^{-1}(1-\alpha)\right]\)</span>, where <span class="math inline">\(H\)</span> is the target CDF and <span class="math inline">\(\alpha = 10^{-4}\)</span>. Truncating at the <span class="math inline">\(0.01\%\)</span> and <span class="math inline">\(99.99\%\)</span> quantiles keeps the mesh focused on the bulk of the density without wasting basis functions in the far tails.</p>
+<p>The component dictionary is a Cartesian product of means and scales. We place <span class="math inline">\(50\)</span> means evenly from the lower to upper percentile endpoints above—the same support as the evaluation mesh, rather than uniform percentiles of <span class="math inline">\(h\)</span> itself (which would be similar here but is not identical). We use <span class="math inline">\(25\)</span> component standard deviations on a log-spaced grid from <span class="math inline">\(0.04s\)</span> to <span class="math inline">\(30s\)</span>, so the basis spans narrow peaks through broad shoulders. Each mean is paired with every scale, giving <span class="math inline">\(K = 50 \times 25 = 1250\)</span> basis functions and a design matrix <span class="math inline">\(A\)</span> with entries <span class="math inline">\(A_{n,k} = \varphi(\theta_n; \mu_k, \tau_k^2)\)</span>.</p>
+<p>With <span class="math inline">\(A\)</span> and <span class="math inline">\(\boldsymbol{h} = (h(\theta_1), \ldots, h(\theta_N))^\top\)</span> fixed, we solve the quadratic program from above. The Hessian <span class="math inline">\(A^\top A\)</span> can be rank-deficient when many components overlap, so we add a small ridge term proportional to the mean diagonal entry of <span class="math inline">\(A^\top A\)</span> before calling a standard QP solver (<code>cvxopt</code> via <code>qpsolvers</code>). The solution <span class="math inline">\(\boldsymbol{\pi}\)</span> is constrained to the simplex, so weights are automatically non-negative and sum to one.</p>
+<p>The left panel plots <span class="math inline">\(\log h(\theta)\)</span> against <span class="math inline">\(\log g(\theta)\)</span> on the evaluation mesh. The right panel shows the fitted weights <span class="math inline">\(\pi_k\)</span> on the <span class="math inline">\((\mu, \log \tau)\)</span> grid as a heatmap, which makes it easy to see which regions of the dictionary the optimizer activates.</p>
+<div id="d2d2e4da" class="cell" data-fig-height="4" data-fig-width="10" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Convex QP fit of a skew-normal target with a Gaussian mixture basis.</figcaption>
+<p><img src="index_files/figure-html/cell-3-output-1.png" width="1213" height="493" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Our main application will be approximating a Student’s-<span class="math inline">\(t\)</span> distirbution, so we can make a simplifying assumption that <span class="math inline">\(\mu_k=0 \&gt; \forall k\)</span>. This can greatly shrink the size of the basis from a few thousand to a few dozen. As you can see below, we can get away with fitting a Student’s-<span class="math inline">\(t\)</span> with ~ 10 basis functions.</p>
+<div id="4470e84a" class="cell" data-fig-height="4" data-fig-width="10" data-execution_count="3">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Convex QP fit of a Student-<span class="math inline">\(t_3\)</span> target with a Gaussian mixture basis centered at zero.</figcaption>
+<p><img src="index_files/figure-html/cell-4-output-1.png" width="1213" height="493" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As a small aside, we can approximate the Student’s-<span class="math inline">\(t\)</span> using Gauss-Laguerre Quadrature and completely avoid the optimization. However, this requires many many more basis functions that we might use via the optimization approach. Below, I use Gauss-Laguerre Quadrature to determine the basis functions.</p>
+<div id="d341c7eb" class="cell" data-fig-height="4" data-fig-width="10" data-execution_count="4">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Zero-optimization fit of a Student-<span class="math inline">\(t_3\)</span> target using a 100-component basis derived via Gauss-Laguerre Quadrature.</figcaption>
+<p><img src="index_files/figure-html/cell-5-output-1.png" width="1213" height="493" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So far as our paper goes, the convex optimization approach tells a very nice story of approximating arbitrary probability densities obeying mild regularity conditions supported on the real line. The trade off is that you need a big basis set. In my opinion, this is not a big deal. Even if you didn’t use some sort of heuristic to shrink the basis via using the active set, all the weights, means, and standard deviations stored in a databaase and the math is the same, the loop is just a little longer. I personally like this approach because of the flexibility and guarentees provided by the convexity.</p>
+</section>
+<section id="optimize-all-parameters-jointly" class="level1">
+<h1>Optimize All Parameters Jointly</h1>
+<p>The alternative is to optimize over <span class="math inline">\(\pi_k\)</span>, <span class="math inline">\(\mu_k\)</span>, and <span class="math inline">\(\tau_k\)</span> jointly. With <span class="math inline">\(K\)</span> fixed in advance, we minimize the same discrete squared loss on the evaluation mesh as above, but now the objective is non-convex because the mixture density is nonlinear in the Gaussian parameters. We use <code>SLSQP</code> from <code>scipy.optimize</code>, supplying an analytical Jacobian of the loss with respect to <span class="math inline">\((\pi_k, \mu_k, \tau_k)\)</span>.</p>
+<p>Several constraints keep the problem well posed. The weights must lie on the simplex: <span class="math inline">\(\pi_k \in [0, 1]\)</span> and <span class="math inline">\(\sum_k \pi_k = 1\)</span>, enforced as box bounds plus an equality constraint. Each mean is restricted to the evaluation interval <span class="math inline">\(\left[H^{-1}(\alpha), H^{-1}(1-\alpha)\right]\)</span>, and each scale is restricted to <span class="math inline">\(\tau_k \in [0.04s, 30s]\)</span>, matching the scale grid used in the convex dictionary fit. It is important that the upper bound on <span class="math inline">\(\tau_k\)</span> be wide enough to cover the tail; capping scales at the mesh width alone is too restrictive and produces poor fits.</p>
+<p>Initialization also matters. We start each component with equal weight <span class="math inline">\(1/K\)</span>, place means at quantiles of the target between <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(1 - 10\alpha\)</span>, and take scales on a log-spaced grid from <span class="math inline">\(0.04s\)</span> to <span class="math inline">\(30s\)</span>. Because the problem is non-convex, a single run from this starting point can stall in a bad local optimum. We therefore repeat the optimization from several random perturbations of the initial <span class="math inline">\((\mu_k, \tau_k)\)</span>, renormalizing the weights after each perturbation, and retain the fit with the lowest loss.</p>
+<p>Below we refit the same skew-normal target as above, now with <span class="math inline">\(K = 10\)</span> free components.</p>
+<div id="502a4af6" class="cell" data-fig-height="4" data-fig-width="10" data-execution_count="5">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Joint SLSQP fit of a skew-normal target with K=10 Gaussian components.</figcaption>
+<p><img src="index_files/figure-html/cell-6-output-1.png" width="1213" height="493" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For a symmetric Student’s-<span class="math inline">\(t\)</span> target we can carry the same joint approach over, but now fix <span class="math inline">\(\mu_k = 0\)</span> for every component and optimize only over <span class="math inline">\((\pi_k, \tau_k)\)</span>. The constraints and initialization are the same as above, restricted to weights and scales: <span class="math inline">\(\pi_k \in [0, 1]\)</span> with <span class="math inline">\(\sum_k \pi_k = 1\)</span>, <span class="math inline">\(\tau_k \in [0.04s, 30s]\)</span>, equal initial weights, log-spaced initial scales, and random restarts that perturb only <span class="math inline">\(\tau_k\)</span>. Below we fit the same Student-<span class="math inline">\(t_3\)</span> target with <span class="math inline">\(K = 10\)</span> zero-mean components.</p>
+<div id="d75fe57b" class="cell" data-fig-height="4" data-fig-width="10" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Joint SLSQP fit of a Student-<span class="math inline">\(t_3\)</span> target with K=10 zero-mean Gaussian components.</figcaption>
+<p><img src="index_files/figure-html/cell-7-output-1.png" width="1213" height="493" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>There are pros and cons:</p>
+<ul>
+<li><p><strong>Setting <span class="math inline">\(K\)</span></strong>. We will need a heuristic with which to choose <span class="math inline">\(K\)</span>. This means running multiple optimizations, which is risky since the problem is non-convex and may land in a local optima. Although we can try to skirt this via the perturbation approach, its a real risk especially as the dimensionality increases.</p></li>
+<li><p><strong>Small basis</strong>. If the optimization is successful, we can limit the size of the basis, even for priors outside the Student’s-<span class="math inline">\(t\)</span> distribution. I feel it is neccesary to remind you though that the math stays the same no matter if <span class="math inline">\(K=6\)</span> or <span class="math inline">\(K=600\)</span>. So far as the user is concerned, we are just using <span class="math inline">\(h(\theta)\)</span> as the prior so the size of the basis, from where I stand, is irrelevant and small <span class="math inline">\(K\)</span> is only nice if you have to do these calculations manually (which I don’t think you would ever wantt to). Even if a customer wanted to know the weights and parameters for our approximation, that’s a simple query ande export.</p></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/dpananos\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-06-20-optimize/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
