@@ -1,0 +1,41 @@
+---
+title: Evolving Thoughts on AI and Academic Writing
+date: 2026-07-14
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+editor: 
+    render-on-save: true
+---
+
+The "Text" section of my ["How I Use AI"](../../ai/index.qmd) reads
+
+>All text on this blog, **and in publications in which I am listed as an author**, is written by me [...]  I will never copy-and-paste from an LLM, nor will I ask an LLM to write a blog post, section of a paper, or email for me.
+
+and I am beginning to think about changing this.  
+
+The fact of the matter is that I have never really been good at scientific writing, and perhaps as a consequence have not enjoyed it.  To be fair, much of the writing I have done has been as a grad student or statistical analyst.  This means that I am mostly responsible for producing results and writing the methods section, which is often dry, procedural, and less writing to communicate ideas to a reader and more _writing to explain or justify the other parts of the paper_.  I've hardly had the chance to be a Hemingway or Steinbeck, so keep that in mind.
+
+My ["How I Use AI"](../../ai/index.qmd) section remains accurate; I have never used AI to write any part of an academic article on which I am listed as an author.  But as of late, I have been using AI to bootstrap my writing for reports to physicians. On the one hand, this doesn't feel in the spirit of my written disclosure on AI -- I won't use AI to write academic papers but I will use AI to write things the authors of those academic papers will read and subsequently write about, and so long as I'm not an author no harm no foul _wink, wink, nudge nudge_.
+
+On the other hand, the writing the AI does for me is just better in a multitude of ways.  In no particular order:
+
+* Having the AI write methods descriptions for me is just a clearly better use of my time.  How many times do I have to write about fitting a logistic regression and scaling predictors so that the intercept is interpreted as the yada yada yada.  I've done this so often, I don't feel like I need to do it any longer and can dedicate my time elsewhere.
+
+* Not only is the AI faster, it does a better job than I could insofar as I like the way it phrases and organizes information.  Personally, I've felt like academic writing has a sort of unspoken expectation that I've just never really grokked, and therefore I've always hated my academic writing because it felt like it wasn't part of the club.  The AI seems to have this though, and so I personally like the result of having the AI write the methods section for me, from a style perspective.
+
+* All this not to mention that the AI does a better job than I would going through the code and accurately describing what was done.  Mechanical minds never tire, and they err at a lower rate than I would because I am human.
+
+Upon reading these points, you may have the impression that I am letting the AI write the paper for me and I am simply acting as a conduit between my terminal and the eventual author's email inbox. Cory Doctorow has a cute little name for this; such a person is a ["reverse centaur"](https://doctorow.medium.com/https-pluralistic-net-2025-09-11-vulgar-thatcherism-there-is-an-alternative-f1428b42a8fd) (a machine that uses a human being as its assistant) as opposed to a "centaur" (a human being who is assisted by a machine). Let me disabuse you of the notion that I am a reverse centaur.  I do not point the AI at code, itself likely written by AI, and allow the AI to write interpretations unchecked only to slap my name on the result as a sort of accountability sink: _Authored by Claude, blame Demetri if anything is wrong_.  Rather, I give the AI high level pointers and structure on what to write, including references.  Let me give you an example of a prompt I could have written today:
+
+> We need to write a detailed methods section for the modelling we did in this targets pipeline.  Because this model is a clinical prediction model, we will need to adhere to TRIPOD.  The TRIPOD checklist is found in @checklist.pdf, and we will need to focus on all sections underneath the "methods" header.  I've done my best to justify approaches in the comments of the code, and you should reference appropriate corresponding authors using the @bib.bib file.
+
+Note, I've told AI what to write (it must adhere to TRIPOD guidelines), I've given it a specific goal (write just the methods section, and ensure we're writing about each checkpoint in the checklist), and I've already done the legwork to justify which resources to cite where and how (using comments in the code, and a corresponding bibtex file).  Then, it is my job to read for accuracy and edit for detail in a virtuous loop in which I guide the AI and the AI does the heavy lifting.  While I think Doctorow might balk at the thought of AI doing writing for me (even if it is boring and akin to boilerplate writing), I don't think he would characterize me as a reverse centaur.
+
+If you're still appalled that I would offload the hard work onto someone or something else, consider the following: _this is precisely how graduate student supervisors treat their trainees_.  Long before AI was as good as it currently is, PhD supervisors would give similar ~~prompts~~ instructions to their PhD students.  The difference between this and that is clear, there is no young academic in training benefiting from the vague prompt to "write the methods section" and the gallons of red ink spilled in edits.  That being said, I don't see the difference between a PhD supervisor reading their student's work for accuracy and quality in order to eventually put their name as an author on the paper, and me doing the same with AI.
+
+The git blame on my ["How I Use AI"](../../ai/index.qmd) disclosure says I committed that particular file on 2025-07-20, about a week shy of a year before I am posting this piece.  I'm almost shocked it has only been a year; I feel like I wrote that when AI was still nascent.  Since then, AI has gotten palpably better, and perhaps these improvements should spur us all to rethink how we should use AI most effectively, and how to remain centaurs as opposed to reverse centaurs.

@@ -10,7 +10,44 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Wed, 03 Jun 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 14 Jul 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Evolving Thoughts on AI and Academic Writing</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-07-14-writing/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>The “Text” section of my <a href="../../ai/index.html">“How I Use AI”</a> reads</p>
+<blockquote class="blockquote">
+<p>All text on this blog, <strong>and in publications in which I am listed as an author</strong>, is written by me […] I will never copy-and-paste from an LLM, nor will I ask an LLM to write a blog post, section of a paper, or email for me.</p>
+</blockquote>
+<p>and I am beginning to think about changing this.</p>
+<p>The fact of the matter is that I have never really been good at scientific writing, and perhaps as a consequence have not enjoyed it. To be fair, much of the writing I have done has been as a grad student or statistical analyst. This means that I am mostly responsible for producing results and writing the methods section, which is often dry, procedural, and less writing to communicate ideas to a reader and more <em>writing to explain or justify the other parts of the paper</em>. I’ve hardly had the chance to be a Hemingway or Steinbeck, so keep that in mind.</p>
+<p>My <a href="../../ai/index.html">“How I Use AI”</a> section remains accurate; I have never used AI to write any part of an academic article on which I am listed as an author. But as of late, I have been using AI to bootstrap my writing for reports to physicians. On the one hand, this doesn’t feel in the spirit of my written disclosure on AI – I won’t use AI to write academic papers but I will use AI to write things the authors of those academic papers will read and subsequently write about, and so long as I’m not an author no harm no foul <em>wink, wink, nudge nudge</em>.</p>
+<p>On the other hand, the writing the AI does for me is just better in a multitude of ways. In no particular order:</p>
+<ul>
+<li><p>Having the AI write methods descriptions for me is just a clearly better use of my time. How many times do I have to write about fitting a logistic regression and scaling predictors so that the intercept is interpreted as the yada yada yada. I’ve done this so often, I don’t feel like I need to do it any longer and can dedicate my time elsewhere.</p></li>
+<li><p>Not only is the AI faster, it does a better job than I could insofar as I like the way it phrases and organizes information. Personally, I’ve felt like academic writing has a sort of unspoken expectation that I’ve just never really grokked, and therefore I’ve always hated my academic writing because it felt like it wasn’t part of the club. The AI seems to have this though, and so I personally like the result of having the AI write the methods section for me, from a style perspective.</p></li>
+<li><p>All this not to mention that the AI does a better job than I would going through the code and accurately describing what was done. Mechanical minds never tire, and they err at a lower rate than I would because I am human.</p></li>
+</ul>
+<p>Upon reading these points, you may have the impression that I am letting the AI write the paper for me and I am simply acting as a conduit between my terminal and the eventual author’s email inbox. Cory Doctorow has a cute little name for this; such a person is a <a href="https://doctorow.medium.com/https-pluralistic-net-2025-09-11-vulgar-thatcherism-there-is-an-alternative-f1428b42a8fd">“reverse centaur”</a> (a machine that uses a human being as its assistant) as opposed to a “centaur” (a human being who is assisted by a machine). Let me disabuse you of the notion that I am a reverse centaur. I do not point the AI at code, itself likely written by AI, and allow the AI to write interpretations unchecked only to slap my name on the result as a sort of accountability sink: <em>Authored by Claude, blame Demetri if anything is wrong</em>. Rather, I give the AI high level pointers and structure on what to write, including references. Let me give you an example of a prompt I could have written today:</p>
+<blockquote class="blockquote">
+<p>We need to write a detailed methods section for the modelling we did in this targets pipeline. Because this model is a clinical prediction model, we will need to adhere to TRIPOD. The TRIPOD checklist is found in <span class="citation" data-cites="checklist.pdf">@checklist.pdf</span>, and we will need to focus on all sections underneath the “methods” header. I’ve done my best to justify approaches in the comments of the code, and you should reference appropriate corresponding authors using the <span class="citation" data-cites="bib.bib">@bib.bib</span> file.</p>
+</blockquote>
+<p>Note, I’ve told AI what to write (it must adhere to TRIPOD guidelines), I’ve given it a specific goal (write just the methods section, and ensure we’re writing about each checkpoint in the checklist), and I’ve already done the legwork to justify which resources to cite where and how (using comments in the code, and a corresponding bibtex file). Then, it is my job to read for accuracy and edit for detail in a virtuous loop in which I guide the AI and the AI does the heavy lifting. While I think Doctorow might balk at the thought of AI doing writing for me (even if it is boring and akin to boilerplate writing), I don’t think he would characterize me as a reverse centaur.</p>
+<p>If you’re still appalled that I would offload the hard work onto someone or something else, consider the following: <em>this is precisely how graduate student supervisors treat their trainees</em>. Long before AI was as good as it currently is, PhD supervisors would give similar <del>prompts</del> instructions to their PhD students. The difference between this and that is clear, there is no young academic in training benefiting from the vague prompt to “write the methods section” and the gallons of red ink spilled in edits. That being said, I don’t see the difference between a PhD supervisor reading their student’s work for accuracy and quality in order to eventually put their name as an author on the paper, and me doing the same with AI.</p>
+<p>The git blame on my <a href="../../ai/index.html">“How I Use AI”</a> disclosure says I committed that particular file on 2025-07-20, about a week shy of a year before I am posting this piece. I’m almost shocked it has only been a year; I feel like I wrote that when AI was still nascent. Since then, AI has gotten palpably better, and perhaps these improvements should spur us all to rethink how we should use AI most effectively, and how to remain centaurs as opposed to reverse centaurs.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-07-14-writing/</guid>
+  <pubDate>Tue, 14 Jul 2026 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Better Priors for Bayesian Analysis of A/B Testing</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8413,396 +8450,6 @@ font-style: inherit;">/</span> log_rr_mean</span>
  ]]></description>
   <guid>https://dpananos.github.io/posts/2024-02-08-peek/</guid>
   <pubDate>Thu, 08 Feb 2024 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>You Just Said Something Wrong About Logistic Regression</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2024-02-06-logit/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>Congratulations, you just said something wrong about logistic regression. That’s OK, logistic regression is hard and we all have to learn/re-learn some things from time to time.</p>
-<p>This is a living blog post intended to address some common misconceptions or flat out wrong statements I’ve seen people make about logistic regression.</p>
-<section id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z." class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="the-coefficients-of-logistic-regression-are-interpreted-as-youre-x-times-more-likely-to-see-y-given-factor-z."><span class="header-section-number">1</span> The Coefficients of Logistic Regression are Interpreted as “You’re X Times More Likely to See Y Given Factor Z”.</h2>
-<p>Wrong! The (exponentiated) coefficients of logistic regression are interpreted as “the odds you see Y given Factor Z are X times larger”.</p>
-<p>Phrases like “X times <em>more likely</em>” allude to the the probability of the event. If the probability of getting some event is 10%, and the probability of getting some other event is 20%, then you are 2 times more likely to get the latter event than the former.</p>
-<p>This kind of comparison between two probabilities is called “the relative risk” (or risk ratio, or lift, it really depends on where you work). The coefficients of a logistic regression are <em>not</em> risk ratios, nor are they log risk ratios; they are log odds ratios.</p>
-<p>Now, it is actually fine to make this mistake under a few conditions. Namely, when a) the odds ratio is sufficiently small, and/or b) the baseline risk is sufficiently small. You can see this on the plot below which plots the odds ratios and corresponds risk ratios for various baseline risks. On the whole though, you shouldn’t interpret any output from logistic regression as a risk ratio unless you explicitly go out of our way to estimate that quantity.</p>
-<div id="bd57bd8e" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> np</span>
-<span id="cb1-2"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> plt</span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> matplotlib.cm <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> cm</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> mpl_toolkits.axes_grid1.inset_locator <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> inset_axes</span>
-<span id="cb1-5"></span>
-<span id="cb1-6">p1 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.array([<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.01</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.05</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.15</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.20</span>])</span>
-<span id="cb1-7"></span>
-<span id="cb1-8">rr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> np.linspace(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4.9</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">500</span>)</span>
-<span id="cb1-9"></span>
-<span id="cb1-10">fig, ax <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> plt.subplots(dpi<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">240</span>)</span>
-<span id="cb1-11">ax.set_aspect(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'equal'</span>)</span>
-<span id="cb1-12">ax.set_xlim(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb1-13">ax.set_ylim(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb1-14"></span>
-<span id="cb1-15"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Set light gray background</span></span>
-<span id="cb1-16">ax.set_facecolor(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'#f0f0f0'</span>)</span>
-<span id="cb1-17"></span>
-<span id="cb1-18"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Set white grid lines</span></span>
-<span id="cb1-19">ax.grid(color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'white'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'-'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb1-20"></span>
-<span id="cb1-21">ax.plot([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>], [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>], <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k--'</span>)</span>
-<span id="cb1-22"></span>
-<span id="cb1-23">cmap <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cm.get_cmap(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'magma'</span>)</span>
-<span id="cb1-24">colors <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> cmap(np.linspace(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(p1)))</span>
-<span id="cb1-25"></span>
-<span id="cb1-26"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(p1):</span>
-<span id="cb1-27">    p2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> rr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> p</span>
-<span id="cb1-28">    odr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> p2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> ((<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p2) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> p)</span>
-<span id="cb1-29">    ax.plot(rr, odr, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>p<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>colors[i])</span>
-<span id="cb1-30"></span>
-<span id="cb1-31"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Move legend outside the plot axis to the right</span></span>
-<span id="cb1-32">ax.legend(title<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Baseline risk"</span>, loc<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'center left'</span>, bbox_to_anchor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>))</span>
-<span id="cb1-33"></span>
-<span id="cb1-34"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Set y ticks to [1, 2, 3, 4, 5]</span></span>
-<span id="cb1-35">ax.set_yticks([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>])</span>
-<span id="cb1-36">ax.set_xticks([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>])</span>
-<span id="cb1-37">ax.set_xlabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Relative Risk'</span>)</span>
-<span id="cb1-38">ax.set_ylabel(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'Odds Ratio'</span>)</span>
-<span id="cb1-39"></span>
-<span id="cb1-40"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Add zoom inset region axis on the bottom center</span></span>
-<span id="cb1-41">axins <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> ax.inset_axes(</span>
-<span id="cb1-42">    [<span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.6</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.47</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.75</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.47</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.75</span>],  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Adjusted position</span></span>
-<span id="cb1-43">    xlim<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>), ylim<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>), xticks<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.25</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>], yticks<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.25</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.5</span>])</span>
-<span id="cb1-44">    </span>
-<span id="cb1-45">axins.plot([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>], [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>], <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'k--'</span>)</span>
-<span id="cb1-46">axins.set_facecolor(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'#f0f0f0'</span>)</span>
-<span id="cb1-47">axins.grid(color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'white'</span>, linestyle<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'-'</span>, linewidth<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb1-48"></span>
-<span id="cb1-49"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, p <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(p1):</span>
-<span id="cb1-50">    p2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> rr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> p</span>
-<span id="cb1-51">    odr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> p2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> ((<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p2) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> p)</span>
-<span id="cb1-52">    axins.plot(rr, odr, label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">f"</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span>p<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:.2f}</span><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>colors[i])</span>
-<span id="cb1-53"></span>
-<span id="cb1-54"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Use ax.indicate_inset_zoom to draw a rectangle around the zoomed-in region</span></span>
-<span id="cb1-55">ax.indicate_inset_zoom(axins, edgecolor<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"black"</span>)</span>
-<span id="cb1-56"></span>
-<span id="cb1-57">plt.show()</span></code></pre></div></div>
-</details>
-<div class="cell-output cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<figcaption>How the relative risk and odds ratio differ for various baseline risks. For each basline risk, we can compute the associated probabiltity given the relative risk. Given that probability, we can also compute the odds ratio.</figcaption>
-<p><img src="https://dpananos.github.io/posts/2024-02-06-logit/index_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2024-02-06-logit/</guid>
-  <pubDate>Tue, 06 Feb 2024 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
