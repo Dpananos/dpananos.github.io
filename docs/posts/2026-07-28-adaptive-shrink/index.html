@@ -223,7 +223,7 @@ window.Quarto = {
 
 
 
-<p>Consider the model</p>
+<p>Let <span class="math inline">\(\theta\)</span> be the true effect of some treatment, <span class="math inline">\(\hat \theta\)</span> be the estimated effect of the treatment, and <span class="math inline">\(s\)</span> be the associated standard error of <span class="math inline">\(\hat \theta\)</span> (assumed known, as is common in A/B testing). Thanks to the Central Limit Theorem, we can think of <span class="math inline">\(\hat \theta\)</span> as a normal random variable with expectation <span class="math inline">\(\theta\)</span> and variance <span class="math inline">\(s^2\)</span>. If we place a nromal prior on <span class="math inline">\(\theta\)</span>, perhaps normal with mean <span class="math inline">\(\mu\)</span> and vairance <span class="math inline">\(\tau^2\)</span>, we get the conjugate normal model, namely</p>
 <p><span class="math display">\[ \begin{align*} \hat \theta \mid \theta &amp;\sim \operatorname{Normal}(\theta, s^2) \&gt;, \\ \theta &amp;\sim \operatorname{Normal}(\mu, \tau^2) \&gt;.\end{align*} \]</span></p>
 <p>The posterior mean for <span class="math inline">\(\theta\)</span> given <span class="math inline">\(\hat \theta\)</span> is</p>
 <p><span class="math display">\[

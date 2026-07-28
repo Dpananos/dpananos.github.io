@@ -15,7 +15,7 @@ cache: true
 library(tidyverse)
 ```
 
-Consider the model
+Let $\theta$ be the true effect of some treatment, $\hat \theta$ be the estimated effect of the treatment, and $s$ be the associated standard error of $\hat \theta$ (assumed known, as is common in A/B testing).  Thanks to the Central Limit Theorem, we can think of $\hat \theta$ as a normal random variable with expectation $\theta$ and variance $s^2$.  If we place a nromal prior on $\theta$, perhaps normal with mean $\mu$ and vairance $\tau^2$, we get the conjugate normal model, namely
 
 $$ \begin{align*} \hat \theta \mid \theta &\sim \operatorname{Normal}(\theta, s^2) \>, \\ \theta &\sim \operatorname{Normal}(\mu, \tau^2) \>.\end{align*} $$
 
