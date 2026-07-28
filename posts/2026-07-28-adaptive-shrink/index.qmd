@@ -1,0 +1,323 @@
+---
+title: Adaptive Shrinkage and the Student's t Prior
+date: 2026-07-28
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: true
+---
+
+
+```{r}
+library(tidyverse)
+```
+
+Consider the model
+
+$$ \begin{align*} \hat \theta \mid \theta &\sim \operatorname{Normal}(\theta, s^2) \>, \\ \theta &\sim \operatorname{Normal}(\mu, \tau^2) \>.\end{align*} $$
+
+The posterior mean for $\theta$ given $\hat \theta$ is 
+
+$$
+E[\theta \mid \hat\theta] =  \lambda \hat\theta + (1-\lambda)\mu,
+\qquad \lambda = \frac{\tau^2}{s^2 + \tau^2} \>.
+$$
+
+In this form, it is straightforward to see that the posterior mean is a compromise between prior mean and data. Assuming the prior is fixed and that the prior mean is 0, $\mu = 0$ (as is often assumed in A/B testing), then the estimate $\hat \theta$ is shrunk toward 0 by a factor which depends only on the standard error and the prior scale, and not at all on the point estimate.  If we denote $r = s / \tau$ to be the ratio of uncertainty between the data and the prior, then the weight of the data is
+
+$$ \lambda(r) = \dfrac{1}{1 + r^2} \>. $$
+
+A value of $\lambda = 1$ means the data has all the weight, and $\lambda = 0$ means the prior has all the weight.  
+
+```{r fig-normal-shrinkage}
+#| fig-cap: |
+#|   Weight of the data under a normal prior. The weight depends only on the ratio of
+#|   uncertainty, never on the point estimate.
+
+shrink_guide <- tibble(
+  label   = c("More certain data", "Less certain data"),
+  x       = c(0.85, 3.15),
+  xend    = c(0.08, 3.92),
+  label_x = c(0.95, 3.05),
+  hjust   = c(0, 1),
+  y       = 0.1
+)
+
+ggplot() +
+  stat_function(fun = \(x) 1 / (1 + x^2), xlim = c(0, 4), n = 1000, linewidth = 1.2) +
+  geom_segment(
+    data = shrink_guide, aes(x = x, xend = xend, y = y, yend = y),
+    arrow = arrow(length = unit(0.16, "inches"), type = "closed"),
+    linewidth = 0.9, colour = "gray35"
+  ) +
+  # geom_label rather than geom_text so the curve, which crosses y = 0.1 near r = 3,
+  # does not run through the text
+  geom_label(
+    data = shrink_guide, aes(x = label_x, y = y, label = label, hjust = hjust),
+    vjust = 0.5, size = 3.3, colour = "gray25",
+    fill = "white", linewidth = 0, label.padding = unit(0.12, "lines")
+  ) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.02))) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25),
+                     expand = expansion(mult = c(0, 0.02))) +
+  labs(
+    x = expression("Ratio of uncertainty " * r == frac(s, tau)),
+    y = expression("Weight of the data " * lambda(r))
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    axis.title = element_text(colour = "gray20")
+  )
+```
+
+Shrinkage is good for a variety of reasons.  However, sometimes the shrinkage afforded by the conjugate normal can place the posterior in a place which is supported by neither the likelihood nor the prior -- a proverbial no-man's-land of parameter space.  Such cases are called "prior data conflict", and happen when the data have a large effect which the prior deems unlikely.  @fig-prior-data-conflict shows an example.  The prior and likelihood are equally certain here, so $\lambda = 0.5$ and the posterior lands exactly halfway between them -- in a region where neither one places much density.  
+
+
+```{r fig-prior-data-conflict}
+#| fig-cap: |
+#|   Prior data conflict. The posterior sits between the prior and the likelihood, in a
+#|   region where neither places much density. Curves are scaled to a common height.
+
+conflict <- tibble(
+  component = c("Normal", "Likelihood"),
+  mean      = c(0, 0.30),
+  sd        = c(0.05, 0.05)
+) |>
+  # Conjugate posterior: precisions add, mean is the precision-weighted average
+  add_row(
+    component = "Posterior",
+    mean = 0.30 * 0.05^2 / (0.05^2 + 0.05^2),
+    sd = sqrt(1 / (1 / 0.05^2 + 1 / 0.05^2))
+  )
+
+conflict_curves <- conflict |>
+  reframe(
+    x = seq(-0.3, 0.8, length.out = 600),
+    density = dnorm(x, mean, sd),
+    .by = component
+  ) |>
+  # Scale each curve to a common peak height; the y axis is relative height, not density
+  mutate(density = density / max(density), .by = component)
+
+conflict_labels <- tibble(
+  component = c("Normal", "Posterior", "Likelihood"),
+  x         = c(-0.10, 0.15, 0.385),
+  y         = c(1.09, 1.15, 1.09)
+)
+
+# Order the curves left to right so the sequential palette tracks position on the axis
+component_levels <- c("Normal", "Posterior", "Likelihood")
+conflict_curves <- mutate(
+  conflict_curves, component = factor(component, component_levels)
+)
+conflict_labels <- mutate(
+  conflict_labels, component = factor(component, component_levels)
+)
+
+ggplot(conflict_curves, aes(x, density, colour = component)) +
+  geom_line(linewidth = 1.2) +
+  geom_text(
+    data = conflict_labels, aes(x = x, y = y, label = component),
+    size = 3.8, show.legend = FALSE
+  ) +
+  scale_colour_viridis_d(end = 0.85) +
+  scale_x_continuous(breaks = seq(-0.25, 0.75, 0.25)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  guides(colour = "none") +
+  labs(
+    x = expression("Effect size " * theta),
+    y = "Relative density"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    # The curves are scaled to a common peak, so the y values carry no information
+    axis.text.y = element_blank(),
+    axis.title = element_text(colour = "gray20")
+  )
+```
+
+
+Eventually the data will hold all the weight and this prior data conflict won't be such a big deal.  How fast does that happen?  The question is easiest to answer in odds rather than weights.  Rearranging $\lambda = 1/(1 + r^2)$,
+
+$$ \dfrac{\lambda}{1 - \lambda} = \dfrac{1}{r^2} = \dfrac{\tau^2}{s^2} \>, $$
+
+The left side is the odds that the posterior mean favors the data over the prior.  Since $s^2 \propto 1/n$, those odds are proportional to the effective sample size, so collecting $k$ times as much data multiplies them by exactly $k$.  Converting back to a weight,
+
+$$ \lambda(kn) = \dfrac{k \, \lambda(n)}{1 + (k-1)\lambda(n)} \>, \qquad \dfrac{\lambda(kn)}{\lambda(n)} = \dfrac{k}{1 + (k-1)\lambda(n)} \>. $$
+
+The consequence of increasing the sample can be read straight off the current weight of the data.
+
+```{r fig-lambda-growth}
+#| fig-cap: |
+#|   Weight of the data after multiplying the effective sample size by k, for several
+#|   starting values.
+
+lambda_growth <- expand_grid(
+  lambda_now = c(0.1, 0.2, 0.3, 0.5, 0.8),
+  k = seq(1, 10, length.out = 400)
+) |>
+  mutate(lambda_new = k * lambda_now / (1 + (k - 1) * lambda_now))
+
+growth_labels <- lambda_growth |>
+  filter(k == max(k), .by = lambda_now)
+
+ggplot(lambda_growth, aes(k, lambda_new, colour = factor(lambda_now))) +
+  geom_line(linewidth = 1.2) +
+  geom_text(
+    data = growth_labels,
+    aes(label = paste0("lambda(n) == ", lambda_now)),
+    parse = TRUE, hjust = 0, nudge_x = 0.15, size = 3.6, show.legend = FALSE
+  ) +
+  scale_x_continuous(breaks = 1:10, expand = expansion(mult = c(0.01, 0.16))) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25)) +
+  scale_colour_viridis_d(end = 0.85, direction = -1) +
+  guides(colour = "none") +
+  labs(
+    x = "Sample size multiplier k",
+    y = expression("Weight of the data " * lambda(kn))
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(axis.title = element_text(colour = "gray20"))
+```
+
+Let's focus on the curves above for a moment.  What these curves tell us is that "overwhelming the prior with the likelihood" can be _incredibly difficult_.  Focus on the $\lambda(n) = 0.5$ line for a moment, which would correspond to @fig-prior-data-conflict.  I were to double my sample size I only increase the weight in the data by 15 percentage points.  That...doesn't feel like a good return on investment, especially if the current sample size is very large.  MOreover, you can see a diminishing return on getting more data.  Clearly, waiting for more data is not always a viable solution to prior data conflict.
+
+As an aside, wec can ask the question in reverse.  Because the odds scale with $n$, the sample size needed to reach a target $\lambda^\star$ is just the ratio of the two odds,
+
+$$ \dfrac{N}{n} = \dfrac{\lambda^\star / (1 - \lambda^\star)}{\lambda(n) / (1 - \lambda(n))} \>. $$
+
+Moving from $\lambda = 0.2$ to $\lambda = 0.9$ means going from odds of $0.25$ to odds of $9$: a thirty-six-fold increase in effective sample size.  In most experiments that is not a decision anyone gets to make.  If the conflict is uncomfortable at the current sample size, waiting for more data is not the fix -- the prior is.
+
+## The Student's t prior
+
+Consider an extension to the model above in which the prior for $\theta$ is now a Student's t distribution with degrees of freedom $\nu$, mean $\mu$,  and standard deviation $\tau$
+
+$$ \begin{align*} \hat \theta \mid \theta &\sim \operatorname{Normal}(\theta, s^2) \>,\\ \theta &\sim \operatorname{Student's-t}(\mu, \tau^2) \>.\end{align*} $$
+This model lacks a closed form posterior, so the expectation is computed with quadrature.  Since the prior is heavier tailed, this means that the weight placed on the data is now a function of the ratio of uncertainties, the degrees of freedom, _and_ the point estimate.  That last part is really important, and means we get to plot the equivalent of @fig-normal-shrinkage in two dimensions.  I'll still plot $r$ on the $x$-axis, and to make things scale invariant I will plot $z = \hat \theta / s$ on the $y$-axis.  The plots for a few degrees of freedom are shown below.
+
+```{r}
+
+lambda_breaks <- seq(0.1, 0.9, 0.2)
+
+# Posterior mean for y ~ N(theta, 1) with a t_nu prior whose standard deviation is
+# tau = 1 / r; the scale that delivers that standard deviation is sigma (needs nu > 2)
+post_mean <- function(z, r, nu) {
+  tau <- 1 / r
+  sigma <- tau * sqrt((nu - 2) / nu)
+  log_kern <- function(theta) {
+    dt(theta / sigma, df = nu, log = TRUE) - log(sigma) + dnorm(z - theta, log = TRUE)
+  }
+  # The integrand has mass near 0 and near z; integrate each region separately so the
+  # quadrature cannot step over a narrow spike
+  brk <- sort(unique(c(0, z)))
+  span <- 60 * max(sigma, 1)
+  lo <- min(brk) - span
+  hi <- max(brk) + span
+  # Rescale by the peak: when the prior is tight and the estimate is far from zero, both
+  # integrals underflow to 0 on the raw scale and the ratio comes back NaN
+  probe <- c(outer(brk, c(0, sigma * c(-8, -2, 2, 8), c(-8, -2, 2, 8)), "+"), lo, hi)
+  peak <- max(log_kern(probe))
+  f <- function(theta) exp(log_kern(theta) - peak)
+  piece <- function(g) {
+    sum(mapply(
+      \(a, b) integrate(g, a, b, subdivisions = 2000L, rel.tol = 1e-10,
+                        stop.on.error = FALSE)$value,
+      c(lo, brk), c(brk, hi)
+    ))
+  }
+  piece(\(th) th * f(th)) / piece(f)
+}
+
+t_shrinkage <- expand_grid(
+  nu = c(3, 10, 20, 50),
+  r = seq(0.05, 4, length.out = 120),
+  z = seq(0.05, 10, length.out = 120)
+) |>
+  mutate(lambda = pmap_dbl(list(z, r, nu), \(z, r, nu) post_mean(z, r, nu) / z))
+```
+
+```{r fig-t-shrinkage}
+#| fig-cap: |
+#|   Weight of the data under a mean-zero Student's t prior, with the prior standard
+#|   deviation held at $\tau = s/r$ in every panel. Solid contours are the t prior at
+#|   $\lambda$ = 0.1, 0.3, 0.5, 0.7, 0.9; dotted vertical lines are the normal prior at
+#|   the same values.
+#| fig-width: 9
+#| fig-height: 7
+ggplot(t_shrinkage, aes(r, z)) +
+  geom_raster(aes(fill = lambda), interpolate = TRUE) +
+  # The normal-prior contours are vertical because lambda = 1 / (1 + r^2) does not
+  # involve the point estimate
+  geom_vline(
+    data = tibble(r = sqrt(1 / lambda_breaks - 1)),
+    aes(xintercept = r), colour = "white", linewidth = 0.3, linetype = "22"
+  ) +
+  geom_contour(aes(z = lambda), colour = "white", linewidth = 0.5,
+               breaks = lambda_breaks) +
+  facet_wrap(~nu, labeller = label_bquote(nu == .(nu))) +
+  scale_fill_viridis_c(limits = c(0, 1), name = expression(lambda)) +
+  labs(x = expression("Ratio of uncertainty " * r == frac(s, tau)),
+       y = expression("Z score " * z == hat(theta) / s)) +
+  coord_cartesian(expand = FALSE) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank(),
+    # unit(1, "null") lets the colorbar stretch to the full height of the panel area
+    legend.key.height = unit(1, "null"),
+    legend.key.width = unit(0.6, "cm")
+  )
+```
+
+Lighter areas indicate where the weight of the data is higher, darker areas are where the weight of the data is lower.  The solid white curves are contours of $\lambda$ under the t prior, drawn at 0.1, 0.3, 0.5, 0.7, and 0.9.  The dotted white lines mark where a *normal* prior of the same standard deviation puts those same contours; because $\lambda = 1/(1 + r^2)$ takes no account of the point estimate, they are vertical, sitting at $r = \sqrt{1/\lambda - 1}$.  Each dotted line pairs with the solid contour at the same value, so the horizontal distance between the two is the difference the heavy tails make.  Notice that, conditional on $r = s / \tau$ remaining constant, the data get more weight as the z score $z$ gets larger.  This is exactly the kind of behaviour we want from the prior to fix the prior data conflict.  Interestingly, we see there is adaptive shrinkage even when $\nu$ is large enough to be approximately normal (see $\nu = 50$ subplot, bottom right).
+
+Now, these are nice plots but I don't think they really convey what is happening.  Rather, if we plot z score on the $x$-axis and shrunk z score on the $y$-axis, then the behavior becomes really clear.  
+
+```{r fig-shrunk-z}
+#| fig-cap: |
+#|   Shrunk z score $\lambda z$ against the observed z score. Rows vary the degrees of
+#|   freedom, columns the ratio of uncertainty. The dotted line is a normal prior matched
+#|   on standard deviation, and the grey diagonal is no shrinkage at all.
+#| fig-width: 9
+#| fig-height: 8.5
+
+shrunk <- expand_grid(
+  nu = c(3, 10, 20, 50),
+  r = c(0.5, 2, 4),
+  z = seq(-10, 10, length.out = 200)
+) |>
+  mutate(
+    # With s = 1 the posterior mean is already on the z scale
+    shrunk_z = pmap_dbl(list(z, r, nu), post_mean),
+    normal_z = z / (1 + r^2)
+  )
+
+shrunk_long <- shrunk |>
+  pivot_longer(c(shrunk_z, normal_z), names_to = "prior", values_to = "shrunk") |>
+  mutate(prior = if_else(prior == "shrunk_z", "Student's t", "Normal"))
+
+# One curve per panel, so r is carried by the facet rather than by colour
+ggplot(shrunk_long, aes(z, shrunk, linetype = prior)) +
+  geom_abline(slope = 1, intercept = 0, colour = "gray80", linewidth = 0.4) +
+  geom_line(linewidth = 0.9) +
+  facet_grid(
+    nu ~ r,
+    labeller = label_bquote(rows = nu == .(nu), cols = r == .(r))
+  ) +
+  scale_linetype_manual(
+    values = c("Student's t" = "solid", "Normal" = "22"), name = NULL
+  ) +
+  labs(
+    x = expression("Z score " * z == hat(theta) / s),
+    y = expression("Shrunk z score " * lambda * z)
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "top")
+```
+
+In my opinion, this is the clearest plot that explains the shrinkage behaviour of the Student's t prior and how the various parameters affect that shrinkage.  As the estimate of $\hat \theta$ comes more certain ($r$ gets smaller) then the shrinkage gets smaller for all estimates.  This makes sense, because as $r$ gets smaller, the likelihood is getting more weight.  The degrees of freedom, $\nu$, controls how far in the $z$ axis the prior will shrink the estimate before deciding that the shrinkage should decrease.  Small values of $\nu$ mean the Student's t will addpatively shrink for smaller values of $z$, and larger $\nu$ will shrink the $z$ more and more like the normal prior would.
+
+
+## Conclusion

@@ -10,7 +10,122 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Tue, 14 Jul 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 28 Jul 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Adaptive Shrinkage and the Student’s t Prior</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Consider the model</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign*%7D%20%5Chat%20%5Ctheta%20%5Cmid%20%5Ctheta%20&amp;%5Csim%20%5Coperatorname%7BNormal%7D(%5Ctheta,%20s%5E2)%20%5C%3E,%20%5C%5C%20%5Ctheta%20&amp;%5Csim%20%5Coperatorname%7BNormal%7D(%5Cmu,%20%5Ctau%5E2)%20%5C%3E.%5Cend%7Balign*%7D%20"></p>
+<p>The posterior mean for <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> given <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Ctheta"> is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5B%5Ctheta%20%5Cmid%20%5Chat%5Ctheta%5D%20=%20%20%5Clambda%20%5Chat%5Ctheta%20+%20(1-%5Clambda)%5Cmu,%0A%5Cqquad%20%5Clambda%20=%20%5Cfrac%7B%5Ctau%5E2%7D%7Bs%5E2%20+%20%5Ctau%5E2%7D%20%5C%3E.%0A"></p>
+<p>In this form, it is straightforward to see that the posterior mean is a compromise between prior mean and data. Assuming the prior is fixed and that the prior mean is 0, <img src="https://latex.codecogs.com/png.latex?%5Cmu%20=%200"> (as is often assumed in A/B testing), then the estimate <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Ctheta"> is shrunk toward 0 by a factor which depends only on the standard error and the prior scale, and not at all on the point estimate. If we denote <img src="https://latex.codecogs.com/png.latex?r%20=%20s%20/%20%5Ctau"> to be the ratio of uncertainty between the data and the prior, then the weight of the data is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Clambda(r)%20=%20%5Cdfrac%7B1%7D%7B1%20+%20r%5E2%7D%20%5C%3E.%20"></p>
+<p>A value of <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%201"> means the data has all the weight, and <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%200"> means the prior has all the weight.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-normal-shrinkage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-normal-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Weight of the data under a normal prior. The weight depends only on the ratio of uncertainty, never on the point estimate.
+</figcaption>
+<div aria-describedby="fig-normal-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/index_files/figure-html/fig-normal-shrinkage-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Shrinkage is good for a variety of reasons. However, sometimes the shrinkage afforded by the conjugate normal can place the posterior in a place which is supported by neither the likelihood nor the prior – a proverbial no-man’s-land of parameter space. Such cases are called “prior data conflict”, and happen when the data have a large effect which the prior deems unlikely. Figure&nbsp;2 shows an example. The prior and likelihood are equally certain here, so <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%200.5"> and the posterior lands exactly halfway between them – in a region where neither one places much density.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-prior-data-conflict" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-prior-data-conflict-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Prior data conflict. The posterior sits between the prior and the likelihood, in a region where neither places much density. Curves are scaled to a common height.
+</figcaption>
+<div aria-describedby="fig-prior-data-conflict-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/index_files/figure-html/fig-prior-data-conflict-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Eventually the data will hold all the weight and this prior data conflict won’t be such a big deal. How fast does that happen? The question is easiest to answer in odds rather than weights. Rearranging <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%201/(1%20+%20r%5E2)">,</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7B%5Clambda%7D%7B1%20-%20%5Clambda%7D%20=%20%5Cdfrac%7B1%7D%7Br%5E2%7D%20=%20%5Cdfrac%7B%5Ctau%5E2%7D%7Bs%5E2%7D%20%5C%3E,%20"></p>
+<p>The left side is the odds that the posterior mean favors the data over the prior. Since <img src="https://latex.codecogs.com/png.latex?s%5E2%20%5Cpropto%201/n">, those odds are proportional to the effective sample size, so collecting <img src="https://latex.codecogs.com/png.latex?k"> times as much data multiplies them by exactly <img src="https://latex.codecogs.com/png.latex?k">. Converting back to a weight,</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Clambda(kn)%20=%20%5Cdfrac%7Bk%20%5C,%20%5Clambda(n)%7D%7B1%20+%20(k-1)%5Clambda(n)%7D%20%5C%3E,%20%5Cqquad%20%5Cdfrac%7B%5Clambda(kn)%7D%7B%5Clambda(n)%7D%20=%20%5Cdfrac%7Bk%7D%7B1%20+%20(k-1)%5Clambda(n)%7D%20%5C%3E.%20"></p>
+<p>The consequence of increasing the sample can be read straight off the current weight of the data.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-lambda-growth" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-lambda-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Weight of the data after multiplying the effective sample size by k, for several starting values.
+</figcaption>
+<div aria-describedby="fig-lambda-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/index_files/figure-html/fig-lambda-growth-1.png" class="img-fluid figure-img" width="672">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s focus on the curves above for a moment. What these curves tell us is that “overwhelming the prior with the likelihood” can be <em>incredibly difficult</em>. Focus on the <img src="https://latex.codecogs.com/png.latex?%5Clambda(n)%20=%200.5"> line for a moment, which would correspond to Figure&nbsp;2. I were to double my sample size I only increase the weight in the data by 15 percentage points. That…doesn’t feel like a good return on investment, especially if the current sample size is very large. MOreover, you can see a diminishing return on getting more data. Clearly, waiting for more data is not always a viable solution to prior data conflict.</p>
+<p>As an aside, wec can ask the question in reverse. Because the odds scale with <img src="https://latex.codecogs.com/png.latex?n">, the sample size needed to reach a target <img src="https://latex.codecogs.com/png.latex?%5Clambda%5E%5Cstar"> is just the ratio of the two odds,</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cdfrac%7BN%7D%7Bn%7D%20=%20%5Cdfrac%7B%5Clambda%5E%5Cstar%20/%20(1%20-%20%5Clambda%5E%5Cstar)%7D%7B%5Clambda(n)%20/%20(1%20-%20%5Clambda(n))%7D%20%5C%3E.%20"></p>
+<p>Moving from <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%200.2"> to <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%200.9"> means going from odds of <img src="https://latex.codecogs.com/png.latex?0.25"> to odds of <img src="https://latex.codecogs.com/png.latex?9">: a thirty-six-fold increase in effective sample size. In most experiments that is not a decision anyone gets to make. If the conflict is uncomfortable at the current sample size, waiting for more data is not the fix – the prior is.</p>
+<section id="the-students-t-prior" class="level2">
+<h2 class="anchored" data-anchor-id="the-students-t-prior">The Student’s t prior</h2>
+<p>Consider an extension to the model above in which the prior for <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is now a Student’s t distribution with degrees of freedom <img src="https://latex.codecogs.com/png.latex?%5Cnu">, mean <img src="https://latex.codecogs.com/png.latex?%5Cmu">, and standard deviation <img src="https://latex.codecogs.com/png.latex?%5Ctau"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign*%7D%20%5Chat%20%5Ctheta%20%5Cmid%20%5Ctheta%20&amp;%5Csim%20%5Coperatorname%7BNormal%7D(%5Ctheta,%20s%5E2)%20%5C%3E,%5C%5C%20%5Ctheta%20&amp;%5Csim%20%5Coperatorname%7BStudent's-t%7D(%5Cmu,%20%5Ctau%5E2)%20%5C%3E.%5Cend%7Balign*%7D%20"> This model lacks a closed form posterior, so the expectation is computed with quadrature. Since the prior is heavier tailed, this means that the weight placed on the data is now a function of the ratio of uncertainties, the degrees of freedom, <em>and</em> the point estimate. That last part is really important, and means we get to plot the equivalent of Figure&nbsp;1 in two dimensions. I’ll still plot <img src="https://latex.codecogs.com/png.latex?r"> on the <img src="https://latex.codecogs.com/png.latex?x">-axis, and to make things scale invariant I will plot <img src="https://latex.codecogs.com/png.latex?z%20=%20%5Chat%20%5Ctheta%20/%20s"> on the <img src="https://latex.codecogs.com/png.latex?y">-axis. The plots for a few degrees of freedom are shown below.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-t-shrinkage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-t-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Weight of the data under a mean-zero Student’s t prior, with the prior standard deviation held at <img src="https://latex.codecogs.com/png.latex?%5Ctau%20=%20s/r"> in every panel. Solid contours are the t prior at <img src="https://latex.codecogs.com/png.latex?%5Clambda"> = 0.1, 0.3, 0.5, 0.7, 0.9; dotted vertical lines are the normal prior at the same values.
+</figcaption>
+<div aria-describedby="fig-t-shrinkage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/index_files/figure-html/fig-t-shrinkage-1.png" class="img-fluid figure-img" width="864">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>Lighter areas indicate where the weight of the data is higher, darker areas are where the weight of the data is lower. The solid white curves are contours of <img src="https://latex.codecogs.com/png.latex?%5Clambda"> under the t prior, drawn at 0.1, 0.3, 0.5, 0.7, and 0.9. The dotted white lines mark where a <em>normal</em> prior of the same standard deviation puts those same contours; because <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%201/(1%20+%20r%5E2)"> takes no account of the point estimate, they are vertical, sitting at <img src="https://latex.codecogs.com/png.latex?r%20=%20%5Csqrt%7B1/%5Clambda%20-%201%7D">. Each dotted line pairs with the solid contour at the same value, so the horizontal distance between the two is the difference the heavy tails make. Notice that, conditional on <img src="https://latex.codecogs.com/png.latex?r%20=%20s%20/%20%5Ctau"> remaining constant, the data get more weight as the z score <img src="https://latex.codecogs.com/png.latex?z"> gets larger. This is exactly the kind of behaviour we want from the prior to fix the prior data conflict. Interestingly, we see there is adaptive shrinkage even when <img src="https://latex.codecogs.com/png.latex?%5Cnu"> is large enough to be approximately normal (see <img src="https://latex.codecogs.com/png.latex?%5Cnu%20=%2050"> subplot, bottom right).</p>
+<p>Now, these are nice plots but I don’t think they really convey what is happening. Rather, if we plot z score on the <img src="https://latex.codecogs.com/png.latex?x">-axis and shrunk z score on the <img src="https://latex.codecogs.com/png.latex?y">-axis, then the behavior becomes really clear.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-shrunk-z" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-shrunk-z-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Shrunk z score <img src="https://latex.codecogs.com/png.latex?%5Clambda%20z"> against the observed z score. Rows vary the degrees of freedom, columns the ratio of uncertainty. The dotted line is a normal prior matched on standard deviation, and the grey diagonal is no shrinkage at all.
+</figcaption>
+<div aria-describedby="fig-shrunk-z-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/index_files/figure-html/fig-shrunk-z-1.png" class="img-fluid figure-img" width="864">
+</div>
+</figure>
+</div>
+</div>
+</div>
+<p>In my opinion, this is the clearest plot that explains the shrinkage behaviour of the Student’s t prior and how the various parameters affect that shrinkage. As the estimate of <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Ctheta"> comes more certain (<img src="https://latex.codecogs.com/png.latex?r"> gets smaller) then the shrinkage gets smaller for all estimates. This makes sense, because as <img src="https://latex.codecogs.com/png.latex?r"> gets smaller, the likelihood is getting more weight. The degrees of freedom, <img src="https://latex.codecogs.com/png.latex?%5Cnu">, controls how far in the <img src="https://latex.codecogs.com/png.latex?z"> axis the prior will shrink the estimate before deciding that the shrinkage should decrease. Small values of <img src="https://latex.codecogs.com/png.latex?%5Cnu"> mean the Student’s t will addpatively shrink for smaller values of <img src="https://latex.codecogs.com/png.latex?z">, and larger <img src="https://latex.codecogs.com/png.latex?%5Cnu"> will shrink the <img src="https://latex.codecogs.com/png.latex?z"> more and more like the normal prior would.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/</guid>
+  <pubDate>Tue, 28 Jul 2026 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Evolving Thoughts on AI and Academic Writing</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -8216,240 +8331,6 @@ font-style: inherit;">=</span> f(outcomes, n)</span></code></pre></div></div>
   <category>Probability</category>
   <guid>https://dpananos.github.io/posts/2024-05-21-interview/</guid>
   <pubDate>Tue, 21 May 2024 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Peeking Sets You Up For Dissapointment</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2024-02-08-peek/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>Peeking (looking for significance in an AB test before the experiment has enough samples to reach desired power) is a “no no”. Rationales for not peeking typically mention inflated type 1 error rate.</p>
-<p>Unless you’re just randomizing into two groups and not changing anything, the null is unlikely to be true. So inflated type one error rate is really not the primary concern. Rather, if we peek then we are setting ourselves up for disappointment. Detected effects from peeking will typically not generalize, and we will be overstating out impact. The reason why is <a href="https://dpananos.github.io/posts/2024-01-22-curse/">fairly clear when considering the Winner’s Curse</a>.</p>
-<p>The long and the short of it is as follows:</p>
-<ul>
-<li>When you peak, your tests are under powered.</li>
-<li>Statistically significant results from under powered tests generally over estimate the truth (see my post on the Winner’s curse for why).</li>
-<li>So when you detect an effect from peeking, you are very likely over estimating your impact. When you roll out the change globally, you’re probably not going to see the impact you expected. This can lead to disappointment (and a lot of questions from everyone when they don’t see changes to the numbers on a dashboard).</li>
-</ul>
-<p>As a concrete example, say you design an experiment to detect a 3% lift in a binary outcome, and say your intervention truly does improve the outcome by 3%. The baseline is 10%, and you design your experiment to have 80% power with a 5% false positive rate. You’re going to need a total of 318,132 users in your experiment…which sounds like a lot. What if we instead checked for statistical significance each time the groups hit a multiple of 20, 000. Depending on how fast we can accrue users into the experiment, this could save time…right?</p>
-<p>Shown below is a line plot of the relative error between what you would expect to detect at each peek and the true lift. The plot speaks for itself; conditional on finding an effect early, you’re likely over estimating the truth.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">n <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20000</span>, N, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20000</span>), N)</span>
-<span id="cb1-2">pwr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sapply</span>(n, \(x) <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">power.prop.test</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">n=</span>x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">p1=</span>pc, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">p2=</span>pt, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">sig.level =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.05</span>)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>power)</span>
-<span id="cb1-3">log_rr_mean <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(pt) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(pc)</span>
-<span id="cb1-4">log_rr_var <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>pt)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span>(pt<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>n) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>pc)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span>(pc<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>n)</span>
-<span id="cb1-5">log_rr_sd <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(log_rr_var)</span>
-<span id="cb1-6"></span>
-<span id="cb1-7">z <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> log_rr_sd <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">qnorm</span>(pwr)</span>
-<span id="cb1-8"></span>
-<span id="cb1-9"></span>
-<span id="cb1-10"></span>
-<span id="cb1-11"></span>
-<span id="cb1-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># expectation from truncated normal</span></span>
-<span id="cb1-13">trunc <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=</span> log_rr_mean <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> log_rr_sd <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dnorm</span>((z <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> log_rr_mean)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> log_rr_sd) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">pnorm</span>((z <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> log_rr_mean)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> log_rr_sd))</span>
-<span id="cb1-14">err <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">abs</span>( log_rr_mean<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>trunc)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span>log_rr_mean</span>
-<span id="cb1-15"></span>
-<span id="cb1-16">sims <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sapply</span>(n, \(nn) {</span>
-<span id="cb1-17">  </span>
-<span id="cb1-18">  </span>
-<span id="cb1-19">  r <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">replicate</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10000</span>, {</span>
-<span id="cb1-20">    </span>
-<span id="cb1-21">  x <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, nn, pc)</span>
-<span id="cb1-22">  y <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, nn, pt)</span>
-<span id="cb1-23">  </span>
-<span id="cb1-24">  test <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">prop.test</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(y, x), <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(nn, nn))</span>
-<span id="cb1-25">  </span>
-<span id="cb1-26">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ifelse</span>(test<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>p.value <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.05</span>, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(y) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(x), <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">NA</span>)</span>
-<span id="cb1-27">  })</span>
-<span id="cb1-28">  </span>
-<span id="cb1-29">  (<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(r, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">na.rm=</span>T) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> log_rr_mean) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> log_rr_mean</span>
-<span id="cb1-30">  </span>
-<span id="cb1-31">  </span>
-<span id="cb1-32">})</span></code></pre></div></div>
-</details>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2024-02-08-peek/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>In the best case scenario, where you end the experiment on the first peek, you’re going to vastly over estimate the impact you had (almost by a factor of 2.3x!). The worst part is that these errors compound, so if you peek on every experiment you’re going to <em>grossly</em> over estimate the total impact you had. Maybe something to talk to your PMs about.</p>
-
-
-
- ]]></description>
-  <guid>https://dpananos.github.io/posts/2024-02-08-peek/</guid>
-  <pubDate>Thu, 08 Feb 2024 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
