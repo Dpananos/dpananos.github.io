@@ -4,7 +4,7 @@ date: 2026-05-14
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [Statistics, Machine Learning]
 number-sections: false
 draft: false
 cache: false

@@ -4,7 +4,7 @@ date: "2022-12-31"
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [Statistics, Misc]
 number-sections: false
 ---
 

@@ -4,7 +4,7 @@ date: 2025-10-15
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: []
+categories: [Misc, Career]
 number-sections: false
 draft: false
 cache: true

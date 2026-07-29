@@ -4,7 +4,7 @@ date: 2026-04-23
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [Misc, Career]
 number-sections: false
 cache: false
 ---

@@ -4,7 +4,7 @@ date: 2026-02-20
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [AB Testing, Bayes, Statistics]
 number-sections: false
 draft: false
 cache: false

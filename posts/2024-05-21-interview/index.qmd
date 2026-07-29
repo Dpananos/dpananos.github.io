@@ -4,7 +4,7 @@ date: "2024-05-21"
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: [Probability]
+categories: [Probability, Misc]
 number-sections: false
 ---
 

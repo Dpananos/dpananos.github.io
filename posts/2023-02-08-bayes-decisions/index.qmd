@@ -6,7 +6,7 @@ code-fold: false
 echo: false
 fig-cap-location: top
 draft: true
-categories: [AB Tests, Statistics, Bayes]
+categories: [AB Testing, Statistics, Bayes]
 number-sections: false
 ---
 

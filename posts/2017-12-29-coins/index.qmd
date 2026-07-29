@@ -2,7 +2,7 @@
 title: "Coins and Factors"
 date: "2017-12-29"
 image: coins.png
-categories: [Python, Riddler]
+categories: [Python, Probability, Riddler]
 ---
 
 I love Fivethirtyeight's Riddler column.  Usually, I can solve the problem with computation, but on some rare occasions I can do some interesting math to get the solution without having to code.  [Here](https://fivethirtyeight.com/features/can-you-survive-this-deadly-board-game/) is the first puzzle I ever solved.  It is a simple puzzle, yet it has an elegant computational and analytic solution.  Let's take a look.

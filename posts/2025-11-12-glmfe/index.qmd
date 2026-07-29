@@ -3,7 +3,7 @@ title: How to Fit a Generalized Linear Model with Fixed Effects (Pt 1)
 date: 2025-11-13
 echo: true
 fig-cap-location: top
-categories: []
+categories: [Statistics, Regression, R]
 number-sections: false
 draft: false
 cache: false

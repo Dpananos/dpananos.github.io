@@ -3,7 +3,7 @@ title: Kuethe's Criterion and A/B Tests
 date: 2025-11-21
 echo: true
 fig-cap-location: top
-categories: []
+categories: [AB Testing, Statistics]
 number-sections: false
 draft: false
 cache: false

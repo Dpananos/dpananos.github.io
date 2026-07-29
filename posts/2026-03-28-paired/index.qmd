@@ -4,7 +4,7 @@ date: 2026-03-27
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [Statistics]
 number-sections: false
 draft: true
 cache: false

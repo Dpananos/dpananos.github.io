@@ -4,7 +4,7 @@ date: 2025-08-10
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: []
+categories: [Statistics, Bayes, R]
 number-sections: false
 draft: false
 cache: true

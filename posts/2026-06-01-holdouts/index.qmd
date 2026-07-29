@@ -4,7 +4,7 @@ date: 2026-05-29
 code-fold: false
 echo: false
 fig-cap-location: top
-categories: []
+categories: [AB Testing, Causal Inference, Statistics]
 number-sections: false
 draft: true
 cache: false

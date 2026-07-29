@@ -4,7 +4,7 @@ date: "2024-06-26"
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: []
+categories: [Statistics, Causal Inference, R]
 number-sections: false
 draft: false
 ---

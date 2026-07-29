@@ -4,7 +4,7 @@ date: "2023-12-01"
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: []
+categories: [AB Testing, Statistics, R]
 number-sections: false
 draft: false
 ---

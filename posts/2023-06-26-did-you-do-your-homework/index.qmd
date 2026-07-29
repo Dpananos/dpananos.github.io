@@ -4,7 +4,7 @@ date: "2023-06-26"
 code-fold: true
 echo: true
 fig-cap-location: top
-categories: []
+categories: [Misc, Career]
 number-sections: false
 draft: false
 ---
