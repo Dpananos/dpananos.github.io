@@ -128,6 +128,10 @@ Figure&nbsp;5: Shrunk z score <img src="https://latex.codecogs.com/png.latex?%5C
 </section>
 
  ]]></description>
+  <category>AB Testing</category>
+  <category>Bayes</category>
+  <category>Statistics</category>
+  <category>R</category>
   <guid>https://dpananos.github.io/posts/2026-07-28-adaptive-shrink/</guid>
   <pubDate>Tue, 28 Jul 2026 04:00:00 GMT</pubDate>
 </item>
@@ -165,6 +169,8 @@ Figure&nbsp;5: Shrunk z score <img src="https://latex.codecogs.com/png.latex?%5C
 
 
  ]]></description>
+  <category>Misc</category>
+  <category>Career</category>
   <guid>https://dpananos.github.io/posts/2026-07-14-writing/</guid>
   <pubDate>Tue, 14 Jul 2026 04:00:00 GMT</pubDate>
 </item>
@@ -237,6 +243,9 @@ Figure&nbsp;5: Shrunk z score <img src="https://latex.codecogs.com/png.latex?%5C
 <li id="fn1"><p>Hand waving aggressively↩︎</p></li>
 </ol>
 </section></div> ]]></description>
+  <category>AB Testing</category>
+  <category>Bayes</category>
+  <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2026-06-03-prior/</guid>
   <pubDate>Wed, 03 Jun 2026 04:00:00 GMT</pubDate>
 </item>
@@ -3189,6 +3198,8 @@ font-style: inherit;">;</span></span>
 </section>
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Machine Learning</category>
   <guid>https://dpananos.github.io/posts/2026-05-14-cov/</guid>
   <pubDate>Thu, 14 May 2026 04:00:00 GMT</pubDate>
 </item>
@@ -3251,6 +3262,8 @@ font-style: inherit;">;</span></span>
 <li id="fn1"><p>Yes, exactly what we need, a boring and trite anology. Not unlike economics itself ;) I joke, don’t kill me.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
+  <category>Misc</category>
+  <category>Career</category>
   <guid>https://dpananos.github.io/posts/2026-04-23-ai/</guid>
   <pubDate>Thu, 23 Apr 2026 04:00:00 GMT</pubDate>
 </item>
@@ -3375,6 +3388,10 @@ Important
 </section>
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Bayes</category>
+  <category>Stan</category>
+  <category>R</category>
   <guid>https://dpananos.github.io/posts/2026-03-22-shrink/</guid>
   <pubDate>Sun, 22 Mar 2026 04:00:00 GMT</pubDate>
 </item>
@@ -3426,6 +3443,9 @@ Important
 
 
  ]]></description>
+  <category>AB Testing</category>
+  <category>Bayes</category>
+  <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2026-02-24-opt-impact/</guid>
   <pubDate>Tue, 24 Feb 2026 05:00:00 GMT</pubDate>
 </item>
@@ -3546,6 +3566,9 @@ Important
 </section>
 
  ]]></description>
+  <category>AB Testing</category>
+  <category>Bayes</category>
+  <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2026-02-20-time/</guid>
   <pubDate>Fri, 20 Feb 2026 05:00:00 GMT</pubDate>
 </item>
@@ -3600,6 +3623,8 @@ Important
 </section>
 
  ]]></description>
+  <category>Misc</category>
+  <category>Career</category>
   <guid>https://dpananos.github.io/posts/2026-02-14-principles/</guid>
   <pubDate>Sat, 14 Feb 2026 05:00:00 GMT</pubDate>
 </item>
@@ -3977,6 +4002,8 @@ font-style: inherit;">.init=</span>raw_data)</span></code></pre></div></div>
 
 
  ]]></description>
+  <category>R</category>
+  <category>Misc</category>
   <guid>https://dpananos.github.io/posts/2026-02-09-cleaning/</guid>
   <pubDate>Mon, 09 Feb 2026 05:00:00 GMT</pubDate>
 </item>
@@ -4327,6 +4354,8 @@ font-style: inherit;">0.95</span>)</span></code></pre></div></div>
 <li id="fn1"><p>Assuming we have enough data that this is a good assumption. Berry-Esseen theorem applies here, but that is another blog post altogether.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
+  <category>AB Testing</category>
+  <category>Statistics</category>
   <guid>https://dpananos.github.io/posts/2025-11-21-kuethe/</guid>
   <pubDate>Fri, 21 Nov 2025 05:00:00 GMT</pubDate>
 </item>
@@ -4867,6 +4896,9 @@ font-style: inherit;">NA</span>)</span></code></pre></div></div>
 </section>
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Regression</category>
+  <category>R</category>
   <guid>https://dpananos.github.io/posts/2025-11-12-glmfe/</guid>
   <pubDate>Thu, 13 Nov 2025 05:00:00 GMT</pubDate>
 </item>
@@ -4890,6 +4922,8 @@ font-style: inherit;">NA</span>)</span></code></pre></div></div>
 
 
  ]]></description>
+  <category>Misc</category>
+  <category>Career</category>
   <guid>https://dpananos.github.io/posts/2025-10-15-hills/</guid>
   <pubDate>Wed, 15 Oct 2025 04:00:00 GMT</pubDate>
 </item>
@@ -5261,6 +5295,9 @@ font-style: inherit;">"top"</span></span>
 </section>
 
  ]]></description>
+  <category>AB Testing</category>
+  <category>Statistics</category>
+  <category>Causal Inference</category>
   <guid>https://dpananos.github.io/posts/2025-08-16-pre/</guid>
   <pubDate>Sat, 16 Aug 2025 04:00:00 GMT</pubDate>
 </item>
@@ -6293,6 +6330,9 @@ font-style: inherit;">"Set1"</span>)</span></code></pre></div></div>
 
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Bayes</category>
+  <category>R</category>
   <guid>https://dpananos.github.io/posts/2025-08-10-shrinking/</guid>
   <pubDate>Sun, 10 Aug 2025 04:00:00 GMT</pubDate>
 </item>
@@ -6768,6 +6808,8 @@ font-style: inherit;">1.01</span>))</span></code></pre></div></div>
 </section>
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Bayes</category>
   <guid>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</guid>
   <pubDate>Tue, 18 Mar 2025 04:00:00 GMT</pubDate>
 </item>
@@ -7023,6 +7065,9 @@ font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div></div>
 <li id="fn2"><p>Hat tip Evan Miller, I saw this section’s title in an internal doc and had a good laugh.↩︎</p></li>
 </ol>
 </section></div> ]]></description>
+  <category>AB Testing</category>
+  <category>Statistics</category>
+  <category>Regression</category>
   <guid>https://dpananos.github.io/posts/2025-03-03-cuped/</guid>
   <pubDate>Mon, 03 Mar 2025 05:00:00 GMT</pubDate>
 </item>
@@ -7619,6 +7664,9 @@ font-style: inherit;">$</span>ggPlot</span></code></pre></div></div>
 <li id="fn3"><p>https://www.youtube.com/watch?v=GN5PJXajxKw↩︎</p></li>
 </ol>
 </section></div> ]]></description>
+  <category>AB Testing</category>
+  <category>Statistics</category>
+  <category>Bayes</category>
   <guid>https://dpananos.github.io/posts/2024-09-01-ab-length/</guid>
   <pubDate>Sun, 01 Sep 2024 04:00:00 GMT</pubDate>
 </item>
@@ -8122,6 +8170,9 @@ font-style: inherit;">#0.06</span></span></code></pre></div></div>
 </section>
 
  ]]></description>
+  <category>Statistics</category>
+  <category>Causal Inference</category>
+  <category>R</category>
   <guid>https://dpananos.github.io/posts/2024-06-23-confound/</guid>
   <pubDate>Wed, 26 Jun 2024 04:00:00 GMT</pubDate>
 </item>
@@ -8334,6 +8385,7 @@ font-style: inherit;">=</span> f(outcomes, n)</span></code></pre></div></div>
 
  ]]></description>
   <category>Probability</category>
+  <category>Misc</category>
   <guid>https://dpananos.github.io/posts/2024-05-21-interview/</guid>
   <pubDate>Tue, 21 May 2024 04:00:00 GMT</pubDate>
 </item>
