@@ -10,6 +10,8 @@ draft: false
 cache: true
 ---
 
+Before we get started, I want to say that here may be good reasons to use a normal prior over a Student's t prior.  [Statistics may be the science of defaults](https://statmodeling.stat.columbia.edu/2012/11/06/statistics-is-the-science-of-defaults-2/), but I am not recommending the Student's t as the default prior for anyone.  Rather, this post is going to take a look at some of the properties of the normal prior as they relate to prior data conflict and we'll see how the Student's t's tail behaviour can ameliorate some of that (should you think it needs ameliorating).  I'm planning a longer blog post in which I discuss why one might want a Student's t prior and what that means for robustness and shrinkage.  For now, enjoy some math.
+
 
 ```{r}
 library(tidyverse)
@@ -73,7 +75,7 @@ ggplot() +
   )
 ```
 
-Shrinkage is good for a variety of reasons.  However, sometimes the shrinkage afforded by the conjugate normal can place the posterior in a region supported by neither the likelihood nor the prior -- a proverbial no-man's-land of parameter space.  Such cases are called *prior data conflict*, and happen when the data show a large effect which the prior deems unlikely.  @fig-prior-data-conflict shows an example.  The prior and likelihood are equally certain here, so $\lambda = 0.5$ and the posterior lands exactly halfway between them -- in a region where neither one places much density.  
+Shrinkage is good for a variety of reasons.  However, sometimes the shrinkage afforded by the conjugate normal can place the posterior in a region supported by neither the likelihood nor the prior -- a proverbial no-man's-land of parameter space.  Such cases are called *prior data conflict*, and can happen when the data show a large effect which the prior deems unlikely.  @fig-prior-data-conflict shows an example.  The prior and likelihood are equally certain here, so $\lambda = 0.5$ and the posterior lands exactly halfway between them -- in a region where neither one places much density.  
 
 
 ```{r fig-prior-data-conflict}
@@ -321,12 +323,3 @@ ggplot(shrunk_long, aes(z, shrunk, linetype = prior)) +
 In my opinion, this is the clearest plot of the shrinkage behavior of the Student's t prior and of how the various parameters affect it.  As the estimate $\hat \theta$ becomes more certain ($r$ gets smaller), the shrinkage gets smaller for all estimates.  This makes sense, because as $r$ gets smaller the likelihood gets more weight.  The degrees of freedom, $\nu$, control how far along the $z$ axis the prior keeps shrinking the estimate before easing off.  Small values of $\nu$ mean the Student's t adaptively shrinks at smaller values of $z$, while larger $\nu$ shrink $z$ more and more like the normal prior would.
 
 
-## Conclusion
-
-OK, so what?  Does this mean we should never use a normal prior? I'm not sure that conclusion is justified, so I'll give you my own thoughts on when you should use each.
-
-First, it makes sense to think about when long tails can arise.  I can't say with perfect certainty when a heavy tail makes sense, but if you're brand new to A/B testing and many teams are trying to move the same metric, then I think a Student's t prior makes a lot of sense.  Many levers are being pulled; some may work and some may _really_ work.  A heavier tail can allow teams to get credit where they deserve it, and shrink where shrinkage is needed.  Indeed, Azevedo et. al report in their 2020 paper [A/B Testing with Fat Tails](https://www.jstor.org/stable/27347381?casa_token=5KkdGjmNuQEAAAAA:4dcrPyh0AgX3RPUmKHDy1NGHdxsiAhdXhMxtdJnCFUheO_UGA3kzZtIbYbXXMjIbHHI0xp2kYllF7_IhrVGws8_XJpxbFjA-jyA6HRm5tFW8yMwnuS9vyg) that the distribution of observed effects for experiments run at Bing is fatter tailed than a normal may allow.  These results are marginal, meaning they are not broken out by team or surface.  If what we observe at Bing is true across the industry, then maybe a Student's t makes sense when we can't create priors for our particular team.
-
-That being said, when a team has run many, many A/B tests and has a good corpus of experiments which can be thought of as exchangeable (because, for example, all experiments are run on the same surface by the same team), then a normal prior can make sense because very extreme effects are unlikely (for example, because the surface has been highly optimized and the low-hanging fruit has been plucked).  
-
-The idea is not to say we should universally use one or the other, but rather to be transparent about our assumptions and why we are using one prior over another.
