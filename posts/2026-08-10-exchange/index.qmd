@@ -6,7 +6,7 @@ echo: false
 fig-cap-location: top
 categories: [AB Testing, Bayes, Statistics]
 number-sections: false
-draft: true
+draft: false
 cache: true
 ---
 
@@ -47,6 +47,12 @@ If it is surprising to you that a button-color or copy-change experiment in trut
 Put differently, exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which $\theta_5$ belonged to the pricing experiment and $\theta_1$ belonged to the button-color experiment.
 
 What this example demonstrates is that exchangeability is more than a formal invariance to permutations of indices. It represents a genuine *a priori* indifference about how treatment effects are assigned to experiments. This is not to say that you know nothing about the experiments. Rather, it says that whatever you do know about them does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.
+
+Gelman and co-authors describe exchangeability as follows in _Bayesian Data Analysis 3ed_: 
+
+>If no informaiton -- other than the data $y$ -- is available to distinguish any of the $\theta_j$'s from any of the others and no ordering or grouping of the parameters can be made, one must assyme symmetry among the parameters in ther prior distribution.
+
+The symmetry point is, in a way, reffering to the definition of exchangebility in terms of permutations (group theorists will know). As such, a useful gut check (as we will see later in this post) is to ask ones self if experiment results can be grouped in some, even if loose, sense.  If they can, exchangeability may not be  justifiable -- but more on that later.
 
 
 It may be useful to state here that exchangeability is different from  being _independent and identically distributed_ (IID). In fact, 
@@ -213,3 +219,122 @@ The button-color experiment may very well produce the largest lift. Rather, befo
 Unlike the previous section, this issue cannot be resolved simply by restricting attention to a narrow period of time. The threat to exchangeability is embedded in the treatments themselves. If we want to retain an exchangeability assumption, we would need to account for treatment class in some way -- for example, by only comparing experiments whose treatments are sufficiently similar along these dimensions.
 
 How similar is "sufficiently similar" is, of course, a judgement call. There is no bright line separating one treatment class from another. But this is exactly the type of judgement exchangeability forces us to make: given everything we know about these experiments before seeing their results, are we genuinely indifferent to how the treatment effects are assigned to the experiment labels?
+
+## Situation 4: Same Team, Same Metric, Same Treatment Class, Same Times, Different Metric Roles
+
+So far, we have implicitly assumed that the metric whose treatment effects we are pooling plays roughly the same role across experiments. This is another assumption that can quietly fail.
+
+Experiments generally contain more than one metric. There may be a __primary metric__ which the treatment is explicitly intended to move, several __secondary metrics__ which help us understand how the treatment works, and __guardrail metrics__ which we monitor largely to make sure that the treatment does not cause harm elsewhere.
+
+Suppose a team runs five experiments over the course of a few weeks and we are interested in their treatment effects on revenue per user. Perhaps the experiments look like
+
+| Treatment                                        | Role of Revenue Per User | Treatment Effect |
+| ------------------------------------------------ | ------------------------ | ---------------- |
+| Reduce friction in checkout flow                 | Primary Metric           | $\theta_1$       |
+| Add “Free Shipping” messaging near checkout CTA  | Primary Metric           | $\theta_2$       |
+| Improve search-result relevance                  | Secondary Metric         | $\theta_3$       |
+| Increase engagement with product recommendations | Secondary Metric         | $\theta_4$       |
+| Reduce page-load latency on the home page        | Guardrail Metric         | $\theta_5$       |
+
+Every $\theta_k$ is measuring the same quantity: the relative lift in revenue per user. Even so, there is a good reason to argue against exchangeability in this case.
+
+The first two treatments were selected specifically because the team believed they had an opportunity to move revenue. Revenue is the target of the treatment. In the latter experiments, revenue may simply be something we monitor to understand downstream consequences, or to make sure that an otherwise desirable product change does not accidentally hurt the business.
+
+That distinction is information about the plausible size of $\theta_k$, and we have it before seeing any results. An experiment which was conceived, prioritized, and designed specifically to increase revenue is not on the same footing as one whose objective was to reduce latency and which carries revenue along merely as a guardrail.
+
+Again, this does not mean that every experiment explicitly targeting revenue will produce a larger effect than every experiment which does not. A latency improvement might unexpectedly produce a substantial revenue lift, while a checkout experiment designed to increase revenue may do absolutely nothing.
+
+The claim is instead that, *a priori*, we would not be indifferent to the assignment. Handed a large revenue effect, we would sooner attach it to the checkout experiment than to the latency experiment, and that preference is exactly what undermine a claim of exchangeability. The role revenue plays in an experiment is information the experiment label is carrying about $\theta_k$. In the words of Gelman and co-aithors, there is information availabl with which to distinguish some of the treatment effecs from others; a rough grouping of parameters could be made.
+
+This gives us a relatively simple restriction when constructing an exchangeable set of experiments: if we are trying to learn the distribution of treatment effects on some metric, we should probably focus primarily on experiments for which that metric was itself a __primary metric__ (you could do also focus secondary metrics or guardrails, but I imagine focusing on primary metrics might be more useful).
+
+There is another closely related issue. Even among experiments for which the same metric is primary, the treatment may operate at very different points in the user journey.
+
+Suppose revenue per user is the primary metric in each of the following experiments:
+
+| Treatment                            | Product Surface | Treatment Effect |
+| ------------------------------------ | --------------- | ---------------- |
+| Reduce payment failures at checkout  | Checkout        | $\theta_1$       |
+| Remove a step from checkout          | Checkout        | $\theta_2$       |
+| Improve product-page recommendations | Product Page    | $\theta_3$       |
+| Improve search ranking               | Search          | $\theta_4$       |
+| Change home-page merchandising       | Home Page       | $\theta_5$       |
+
+The further up in the funnel an experiment takes place, the more things generally need to happen between the treatment and the eventual realization of revenue.
+
+A checkout treatment acts on users who are already very close to purchasing. Improving search ranking, on the other hand, may first need to change what a user sees, then what they click, then whether they find a product appealing, then whether they add it to their cart, and finally whether they complete the purchase. Each additional step provides another opportunity for an effect to attenuate.
+
+For that reason, knowing where in the funnel a treatment acts tells us something about the revenue effect we should find plausible. Treatments higher in the funnel have more places to lose their effect before it reaches revenue, even when revenue is nominally the primary metric for both experiments. 
+
+Once again, then, experiment identity makes certain permutations less plausible than others -- that is, we can use existing information to group effects. If we know that one experiment directly changes the checkout flow and another makes a relatively small change to the home page, we would not be indifferent to swapping their revenue effects.
+
+Perhaps the more general point is that sharing a metric is not enough. We should also ask whether that metric occupies approximately the same __role__ in each experiment, and whether the treatments have a comparable opportunity to affect it.
+
+If the metric is merely observed rather than targeted, or if some treatments are substantially further removed from it in the funnel, then the experiment label is again telling us something we would rather the model knew about.
+
+## Situation 5: Different Teams, Same Metric, Same Treatment Class, Same Times
+
+Finally, suppose we allow experiments from different teams into the exchangeable population.
+
+Imagine several teams running experiments over roughly the same period, all targeting revenue per user and all running treatments which appear to belong to approximately the same treatment class.
+
+Perhaps the experiments look like
+
+| Team        | Treatment                                         | Treatment Effect |
+| ----------- | ------------------------------------------------- | ---------------- |
+| Checkout    | Add reassurance copy beside payment fields        | $\theta_1$       |
+| Pricing     | Add reassurance copy beside annual-plan pricing   | $\theta_2$       |
+| Growth      | Add reassurance copy beside signup CTA            | $\theta_3$       |
+| Billing     | Add reassurance copy during plan upgrade flow     | $\theta_4$       |
+| Marketplace | Add reassurance copy before purchase confirmation | $\theta_5$       |
+
+At first glance this looks fairly reasonable. The experiments happen at similar times, target the same metric, and involve treatments of roughly similar scope.
+
+However, the team label may carry quite a lot of information about the plausible size of the treatment effect.
+
+Different teams generally operate on different product surfaces, at different points in the user journey, and on different populations of users. A checkout team is interacting with users who have already demonstrated substantial purchase intent. A growth team may be operating much earlier in the funnel. A billing team may mostly interact with existing paying customers.
+
+Consequently, even if the metric is the same, the opportunity to move that metric can differ systematically between teams.
+
+There may also be differences in how teams select experiments.
+
+One team may run many speculative experiments, testing ideas cheaply and accepting that most will fail. Another may only run an experiment after extensive research has convinced them that the treatment is likely to work. Some teams may operate on relatively immature surfaces with lots of obvious opportunities for improvement, while others may own products which have already undergone years of optimization.
+
+All of these are things we may know about a team before a single result comes in, and all of them bear on which effects we would find plausible for that team's experiments. Team identity therefore acts as a proxy for a collection of potentially important characteristics: surface, user population, funnel position, experimentation philosophy, product maturity, and perhaps many others.
+
+This does not mean that experiments from different teams can never be exchangeable. Two teams may operate on very similar surfaces, target similar populations, and have very similar processes for selecting treatments. In such a case, pooling their experiments may be perfectly reasonable. The important question is what information is contained in the team label.
+
+If knowing the team systematically changes what treatment effects we find plausible, then global exchangeability across teams is difficult to justify.
+
+One response would be to suppose that experiments are exchangeable __conditional on team__. For example, we might imagine something like
+
+$$
+\theta_k 
+\sim
+\mbox{Normal}(\mu_k, \tau_k^2).
+$$
+
+A hierarchical model could go further and allow those team-specific distributions to themselves share information. This would let us borrow strength across teams without making the much stronger claim that an experiment from the checkout team is directly exchangeable with an experiment from the growth team. That is, of course, a different model from the simple normal-normal model considered here, and hence out of scope.
+
+For our purposes, the important point is simply that crossing team boundaries introduces another potential source of information about the treatment effect, and therefore another reason to question exchangeability.
+
+## A/A Tests
+
+Before constructing any exchangeable set of experiments, there is one class of experiments which should simply be removed: __A/A tests__.
+
+In an A/A test, both experimental groups intentionally receive the same treatment. Assuming that the experiment is implemented correctly, the true treatment effect is therefore
+
+$$
+\theta_k = 0.
+$$
+
+If we know that an experiment is an A/A test, then its identity tells us essentially everything we need to know about its treatment effect. It is therefore clearly not exchangeable with a collection of genuine A/B tests whose true treatment effects are unknown. The experiment label contains information about the treatment effect by construction.
+
+For cumulative impact, known A/A tests should therefore be excluded from the population used to estimate $\mu$ and $\tau$.
+
+
+## So What Experiments Should We Treat As Exchangeable?
+
+If you've come to this point in the post, you may wonder if exchangeability is ever reasonable to claim.  Experiments _do_ happen across time, _do_ happen across teams, surfaces areas, and points in the funnel.  What use is cumulative impact of exchangeability is a bar too high to cross?
+
+Remember, exchangeability is ultimately a _judgement_ about the information contained in the experiment labels.  You may be willing to trade off a bit of precision in your results for some usefulness in the feature.  Cumulative impact is not intended to be a one-stop-shop and replace other methods, like holdouts or constructing your big-ass-heirarchcal Bayesian model to pool experiments nested within teams.  Rather, it is intended to be another tool in your toolbox, in which you need to make a judgment about time and place for use and how much weight to place in results.  This post just arms you with some information with which to improve your judgement.

@@ -116,7 +116,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-E73MJ55N1R', { 'anonymize_ip': true});
 </script>
-<meta name="quarto:status" content="draft">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -161,7 +160,7 @@ window.Quarto = {
 <body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner"><div id="quarto-draft-alert" class="alert alert-warning"><i class="bi bi-pencil-square"></i>Draft</div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -253,6 +252,10 @@ window.Quarto = {
   <li><a href="#situation-1-same-team-same-metric-same-treatment-class-same-time" id="toc-situation-1-same-team-same-metric-same-treatment-class-same-time" class="nav-link" data-scroll-target="#situation-1-same-team-same-metric-same-treatment-class-same-time">Situation 1: Same Team, Same Metric, Same Treatment Class, Same Time</a></li>
   <li><a href="#situation-2-same-team-same-metric-same-treatment-class-different-times" id="toc-situation-2-same-team-same-metric-same-treatment-class-different-times" class="nav-link" data-scroll-target="#situation-2-same-team-same-metric-same-treatment-class-different-times">Situation 2: Same Team, Same Metric, Same Treatment Class, Different Times</a></li>
   <li><a href="#situation-3-same-team-same-metric-different-treatment-class-same-times" id="toc-situation-3-same-team-same-metric-different-treatment-class-same-times" class="nav-link" data-scroll-target="#situation-3-same-team-same-metric-different-treatment-class-same-times">Situation 3: Same Team, Same Metric, Different Treatment Class, Same Times</a></li>
+  <li><a href="#situation-4-same-team-same-metric-same-treatment-class-same-times-different-metric-roles" id="toc-situation-4-same-team-same-metric-same-treatment-class-same-times-different-metric-roles" class="nav-link" data-scroll-target="#situation-4-same-team-same-metric-same-treatment-class-same-times-different-metric-roles">Situation 4: Same Team, Same Metric, Same Treatment Class, Same Times, Different Metric Roles</a></li>
+  <li><a href="#situation-5-different-teams-same-metric-same-treatment-class-same-times" id="toc-situation-5-different-teams-same-metric-same-treatment-class-same-times" class="nav-link" data-scroll-target="#situation-5-different-teams-same-metric-same-treatment-class-same-times">Situation 5: Different Teams, Same Metric, Same Treatment Class, Same Times</a></li>
+  <li><a href="#aa-tests" id="toc-aa-tests" class="nav-link" data-scroll-target="#aa-tests">A/A Tests</a></li>
+  <li><a href="#so-what-experiments-should-we-treat-as-exchangeable" id="toc-so-what-experiments-should-we-treat-as-exchangeable" class="nav-link" data-scroll-target="#so-what-experiments-should-we-treat-as-exchangeable">So What Experiments Should We Treat As Exchangeable?</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/Dpananos/dpananos.github.io/edit/main/posts/2026-08-10-exchange/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Dpananos/dpananos.github.io/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -310,6 +313,11 @@ p(\theta_1, \cdots, \theta_K)= p(\theta_{\pi(1)}, \cdots, \theta_{\pi(K)}).
 <p>If it is surprising to you that a button-color or copy-change experiment in truth produces a larger effect on revenue than a pricing or checkout experiment, then the experiment labels are carrying information about the plausible sizes of the treatment effects. In that case, treating the effects as exchangeable is probably not defensible.</p>
 <p>Put differently, exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which <span class="math inline">\(\theta_5\)</span> belonged to the pricing experiment and <span class="math inline">\(\theta_1\)</span> belonged to the button-color experiment.</p>
 <p>What this example demonstrates is that exchangeability is more than a formal invariance to permutations of indices. It represents a genuine <em>a priori</em> indifference about how treatment effects are assigned to experiments. This is not to say that you know nothing about the experiments. Rather, it says that whatever you do know about them does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.</p>
+<p>Gelman and co-authors describe exchangeability as follows in <em>Bayesian Data Analysis 3ed</em>:</p>
+<blockquote class="blockquote">
+<p>If no informaiton – other than the data <span class="math inline">\(y\)</span> – is available to distinguish any of the <span class="math inline">\(\theta_j\)</span>’s from any of the others and no ordering or grouping of the parameters can be made, one must assyme symmetry among the parameters in ther prior distribution.</p>
+</blockquote>
+<p>The symmetry point is, in a way, reffering to the definition of exchangebility in terms of permutations (group theorists will know). As such, a useful gut check (as we will see later in this post) is to ask ones self if experiment results can be grouped in some, even if loose, sense. If they can, exchangeability may not be justifiable – but more on that later.</p>
 <p>It may be useful to state here that exchangeability is different from being <em>independent and identically distributed</em> (IID). In fact,</p>
 <p><span class="math display">\[\mbox{IID} \Rightarrow \mbox{Exchangeability} \&gt;,\]</span> however</p>
 <p><span class="math display">\[\mbox{Exchangeability} \nRightarrow \mbox{IID}\]</span></p>
@@ -492,6 +500,187 @@ Example: <span class="math inline">\(\mbox{Exchangeability} \nRightarrow \mbox{I
 <p>The button-color experiment may very well produce the largest lift. Rather, before seeing any results, I would probably not be indifferent to assigning a very large treatment effect to the shipping-fee experiment versus the button-color experiment. Some permutations simply seem more plausible than others given what we know about the treatments.</p>
 <p>Unlike the previous section, this issue cannot be resolved simply by restricting attention to a narrow period of time. The threat to exchangeability is embedded in the treatments themselves. If we want to retain an exchangeability assumption, we would need to account for treatment class in some way – for example, by only comparing experiments whose treatments are sufficiently similar along these dimensions.</p>
 <p>How similar is “sufficiently similar” is, of course, a judgement call. There is no bright line separating one treatment class from another. But this is exactly the type of judgement exchangeability forces us to make: given everything we know about these experiments before seeing their results, are we genuinely indifferent to how the treatment effects are assigned to the experiment labels?</p>
+</section>
+<section id="situation-4-same-team-same-metric-same-treatment-class-same-times-different-metric-roles" class="level2">
+<h2 class="anchored" data-anchor-id="situation-4-same-team-same-metric-same-treatment-class-same-times-different-metric-roles">Situation 4: Same Team, Same Metric, Same Treatment Class, Same Times, Different Metric Roles</h2>
+<p>So far, we have implicitly assumed that the metric whose treatment effects we are pooling plays roughly the same role across experiments. This is another assumption that can quietly fail.</p>
+<p>Experiments generally contain more than one metric. There may be a <strong>primary metric</strong> which the treatment is explicitly intended to move, several <strong>secondary metrics</strong> which help us understand how the treatment works, and <strong>guardrail metrics</strong> which we monitor largely to make sure that the treatment does not cause harm elsewhere.</p>
+<p>Suppose a team runs five experiments over the course of a few weeks and we are interested in their treatment effects on revenue per user. Perhaps the experiments look like</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 54%">
+<col style="width: 27%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Treatment</th>
+<th>Role of Revenue Per User</th>
+<th>Treatment Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Reduce friction in checkout flow</td>
+<td>Primary Metric</td>
+<td><span class="math inline">\(\theta_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Add “Free Shipping” messaging near checkout CTA</td>
+<td>Primary Metric</td>
+<td><span class="math inline">\(\theta_2\)</span></td>
+</tr>
+<tr class="odd">
+<td>Improve search-result relevance</td>
+<td>Secondary Metric</td>
+<td><span class="math inline">\(\theta_3\)</span></td>
+</tr>
+<tr class="even">
+<td>Increase engagement with product recommendations</td>
+<td>Secondary Metric</td>
+<td><span class="math inline">\(\theta_4\)</span></td>
+</tr>
+<tr class="odd">
+<td>Reduce page-load latency on the home page</td>
+<td>Guardrail Metric</td>
+<td><span class="math inline">\(\theta_5\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>Every <span class="math inline">\(\theta_k\)</span> is measuring the same quantity: the relative lift in revenue per user. Even so, there is a good reason to argue against exchangeability in this case.</p>
+<p>The first two treatments were selected specifically because the team believed they had an opportunity to move revenue. Revenue is the target of the treatment. In the latter experiments, revenue may simply be something we monitor to understand downstream consequences, or to make sure that an otherwise desirable product change does not accidentally hurt the business.</p>
+<p>That distinction is information about the plausible size of <span class="math inline">\(\theta_k\)</span>, and we have it before seeing any results. An experiment which was conceived, prioritized, and designed specifically to increase revenue is not on the same footing as one whose objective was to reduce latency and which carries revenue along merely as a guardrail.</p>
+<p>Again, this does not mean that every experiment explicitly targeting revenue will produce a larger effect than every experiment which does not. A latency improvement might unexpectedly produce a substantial revenue lift, while a checkout experiment designed to increase revenue may do absolutely nothing.</p>
+<p>The claim is instead that, <em>a priori</em>, we would not be indifferent to the assignment. Handed a large revenue effect, we would sooner attach it to the checkout experiment than to the latency experiment, and that preference is exactly what undermine a claim of exchangeability. The role revenue plays in an experiment is information the experiment label is carrying about <span class="math inline">\(\theta_k\)</span>. In the words of Gelman and co-aithors, there is information availabl with which to distinguish some of the treatment effecs from others; a rough grouping of parameters could be made.</p>
+<p>This gives us a relatively simple restriction when constructing an exchangeable set of experiments: if we are trying to learn the distribution of treatment effects on some metric, we should probably focus primarily on experiments for which that metric was itself a <strong>primary metric</strong> (you could do also focus secondary metrics or guardrails, but I imagine focusing on primary metrics might be more useful).</p>
+<p>There is another closely related issue. Even among experiments for which the same metric is primary, the treatment may operate at very different points in the user journey.</p>
+<p>Suppose revenue per user is the primary metric in each of the following experiments:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 53%">
+<col style="width: 22%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Treatment</th>
+<th>Product Surface</th>
+<th>Treatment Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Reduce payment failures at checkout</td>
+<td>Checkout</td>
+<td><span class="math inline">\(\theta_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Remove a step from checkout</td>
+<td>Checkout</td>
+<td><span class="math inline">\(\theta_2\)</span></td>
+</tr>
+<tr class="odd">
+<td>Improve product-page recommendations</td>
+<td>Product Page</td>
+<td><span class="math inline">\(\theta_3\)</span></td>
+</tr>
+<tr class="even">
+<td>Improve search ranking</td>
+<td>Search</td>
+<td><span class="math inline">\(\theta_4\)</span></td>
+</tr>
+<tr class="odd">
+<td>Change home-page merchandising</td>
+<td>Home Page</td>
+<td><span class="math inline">\(\theta_5\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>The further up in the funnel an experiment takes place, the more things generally need to happen between the treatment and the eventual realization of revenue.</p>
+<p>A checkout treatment acts on users who are already very close to purchasing. Improving search ranking, on the other hand, may first need to change what a user sees, then what they click, then whether they find a product appealing, then whether they add it to their cart, and finally whether they complete the purchase. Each additional step provides another opportunity for an effect to attenuate.</p>
+<p>For that reason, knowing where in the funnel a treatment acts tells us something about the revenue effect we should find plausible. Treatments higher in the funnel have more places to lose their effect before it reaches revenue, even when revenue is nominally the primary metric for both experiments.</p>
+<p>Once again, then, experiment identity makes certain permutations less plausible than others – that is, we can use existing information to group effects. If we know that one experiment directly changes the checkout flow and another makes a relatively small change to the home page, we would not be indifferent to swapping their revenue effects.</p>
+<p>Perhaps the more general point is that sharing a metric is not enough. We should also ask whether that metric occupies approximately the same <strong>role</strong> in each experiment, and whether the treatments have a comparable opportunity to affect it.</p>
+<p>If the metric is merely observed rather than targeted, or if some treatments are substantially further removed from it in the funnel, then the experiment label is again telling us something we would rather the model knew about.</p>
+</section>
+<section id="situation-5-different-teams-same-metric-same-treatment-class-same-times" class="level2">
+<h2 class="anchored" data-anchor-id="situation-5-different-teams-same-metric-same-treatment-class-same-times">Situation 5: Different Teams, Same Metric, Same Treatment Class, Same Times</h2>
+<p>Finally, suppose we allow experiments from different teams into the exchangeable population.</p>
+<p>Imagine several teams running experiments over roughly the same period, all targeting revenue per user and all running treatments which appear to belong to approximately the same treatment class.</p>
+<p>Perhaps the experiments look like</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 64%">
+<col style="width: 21%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Team</th>
+<th>Treatment</th>
+<th>Treatment Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Checkout</td>
+<td>Add reassurance copy beside payment fields</td>
+<td><span class="math inline">\(\theta_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Pricing</td>
+<td>Add reassurance copy beside annual-plan pricing</td>
+<td><span class="math inline">\(\theta_2\)</span></td>
+</tr>
+<tr class="odd">
+<td>Growth</td>
+<td>Add reassurance copy beside signup CTA</td>
+<td><span class="math inline">\(\theta_3\)</span></td>
+</tr>
+<tr class="even">
+<td>Billing</td>
+<td>Add reassurance copy during plan upgrade flow</td>
+<td><span class="math inline">\(\theta_4\)</span></td>
+</tr>
+<tr class="odd">
+<td>Marketplace</td>
+<td>Add reassurance copy before purchase confirmation</td>
+<td><span class="math inline">\(\theta_5\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>At first glance this looks fairly reasonable. The experiments happen at similar times, target the same metric, and involve treatments of roughly similar scope.</p>
+<p>However, the team label may carry quite a lot of information about the plausible size of the treatment effect.</p>
+<p>Different teams generally operate on different product surfaces, at different points in the user journey, and on different populations of users. A checkout team is interacting with users who have already demonstrated substantial purchase intent. A growth team may be operating much earlier in the funnel. A billing team may mostly interact with existing paying customers.</p>
+<p>Consequently, even if the metric is the same, the opportunity to move that metric can differ systematically between teams.</p>
+<p>There may also be differences in how teams select experiments.</p>
+<p>One team may run many speculative experiments, testing ideas cheaply and accepting that most will fail. Another may only run an experiment after extensive research has convinced them that the treatment is likely to work. Some teams may operate on relatively immature surfaces with lots of obvious opportunities for improvement, while others may own products which have already undergone years of optimization.</p>
+<p>All of these are things we may know about a team before a single result comes in, and all of them bear on which effects we would find plausible for that team’s experiments. Team identity therefore acts as a proxy for a collection of potentially important characteristics: surface, user population, funnel position, experimentation philosophy, product maturity, and perhaps many others.</p>
+<p>This does not mean that experiments from different teams can never be exchangeable. Two teams may operate on very similar surfaces, target similar populations, and have very similar processes for selecting treatments. In such a case, pooling their experiments may be perfectly reasonable. The important question is what information is contained in the team label.</p>
+<p>If knowing the team systematically changes what treatment effects we find plausible, then global exchangeability across teams is difficult to justify.</p>
+<p>One response would be to suppose that experiments are exchangeable <strong>conditional on team</strong>. For example, we might imagine something like</p>
+<p><span class="math display">\[
+\theta_k
+\sim
+\mbox{Normal}(\mu_k, \tau_k^2).
+\]</span></p>
+<p>A hierarchical model could go further and allow those team-specific distributions to themselves share information. This would let us borrow strength across teams without making the much stronger claim that an experiment from the checkout team is directly exchangeable with an experiment from the growth team. That is, of course, a different model from the simple normal-normal model considered here, and hence out of scope.</p>
+<p>For our purposes, the important point is simply that crossing team boundaries introduces another potential source of information about the treatment effect, and therefore another reason to question exchangeability.</p>
+</section>
+<section id="aa-tests" class="level2">
+<h2 class="anchored" data-anchor-id="aa-tests">A/A Tests</h2>
+<p>Before constructing any exchangeable set of experiments, there is one class of experiments which should simply be removed: <strong>A/A tests</strong>.</p>
+<p>In an A/A test, both experimental groups intentionally receive the same treatment. Assuming that the experiment is implemented correctly, the true treatment effect is therefore</p>
+<p><span class="math display">\[
+\theta_k = 0.
+\]</span></p>
+<p>If we know that an experiment is an A/A test, then its identity tells us essentially everything we need to know about its treatment effect. It is therefore clearly not exchangeable with a collection of genuine A/B tests whose true treatment effects are unknown. The experiment label contains information about the treatment effect by construction.</p>
+<p>For cumulative impact, known A/A tests should therefore be excluded from the population used to estimate <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\tau\)</span>.</p>
+</section>
+<section id="so-what-experiments-should-we-treat-as-exchangeable" class="level2">
+<h2 class="anchored" data-anchor-id="so-what-experiments-should-we-treat-as-exchangeable">So What Experiments Should We Treat As Exchangeable?</h2>
+<p>If you’ve come to this point in the post, you may wonder if exchangeability is ever reasonable to claim. Experiments <em>do</em> happen across time, <em>do</em> happen across teams, surfaces areas, and points in the funnel. What use is cumulative impact of exchangeability is a bar too high to cross?</p>
+<p>Remember, exchangeability is ultimately a <em>judgement</em> about the information contained in the experiment labels. You may be willing to trade off a bit of precision in your results for some usefulness in the feature. Cumulative impact is not intended to be a one-stop-shop and replace other methods, like holdouts or constructing your big-ass-heirarchcal Bayesian model to pool experiments nested within teams. Rather, it is intended to be another tool in your toolbox, in which you need to make a judgment about time and place for use and how much weight to place in results. This post just arms you with some information with which to improve your judgement.</p>
 
 
 </section>
