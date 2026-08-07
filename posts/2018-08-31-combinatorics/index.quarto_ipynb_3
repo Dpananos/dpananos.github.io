@@ -14,7 +14,7 @@
         "\n",
         "We could always just sample form the set to estimate the expected value.  Here is a python script to do just that."
       ],
-      "id": "e366e27d"
+      "id": "10235448"
     },
     {
       "cell_type": "code",
@@ -29,7 +29,7 @@
         "\n",
         "print(np.mean(mins))"
       ],
-      "id": "c593bc49",
+      "id": "44ddbc9e",
       "execution_count": null,
       "outputs": []
     },
@@ -39,7 +39,7 @@
       "source": [
         "But that is estimating the mean.  We can do better and directly compute it.  Here is some python code to create all subsets from $S$ of size 6.  Then, we simply take out the minimum from each subset and compute the mean."
       ],
-      "id": "03cdb826"
+      "id": "4169a5a9"
     },
     {
       "cell_type": "code",
@@ -61,7 +61,7 @@
         "\n",
         "print( s )"
       ],
-      "id": "52d2fa6c",
+      "id": "b0b4df5e",
       "execution_count": null,
       "outputs": []
     },
@@ -81,7 +81,7 @@
         "\n",
         "Whatever that sum happens to be. Here is how you could code up the analytic solution to our problem."
       ],
-      "id": "7aad5c15"
+      "id": "8ce3134d"
     },
     {
       "cell_type": "code",
@@ -102,7 +102,7 @@
         "\n",
         "print(E/binom(x.size, sample_size))"
       ],
-      "id": "b779b91f",
+      "id": "298faa10",
       "execution_count": null,
       "outputs": []
     },
@@ -112,7 +112,7 @@
       "source": [
         "Full disclosure, this was on a job application (literally, on the job application), so sorry KiK for putting the answer out there, but the question was too fun not to write up!"
       ],
-      "id": "88bb46cc"
+      "id": "829dbcbf"
     }
   ],
   "metadata": {

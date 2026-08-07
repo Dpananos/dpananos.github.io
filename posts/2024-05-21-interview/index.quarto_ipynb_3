@@ -54,7 +54,7 @@
         "\n",
         "with the added stipulation that $\\Pr(A>n) = 0$.  Ok, not a fun sum to do by hand, let's cook up a numpy function"
       ],
-      "id": "adc81ada"
+      "id": "f6a95969"
     },
     {
       "cell_type": "code",
@@ -86,7 +86,7 @@
         "    outcomes = np.arange(1, n+2)\n",
         "    probs[i] = f(outcomes, n)"
       ],
-      "id": "ad4c9ac9",
+      "id": "82714b90",
       "execution_count": null,
       "outputs": []
     },
@@ -115,7 +115,7 @@
         "\n",
         "ax.legend()"
       ],
-      "id": "2613494e",
+      "id": "f7dd1713",
       "execution_count": null,
       "outputs": []
     },
@@ -131,7 +131,7 @@
         "\n",
         "This means $\\Pr(D+n)$ is symmetric about $n+0.5$ implying that $\\Pr(D\\leq 0) = \\Pr(D\\gt 0) = 0.5$ as desired."
       ],
-      "id": "ed97f713"
+      "id": "593f1727"
     }
   ],
   "metadata": {

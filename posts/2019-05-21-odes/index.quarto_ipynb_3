@@ -66,7 +66,7 @@
         "\n",
         "Let's define the system, the appropriate derivatives, generate some observations and fit $\\theta$ using gradient descent.  Here si what you'll need to get started:"
       ],
-      "id": "943a1b56"
+      "id": "df0b458c"
     },
     {
       "cell_type": "code",
@@ -80,7 +80,7 @@
         "from scipy.integrate import odeint as BlackBox\n",
         "import matplotlib.pyplot as plt"
       ],
-      "id": "d67641dd",
+      "id": "d32ddedf",
       "execution_count": null,
       "outputs": []
     },
@@ -90,7 +90,7 @@
       "source": [
         "Let's then define the ODE system"
       ],
-      "id": "69794c9f"
+      "id": "45e4ed3d"
     },
     {
       "cell_type": "code",
@@ -104,7 +104,7 @@
         "\n",
         "    return np.array([ds,di])"
       ],
-      "id": "f0ca82bf",
+      "id": "613105ed",
       "execution_count": null,
       "outputs": []
     },
@@ -114,7 +114,7 @@
       "source": [
         "and take appropriate derivatives"
       ],
-      "id": "06b11e5d"
+      "id": "b768d161"
     },
     {
       "cell_type": "code",
@@ -125,7 +125,7 @@
         "#Gradient wrt theta\n",
         "grad_f_theta = autograd.jacobian(f,argnum=2)"
       ],
-      "id": "2d3001bf",
+      "id": "acc2f741",
       "execution_count": null,
       "outputs": []
     },
@@ -135,7 +135,7 @@
       "source": [
         "Next, we'll define the augmented system (that is, the ODE plus the sensitivities)."
       ],
-      "id": "0be07be3"
+      "id": "58e7df0f"
     },
     {
       "cell_type": "code",
@@ -154,7 +154,7 @@
         "\n",
         "    return np.concatenate([dy_dt,grad_y_theta])"
       ],
-      "id": "245c069f",
+      "id": "7f515540",
       "execution_count": null,
       "outputs": []
     },
@@ -164,7 +164,7 @@
       "source": [
         "We'll optimize the $L_2$ norm of the error\n"
       ],
-      "id": "d92cf2da"
+      "id": "026f5579"
     },
     {
       "cell_type": "code",
@@ -180,7 +180,7 @@
         "\n",
         "    return cost"
       ],
-      "id": "9d65f8bc",
+      "id": "a8465ea1",
       "execution_count": null,
       "outputs": []
     },
@@ -190,7 +190,7 @@
       "source": [
         "Create some observations from which to fit"
       ],
-      "id": "e6be14c1"
+      "id": "2affbb5e"
     },
     {
       "cell_type": "code",
@@ -219,7 +219,7 @@
         "\n",
         "plt.legend();"
       ],
-      "id": "1700bf66",
+      "id": "19b9e1b6",
       "execution_count": null,
       "outputs": []
     },
@@ -229,7 +229,7 @@
       "source": [
         "Perform Gradient Descent"
       ],
-      "id": "f1030057"
+      "id": "3e518c5f"
     },
     {
       "cell_type": "code",
@@ -252,7 +252,7 @@
         "    if i%10==0:\n",
         "        print(\"Theta estimate: \", theta_iter)"
       ],
-      "id": "ad22e41c",
+      "id": "d5e5be16",
       "execution_count": null,
       "outputs": []
     },
@@ -262,7 +262,7 @@
       "source": [
         "And lastly, compare our fitted curves to the true curves"
       ],
-      "id": "da2338af"
+      "id": "7bb1544f"
     },
     {
       "cell_type": "code",
@@ -287,7 +287,7 @@
         "plt.tight_layout()\n",
         "plt.savefig('sir_curves.png');"
       ],
-      "id": "91a256d4",
+      "id": "4573f731",
       "execution_count": null,
       "outputs": []
     },
@@ -299,7 +299,7 @@
         "\n",
         "Fitting ODEs via gradient descent is possible, and not as complicated as I had initially thought.  There are still some relaxations to be explored.  Namely: what happens if we have observations at time $t_i$ for one part of the system but not the other?  How does this scale as we add more parameters to the model?  Can we speed up gradient descent some how (because it takes too long to converge as it is, hence the `maxiter` variable).  In any case, this was an interesting, yet related, divergence from my GSoC work.  I hope you learned something."
       ],
-      "id": "4014e764"
+      "id": "8e9768bb"
     }
   ],
   "metadata": {

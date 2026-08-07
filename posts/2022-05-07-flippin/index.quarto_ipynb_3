@@ -156,7 +156,7 @@
         "\n",
         "With the model written down, all we need to do is add some python code to create the counts of each subsequence and then run the stan model.  Here is teh python code I used to create the response tweets for that game I ran on twitter."
       ],
-      "id": "15582134"
+      "id": "3eb3521a"
     },
     {
       "cell_type": "code",
@@ -274,7 +274,7 @@
         "print(f\"Your sequence was {''.join(sequence)}\")\n",
         "print(tweet)"
       ],
-      "id": "5ffab600",
+      "id": "23a90dec",
       "execution_count": null,
       "outputs": []
     },
@@ -367,7 +367,7 @@
         "\n",
         "One thing I've shirked is really detailed model criticism, though I have an idea of how I would do that.  In that answer on cross validated, COOLSerdash posts a REALLY COOL way to visualize the sequence data.  They plot the number of runs (sequences of consecutive heads or tails) against the longest run in the sequence.  I think this would make for an excellent way to check that our model has learned the correct autocorrelation for each individual who participated in the game (though I think the sequences were too short to have a precise estimate)."
       ],
-      "id": "3bad29ba"
+      "id": "2ba44044"
     }
   ],
   "metadata": {

@@ -56,7 +56,7 @@
         "\n",
         "## The Code (I Know You Skipped Here, Don't Lie)"
       ],
-      "id": "ed925286"
+      "id": "42cb0402"
     },
     {
       "cell_type": "code",
@@ -109,7 +109,7 @@
         "cv = cross_validate(model, X, y, cv = RepeatedKFold(n_splits=10, n_repeats=100), scoring=mse)['test_score'].mean()\n",
         "print(f'repeated cv: {cv:.2f}')"
       ],
-      "id": "9394e5fd",
+      "id": "3dddb2b4",
       "execution_count": null,
       "outputs": []
     },
@@ -119,7 +119,7 @@
       "source": [
         "The three estimates (optimism corrected, 10 fold, and repeated 10 fold) should be reasonably close together, but uh don't run this code multiple times.  You might see that the optimism corrected estimate is quite noisy meaning I'm either wrong or that twitter thread I linked to might have some merit."
       ],
-      "id": "203c6b21"
+      "id": "cb55964c"
     }
   ],
   "metadata": {

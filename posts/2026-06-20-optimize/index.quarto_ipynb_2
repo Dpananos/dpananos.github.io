@@ -93,7 +93,7 @@
         "\n",
         "The left panel plots $\\log h(\\theta)$ against $\\log g(\\theta)$ on the evaluation mesh.  The right panel shows the fitted weights $\\pi_k$ on the $(\\mu, \\log \\tau)$ grid as a heatmap, which makes it easy to see which regions of the dictionary the optimizer activates."
       ],
-      "id": "dadd80d0"
+      "id": "603af476"
     },
     {
       "cell_type": "code",
@@ -341,7 +341,7 @@
         "    mu = np.zeros(k)\n",
         "    return pi, mu, tau, mixture_density(theta, pi, mu, tau)"
       ],
-      "id": "9c61db3c",
+      "id": "0573d4bd",
       "execution_count": null,
       "outputs": []
     },
@@ -385,7 +385,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "04efbffd",
+      "id": "59877e4b",
       "execution_count": null,
       "outputs": []
     },
@@ -395,7 +395,7 @@
       "source": [
         "Our main application will be approximating a Student's-$t$ distirbution, so we can make a simplifying assumption that $\\mu_k=0 \\> \\forall k$.  This can greatly shrink the size of the basis from a few thousand to a few dozen. As you can see below, we can get away with fitting a Student's-$t$ with $K = 25$ scale-only components (the same log-spaced grid from $0.04s$ to $30s$, all centered at zero).\n"
       ],
-      "id": "59bee94a"
+      "id": "eafa59cb"
     },
     {
       "cell_type": "code",
@@ -426,7 +426,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "b4223d04",
+      "id": "3510d425",
       "execution_count": null,
       "outputs": []
     },
@@ -436,7 +436,7 @@
       "source": [
         "As a small aside, we can approximate the Student's-$t$ using Gauss-Laguerre Quadrature and completely avoid the optimization.  However, this requires many many more basis functions that we might use via the optimization approach.  Below, I use Gauss-Laguerre Quadrature to determine the basis functions.  "
       ],
-      "id": "c8088424"
+      "id": "2a7b817c"
     },
     {
       "cell_type": "code",
@@ -482,7 +482,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "b8bf565f",
+      "id": "0d79b035",
       "execution_count": null,
       "outputs": []
     },
@@ -502,7 +502,7 @@
         "\n",
         "Below we refit the same skew-normal target as above, now with $K = 10$ free components."
       ],
-      "id": "ad40b803"
+      "id": "3b9d09d5"
     },
     {
       "cell_type": "code",
@@ -540,7 +540,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "691f54fe",
+      "id": "c54eb436",
       "execution_count": null,
       "outputs": []
     },
@@ -550,7 +550,7 @@
       "source": [
         "For a symmetric Student's-$t$ target we can carry the same joint approach over, but now fix $\\mu_k = 0$ for every component and optimize only over $(\\pi_k, \\tau_k)$.  The constraints and initialization are the same as above, restricted to weights and scales: $\\pi_k \\in [0, 1]$ with $\\sum_k \\pi_k = 1$, $\\tau_k \\in [0.04s, 30s]$, equal initial weights, log-spaced initial scales, and $25$ random restarts that perturb only $\\tau_k$.  Below we fit the same Student-$t_3$ target with $K = 10$ zero-mean components. "
       ],
-      "id": "c63f1b8b"
+      "id": "977a352b"
     },
     {
       "cell_type": "code",
@@ -578,7 +578,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "6ad247cb",
+      "id": "bb745cbf",
       "execution_count": null,
       "outputs": []
     },
@@ -592,7 +592,7 @@
         "\n",
         "* **Small basis**.  If the optimization is successful, we can limit the size of the basis, even for priors outside the Student's-$t$ distribution.  I feel it is neccesary to remind you though that the math stays the same no matter if $K=6$ or $K=600$.  So far as the user is concerned, we are just using $h(\\theta)$ as the prior so the size of the basis, from where I stand, is irrelevant and small $K$ is only nice if you have to do these calculations manually (which I don't think you would ever wantt to).  Even if a customer wanted to know the weights and parameters for our approximation, that's a simple query ande export. "
       ],
-      "id": "358c9c9e"
+      "id": "ff174525"
     }
   ],
   "metadata": {

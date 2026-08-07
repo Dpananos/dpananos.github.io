@@ -24,7 +24,7 @@
         "\n",
         "This is really easy to program.  Here is a little python script to compute the solution:"
       ],
-      "id": "ff1a8552"
+      "id": "cfb2ceec"
     },
     {
       "cell_type": "code",
@@ -45,7 +45,7 @@
         "    \n",
         "    coins[index%N==0] = ~coins[index%N==0]  #Flip the coin.  \n"
       ],
-      "id": "25bfb070",
+      "id": "3554c3ac",
       "execution_count": null,
       "outputs": []
     },
@@ -55,7 +55,7 @@
       "source": [
         "Shown below is the solution.  In dark blue are the coins face down (I've arranged them in a 10 by 10 grid and annotated them with their position for clarity).  When we take a look at the `coins` variable, we see that those coins in positions which are perfect squares pop out. That is an interesting result, but what is more interesting is reasoning out the solution without doing any computation at all!\n"
       ],
-      "id": "c9565a9e"
+      "id": "c2aef829"
     },
     {
       "cell_type": "code",
@@ -136,7 +136,7 @@
         "\n",
         "I love trying to solve the Riddler's puzzle without coding.  It makes me draw upon knowledge I haven't used in a while, and may force me to learn something new."
       ],
-      "id": "230e7349"
+      "id": "26edfd29"
     }
   ],
   "metadata": {

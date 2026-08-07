@@ -30,7 +30,7 @@
         "\n",
         "Now, it is actually fine to make this mistake under a few conditions.  Namely, when a) the odds ratio is sufficiently small, and/or b) the baseline risk is sufficiently small.  You can see this on the plot below which plots the odds ratios and corresponds risk ratios for various baseline risks.  On the whole though, you shouldn't interpret any output from logistic regression as a risk ratio unless you explicitly go out of our way to estimate that quantity.\n"
       ],
-      "id": "acc985a3"
+      "id": "6c52fb1b"
     },
     {
       "cell_type": "code",
@@ -96,7 +96,7 @@
         "\n",
         "plt.show()"
       ],
-      "id": "f548e4ab",
+      "id": "ca00719f",
       "execution_count": null,
       "outputs": []
     }
