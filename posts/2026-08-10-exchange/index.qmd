@@ -1,0 +1,215 @@
+---
+title: Exchangeability in AB Testing
+date: 2026-08-10
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: [AB Testing, Bayes, Statistics]
+number-sections: false
+draft: true
+cache: true
+---
+
+Earlier this year, I worked on our [cumulative impact feature](https://docs.datadoghq.com/experiments/concepts/cumulative_impact/); an implementation of the hierarchical normal normal model to enable customers to estimate the cumulative impact of past experiments while adjusting for the Winner's Curse.
+
+In my opinion, the largest difficulty with using this feature is going to be defining an exchangeable set of experiments, and so I thought I would collect my thoughts (for all to see) on exchangeability in AB tests so that I can be prepared to answer inevitable questions on the topic.
+
+
+
+## What is Exchangeability?
+
+A sequence of random variables $\theta_1, \cdots, \theta_K$ is said to be exchangeable if their joint distribution, $p$, is invariant to permutations of the indices:
+
+$$
+p(\theta_1, \cdots, \theta_K)= p(\theta_{\pi(1)}, \cdots, \theta_{\pi(K)}).
+$$
+
+Practically, exchangeability means that if I shuffled the treatment effects among the experiments, you would have no reason, *a priori*, to prefer one assignment of effects to experiments over another. In other words, knowing the identity of experiments tells you nothing about which treatment effect it should have.
+
+It may be easier to see what exchangeability is *not*. Suppose $K=5$, and $\theta_k$ is the true relative lift in revenue per user from experiment $k$. Further suppose the treatment effects are ordered from smallest to largest, so that
+
+$$
+\theta_1 < \theta_2 < \theta_3 < \theta_4 < \theta_5.
+$$
+
+Now suppose I assign those effects to experiments as follows:
+
+| Experiment              | Treatment Effect |
+| ----------------------- | :--------------: |
+| Pricing Experiment      |    $\theta_1$    |
+| Checkout Experiment     |    $\theta_2$    |
+| Site Redesign           |    $\theta_3$    |
+| Copy Change Experiment  |    $\theta_4$    |
+| Button Color Experiment |    $\theta_5$    |
+
+If it is surprising to you that a button-color or copy-change experiment in truth produces a larger effect on revenue than a pricing or checkout experiment, then the experiment labels are carrying information about the plausible sizes of the treatment effects. In that case, treating the effects as exchangeable is probably not defensible.
+
+Put differently, exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which $\theta_5$ belonged to the pricing experiment and $\theta_1$ belonged to the button-color experiment.
+
+What this example demonstrates is that exchangeability is more than a formal invariance to permutations of indices. It represents a genuine *a priori* indifference about how treatment effects are assigned to experiments. This is not to say that you know nothing about the experiments. Rather, it says that whatever you do know about them does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.
+
+
+It may be useful to state here that exchangeability is different from  being _independent and identically distributed_ (IID). In fact, 
+
+$$\mbox{IID} \Rightarrow \mbox{Exchangeability} \>,$$
+however 
+
+$$\mbox{Exchangeability} \nRightarrow \mbox{IID}$$
+
+For an example of a sequence of exchangeable but non IID random variables, see the section below.
+
+<details>
+<summary>Example: $\mbox{Exchangeability} \nRightarrow \mbox{IID}$</summary>
+
+Let $\Theta \sim \mbox{Uniform}(0, 1)$ and let $X_1, X_2 \mid \Theta \overset{\mbox{IID}}{\sim} \mbox{Bernoulli}(\Theta)$.
+
+Conditional on $\Theta$, the $X_1, X_2$ are IID by construction.  However, if we look only at their joint distribution having integrated out $\Theta$ (that is $X_1, X_2$ and not $X_1, X_2 \mid \Theta$) then we can show they are not IID.
+
+It is straightforward to show $P(X_1=1)=P(X_2=1)=E[\Theta]=\frac{1}{2}$: Let $f(\Theta) = 1$ be the probability density of $\Theta$.  Therefore
+
+$$ \begin{align}P(X_j=1) = E_\Theta[P(X_j=1 \mid \Theta)] &= \int_{0}^1 P(X_j=1\mid \Theta=u)f(u) \, du \\ &= \int_0^1 u \, du \\ &= \dfrac{1}{2} \end{align} $$
+
+
+If $X_1, X_2$ were independent, then $P(X_1=1, X_2=1) = P(X_1=1)P(X_2=1) = \frac{1}{4}$.  Alas, this is false and quite easy to simulate in R
+
+```{r}
+#| collapse: true
+#| comment: "#>"
+#| message: false
+#| warning: false
+#| code-fold: false
+#| echo: true
+
+set.seed(123)
+
+x <- t(replicate(1e6, {
+  theta <- runif(1, 0, 1)
+  rbinom(2, 1, theta)
+}))
+
+p_1_1 <- mean((x[, 1] == 1) & (x[, 2] == 1))
+p_1_1
+```
+
+In truth
+
+$$\begin{align}P(X_1=1, X_2=1) &=  \int_0^1 u^2 f(u) \, du \\ &= \dfrac{1}{3}\end{align}$$
+
+Which is pretty close to our simulated estimate. So we've shown these random variables are not IID, but are they exchangeable?  Their joint mass function is
+
+$$ p(X_1=x_1, X_2=x_2) = \int_0^1 u^{x_1 + x_2} (1-u)^{2 - (x_1 + x_2)} f(u) \,du  \>. $$
+The mass function relies only on the sum $x_1 + x_2$, and since sums commute the joint mass function is invariant to permutations of the indices, hence these are exchangeable.
+
+</details>
+
+## Why Is Exchangeability Important for Cumulative Impact?
+
+To begin, let's write down the model for cumulative impact.  Let $\theta$ be a true treatment effect in an AB test, $\hat \theta$ be an estimate of $\theta$, and let $s$ be the standard error for said estimate.  In AB testing, the distribution of $\hat \theta \mid \theta$ is justified via the Central Limit Theorem, and it is typical to assume $s$ is measured with enough precision to be assumed known.   We use empirical Bayes to fit
+
+
+```{=latex}
+\begin{align}
+\hat \theta_k \mid \theta_k &\sim \mbox{Normal}(\theta_k, s_k^2) \\
+\theta_k \mid \mu, \tau &\sim \mbox{Normal}(\mu, \tau^2) \\
+\end{align}
+```
+
+Conditional on $\mu$ and $\tau$, the treatment effects $\theta_1,\cdots,\theta_K$ are IID.  When $\mu$ and $\tau$ are unknown, the $\theta_k$ are no longer independent after we account for our uncertainty about those shared parameters. They do, however, remain exchangeable. Permuting the experiment indices leaves their joint distribution unchanged.
+
+Cumulative impact is intended to adjust for the bias one would incur when naively adding up treatment effects from winning experiments -- i.e. the bias from the Winner's Curse. The model powering cumulative impact achieves this through partial pooling: the estimate for each $\theta_k$ is pulled toward the shared mean $\mu$, allowing information from the collection of experiments to inform inference about the true effect of each individual experiment.
+
+The amount of shrinkage depends on both $s_k$ and $\tau$. Experiments with noisier estimates are generally shrunk more heavily toward $\mu$, while experiments estimated with greater precision are allowed to remain closer to their observed $\hat\theta_k$.
+
+Exchangeability is what licenses this sharing of information across experiments. If experiment identity itself tells us something about the plausible size of $\theta_k$, then treating every experiment symmetrically under the same $\mu$ and $\tau$ may be inappropriate. Exchangeability is therefore a vital assumption of the model underlying the feature.
+
+However, we don't ever get to see $\theta$, only their estimates.  In what sense can we assess the plausibility of the assumption of exchangeability if we only have access to the noisy $\hat \theta$ and not the $\theta$?  This gives us our first takeaway: exchangeability is less an assumption that can be validated from the data and more a judgement about whether experiment identity contains information about the treatment effect, after accounting for the information we believe matters.
+
+Making that judgement is partly an art. The remainder of this post discusses several common situations in which exchangeability may be more or less defensible, moving from stronger to weaker forms of the assumption.
+
+## What Cost Do We Pay For Non-Exchangeable Experiments?
+
+Mathematically, a collection of random variables is either exchangeable or it is not. What is a matter of degree is how defensible we believe the exchangeability assumption to be.
+
+In practice, we may be willing to treat a collection of treatment effects as exchangeable even when there is a little nagging voice in our heads raising arguments to the contrary. In such cases, what costs do we pay if that judgment is wrong?
+
+The main cost is bad pooling.
+
+The empirical Bayes model allows experiments to provide information about one another by shrinking their estimates toward a shared $\mu$. If the experiments are not exchangeable, that shared mean may be an inappropriate shrinkage target. Some experiments may be shrunk too much, others not enough.
+
+Similarly, $\tau$ is intended to describe heterogeneity in treatment effects among experiments we are willing to treat symmetrically. If systematic differences between experiments are ignored, then $\tau$ may end up absorbing structure that should have been modeled explicitly. Both problems ultimately affect the cumulative impact estimate.
+
+How fast and loose we are willing to play with the exchangeability assumption can therefore depend partly on how important the resulting cumulative impact estimate is. If we need a ballpark number, we may tolerate a weaker argument for exchangeability. If we need a highly defensible estimate, then the composition of the experiment set becomes much more important (personally, I might even suggest a different method altogether, such as a holdout).
+
+## Small Note on Terminology
+
+Going forward, I'm going to use the term "Treatment Class" to refer to the comparability of two treatments in terms of potential scope, effectiveness, and mechanism.  For example, a copy change and a site re-design are in different treatment classes -- different scope, effectiveness, and mechanism with which to modulate some metric.
+
+
+
+## Situation 1: Same Team, Same Metric, Same Treatment Class, Same Time
+
+Consider a (perhaps extreme) scenario in which a single team runs several experiments in quick succession (perhaps on the scale of weeks), on the same surface, targeting the same metric, in which treatments are of the same treatment class.
+
+Suppose this team is targeting revenue per user as their primary metric, and they only run experiments on the checkout page.  Their list of 5 experiments may look like
+
+| Experiment                                                           | Treatment Effect |
+| -------------------------------------------------------------------- | :--------------: |
+| Add “Free Shipping” copy beneath Place Order button                  |    $\theta_1$    |
+| Add “Secure checkout” copy beneath Place Order button                |    $\theta_2$    |
+| Add estimated delivery date beside order total                       |    $\theta_3$    |
+| Add “No hidden fees” copy beside order total                         |    $\theta_4$    |
+| Add “Cancel anytime before shipment” copy beneath Place Order button |    $\theta_5$    |
+
+All treatments are of the same treatment class, so there is no reason to suspect that the experiments identity should matter in relation to the effects they produce -- that is to say, the permutation of the effects and the experiment labels seems fine, given what we know about the experiment. Exchangeability here is a highly defensible claim in my personal opinion.
+
+This is a purposefully extreme claim. Let's weaken it slightly, by making it more realistic.
+
+## Situation 2: Same Team, Same Metric, Same Treatment Class, Different Times
+
+"Quick succession" is carrying a lot of weight in the previous section.  In reality, a sequence of experiments can happen over months.  The reality is that economic factors and competitive landscapes can impact treatment sizes. 
+
+It may be the case that the "Free shipping" was run during a particularly turbulent economic time, making customers cost sensitive.  This may undercut the justification for treating these experiments as exchangeable -- clearly, information about the experiments does somehow make certain permutations of the indices less plausible.
+
+A more likely threat to exchangeability is "picking low hanging fruit" in experimentation.  Consider a team which chooses treatments to implement based on their likelihood to improve the product.  The choosing is not the issue here, rather choosing the treatments most likely to win _and saving the treatments which may not produce lift for later_ is the issue.  In this case, the marginal lift -- the lift produced by the next experiment -- is expected to be smaller in magnitude than the ones that came before it.   Perhaps the list of 5 experiments looks like the following:
+
+| Treatment                                                 | Treatment Effect |
+| --------------------------------------------------------- | :--------------: |
+| Add prominent “Free Shipping” messaging near checkout CTA |    $\theta_1$    |
+| Show estimated delivery date before purchase              |    $\theta_2$    |
+| Add “Secure checkout” reassurance beside payment fields   |    $\theta_3$    |
+| Clarify return policy beneath Place Order button          |    $\theta_4$    |
+| Slightly revise checkout confirmation copy                |    $\theta_5$    |
+
+Again, we see that experiment identity makes certain permutations less plausible than others.
+The important part is not that the estimated effects must satisfy $\hat \theta_5 \lt \hat\theta_4 \lt\hat \theta_3 \lt \hat\theta_2 \lt\hat \theta_1$ but that before seeing the results, the team expects earlier experiments to have larger effects because it deliberately prioritized the most promising ideas first.
+
+There are ways to account for this, and we can assume that the experiments are _conditionally exchangeable_ -- conditional on time.  This would lead to an altogether different model than we posited above, and so how to deal with these cases is, for now, out of scope.
+
+## Situation 3: Same Team, Same Metric, Different Treatment Class, Same Times
+
+Suppose the same checkout team runs 5 experiments over the course of a few weeks, all targeting revenue per user. What has changed is the nature of the treatments themselves. Their experiments may look something like the table below. 
+
+| Treatment | Treatment Effect |
+|---|---|
+| Reduce shipping fees by 20% | $\theta_1$ |
+| Remove a step from the checkout flow | $\theta_2$ |
+| Add estimated delivery date beside order total | $\theta_3$ |
+| Add “Secure checkout” copy beside payment fields | $\theta_4$ |
+| Change the color of the Place Order button | $\theta_5$ |
+
+
+
+
+A 20% reduction in shipping fees has a very different scope and mechanism than changing the color of a button. Similarly, removing an entire step from checkout plausibly has more opportunity to affect purchasing behavior than adding a small piece of reassurance copy.
+
+Again, the important claim is not that the true effects must satisfy
+
+$$
+\theta_5 \lt \theta_4 \lt \theta_3 \lt \theta_2 \lt \theta_1.
+$$
+
+The button-color experiment may very well produce the largest lift. Rather, before seeing any results, I would probably not be indifferent to assigning a very large treatment effect to the shipping-fee experiment versus the button-color experiment. Some permutations simply seem more plausible than others given what we know about the treatments.
+
+Unlike the previous section, this issue cannot be resolved simply by restricting attention to a narrow period of time. The threat to exchangeability is embedded in the treatments themselves. If we want to retain an exchangeability assumption, we would need to account for treatment class in some way -- for example, by only comparing experiments whose treatments are sufficiently similar along these dimensions.
+
+How similar is "sufficiently similar" is, of course, a judgement call. There is no bright line separating one treatment class from another. But this is exactly the type of judgement exchangeability forces us to make: given everything we know about these experiments before seeing their results, are we genuinely indifferent to how the treatment effects are assigned to the experiment labels?
