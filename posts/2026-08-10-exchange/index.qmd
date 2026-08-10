@@ -24,7 +24,7 @@ $$
 p(\theta_1, \cdots, \theta_K)= p(\theta_{\pi(1)}, \cdots, \theta_{\pi(K)}).
 $$
 
-Practically, exchangeability means that if I shuffled the treatment effects among the experiments, you would have no reason, *a priori*, to prefer one assignment of effects to experiments over another. In other words, knowing the identity of experiments tells you nothing about which treatment effect it should have.
+Practically, exchangeability means that whatever you know about the experiments does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.
 
 It may be easier to see what exchangeability is *not*. Suppose $K=5$, and $\theta_k$ is the true relative lift in revenue per user from experiment $k$. Further suppose the treatment effects are ordered from smallest to largest, so that
 
@@ -44,11 +44,9 @@ Now suppose I assign those effects to experiments as follows:
 
 If it is surprising to you that a button-color or copy-change experiment in truth produces a larger effect on revenue than a pricing or checkout experiment, then the experiment labels are carrying information about the plausible sizes of the treatment effects. In that case, treating the effects as exchangeable is probably not defensible.
 
-Put differently, exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which $\theta_5$ belonged to the pricing experiment and $\theta_1$ belonged to the button-color experiment.
+Exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which $\theta_5$ belonged to the pricing experiment and $\theta_1$ belonged to the button-color experiment.
 
-What this example demonstrates is that exchangeability is more than a formal invariance to permutations of indices. It represents a genuine *a priori* indifference about how treatment effects are assigned to experiments. This is not to say that you know nothing about the experiments. Rather, it says that whatever you do know about them does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.
-
-Gelman and co-authors describe exchangeability as follows in _Bayesian Data Analysis 3ed_: 
+Gelman and co-authors offer another way to think about exchangeability, describing exchangeability as follows in _Bayesian Data Analysis 3ed_:
 
 >If no information -- other than the data $y$ -- is available to distinguish any of the $\theta_j$'s from any of the others, and no ordering or grouping of the parameters can be made, one must assume symmetry among the parameters in their prior distribution.
 

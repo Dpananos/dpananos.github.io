@@ -269,7 +269,7 @@ window.Quarto = {
 <p><span class="math display">\[
 p(\theta_1, \cdots, \theta_K)= p(\theta_{\pi(1)}, \cdots, \theta_{\pi(K)}).
 \]</span></p>
-<p>Practically, exchangeability means that if I shuffled the treatment effects among the experiments, you would have no reason, <em>a priori</em>, to prefer one assignment of effects to experiments over another. In other words, knowing the identity of experiments tells you nothing about which treatment effect it should have.</p>
+<p>Practically, exchangeability means that whatever you know about the experiments does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.</p>
 <p>It may be easier to see what exchangeability is <em>not</em>. Suppose <span class="math inline">\(K=5\)</span>, and <span class="math inline">\(\theta_k\)</span> is the true relative lift in revenue per user from experiment <span class="math inline">\(k\)</span>. Further suppose the treatment effects are ordered from smallest to largest, so that</p>
 <p><span class="math display">\[
 \theta_1 &lt; \theta_2 &lt; \theta_3 &lt; \theta_4 &lt; \theta_5.
@@ -306,9 +306,8 @@ p(\theta_1, \cdots, \theta_K)= p(\theta_{\pi(1)}, \cdots, \theta_{\pi(K)}).
 </tbody>
 </table>
 <p>If it is surprising to you that a button-color or copy-change experiment in truth produces a larger effect on revenue than a pricing or checkout experiment, then the experiment labels are carrying information about the plausible sizes of the treatment effects. In that case, treating the effects as exchangeable is probably not defensible.</p>
-<p>Put differently, exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which <span class="math inline">\(\theta_5\)</span> belonged to the pricing experiment and <span class="math inline">\(\theta_1\)</span> belonged to the button-color experiment.</p>
-<p>What this example demonstrates is that exchangeability is more than a formal invariance to permutations of indices. It represents a genuine <em>a priori</em> indifference about how treatment effects are assigned to experiments. This is not to say that you know nothing about the experiments. Rather, it says that whatever you do know about them does not give you reason to believe that one experiment should systematically receive a larger or smaller treatment effect than another. Equivalently, if you were to hypothetically reshuffle the treatment effects among the experiments, each reassignment would remain just as plausible under your prior model as the one in front of you.</p>
-<p>Gelman and co-authors describe exchangeability as follows in <em>Bayesian Data Analysis 3ed</em>:</p>
+<p>Exchangeability requires that, before seeing the experimental results, you would be just as comfortable with the assignment above as with one in which <span class="math inline">\(\theta_5\)</span> belonged to the pricing experiment and <span class="math inline">\(\theta_1\)</span> belonged to the button-color experiment.</p>
+<p>Gelman and co-authors offer another way to think about exchangeability, describing exchangeability as follows in <em>Bayesian Data Analysis 3ed</em>:</p>
 <blockquote class="blockquote">
 <p>If no information – other than the data <span class="math inline">\(y\)</span> – is available to distinguish any of the <span class="math inline">\(\theta_j\)</span>’s from any of the others, and no ordering or grouping of the parameters can be made, one must assume symmetry among the parameters in their prior distribution.</p>
 </blockquote>
