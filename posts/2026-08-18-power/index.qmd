@@ -1,0 +1,148 @@
+---
+title: "Exaggeration in Low Powered Experiments"
+date: 2026-08-18
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+
+I want to start this post at the end: statistically significant results from low powered experiments are, almost certainly, an exaggeration to the truth.  
+
+Below, I show the expected amount by which a statistically significant result will exaggerate the truth as a function of the statistical power (note the log scale).  This means at 80% power, we should expect statistically significant results to exaggerate the truth by a factor of roughly 13% (an often quoted fact by Ron Khohavi if I understand correctly).  The remainder of this post will derive the formula for this curve and discussing implications.
+
+
+```{r}
+library(tidyverse)
+
+alpha <- 0.05
+critical_z <- qnorm(1 - alpha / 2)
+
+exaggeration_curve <- tibble(
+  snr = seq(0.001, 6, length.out = 10000)
+) |>
+  mutate(
+    p_positive = pnorm(snr - critical_z),
+    p_negative = pnorm(-critical_z - snr),
+    power = p_positive + p_negative,
+    exaggeration = (
+      snr * (p_positive - p_negative) +
+        dnorm(critical_z - snr) +
+        dnorm(critical_z + snr)
+    ) / (snr * power)
+  )
+
+
+ggplot(
+  exaggeration_curve,
+  aes(x = power, y = exaggeration)
+) +
+  geom_line() +
+  scale_x_continuous(n.breaks = 10, labels = scales::percent) + 
+  scale_y_log10() +
+  labs(
+    x = 'Two-tailed Power',
+    y = 'Expected Magnitude Exaggeration'
+  ) + 
+  theme_minimal()
+
+
+```
+
+
+
+This is not news.  Lately, I've been trumpeting solutions to the Winner's Curse, and I've posted about this exact topic [here](../2024-01-22-curse/index.qmd) and [here](../2024-02-08-peek/index.qmd).  So why report old news?
+
+I recently gave a talk to some product analytics engineers about the sample size calculator we built for the experimentation product.  My message was _not exactly subtle_: looking at two time series and claiming one group's metric is better than another is _a bad way to make decisions_, and is especially bad when those decisions are made from small samples.  Even if these decisions used statistical tests a la AB testing, they would very likely be under powered for the true effect (and this is not to say anything about peeking, always valid intervals, and the trade off of statistical power required therein).
+
+I don't think I really drove the point home for just how much the effect can be exaggerated.
+
+I've included the derivation for the curve below.
+
+<details>
+<summary>Click here to see the derivation</summary>
+
+Let $\theta$ be the true treatment effect and suppose
+
+$$
+\hat{\theta} \sim N(\theta,s^2),
+$$
+
+where $s$ is treated as known. If positive effects are favorable and an estimate is detected when $|\hat{\theta}|>cs$, define the expected exaggeration factor as
+
+$$
+R(\theta,s)
+=
+\frac{
+E\left[|\hat\theta|\mid |\hat\theta|>cs\right]
+}{
+|\theta|
+},
+\qquad
+c=z_{1-\alpha/2}.
+$$
+
+Here, for $\theta>0$, $\lambda = \theta / s$ is the signal to noise ratio.  The stattistical power to exceed the detection threshold is
+
+$$
+p_+(\lambda)
+=
+P(\hat\theta>cs)
+=
+1-\Phi(c-\lambda)
+$$
+
+and
+
+$$
+p_-(\lambda)
+=
+P(\hat\theta<-cs)
+=
+\Phi(-c-\lambda).
+$$
+
+Therefore,
+
+$$
+\pi(\lambda)
+=
+p_+(\lambda)+p_-(\lambda).
+$$
+
+We can re-write this using the expectation of a truncated normal (see [here](../2024-01-22-curse/index.qmd)) as
+
+$$
+E\left[\hat\theta\,1(\hat\theta>cs)\right]
+=
+\theta p_+(\lambda)+s\varphi(c-\lambda)
+$$
+
+and
+
+$$
+E\left[-\hat\theta\,1(\hat\theta<-cs)\right]
+=
+-\theta p_-(\lambda)+s\varphi(c+\lambda).
+$$
+
+Combining the tails gives
+
+$$
+R(\lambda)
+=
+\frac{
+\lambda\left[p_+(\lambda)-p_-(\lambda)\right]
++\varphi(c-\lambda)
++\varphi(c+\lambda)
+}{
+\lambda\left[p_+(\lambda)+p_-(\lambda)\right]
+}.
+$$
+
+</details>
+
