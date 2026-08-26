@@ -1,0 +1,52 @@
+---
+title: "Bayes Does Not Make Experiments Faster On Its Own"
+date: 2026-08-26
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+
+While at Zapier, I remember PMs asking me about using Bayesian statistics in our A/B tests because Bayes makes the experiment "run faster".  This idea, that Bayes somehow makes experiments run faster, needs some explanation because it is _partly_ true.  In this post, I'll explain what is true and what is perhaps misunderstood.
+
+
+When we talk about experiments running faster, we usually mean shrinking the sample size while maintaining the same power.  Assume $\hat \theta$ is the estimated effect and $s / \sqrt{n}$ is its standard error after observing a sample of size $n$.  Then the frequentist $z$ score is 
+
+$$ z_F = \dfrac{\sqrt{n} \hat \theta}{s}$$
+
+and we usually claim superiority of the treatment when $z_F > z_{1-\alpha/2}$.  At a fixed positive true effect $\theta$, decreasing $n$ lowers power.  We would also need to make $s$ small enough to keep $\sqrt{n}\theta/s$ fixed.  This is how CUPED "makes experiments run faster" -- the variance is reduced, so we can achieve more power given the same sample size.
+
+A very quick search of documentation from popular experimentation platforms shows that the conjugate normal model is a common way to support Bayesian inference in A/B testing.  For better or worse, I have seen practitioners simply port over their frequentist thinking to the conjugate normal model, declaring the treatment superior when the associated posterior probability of superiority is greater than $1-\alpha/2$ (this is equivalent to the lower bound of the central $100(1-\alpha)\%$ credible interval excluding 0).  Assuming that this is the decision rule those who tout Bayes as faster intend to use, does the conjugate normal model make experiments run faster?  The answer is a resounding "no".
+
+Let $\theta$ be the true treatment effect, $\hat \theta$ its estimator, and $s/\sqrt{n}$ the associated standard error (assumed known).  The conjugate normal model is 
+
+$$\widehat\theta\mid\theta\sim N\left(\theta,\frac{s^2}{n}\right),
+\qquad
+\theta\sim N(0,\tau^2),$$
+
+and the decision rule is 
+
+$$ \Pr(\theta > 0 \mid \hat \theta) > 1-\alpha/2 \>. $$
+
+This decision rule is equivalent to 
+
+$$
+\begin{aligned}
+\frac{z_F}{\sqrt{1 + s^2/(n\tau^2)}} &> z_{1-\alpha/2} \\
+\implies\quad
+z_F &> z_{1-\alpha/2}\sqrt{1 + \frac{s^2}{n\tau^2}} > z_{1-\alpha/2}.
+\end{aligned}
+$$
+
+
+Immediately we see something undermining the notion that Bayes makes experiments run faster.  Using the conjugate normal model and a decision rule intended to mimic frequentist statistical significance would actually require the frequentist $z_F$ to be _larger_ than it would otherwise be in order to declare the treatment superior.  When $\alpha=0.05$, the frequentist would claim superiority of the treatment when the $z$ score is larger than 1.96, whereas the Bayesian using a similar decision rule would only claim superiority when the $z$ score is larger than $1.96 \times \sqrt{1 + \dfrac{s^2}{n \tau^2}}$.  This makes the criterion harder to satisfy at a fixed sample size, not easier.
+
+This should be unsurprising.  Recall that the conjugate normal model's posterior mean is a precision-weighted average of the prior mean and the observed estimate.  If the prior mean is 0, then the posterior mean is going to shrink the estimated effect toward 0. This shrinkage works against us if our goal is to show probability of superiority. Shrinkage is desirable behavior, but does not make experiments run faster.
+
+What then is the partial truth of experiments running faster with Bayes?  In the approach I have in mind, you need to change your decision rule to something based on the value of more data, rather than probability of superiority alone.  To learn more, I suggest reading my related blog post [A More Complete Post on Decision Theory and EVSI in A/B Testing](../2026-08-16-decisions/index.qmd), and the section on "Expected Value of Sample Information".  In short, when experiment results are sufficiently convincing, additional data are unlikely to change our decision.  We can quantify the probability that our decision would change and the expected loss avoided by changing it, conditional on a change.  Their product is the expected value of sample information.  When that quantity is sufficiently low, we can stop the experiment early.  This procedure is not without some cost -- the simulation in that section shows that estimation error increases (because we are forgoing additional data that could add precision), but hey -- no such thing as a free lunch.
+
+I would encourage you to be curious when you hear that Bayes can run experiments faster.  This claim is partly true -- with the right decision rule and appetite for trading off speed for estimation precision, Bayes _can_ run experiments faster, but it isn't as simple as people tend to think.  If I could, I would ammend these claims to something more like "Bayesian statistics enables decision frameworks which can result in shorter times to action", but I guess that isn't as catchy.

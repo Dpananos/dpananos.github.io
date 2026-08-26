@@ -10,7 +10,39 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Tue, 18 Aug 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 26 Aug 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Bayes Does Not Make Experiments Faster On Its Own</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-08-26-fast/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>While at Zapier, I remember PMs asking me about using Bayesian statistics in our A/B tests because Bayes makes the experiment “run faster”. This idea, that Bayes somehow makes experiments run faster, needs some explanation because it is <em>partly</em> true. In this post, I’ll explain what is true and what is perhaps misunderstood.</p>
+<p>When we talk about experiments running faster, we usually mean shrinking the sample size while maintaining the same power. Assume <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Ctheta"> is the estimated effect and <img src="https://latex.codecogs.com/png.latex?s%20/%20%5Csqrt%7Bn%7D"> is its standard error after observing a sample of size <img src="https://latex.codecogs.com/png.latex?n">. Then the frequentist <img src="https://latex.codecogs.com/png.latex?z"> score is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20z_F%20=%20%5Cdfrac%7B%5Csqrt%7Bn%7D%20%5Chat%20%5Ctheta%7D%7Bs%7D"></p>
+<p>and we usually claim superiority of the treatment when <img src="https://latex.codecogs.com/png.latex?z_F%20%3E%20z_%7B1-%5Calpha/2%7D">. At a fixed positive true effect <img src="https://latex.codecogs.com/png.latex?%5Ctheta">, decreasing <img src="https://latex.codecogs.com/png.latex?n"> lowers power. We would also need to make <img src="https://latex.codecogs.com/png.latex?s"> small enough to keep <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7Bn%7D%5Ctheta/s"> fixed. This is how CUPED “makes experiments run faster” – the variance is reduced, so we can achieve more power given the same sample size.</p>
+<p>A very quick search of documentation from popular experimentation platforms shows that the conjugate normal model is a common way to support Bayesian inference in A/B testing. For better or worse, I have seen practitioners simply port over their frequentist thinking to the conjugate normal model, declaring the treatment superior when the associated posterior probability of superiority is greater than <img src="https://latex.codecogs.com/png.latex?1-%5Calpha/2"> (this is equivalent to the lower bound of the central <img src="https://latex.codecogs.com/png.latex?100(1-%5Calpha)%5C%25"> credible interval excluding 0). Assuming that this is the decision rule those who tout Bayes as faster intend to use, does the conjugate normal model make experiments run faster? The answer is a resounding “no”.</p>
+<p>Let <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> be the true treatment effect, <img src="https://latex.codecogs.com/png.latex?%5Chat%20%5Ctheta"> its estimator, and <img src="https://latex.codecogs.com/png.latex?s/%5Csqrt%7Bn%7D"> the associated standard error (assumed known). The conjugate normal model is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cwidehat%5Ctheta%5Cmid%5Ctheta%5Csim%20N%5Cleft(%5Ctheta,%5Cfrac%7Bs%5E2%7D%7Bn%7D%5Cright),%0A%5Cqquad%0A%5Ctheta%5Csim%20N(0,%5Ctau%5E2),"></p>
+<p>and the decision rule is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20%5CPr(%5Ctheta%20%3E%200%20%5Cmid%20%5Chat%20%5Ctheta)%20%3E%201-%5Calpha/2%20%5C%3E.%20"></p>
+<p>This decision rule is equivalent to</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Cfrac%7Bz_F%7D%7B%5Csqrt%7B1%20+%20s%5E2/(n%5Ctau%5E2)%7D%7D%20&amp;%3E%20z_%7B1-%5Calpha/2%7D%20%5C%5C%0A%5Cimplies%5Cquad%0Az_F%20&amp;%3E%20z_%7B1-%5Calpha/2%7D%5Csqrt%7B1%20+%20%5Cfrac%7Bs%5E2%7D%7Bn%5Ctau%5E2%7D%7D%20%3E%20z_%7B1-%5Calpha/2%7D.%0A%5Cend%7Baligned%7D%0A"></p>
+<p>Immediately we see something undermining the notion that Bayes makes experiments run faster. Using the conjugate normal model and a decision rule intended to mimic frequentist statistical significance would actually require the frequentist <img src="https://latex.codecogs.com/png.latex?z_F"> to be <em>larger</em> than it would otherwise be in order to declare the treatment superior. When <img src="https://latex.codecogs.com/png.latex?%5Calpha=0.05">, the frequentist would claim superiority of the treatment when the <img src="https://latex.codecogs.com/png.latex?z"> score is larger than 1.96, whereas the Bayesian using a similar decision rule would only claim superiority when the <img src="https://latex.codecogs.com/png.latex?z"> score is larger than <img src="https://latex.codecogs.com/png.latex?1.96%20%5Ctimes%20%5Csqrt%7B1%20+%20%5Cdfrac%7Bs%5E2%7D%7Bn%20%5Ctau%5E2%7D%7D">. This makes the criterion harder to satisfy at a fixed sample size, not easier.</p>
+<p>This should be unsurprising. Recall that the conjugate normal model’s posterior mean is a precision-weighted average of the prior mean and the observed estimate. If the prior mean is 0, then the posterior mean is going to shrink the estimated effect toward 0. This shrinkage works against us if our goal is to show probability of superiority. Shrinkage is desirable behavior, but does not make experiments run faster.</p>
+<p>What then is the partial truth of experiments running faster with Bayes? In the approach I have in mind, you need to change your decision rule to something based on the value of more data, rather than probability of superiority alone. To learn more, I suggest reading my related blog post <a href="../../posts/2026-08-16-decisions/index.html">A More Complete Post on Decision Theory and EVSI in A/B Testing</a>, and the section on “Expected Value of Sample Information”. In short, when experiment results are sufficiently convincing, additional data are unlikely to change our decision. We can quantify the probability that our decision would change and the expected loss avoided by changing it, conditional on a change. Their product is the expected value of sample information. When that quantity is sufficiently low, we can stop the experiment early. This procedure is not without some cost – the simulation in that section shows that estimation error increases (because we are forgoing additional data that could add precision), but hey – no such thing as a free lunch.</p>
+<p>I would encourage you to be curious when you hear that Bayes can run experiments faster. This claim is partly true – with the right decision rule and appetite for trading off speed for estimation precision, Bayes <em>can</em> run experiments faster, but it isn’t as simple as people tend to think. If I could, I would ammend these claims to something more like “Bayesian statistics enables decision frameworks which can result in shorter times to action”, but I guess that isn’t as catchy.</p>
+
+
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-08-26-fast/</guid>
+  <pubDate>Wed, 26 Aug 2026 04:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Exaggeration in Low Powered Experiments</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -7312,264 +7344,6 @@ font-style: inherit;">1.01</span>))</span></code></pre></div></div>
   <category>Bayes</category>
   <guid>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</guid>
   <pubDate>Tue, 18 Mar 2025 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>A Brief Tour of CUPED and Related Methods (Pt. 1)</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2025-03-03-cuped/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<p>Randomized experiments have a rich history, almost none of which is the concern of this post. Rather, I want to focus on a tiny slice of randomized experiment literature: CUPED (Controlled-experiment Using Pre-Experiment Data). The technique has been impactful in the online randomized experiment (a.k.a. A/B Testing) community, with many vendors – Eppo included – offering the technique. Despite the popularity and impact, customers and data scientists still seem to misunderstand why CUPED works, why different implementations of the procedure (a la regression adjustment) still provide the same benefit, and why different implementations are equivalent.</p>
-<p>This sequence of posts seeks to answer popular questions regarding the CUPED, and in particular frames the technique as a regression procedure first as opposed to a “new” or different technique. I discuss papers that pre-date the CUPED as well as discuss how the literature has evolved since the publication of CUPED. This is not a systematic review, nor a scoping review; this is a story of regression erasure (I kid).</p>
-<p>This post in particular will demonstrate the equivlence between CUPED and regression.</p>
-</section>
-<section id="set-up" class="level1">
-<h1>Set Up</h1>
-<p>Most of this blog post concerns online randomized experiments or “A/B tests” as they are known in industry. Generally, subjects will be exposed to treatment or control at some known probability (usually 50/50 since this is the most efficient design). Some outcome, <img src="https://latex.codecogs.com/png.latex?Y">, is then recorded and groups are compared statistically. Various estimands are used in industry, but for simplicity we will use the average treatment effect as our estimand of choice.</p>
-</section>
-<section id="cuped-for-those-who-dont-know" class="level1">
-<h1>CUPED: For Those Who Don’t Know</h1>
-<p>Deng and colleagues published CUPED in their 2013 paper <a href="https://exp-platform.com/Documents/2013-02-CUPED-ImprovingSensitivityOfControlledExperiments.pdf">“Improving the Sensitivity of Online Controlled Experiments by Utilizing Pre-Experiment Data”</a>. The main motivation for the paper is increasing sensitivity of experiments to detect smaller effects, detect effects faster, or both. Deng et. al motivate their approach through “control variates”. Briefly – and aside from experimentation for a moment – given pairs of random variables <img src="https://latex.codecogs.com/png.latex?(Y_i,%20X_i)"> in which <img src="https://latex.codecogs.com/png.latex?E%5BX%5D"> is known, define</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D=%5Cbar%7BY%7D-%5Ctheta%20%5Cbar%7BX%7D+%5Ctheta%20E%5BX%5D"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is an arbitrary constant. It can be shown that <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D"> is an unbiased estimator of <img src="https://latex.codecogs.com/png.latex?E%5BY%5D">. Because <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> is arbitrary, we can choose a <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> so that the variance of the estimator is minimized. The variance of <img src="https://latex.codecogs.com/png.latex?%5Cwidehat%7BY%7D_%7Bc%20v%7D"> is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Cbegin%7Balign%7D%0A%5Coperatorname%7BVar%7D(%5Cwidehat%7BY%7D_%7Bc%20v%7D)%20&amp;=%20%5Coperatorname%7BVar%7D(%5Cbar%7BY%7D-%5Ctheta%20%5Cbar%7BX%7D+%5Ctheta%20E%5BX%5D)%5C%5C%0A&amp;=%5Cdfrac%7B1%7D%7Bn%7D%20%5Cleft(%20%5Coperatorname%7BVar%7D(Y)%20+%20%5Ctheta%5E2%20%5Coperatorname%7BVar%7D(X)%20-%202%5Ctheta%5Coperatorname%7BCov%7D(X,Y)%20%5Cright)%0A%5Cend%7Balign%7D"></p>
-<p>and is notably quadratic in <img src="https://latex.codecogs.com/png.latex?%5Ctheta">. Application of elementary calculus shows that the variance is then minimized when</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Ctheta%20=%20%5Cdfrac%7B%5Coperatorname%7BCov%7D(Y,%20X)%7D%7B%5Coperatorname%7BVar%7D(X)%7D%20"> and further algebraic manipulation shows</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5Coperatorname%7Bvar%7D%5Cleft(%5Cwidehat%7BY%7D_%7Bc%20v%7D%5Cright)=%5Coperatorname%7Bvar%7D(%5Cbar%7BY%7D)%5Cleft(1-%5Crho%5E2%5Cright)%20"> where <img src="https://latex.codecogs.com/png.latex?%5Crho%20=%20%5Coperatorname%7BCor%7D(Y,%20X)">.</p>
-<p>In short, the standard error of the mean can be reduced so long as there is some other variable, <img src="https://latex.codecogs.com/png.latex?X">, correlated with <img src="https://latex.codecogs.com/png.latex?Y">, where larger correlations lead to more variance reduction.</p>
-<p>Back to experimentation, the insight in the CUPED paper was that while finding an <img src="https://latex.codecogs.com/png.latex?X"> with known expectation is hard, the <em>difference</em> in expectations for any random variable in the pre-treatment period is 0. Deng et. al then estimate the difference in means between treatment in control by computing the control variate versions of outcomes in each group and then estimating the difference in means using <sup>1</sup></p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5CDelta_%7Bc%20v%7D=%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(t)%7D-%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(c)%7D%20%5C%3E.%20"></p>
-<p>In the remainder of the paper, Deng et. al provide some recommendations on choosing <img src="https://latex.codecogs.com/png.latex?X">, landing on the recommendation to “[…]to use the same variable from the pre-experiment period as the covariate” – i.e.&nbsp;to use the pre-experiment outcome as the control variable. Deng et. al write</p>
-<blockquote class="blockquote">
-<p>It is interesting to point out the connection with linear regression. The optimal <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> tunrs out to be the ordinary least squares (OLS) solution regressing (centered) <img src="https://latex.codecogs.com/png.latex?Y"> on (centered) <img src="https://latex.codecogs.com/png.latex?X"></p>
-</blockquote>
-<p>so the connection to regression was clearly made to readers. As we will see, the method is formally equivalent to regression, but in order to see this more clearly we will need the Frisch Waugh Lovell theorem.</p>
-</section>
-<section id="frisch-waugh-lovell-theorem-for-those-who-dont-know" class="level1">
-<h1>Frisch Waugh Lovell Theorem: For Those Who Don’t Know</h1>
-<p>Econometricians will know the Frisch Waugh Lovell (FWL) theorem well. Borrowing from wikipedia, the theorem states that the estimate for <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2"> in the model (henceforth full model)</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20Y%20=%20X_1%20%5Cbeta_1%20+%20X_2%20%5Cbeta_2%20+u%20"> will be the same as the estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2"> in the model (henceforth FWL model)</p>
-<p><img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D%20Y=M_%7BX_1%7D%20X_2%20%5Cbeta_2+M_%7BX_1%7D%20u"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D%20=%20I-X_1(X%5ET_1X_1)%5E%7B-1%7DX_1%5ET">. Squint hard enough and you will see that the projection, or hat, matrix appears in <img src="https://latex.codecogs.com/png.latex?M_%7BX_1%7D">. The FWL theorem then says, more or less,</p>
-<blockquote class="blockquote">
-<p>First regress <img src="https://latex.codecogs.com/png.latex?Y"> onto <img src="https://latex.codecogs.com/png.latex?X_1"> and compute the residuals. Then, regress <img src="https://latex.codecogs.com/png.latex?X_2"> onto <img src="https://latex.codecogs.com/png.latex?X_1"> and compute the residuals. The regression of the result from the first operation onto the result from the second operation will yield the same estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta_2">.</p>
-</blockquote>
-<p>The proof can (probably) be found in most econometrics textbooks, but for now we will suffice for an example in R.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">fit <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(am <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> vs <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> mpg, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>mtcars)</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">(ols_estimate <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(fit)[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'vs'</span>])</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        vs 
--0.4072501 </code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">r1 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">resid</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(am <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> mpg, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>mtcars))</span>
-<span id="cb3-2">r2 <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">resid</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(vs <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> mpg, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data=</span>mtcars))</span>
-<span id="cb3-3"></span>
-<span id="cb3-4">fwl_fit <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">lm</span>(r1<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span>r2)</span>
-<span id="cb3-5"></span>
-<span id="cb3-6">(fwl_estimate <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(fwl_fit)[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'r2'</span>])</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        r2 
--0.4072501 </code></pre>
-</div>
-</div>
-<p>The procedure described above is sometimes called “partialling out” or “residualizing”. Point estimates and standard errors should be the same from both procedures (note that you have to adjust the partialled out estimate of the standard error so that it has the same degrees of freedom as the full estimate, see code below).</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">(se_vs_full <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(fit)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>coefficients[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"vs"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Std. Error"</span>])</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1816192</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">se_vs_fwl_raw <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(fwl_fit)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>coefficients[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"r2"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Std. Error"</span>]</span>
-<span id="cb7-2"></span>
-<span id="cb7-3">n <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">nrow</span>(mtcars)</span>
-<span id="cb7-4">p_full <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">length</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(fit))  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Number of parameters in full model</span></span>
-<span id="cb7-5">p_fwl <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">length</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">coef</span>(fwl_fit))  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Number of parameters in FWL regression</span></span>
-<span id="cb7-6"></span>
-<span id="cb7-7">sigma2_full <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">residuals</span>(fit)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (n <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p_full)</span>
-<span id="cb7-8">sigma2_fwl <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">residuals</span>(fwl_fit)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> (n <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p_fwl)</span>
-<span id="cb7-9"></span>
-<span id="cb7-10">(se_vs_fwl_corrected <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> se_vs_fwl_raw <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(sigma2_full <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> sigma2_fwl))</span></code></pre></div></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1816192</code></pre>
-</div>
-</div>
-<p>Note also that the standard error from either the FWL model or the full model is smaller than it would be had <img src="https://latex.codecogs.com/png.latex?X_2"> (or <code>vs</code> in my example) been the only variable in the regression. While I omit a proof of this claim, the intuition is straight forward. When including <img src="https://latex.codecogs.com/png.latex?X_1"> in the regression (either in the full or FWL model), some of the variation in <img src="https://latex.codecogs.com/png.latex?Y"> will be explained by variation in <img src="https://latex.codecogs.com/png.latex?X_1">. This leads to smaller residual variation, which in turn shrinks the sampling variability of the coefficient for <img src="https://latex.codecogs.com/png.latex?X_2">. Hence <em>variance is reduced by including <img src="https://latex.codecogs.com/png.latex?X_1"></em> in the regression. Furthermore, there is little risk of inflated standard errors due to collinearity since <img src="https://latex.codecogs.com/png.latex?X_2"> is independent of <img src="https://latex.codecogs.com/png.latex?X_1"> and hence uncorrelated in expectation. Hence, variance should only decrease when adjusting for pre-treatment variables correlated with <img src="https://latex.codecogs.com/png.latex?Y">.</p>
-</section>
-<section id="why-you-cant-spell-cuped-without-fwl" class="level1">
-<h1>Why You Can’t Spell CUPED without FWL</h1>
-<p>Let’s bring this all together.<sup>2</sup> I’m going to start with a regression model and apply the FWL theorem in order to prove that CUPED is equivalent to regression.</p>
-<p>Let <img src="https://latex.codecogs.com/png.latex?(Y,%20X,%20D)"> be a triple of random variables such that</p>
-<ol type="1">
-<li><img src="https://latex.codecogs.com/png.latex?E%5BY%5D%20=%20E%5BX%5D%20=%20E%5BD%5D%20=%200"></li>
-<li><img src="https://latex.codecogs.com/png.latex?D"> is a randomly assigned binary treatment indicator and takes on values <img src="https://latex.codecogs.com/png.latex?%5C%7B-0.5,%200.5%5C%7D">. This is mostly for convenience.</li>
-<li><img src="https://latex.codecogs.com/png.latex?Y,%20X%20%5Cperp%20D"> due to randomization</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7BCov%7D(Y,%20X)%20%20%5Cneq%200"></li>
-<li>The true data generating mechanism is <img src="https://latex.codecogs.com/png.latex?Y%20=%20%5Ctheta%20X%20+%20%5CDelta%20D%20+%20%5Cepsilon"> with <img src="https://latex.codecogs.com/png.latex?E%5B%5Cepsilon%5D%20=%200"> and <img src="https://latex.codecogs.com/png.latex?E%5B%5Cepsilon%20D%5D%20=%200">.</li>
-</ol>
-<p>First, partial out the effect of <img src="https://latex.codecogs.com/png.latex?X"> on <img src="https://latex.codecogs.com/png.latex?Y"> by regression <img src="https://latex.codecogs.com/png.latex?Y"> on <img src="https://latex.codecogs.com/png.latex?X">. The residual <img src="https://latex.codecogs.com/png.latex?r_1"> is defined as</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20r_1%20=%20Y%20-%20%5Chat%7B%5Ctheta%7DX%20"></p>
-<p>with <img src="https://latex.codecogs.com/png.latex?%5Chat%7B%5Ctheta%7D%20=%20%5Coperatorname%7BCov%7D(Y,%20X)%20/%20%5Coperatorname%7BVar%7D(X)">. Note that this choice of <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> minimizes the variance of <img src="https://latex.codecogs.com/png.latex?r_1">.</p>
-<p>Second, partial out the effect of <img src="https://latex.codecogs.com/png.latex?X"> on <img src="https://latex.codecogs.com/png.latex?D"> by computing</p>
-<p><img src="https://latex.codecogs.com/png.latex?r_2%20=%20D-%5Chat%7B%5Cbeta%7D%20X%20"></p>
-<p>Since <img src="https://latex.codecogs.com/png.latex?D"> is assumed independent of <img src="https://latex.codecogs.com/png.latex?X">, then <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bbeta%7D=0"> and therefore <img src="https://latex.codecogs.com/png.latex?r_2=D">.</p>
-<p>By the FWL theorem, the coefficeint <img src="https://latex.codecogs.com/png.latex?%5CDelta"> can be estimated using the following regression</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20r_1%20=%20%5CDelta%20r_2%20+%20%5Cvarepsilon%20=%20%5CDelta%20D%20+%20%5Cvarepsilon%20"> Since <img src="https://latex.codecogs.com/png.latex?D"> is binary and treatment corresponds to a unit change in <img src="https://latex.codecogs.com/png.latex?D">, this model estimates the difference in means between the two groups. The difference in means is</p>
-<p><img src="https://latex.codecogs.com/png.latex?%20%5CDelta%20=%20E%5BY%20-%20%5Chat%7B%5Ctheta%7D%20X%20%5Cmid%20D=0.5%5D%20-%20E%5BY%20-%20%5Chat%7B%5Ctheta%7D%20X%20%5Cmid%20D=-0.5%5D"></p>
-<p>which is equivalent to the CUPED estimator.</p>
-<p>Statistics, machine learning, and online experimentation are just different dialects of the same language. It can be useful to be proficient in all dialects because that means we can borrow ideas from one to apply to the other without the need to re-invent the wheel. Now that we know CUPED is just regression, we can just skip right to fitting a linear model and interpreting the coefficient knowing that we benefit from the variance reduction CUPED promises us.</p>
-<p>I want to bring special attention to a quote from the CUPED paper regarding the choice of <img src="https://latex.codecogs.com/png.latex?%5Ctheta">.</p>
-<blockquote class="blockquote">
-<p>There is a slight subtlety that’s worth pointing out. The pair <img src="https://latex.codecogs.com/png.latex?(Y,%20X)"> may have different distributions in treatment and control when there is an experiment effect. For <img src="https://latex.codecogs.com/png.latex?%5CDelta_%7Bcv%7D"> to be unbiased, the same <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> has to be used for both control and treatment. The simplest way to estimate it is from the pooled population of control and treatment. The impact on variance reduction will likely be negligible.</p>
-</blockquote>
-<p>In the next post in this series, we’ll examine this statement more closely along with earler criticisms of the use of OLS for estimating the average treatment effect in randomized experiments.</p>
-
-
-</section>
-
-
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>The algebraic details are as follows. Let <img src="https://latex.codecogs.com/png.latex?Y_i%5E%7B(t)%7D"> be an outcome in the treatment group and let <img src="https://latex.codecogs.com/png.latex?Y_i%5E%7B(c)%7D"> be an outcome in the control group. Then <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Balign%7D%20%5CDelta_%7Bc%20v%7D&amp;=%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(t)%7D-%5Cwidehat%7BY%7D_%7Bc%20v%7D%5E%7B(c)%7D%5C%5C%0A&amp;=%20%5Cbar%7BY%7D%5E%7B(t)%7D-%5Ctheta%20%5Cbar%7BX%7D%5E%7B(t)%7D+%5Ctheta%20E%5BX%5E%7B(t)%7D%5D%20-%20(%5Cbar%7BY%7D%5E%7B(c)%7D-%5Ctheta%20%5Cbar%7BX%7D%5E%7B(c)%7D+%5Ctheta%20E%5BX%5E%7B(c)%7D%5D%20)%0A%5Cend%7Balign%7D"> Note that prior to the treatment <img src="https://latex.codecogs.com/png.latex?E%5BX%5E%7B(t)%7D%5D%20=%20E%5BX%5E%7B(c)%7D%5D">. Deng et. al also recommend using the same <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> for both treatment and control groups, which we will see in a future post can be improved upon.↩︎</p></li>
-<li id="fn2"><p>Hat tip Evan Miller, I saw this section’s title in an internal doc and had a good laugh.↩︎</p></li>
-</ol>
-</section></div> ]]></description>
-  <category>AB Testing</category>
-  <category>Statistics</category>
-  <category>Regression</category>
-  <guid>https://dpananos.github.io/posts/2025-03-03-cuped/</guid>
-  <pubDate>Mon, 03 Mar 2025 05:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
