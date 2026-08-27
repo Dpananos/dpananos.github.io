@@ -14,7 +14,7 @@ cache: false
 While at Zapier, I remember PMs asking me about using Bayesian statistics in our A/B tests because Bayes makes the experiment "run faster".  This idea, that Bayes somehow makes experiments run faster, needs some explanation because it is _partly_ true.  In this post, I'll explain what is true and what is perhaps misunderstood.
 
 
-When we talk about experiments running faster, we usually mean achieving larger statistical power with the same sample size (alternatively, achieving the same statistical power with a smaller sample size).  This results in faster experiments in so far as we achieve the statistical power we want sooner because it takes time to acrue samples. Assume $\theta$ is the true effect and $s / \sqrt{n}$ is its standard error after observing a sample of size $n$. Assume further that $\theta \ne 0$, that we use a false positive rate of $\alpha$ under the null, and a two-tailed test. The probability of rejecting the null hypothesis of no treatment effect is then
+When we talk about experiments running faster, we usually mean achieving greater statistical power with the same sample size (or, equivalently, achieving the same power with a smaller sample size). Experiments can therefore reach the desired power sooner because collecting observations takes time. Assume $\theta$ is the true effect and $s / \sqrt{n}$ is its standard error after observing a sample of size $n$. Assume further that $\theta \ne 0$, that we use a false positive rate of $\alpha$ under the null, and a two-tailed test. The probability of rejecting the null hypothesis of no treatment effect is then
 
 $$
 \pi_F(\theta; n)
@@ -22,9 +22,9 @@ $$
 + \Phi\left(-z_{1-\alpha/2} + \dfrac{\sqrt{n}\theta}{s}\right) \>.
 $$
 
-The first term is the probability of rejecting in the lower tail, and the second is the probability of rejecting in the upper tail. At a fixed nonzero true effect $\theta$, decreasing $n$ decreases this probability.  We would also need to make $s$ small enough to keep $\sqrt{n}\theta/s$ fixed.  This is how CUPED "makes experiments run faster" -- the variance is reduced, so we can achieve more power given the same sample size.
+The first term is the probability of rejecting in the lower tail, and the second is the probability of rejecting in the upper tail. At a fixed nonzero true effect $\theta$, reducing $n$ reduces this probability. To maintain power with a smaller $n$, we would need to reduce $s$ enough to keep $\sqrt{n}\theta/s$ fixed. This is how CUPED "makes experiments run faster" -- the variance is reduced, so we can achieve more power given the same sample size.
 
-A very quick search of documentation from popular experimentation platforms shows that the conjugate normal model is a common way to support Bayesian inference in A/B testing.  For better or worse, I have seen practitioners simply port over their frequentist thinking to the conjugate normal model, declaring a difference when either posterior tail probability is greater than $1-\alpha/2$ (this is equivalent to the central $100(1-\alpha)\%$ credible interval excluding 0).  Assuming that this is the decision rule those who tout Bayes as faster intend to use, does the conjugate normal model make experiments run faster?  The answer is a resounding "no".
+A quick review of the documentation for popular experimentation platforms shows that the conjugate normal model is a common way to support Bayesian inference in A/B testing. For better or worse, I have seen practitioners simply port their frequentist thinking to the conjugate normal model, declaring a difference when either directional posterior probability exceeds $1-\alpha/2$ (equivalently, when the central $100(1-\alpha)\%$ credible interval excludes 0). If this is the decision rule that proponents have in mind when they claim Bayes is faster, does the conjugate normal model actually make experiments run faster? The answer is a resounding "no".
 
 Let $\theta$ be the true treatment effect, $\hat \theta$ its estimator, and $s/\sqrt{n}$ the associated standard error (assumed known).  The conjugate normal model is 
 
@@ -51,10 +51,10 @@ $$
 $$
 
 
-Immediately we see something undermining the notion that Bayes makes experiments run faster.  Using the conjugate normal model and a decision rule intended to mimic frequentist statistical significance would actually require the absolute frequentist $z$ score to be _larger_ than it would otherwise be in order to declare a difference.  When $\alpha=0.05$, the frequentist would declare a difference when $|z|$ is larger than 1.96, whereas the Bayesian using a similar decision rule would only declare a difference when $|z|$ is larger than $1.96 \times \sqrt{1 + \dfrac{s^2}{n \tau^2}}$.
+This immediately undermines the notion that Bayes makes experiments run faster. Using the conjugate normal model and a decision rule intended to mimic frequentist statistical significance requires the absolute $z$ score to be _larger_ than under the corresponding frequentist rule before we declare a difference. When $\alpha=0.05$, the frequentist procedure declares a difference when $|z|$ is larger than 1.96, whereas the Bayesian procedure with a similar decision rule only declares a difference when $|z|$ is larger than $1.96 \times \sqrt{1 + \dfrac{s^2}{n \tau^2}}$.
 
 
-How does this affect the probability of detecting a nonzero treatment effect? Accounting for both tails, the probability of declaring a difference under the Bayesian approach would be
+How does this affect the probability of detecting a nonzero treatment effect? Accounting for both tails, the probability of declaring a difference under the Bayesian approach is
 
 $$
 \begin{aligned}
@@ -64,7 +64,7 @@ $$
 \end{aligned}
 $$
 
-If I were to plot this probability as a function of $n$ and for a fixed $\theta$, then $\pi_B(\theta;n)$ would look like $\pi_F(\theta;n)$ shifted right.  That is to say, for a fixed $\theta$, $\pi_B(\theta; n) < \pi_F(\theta; n) \quad \forall n$.  Bayes will not make your experiment run faster.  In fact, you would have to collect more data to have the same probability of detecting a nonzero treatment effect.  That is the _opposite_ effect of what you really want.
+Plotting this probability as a function of $n$ for a fixed $\theta$ shows that $\pi_B(\theta;n)$ is a right-shifted version of $\pi_F(\theta;n)$. That is to say, for a fixed $\theta$, $\pi_B(\theta; n) < \pi_F(\theta; n)$ for all $n$. Bayes will not make your experiment run faster. In fact, you would have to collect more data to have the same probability of detecting a nonzero treatment effect. That is the _opposite_ of what you really want.
 
 ```{r}
 #| fig-cap: 'Two-sided power for the frequentist and Bayesian decision rules, with $\alpha = 0.05$, $s = 1$, $\tau = 0.05$, $\theta = 0.1$, and $n$ ranging from 1 to 2,000.'
@@ -107,8 +107,8 @@ legend(
 
 ```
 
-This shouldn't be surprising.  Recall that the conjugate normal model's posterior mean is a precision-weighted average of the prior mean and the observed estimate.  If the prior mean is 0, then the posterior mean is going to shrink the estimated effect toward 0. This shrinkage works against us if our goal is to detect a nonzero effect in either direction. Shrinkage is desirable behavior, but does not make experiments run faster.
+This shouldn't be surprising. Recall that the conjugate normal model's posterior mean is a precision-weighted average of the prior mean and the observed estimate. If the prior mean is 0, then the posterior mean will shrink the estimated effect toward 0. This shrinkage works against us if our goal is to detect a nonzero effect in either direction. Shrinkage is a desirable property, but it does not make experiments run faster.
 
-What then is the partial truth of experiments running faster with Bayes?  In the approach I have in mind, you need to change your decision rule to something based on the value of more data, rather than posterior evidence against zero alone.  To learn more, I suggest reading my related blog post [A More Complete Post on Decision Theory and EVSI in A/B Testing](../2026-08-16-decisions/index.qmd), and the section on "Expected Value of Sample Information".  In short, when experiment results are sufficiently convincing, additional data are unlikely to change our decision.  We can quantify the probability that our decision would change and the expected loss avoided by changing it, conditional on a change.  Their product is the expected value of sample information.  When that quantity is sufficiently low, we can stop the experiment early.  This procedure is not without some cost -- the simulation in that section shows that estimation error increases (because we are forgoing additional data that could add precision), but hey -- no such thing as a free lunch.
+What, then, is the partial truth behind the claim that Bayes makes experiments run faster? In the approach I have in mind, you need a decision rule based on the value of more data rather than on posterior evidence against zero alone. To learn more, I suggest reading my related blog post [A More Complete Post on Decision Theory and EVSI in A/B Testing](../2026-08-16-decisions/index.qmd), especially the section on "Expected Value of Sample Information". In short, when experiment results are sufficiently convincing, additional data are unlikely to change our decision. We can quantify both the probability that additional data would change our decision and the expected loss avoided if they did. Their product is the expected value of sample information. When that quantity is sufficiently low, we can stop the experiment early. This procedure comes at a cost -- the simulation in that section shows that estimation error increases because we are forgoing additional data that could add precision, but hey -- no such thing as a free lunch.
 
-I would encourage you to be curious when you hear that Bayes can run experiments faster.  This claim is partly true -- with the right decision rule and appetite for trading off speed for estimation precision, Bayes _can_ run experiments faster, but it isn't as simple as people tend to think.  If I could, I would ammend these claims to something more like "Bayesian statistics enables decision frameworks which can result in shorter times to action", but I guess that isn't as catchy.
+I would encourage you to be curious when you hear that Bayes can run experiments faster. This claim is partly true -- with the right decision rule and an appetite for trading off speed for estimation precision, Bayes _can_ run experiments faster, but it isn't as simple as people tend to think. If I could, I would rephrase the claim as something more like "Bayesian statistics enables decision frameworks that can result in shorter times to action", but I guess that isn't as catchy.
