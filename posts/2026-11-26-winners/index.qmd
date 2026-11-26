@@ -131,5 +131,18 @@ $$
 
 This figure from an [earlier post](../2024-01-22-curse/index.qmd) illustrates selection for a single experiment.  An experiment draws from the distribution in blue, but we keep those draws that are large enough to be in the shaded region; the region under the blue curve that is not shaded would not be considered "statistically significant".  The average of the shaded region is not the same of the average of the blue curve; the average of the shaded region is slightly larger.  Hence, statistically significant estimates from experiments are generally biased upwards, and stacking these estimates as we do when constructing $\hat T$ simply allows that bias to compound.
 
-![](selection-figure.png)
+```{r}
+#| fig-width: 7
+#| fig-height: 4.5
+
+x <- seq(-2, 8, length.out = 500)
+selected_x <- seq(1.96, 8, length.out = 500)
+
+plot(x, dnorm(x, mean = 3), type = "n",
+     xlab = "Difference in means", ylab = "", xaxt = "n", yaxt = "n")
+polygon(c(selected_x, rev(selected_x)),
+        c(dnorm(selected_x, mean = 3), rep(0, length(selected_x))),
+        col = adjustcolor("blue", alpha.f = 0.3), border = NA)
+lines(x, dnorm(x, mean = 3), col = "blue")
+```
 

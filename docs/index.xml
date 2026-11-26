@@ -64,7 +64,15 @@
 <section id="how-do-i-explain-this-without-algebra" class="level2">
 <h2 class="anchored" data-anchor-id="how-do-i-explain-this-without-algebra">How do I explain this without algebra?</h2>
 <p>This figure from an <a href="../../posts/2024-01-22-curse/index.html">earlier post</a> illustrates selection for a single experiment. An experiment draws from the distribution in blue, but we keep those draws that are large enough to be in the shaded region; the region under the blue curve that is not shaded would not be considered “statistically significant”. The average of the shaded region is not the same of the average of the blue curve; the average of the shaded region is slightly larger. Hence, statistically significant estimates from experiments are generally biased upwards, and stacking these estimates as we do when constructing <img src="https://latex.codecogs.com/png.latex?%5Chat%20T"> simply allows that bias to compound.</p>
-<p><img src="https://dpananos.github.io/posts/2026-11-26-winners/selection-figure.png" class="img-fluid"></p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://dpananos.github.io/posts/2026-11-26-winners/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
