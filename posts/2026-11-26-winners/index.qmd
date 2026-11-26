@@ -1,0 +1,130 @@
+---
+title: Why Does The Winner's Curse Exist?
+date: 2026-11-25
+code-fold: false
+echo: false
+fig-cap-location: top
+categories: []
+number-sections: false
+draft: false
+cache: false
+---
+
+Previous posts of mine have pointed out that summing the estimated effects of treatments selected from online experiments can exaggerate the sum of their true effects. Why does this happen, and can we describe it analytically?
+
+Suppose we have $K$ experiments, indexed by $k=1,\ldots,K$. Throughout, we assume:
+
+- Each experiment has a fixed true effect $\theta_k$ and an estimate $\hat\theta_k = \theta_k + \varepsilon_k$, where $E[\varepsilon_k]=0$ and $\operatorname{Var}(\varepsilon_k)=s_k^2$.
+- Each standard error $s_k>0$ is known, or estimated precisely enough to treat it as known.
+- We ship the treatment from experiment $k$ when $\hat\theta_k > 2s_k$. This is approximately the positive-side threshold for a two-sided test at the 5% significance level.
+- For the truncated-normal calculation, we assume $\varepsilon_k\sim\mathcal{N}(0,s_k^2)$. In A/B tests, the central limit theorem can motivate this as an approximation for sufficiently large samples under suitable regularity conditions; it does not guarantee an exact normal distribution.
+
+We do not need to assume that the experiments are independent.
+
+## The effect of selection
+
+Let $I_k=1$ if we ship the treatment from experiment $k$, and let $I_k=0$ otherwise. The sum of the true effects of the selected treatments is
+
+$$
+T = \sum_{k=1}^K I_k\theta_k,
+$$
+
+but since the true effects are unknown, we compute
+
+$$
+\hat T = \sum_{k=1}^K I_k\hat\theta_k.
+$$
+
+Both sums depend on which treatments are selected. Their expected difference is
+
+$$
+\begin{align}
+E[\hat T-T]
+&= E\left[\sum_{k=1}^K I_k(\hat\theta_k-\theta_k)\right] \\
+&= \sum_{k=1}^K E[I_k\varepsilon_k] \\
+&= \sum_{k=1}^K E[\varepsilon_k\mid I_k=1]\Pr(I_k=1).
+\end{align}
+$$
+
+The last expression applies when each selection probability is positive. Although each estimate is unbiased before selection, its error need not have mean zero among selected treatments. The simulation below illustrates this: it draws a new set of true effects in each repetition, then generates estimates conditional on those effects.
+
+```{r}
+
+set.seed(20261125)
+simulations <- replicate(50000, {
+
+    nexps <- 20
+    theta <- rnorm(nexps, 0, 0.05)
+    # 50% chance of detecting theta=0.02
+    s <- 0.01
+    theta_hat <- rnorm(nexps, theta, s)
+    Ik <- theta_hat/s > 2
+
+    c(
+        Tstat = sum(Ik*theta),
+        Tstat_hat = sum(Ik*theta_hat)
+    )
+
+})
+
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+#| fig-cap: 'Across 50,000 simulations, each with 20 experiments, true effects are drawn from $\mathcal{N}(0, 0.05^2)$ and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the dashed vertical line marks the mean error, an estimate of the expected error.'
+
+par(mfrow = c(1, 2), mar = c(4, 4.5, 3, 1))
+
+sum_range <- range(simulations[c("Tstat", "Tstat_hat"), ])
+plot(simulations["Tstat", ], simulations["Tstat_hat", ],
+     xlim = sum_range, ylim = sum_range, asp = 1,
+     xlab = expression("True sum" ~ T),
+     ylab = expression("Estimated sum" ~ hat(T)),
+     pch = 16, cex = 0.35, col = adjustcolor("#356c91", alpha.f = 0.15))
+abline(a = 0, b = 1, lty = 2)
+error <- simulations["Tstat_hat", ] - simulations["Tstat", ]
+hist(error, breaks = 30,
+     main = expression("Error" ~ (hat(T) - T)), xlab = expression(hat(T) - T),
+     ylab = "Number of simulations", col = "#356c91", border = "white")
+mean_error <- mean(error)
+abline(v = mean_error, lty = 2, lwd = 2)
+legend("topright", legend = bquote(E(hat(T) - T) %~~% .(sprintf("%.4f", mean_error))),
+       lty = 2, lwd = 2, bty = "n")
+```
+
+
+## Normally distributed errors
+
+Under the normal error assumption, we can calculate the bias for any fixed true effects. Write $\varepsilon_k=s_kz_k$, where $z_k\sim\mathcal{N}(0,1)$, and define the standardized estimate
+
+$$
+Z_k = \frac{\hat\theta_k}{s_k} = \frac{\theta_k}{s_k}+z_k.
+$$
+
+The selection rule $Z_k>2$ is equivalent to $z_k>2-\theta_k/s_k$. The mean of a standard normal variable truncated below this threshold is
+
+$$
+E\left[z_k\mid I_k=1\right]
+= \frac{\phi(2-\theta_k/s_k)}{1-\Phi(2-\theta_k/s_k)},
+$$
+
+where $\phi$ and $\Phi$ are the standard normal density and cumulative distribution function. On the original scale, the expected error among selected treatments is therefore
+
+$$
+E\left[\varepsilon_k\mid I_k=1\right]
+= s_k\frac{\phi(2-\theta_k/s_k)}{1-\Phi(2-\theta_k/s_k)}
+> 0.
+$$
+
+Since $\Pr(I_k=1)=1-\Phi(2-\theta_k/s_k)$, the expected difference between the estimated and true sums is
+
+$$
+E[\hat T-T]
+= \sum_{k=1}^K s_k\phi(2-\theta_k/s_k)
+> 0.
+$$
+
+## How do I explain this without algebra?
+
+The values we add up are estimates, and estimates contain noise. A treatment is selected when its estimated effect is high enough, so a positive error can help it make the cut, while a negative error can keep it out. Some selected estimates will still fall below their true effects, but the errors among selected estimates are positive on average. As a result, their sum overstates the sum of the true effects in expectation.

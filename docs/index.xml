@@ -10,7 +10,68 @@
 <atom:link href="https://dpananos.github.io/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Wed, 26 Aug 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 25 Nov 2026 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Why Does The Winner’s Curse Exist?</title>
+  <dc:creator>Demetri Pananos</dc:creator>
+  <link>https://dpananos.github.io/posts/2026-11-26-winners/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Previous posts of mine have pointed out that summing the estimated effects of treatments selected from online experiments can exaggerate the sum of their true effects. Why does this happen, and can we describe it analytically?</p>
+<p>Suppose we have <img src="https://latex.codecogs.com/png.latex?K"> experiments, indexed by <img src="https://latex.codecogs.com/png.latex?k=1,%5Cldots,K">. Throughout, we assume:</p>
+<ul>
+<li>Each experiment has a fixed true effect <img src="https://latex.codecogs.com/png.latex?%5Ctheta_k"> and an estimate <img src="https://latex.codecogs.com/png.latex?%5Chat%5Ctheta_k%20=%20%5Ctheta_k%20+%20%5Cvarepsilon_k">, where <img src="https://latex.codecogs.com/png.latex?E%5B%5Cvarepsilon_k%5D=0"> and <img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7BVar%7D(%5Cvarepsilon_k)=s_k%5E2">.</li>
+<li>Each standard error <img src="https://latex.codecogs.com/png.latex?s_k%3E0"> is known, or estimated precisely enough to treat it as known.</li>
+<li>We ship the treatment from experiment <img src="https://latex.codecogs.com/png.latex?k"> when <img src="https://latex.codecogs.com/png.latex?%5Chat%5Ctheta_k%20%3E%202s_k">. This is approximately the positive-side threshold for a two-sided test at the 5% significance level.</li>
+<li>For the truncated-normal calculation, we assume <img src="https://latex.codecogs.com/png.latex?%5Cvarepsilon_k%5Csim%5Cmathcal%7BN%7D(0,s_k%5E2)">. In A/B tests, the central limit theorem can motivate this as an approximation for sufficiently large samples under suitable regularity conditions; it does not guarantee an exact normal distribution.</li>
+</ul>
+<p>We do not need to assume that the experiments are independent.</p>
+<section id="the-effect-of-selection" class="level2">
+<h2 class="anchored" data-anchor-id="the-effect-of-selection">The effect of selection</h2>
+<p>Let <img src="https://latex.codecogs.com/png.latex?I_k=1"> if we ship the treatment from experiment <img src="https://latex.codecogs.com/png.latex?k">, and let <img src="https://latex.codecogs.com/png.latex?I_k=0"> otherwise. The sum of the true effects of the selected treatments is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AT%20=%20%5Csum_%7Bk=1%7D%5EK%20I_k%5Ctheta_k,%0A"></p>
+<p>but since the true effects are unknown, we compute</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Chat%20T%20=%20%5Csum_%7Bk=1%7D%5EK%20I_k%5Chat%5Ctheta_k.%0A"></p>
+<p>Both sums depend on which treatments are selected. Their expected difference is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AE%5B%5Chat%20T-T%5D%0A&amp;=%20E%5Cleft%5B%5Csum_%7Bk=1%7D%5EK%20I_k(%5Chat%5Ctheta_k-%5Ctheta_k)%5Cright%5D%20%5C%5C%0A&amp;=%20%5Csum_%7Bk=1%7D%5EK%20E%5BI_k%5Cvarepsilon_k%5D%20%5C%5C%0A&amp;=%20%5Csum_%7Bk=1%7D%5EK%20E%5B%5Cvarepsilon_k%5Cmid%20I_k=1%5D%5CPr(I_k=1).%0A%5Cend%7Balign%7D%0A"></p>
+<p>The last expression applies when each selection probability is positive. Although each estimate is unbiased before selection, its error need not have mean zero among selected treatments. The simulation below illustrates this: it draws a new set of true effects in each repetition, then generates estimates conditional on those effects.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<figcaption>Across 50,000 simulations, each with 20 experiments, true effects are drawn from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%200.05%5E2)"> and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the dashed vertical line marks the mean error, an estimate of the expected error.</figcaption>
+<p><img src="https://dpananos.github.io/posts/2026-11-26-winners/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="normally-distributed-errors" class="level2">
+<h2 class="anchored" data-anchor-id="normally-distributed-errors">Normally distributed errors</h2>
+<p>Under the normal error assumption, we can calculate the bias for any fixed true effects. Write <img src="https://latex.codecogs.com/png.latex?%5Cvarepsilon_k=s_kz_k">, where <img src="https://latex.codecogs.com/png.latex?z_k%5Csim%5Cmathcal%7BN%7D(0,1)">, and define the standardized estimate</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AZ_k%20=%20%5Cfrac%7B%5Chat%5Ctheta_k%7D%7Bs_k%7D%20=%20%5Cfrac%7B%5Ctheta_k%7D%7Bs_k%7D+z_k.%0A"></p>
+<p>The selection rule <img src="https://latex.codecogs.com/png.latex?Z_k%3E2"> is equivalent to <img src="https://latex.codecogs.com/png.latex?z_k%3E2-%5Ctheta_k/s_k">. The mean of a standard normal variable truncated below this threshold is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5Cleft%5Bz_k%5Cmid%20I_k=1%5Cright%5D%0A=%20%5Cfrac%7B%5Cphi(2-%5Ctheta_k/s_k)%7D%7B1-%5CPhi(2-%5Ctheta_k/s_k)%7D,%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cphi"> and <img src="https://latex.codecogs.com/png.latex?%5CPhi"> are the standard normal density and cumulative distribution function. On the original scale, the expected error among selected treatments is therefore</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5Cleft%5B%5Cvarepsilon_k%5Cmid%20I_k=1%5Cright%5D%0A=%20s_k%5Cfrac%7B%5Cphi(2-%5Ctheta_k/s_k)%7D%7B1-%5CPhi(2-%5Ctheta_k/s_k)%7D%0A%3E%200.%0A"></p>
+<p>Since <img src="https://latex.codecogs.com/png.latex?%5CPr(I_k=1)=1-%5CPhi(2-%5Ctheta_k/s_k)">, the expected difference between the estimated and true sums is</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AE%5B%5Chat%20T-T%5D%0A=%20%5Csum_%7Bk=1%7D%5EK%20s_k%5Cphi(2-%5Ctheta_k/s_k)%0A%3E%200.%0A"></p>
+</section>
+<section id="how-do-i-explain-this-without-algebra" class="level2">
+<h2 class="anchored" data-anchor-id="how-do-i-explain-this-without-algebra">How do I explain this without algebra?</h2>
+<p>The values we add up are estimates, and estimates contain noise. A treatment is selected when its estimated effect is high enough, so a positive error can help it make the cut, while a negative error can keep it out. Some selected estimates will still fall below their true effects, but the errors among selected estimates are positive on average. As a result, their sum overstates the sum of the true effects in expectation.</p>
+
+
+</section>
+
+ ]]></description>
+  <guid>https://dpananos.github.io/posts/2026-11-26-winners/</guid>
+  <pubDate>Wed, 25 Nov 2026 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Bayes Does Not Make Experiments Faster On Its Own</title>
   <dc:creator>Demetri Pananos</dc:creator>
@@ -6883,483 +6944,6 @@ font-style: inherit;">"Set1"</span>)</span></code></pre></div></div>
   <category>R</category>
   <guid>https://dpananos.github.io/posts/2025-08-10-shrinking/</guid>
   <pubDate>Sun, 10 Aug 2025 04:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>More on Bayesian Statistics</title>
-  <dc:creator>Demetri Pananos</dc:creator>
-  <link>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<p>I recently wrote a <a href="https://www.geteppo.com/blog/bayes-vs-frequentism-can-be-a-big-deal">blog post</a> for my employer in which I made some claims regarding Bayesian statistics.</p>
-<section id="claim-1-flat-priors-in-heirarchal-models-can-lead-to-pulling-apart-and-implausible-estimates" class="level1">
-<h1>Claim 1: Flat Priors in Heirarchal Models Can Lead to Pulling Apart and Implausible Estimates</h1>
-<p>On flat priors in hierarchical models, Gelman says</p>
-<blockquote class="blockquote">
-<p>A noninformative uniform prior on the coefficients is equivalent to a hierarchical N(0,tau^2) model with tau set to a very large value. This is a very strong prior distribution pulling the estimates apart, and the resulting estimates of individual coefficients are implausible.</p>
-</blockquote>
-<p>By “pulling the estimates apart” I assume Gelman means “not pooling/regularizing estimates” as opposed to literally pulling the estimates apart. As for the line about “implausibility” of individual coefficients, that requires some unpacking.</p>
-<p>Gelman is known for picking out poor methodological papers and commenting on them. Consider <a href="https://sites.stat.columbia.edu/gelman/research/unpublished/prior_context_2.pdf">“The prior can often only be understood in the context of the likelihood”</a> in which Gelman and authors discuss a study which ostensibly demonstrated that “beautiful” people are more likely to have a daughter.</p>
-<p>You’re free to read what Gelman and authors wrote, I won’t summarize it here, but in short the authors to which Gelman refers report an unusually high differential in the probability of giving birth to a girl if you are a “beautiful” person. Given what we know about the sex ratio of births and how they vary across the globe, this seems fairly extreme. Reading between the lines, I would go so far as to say Gelman would consider this estimate as “implausible”. Hence, I interpret “implausible” to mean “no different than Frequentist estimates”. That is not to say that all frequentist estimates are implausible, just that when certain estimates should be shrunk/regularized, a hierarchical model with a flat prior would fail to do so.</p>
-<p>This is fairly easily demonstrated. I’m going to simulate 16 A/B tests. Each test is powered to detect a lift of 5%. However, each of the lifts from the 16 tests is drawn from a normal distribution with mean 1 and standard deviation 0.02. This means that, while not impossible to see a 5% lift, it is highly improbable and often our tests are underpowered for the true effect. This, as I understand it, is the prevailing attitude in A/B testing.</p>
-<p>Each A/B test will be fed to a hierarchical model (shown below in Stan). I place a flat prior on the population mean and parameterize the prior on the population variance so that I can study how estimates change when the prior is less/more variable.</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb1-1"></span>
-<span id="cb1-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">data</span>{</span>
-<span id="cb1-3">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">int</span> n;</span>
-<span id="cb1-4">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">vector</span>[n] log_rr;</span>
-<span id="cb1-5">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">vector</span>[n] stderr;</span>
-<span id="cb1-6">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">real</span> beta;</span>
-<span id="cb1-7">}</span>
-<span id="cb1-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">parameters</span>{</span>
-<span id="cb1-9">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">real</span> mu;</span>
-<span id="cb1-10">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>&gt; tau;</span>
-<span id="cb1-11">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">vector</span>[n] z;</span>
-<span id="cb1-12">}</span>
-<span id="cb1-13"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">transformed parameters</span> {</span>
-<span id="cb1-14">  <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">vector</span>[n] theta = mu + tau * z;</span>
-<span id="cb1-15">}</span>
-<span id="cb1-16"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">model</span> {</span>
-<span id="cb1-17">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// No mu in the model block means a uniform prior over the domain.</span></span>
-<span id="cb1-18">  tau ~ inv_gamma(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, beta);</span>
-<span id="cb1-19">  z ~ std_normal();</span>
-<span id="cb1-20">  log_rr ~ normal(theta, stderr);</span>
-<span id="cb1-21">}</span></code></pre></div></div>
-</div>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span>
-<span id="cb2-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(cmdstanr)</span>
-<span id="cb2-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidybayes)</span>
-<span id="cb2-4"></span>
-<span id="cb2-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)</span>
-<span id="cb2-6"></span>
-<span id="cb2-7">control_conversion <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.1</span></span>
-<span id="cb2-8">target_lift <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.05</span></span>
-<span id="cb2-9">target_conversion <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> control_conversion <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> target_lift</span>
-<span id="cb2-10">design <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">power.prop.test</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">p1 =</span> control_conversion, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">p2 =</span> target_conversion, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">power =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.8</span>)</span>
-<span id="cb2-11">n_per_group <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ceiling</span>(design<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>n)</span>
-<span id="cb2-12">n_experiments <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">16</span></span>
-<span id="cb2-13"></span>
-<span id="cb2-14">results <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">replicate</span>(n_experiments, {</span>
-<span id="cb2-15">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># In reality, we generate smaller effects than we wish we did</span></span>
-<span id="cb2-16">  actual_lift <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.02</span>)</span>
-<span id="cb2-17">  actual_log_rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(actual_lift)</span>
-<span id="cb2-18">  </span>
-<span id="cb2-19">  control <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, n_per_group, control_conversion)</span>
-<span id="cb2-20">  treatment <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rbinom</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, n_per_group, control_conversion <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> actual_lift)</span>
-<span id="cb2-21">  </span>
-<span id="cb2-22">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Since the groups are the same size the two factors of log(n_per_group) cancel</span></span>
-<span id="cb2-23">  observed_log_rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(treatment) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(control)</span>
-<span id="cb2-24">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># A Standard result from the Delta method.</span></span>
-<span id="cb2-25">  sampling_var <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> treatment <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> control <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span> n_per_group</span>
-<span id="cb2-26">  stderr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(sampling_var)</span>
-<span id="cb2-27">  </span>
-<span id="cb2-28">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(observed_log_rr, stderr, actual_log_rr)</span>
-<span id="cb2-29">  </span>
-<span id="cb2-30">})</span>
-<span id="cb2-31"></span>
-<span id="cb2-32">log_rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, ]</span>
-<span id="cb2-33">stderr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, ]</span>
-<span id="cb2-34">actual_log_rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> results[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, ]</span>
-<span id="cb2-35"></span>
-<span id="cb2-36"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Keep track of the RMSE from our frequentist estimates.</span></span>
-<span id="cb2-37"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Hopefully, the Hierarchical model will do better than this.</span></span>
-<span id="cb2-38">observed_rmse <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>((log_rr <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> actual_log_rr) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb2-39"></span>
-<span id="cb2-40">model <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cmdstan_model</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'model.stan'</span>)</span>
-<span id="cb2-41"></span>
-<span id="cb2-42">beta <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">seq</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>, <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.5</span>)</span>
-<span id="cb2-43">sims <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">map_dfr</span>(beta, <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">~</span> {</span>
-<span id="cb2-44">  stan_data <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">list</span>(</span>
-<span id="cb2-45">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">n =</span> n_experiments,</span>
-<span id="cb2-46">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">log_rr =</span> log_rr,</span>
-<span id="cb2-47">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">stderr =</span> stderr,</span>
-<span id="cb2-48">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">beta =</span> .x</span>
-<span id="cb2-49">  )</span>
-<span id="cb2-50">  </span>
-<span id="cb2-51">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">capture.output</span>(</span>
-<span id="cb2-52">  fit <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> model<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sample</span>(</span>
-<span id="cb2-53">    stan_data,</span>
-<span id="cb2-54">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">parallel_chains =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,</span>
-<span id="cb2-55">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">adapt_delta =</span> <span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0.99</span>,</span>
-<span id="cb2-56">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">chains =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">10</span>,</span>
-<span id="cb2-57">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, </span>
-<span id="cb2-58">    <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">seed=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span></span>
-<span id="cb2-59">  )</span>
-<span id="cb2-60">  )</span>
-<span id="cb2-61">  </span>
-<span id="cb2-62">  </span>
-<span id="cb2-63">  estimated <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> fit<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summary</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'theta'</span>)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>mean</span>
-<span id="cb2-64">  error <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> actual_log_rr <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> estimated</span>
-<span id="cb2-65">  rmse <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">mean</span>(error <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))</span>
-<span id="cb2-66">  max_rhat <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">max</span>(posterior<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">summarise_draws</span>(fit<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">draws</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'theta'</span>), <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">'rhat'</span>)<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>rhat)</span>
-<span id="cb2-67">  divs <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sum</span>(fit<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">diagnostic_summary</span>()<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>num_divergent)</span>
-<span id="cb2-68">  </span>
-<span id="cb2-69">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tibble</span>(rmse, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">beta =</span> .x, max_rhat, divs)</span>
-<span id="cb2-70">  </span>
-<span id="cb2-71">})</span>
-<span id="cb2-72"></span>
-<span id="cb2-73"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stopifnot</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">all</span>(sims<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>divs<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb2-74"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">stopifnot</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">all</span>(sims<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">$</span>max_rhat<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span><span class="fl" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1.01</span>))</span></code></pre></div></div>
-</details>
-</div>
-<p>Below is a plot of the relative RMSE of the estimates from the Bayesian model. I’ve rescaled the y axis so that the black line (y=1) corresponds to the RMSE from the Frequentist estimates. As you can see, more informative priors do result in better RMSE – <strong>to a point</strong>. When the prior becomes too informative, then the RMSE increases. This is due to pooling all estimates to the grand mean. Conversely, when the prior on the variance is too large, no pooling happens and results are the same as Frequentist estimates (i.e.&nbsp;implausible if they are noisy a la Gelman).</p>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>So, let’s take stock. From this little simulation – which adheres the best I can to what I know about A/B testing, and is still imperfect – we have seen:</p>
-<ul>
-<li>It is true that uninformative priors will give you equivalent estimates to Frequentist approaches (at least in terms of RMSE).</li>
-<li>You probably don’t want to be similar to Frequentist results if you can help it, because you can do better (again in terms of RMSE) by applying a little prior information.</li>
-<li>You don’t even need to be that accurate with your priors. Any reduction in RMSE is good, you don’t need to find the optimal prior to reduce the RMSE. In this case, anywhere between <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%200.05"> and <img src="https://latex.codecogs.com/png.latex?%5Cbeta%20=%203"> is probably sufficient to reduce RMSE.</li>
-<li>Setting a good prior (in this case) isn’t even that hard. Think about how variable individual experiments vary in results. You aren’t likely to see many experiments 1 lift unit away from the mean. You know, intuitively, that lift estimates are probably somewhere between -10% and 10% on a good day. Even if you were REALLY uncertain and said -50% to 50% for any given experiment, that is still a standard deviation of ~25% and hence well within the range of reducing RMSE (again, in this example. I can’t say if this applies generally).</li>
-</ul>
-<p>Listen, Bayesian or Frequentist, I don’t care. However, it is absolutely clear that, when you pay careful attention to the nuance, the difference between Bayes and Frequentism is a big deal despite what some will say.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Statistics</category>
-  <category>Bayes</category>
-  <guid>https://dpananos.github.io/posts/2025-03-17-bayes-big-deal/</guid>
-  <pubDate>Tue, 18 Mar 2025 04:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
