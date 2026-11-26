@@ -1558,6 +1558,6 @@
     "href": "posts/2026-11-26-winners/index.html#how-do-i-explain-this-without-algebra",
     "title": "Why Does The Winner’s Curse Exist?",
     "section": "How do I explain this without algebra?",
-    "text": "How do I explain this without algebra?\nThe values we add up are estimates, and estimates contain noise. A treatment is selected when its estimated effect is high enough, so a positive error can help it make the cut, while a negative error can keep it out. Some selected estimates will still fall below their true effects, but the errors among selected estimates are positive on average. As a result, their sum overstates the sum of the true effects in expectation."
+    "text": "How do I explain this without algebra?\nThe key to explaining this without any algebra comes from this equation\n\\[\n\\begin{align}\nE[\\hat T-T]\n&= \\sum_{k=1}^K E[\\varepsilon_k\\mid I_k=1]\\Pr(I_k=1).\n\\end{align}\n\\]\nIn the naive case, the things we add up are statistically significant but they are not the truth; they are estimates, and estimates have noise (that is, we are adding up \\(\\hat \\theta\\) and not \\(\\theta\\)). When something is statistically significant (i.e. when it is selected into the sum), the noise is likely to have made our estimate large enough to be selected, hence it is very likely that the noise is leading us to over estimate the truth (that is \\(E[\\varepsilon_k \\mid I_k=1]&gt;0\\)). Stacking up all those over estimates means we’re going to overshoot the truth more often than not."
   }
 ]
