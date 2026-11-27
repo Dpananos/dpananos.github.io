@@ -74,17 +74,18 @@ simulations <- replicate(50000, {
 ```{r}
 #| fig-width: 10
 #| fig-height: 5
-#| fig-cap: 'Across 50,000 simulations, each with 20 experiments, true effects are drawn from $\mathcal{N}(0, 0.05^2)$ and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the dashed vertical line marks the mean error, an estimate of the expected error.'
+#| fig-cap: 'Across 50,000 simulations, each with 20 experiments, true effects are drawn from $\mathcal{N}(0, 0.05^2)$ and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the red line is a regression of the true sum on the estimated sum through the origin. The dashed vertical line marks the mean error, an estimate of the expected error.'
 
 par(mfrow = c(1, 2), mar = c(4, 4.5, 3, 1))
 
 sum_range <- range(simulations[c("Tstat", "Tstat_hat"), ])
-plot(simulations["Tstat", ], simulations["Tstat_hat", ],
+plot(simulations["Tstat_hat", ], simulations["Tstat", ],
      xlim = sum_range, ylim = sum_range, asp = 1,
-     xlab = expression("True sum" ~ T),
-     ylab = expression("Estimated sum" ~ hat(T)),
+     xlab = expression("Estimated sum" ~ hat(T)),
+     ylab = expression("True sum" ~ T),
      pch = 16, cex = 0.35, col = adjustcolor("#356c91", alpha.f = 0.15))
 abline(a = 0, b = 1, lty = 2)
+abline(lm(simulations["Tstat", ] ~ simulations["Tstat_hat", ] - 1), col = "red", lwd = 2)
 error <- simulations["Tstat_hat", ] - simulations["Tstat", ]
 hist(error, breaks = 30,
      main = expression("Error" ~ (hat(T) - T)), xlab = expression(hat(T) - T),

@@ -43,7 +43,7 @@
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<figcaption>Across 50,000 simulations, each with 20 experiments, true effects are drawn from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%200.05%5E2)"> and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the dashed vertical line marks the mean error, an estimate of the expected error.</figcaption>
+<figcaption>Across 50,000 simulations, each with 20 experiments, true effects are drawn from <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%200.05%5E2)"> and estimates are normally distributed around their true effects with standard error 0.01. Treatments are selected when their estimated effect exceeds 0.02. The dashed diagonal marks equal true and estimated sums; the red line is a regression of the true sum on the estimated sum through the origin. The dashed vertical line marks the mean error, an estimate of the expected error.</figcaption>
 <p><img src="https://dpananos.github.io/posts/2026-11-26-winners/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="960"></p>
 </figure>
 </div>
